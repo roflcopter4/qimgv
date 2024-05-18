@@ -4,18 +4,21 @@
 #include <QString>
 #include <QVersionNumber>
 
+#include "Common.h"
+
 class Actions
 {
-public:
-    Actions();
+  public:
     static Actions *getInstance();
-    const QMap<QString, QVersionNumber> &getMap();
-    QList<QString> getList();
 
-private:
+    ND auto getMap() const & -> QMap<QString, QVersionNumber> const &;
+    ND auto getList() const -> QList<QString>;
+
+  private:
+    Actions();
     void init();
-    QMap<QString, QVersionNumber> mActions;
 
+    QMap<QString, QVersionNumber> mActions;
 };
 
 extern Actions *appActions;

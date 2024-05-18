@@ -8,14 +8,14 @@ VideoControls::VideoControls(FloatingWidgetContainer *parent) :
     ui->setupUi(this);
     this->setAttribute(Qt::WA_NoMousePropagation, true);
     hide();
-    ui->pauseButton->setIconPath(":res/icons/common/buttons/videocontrols/play24.png");
-    ui->pauseButton->setAction("pauseVideo");
-    ui->prevFrameButton->setIconPath(":res/icons/common/buttons/videocontrols/skip-backwards24.png");
-    ui->prevFrameButton->setAction("frameStepBack");
-    ui->nextFrameButton->setIconPath(":res/icons/common/buttons/videocontrols/skip-forward24.png");
-    ui->nextFrameButton->setAction("frameStep");
-    ui->muteButton->setIconPath(":/res/icons/common/buttons/videocontrols/mute-on24.png");
-    ui->muteButton->setAction("toggleMute");
+    ui->pauseButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/play24.png"));
+    ui->pauseButton->setAction(QS("pauseVideo"));
+    ui->prevFrameButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/skip-backwards24.png"));
+    ui->prevFrameButton->setAction(QS("frameStepBack"));
+    ui->nextFrameButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/skip-forward24.png"));
+    ui->nextFrameButton->setAction(QS("frameStep"));
+    ui->muteButton->setIconPath(QS(":/res/icons/common/buttons/videocontrols/mute-on24.png"));
+    ui->muteButton->setAction(QS("toggleMute"));
 
     lastPosition = -1;
 
@@ -29,7 +29,7 @@ VideoControls::VideoControls(FloatingWidgetContainer *parent) :
 }
 
 void VideoControls::readSettings() {
-    if(settings->panelEnabled() && settings->panelPosition() == PanelPosition::PANEL_BOTTOM)
+    if(settings->panelEnabled() && settings->panelPosition() == PanelPosition::BOTTOM)
         setPosition(FloatingWidgetPosition::TOP);
     else
         setPosition(FloatingWidgetPosition::BOTTOM);
@@ -41,21 +41,21 @@ VideoControls::~VideoControls() {
 
 void VideoControls::setMode(PlaybackMode _mode) {
     mode = _mode;
-    ui->muteButton->setVisible( (mode == PLAYBACK_VIDEO) );
+    ui->muteButton->setVisible( (mode == PlaybackMode::VIDEO) );
 }
 
 void VideoControls::setPlaybackDuration(int duration) {
     QString durationStr;
-    if(mode == PLAYBACK_VIDEO) {
+    if(mode == PlaybackMode::VIDEO) {
         int _time = duration;
         int hours = _time / 3600;
         _time -= hours * 3600;
         int minutes = _time / 60;
         int seconds = _time - minutes * 60;
-        durationStr = QString("%1").arg(minutes, 2, 10, QChar('0')) + ":" +
-                      QString("%1").arg(seconds, 2, 10, QChar('0'));
+        durationStr = QS("%1").arg(minutes, 2, 10, QChar('0')) + QChar(':') +
+                      QS("%1").arg(seconds, 2, 10, QChar('0'));
         if(hours)
-            durationStr.prepend(QString("%1").arg(hours, 2, 10, QChar('0')) + ":");
+            durationStr.prepend(QS("%1").arg(hours, 2, 10, QChar('0')) + QChar(':'));
     } else {
         durationStr = QString::number(duration);
     }
@@ -63,43 +63,43 @@ void VideoControls::setPlaybackDuration(int duration) {
     ui->durationLabel->setText(durationStr);
     ui->positionLabel->setText(durationStr);
     recalculateGeometry();
-    ui->positionLabel->setText("");
+    ui->positionLabel->setText(QS(""));
 }
 
-void VideoControls::setPlaybackPosition(int position) {
-    if(position == lastPosition)
+void VideoControls::setPlaybackPosition(int Position) {
+    if(Position == lastPosition)
         return;
     QString positionStr;
-    if(mode == PLAYBACK_VIDEO) {
-        int _time = position;
+    if(mode == PlaybackMode::VIDEO) {
+        int _time = Position;
         int hours = _time / 3600;
         _time -= hours * 3600;
         int minutes = _time / 60;
         int seconds = _time - minutes * 60;
-        positionStr = QString("%1").arg(minutes, 2, 10, QChar('0')) + ":" +
-                      QString("%1").arg(seconds, 2, 10, QChar('0'));
+        positionStr = QS("%1").arg(minutes, 2, 10, QChar('0')) + QChar(':') +
+                      QS("%1").arg(seconds, 2, 10, QChar('0'));
         if(hours)
-            positionStr.prepend(QString("%1").arg(hours, 2, 10, QChar('0')) + ":");
+            positionStr.prepend(QS("%1").arg(hours, 2, 10, QChar('0')) + QChar(':'));
     } else {
-        positionStr = QString::number(position + 1);
+        positionStr = QString::number(Position + 1);
     }
     ui->positionLabel->setText(positionStr);
     ui->seekBar->blockSignals(true);
-    ui->seekBar->setValue(position);
+    ui->seekBar->setValue(Position);
     ui->seekBar->blockSignals(false);
-    lastPosition = position;
+    lastPosition = Position;
 }
 
-void VideoControls::onPlaybackPaused(bool mode) {
-    if(mode)
-        ui->pauseButton->setIconPath(":res/icons/common/buttons/videocontrols/play24.png");
+void VideoControls::onPlaybackPaused(bool newMode) {
+    if(newMode)
+        ui->pauseButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/play24.png"));
     else
-        ui->pauseButton->setIconPath(":res/icons/common/buttons/videocontrols/pause24.png");
+        ui->pauseButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/pause24.png"));
 }
 
-void VideoControls::onVideoMuted(bool mode) {
-    if(mode)
-        ui->muteButton->setIconPath(":res/icons/common/buttons/videocontrols/mute-on24.png");
+void VideoControls::onVideoMuted(bool newMode) {
+    if(newMode)
+        ui->muteButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/mute-on24.png"));
     else
-        ui->muteButton->setIconPath(":res/icons/common/buttons/videocontrols/mute-off24.png");
+        ui->muteButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/mute-off24.png"));
 }

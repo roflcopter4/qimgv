@@ -1,25 +1,30 @@
 #pragma once
 
-#include "gui/customwidgets/iconbutton.h"
 #include "components/actionmanager/actionmanager.h"
+#include "gui/customwidgets/iconbutton.h"
 
-enum TriggerMode {
-    PressTrigger,
-    ClickTrigger
+#include "Common.h"
+
+enum class TriggerMode {
+    Press,
+    Click,
 };
 
-class ActionButton : public IconButton {
-public:
-    ActionButton(QWidget *parent = nullptr);
-    ActionButton(QString _actionName, QString _iconPath, QWidget *parent = nullptr);
-    ActionButton(QString _actionName, QString _iconPath, int _size, QWidget *parent = nullptr);
-    void setAction(QString _actionName);
-    void setTriggerMode(TriggerMode mode);
-    TriggerMode triggerMode();
+class ActionButton : public IconButton
+{
+  public:
+    explicit ActionButton(QWidget *parent = nullptr);
+    ActionButton(QString const &_actionName, QString const &_iconPath, QWidget *parent = nullptr);
+    ActionButton(QString const &_actionName, QString const &_iconPath, int _size, QWidget *parent = nullptr);
 
-protected:
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    QString actionName;
+    void setAction(QString const &_actionName);
+    void setTriggerMode(TriggerMode mode);
+
+    ND TriggerMode triggerMode() const;
+
+  protected:
+    void        mousePressEvent(QMouseEvent *event) override;
+    void        mouseReleaseEvent(QMouseEvent *event) override;
+    QString     actionName;
     TriggerMode mTriggerMode;
 };

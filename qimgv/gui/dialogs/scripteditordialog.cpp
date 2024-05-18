@@ -1,19 +1,19 @@
 #include "scripteditordialog.h"
 #include "ui_scripteditordialog.h"
 
-ScriptEditorDialog::ScriptEditorDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::ScriptEditorDialog),
-    editMode(false)
+ScriptEditorDialog::ScriptEditorDialog(QWidget *parent)
+    : QDialog(parent),
+      ui(new Ui::ScriptEditorDialog),
+      editMode(false)
 {
     ui->setupUi(this);
     this->setWindowTitle(tr("New application/script"));
-    ui->keywordsLabel->setText(tr("Keywords:") + " %file%");
+    ui->keywordsLabel->setText(tr("Keywords:") + QS(" %file%"));
     connect(ui->nameLineEdit, &QLineEdit::textChanged, this, &ScriptEditorDialog::onNameChanged);
     this->onNameChanged(ui->nameLineEdit->text());
 }
 
-ScriptEditorDialog::ScriptEditorDialog(QString name, Script script, QWidget *parent)
+ScriptEditorDialog::ScriptEditorDialog(QString name, Script const &script, QWidget *parent)
     : QDialog(parent),
       ui(new Ui::ScriptEditorDialog),
       editMode(true)
@@ -21,28 +21,32 @@ ScriptEditorDialog::ScriptEditorDialog(QString name, Script script, QWidget *par
     ui->setupUi(this);
     this->setWindowTitle(tr("Edit"));
     this->onNameChanged(ui->nameLineEdit->text());
-    editTarget = name;
+    editTarget = std::move(name);
     connect(ui->nameLineEdit, &QLineEdit::textChanged, this, &ScriptEditorDialog::onNameChanged);
-    ui->nameLineEdit->setText(name);
+    ui->nameLineEdit->setText(editTarget);
     ui->pathLineEdit->setText(script.command);
     ui->blockingCheckBox->setChecked(script.blocking);
     this->onNameChanged(ui->nameLineEdit->text());
 }
 
-ScriptEditorDialog::~ScriptEditorDialog() {
+ScriptEditorDialog::~ScriptEditorDialog()
+{
     delete ui;
 }
 
-QString ScriptEditorDialog::scriptName() {
+QString ScriptEditorDialog::scriptName() const
+{
     return ui->nameLineEdit->text();
 }
 
-Script ScriptEditorDialog::script() {
-    return Script(ui->pathLineEdit->text(), ui->blockingCheckBox->isChecked());
+Script ScriptEditorDialog::script() const
+{
+    return {ui->pathLineEdit->text(), ui->blockingCheckBox->isChecked()};
 }
 
-void ScriptEditorDialog::onNameChanged(QString name) {
-    if(name.isEmpty()) {
+void ScriptEditorDialog::onNameChanged(QString const &name)
+{
+    if (name.isEmpty()) {
         ui->messageLabel->setText(tr("Enter script name"));
         ui->acceptButton->setEnabled(false);
         return;
@@ -53,33 +57,30 @@ void ScriptEditorDialog::onNameChanged(QString name) {
     QString okBtnText;
     ui->messageLabel->clear();
 
-    if(editMode) {
-        if(name != editTarget && scriptManager->scriptExists(name)) {
+    if (editMode) {
+        if (name != editTarget && scriptManager->scriptExists(name)) {
             ui->messageLabel->setText(tr("A script with this same name exists"));
-            okBtnText = "Replace";
+            okBtnText = QS("Replace");
         } else {
-            okBtnText = "Save";
+            okBtnText = QS("Save");
         }
+    } else if (scriptManager->scriptExists(name)) {
+        ui->messageLabel->setText(tr("A script with this same name exists"));
+        okBtnText = QS("Replace");
     } else {
-        if(scriptManager->scriptExists(name)) {
-            ui->messageLabel->setText(tr("A script with this same name exists"));
-            okBtnText = "Replace";
-        } else {
-            okBtnText = "Create";
-        }
+        okBtnText = QS("Create");
     }
     ui->acceptButton->setText(okBtnText);
 }
 
-void ScriptEditorDialog::selectScriptPath() {
-    QFileDialog dialog;
+void ScriptEditorDialog::selectScriptPath()
+{
     QString file;
-#ifdef _WIN32
-    file = dialog.getOpenFileName(this, tr("Select an executable/script"), "", "Executable/script (*.exe *.bat)");
+#ifdef Q_OS_WIN32
+    file = QFileDialog::getOpenFileName(this, tr("Select an executable/script"), QS(""), QS("Executable/script (*.exe *.bat)"));
 #else
-    file = dialog.getOpenFileName(this, tr("Select a script file"), "", "Shell script (*.sh)");
+    file = QFileDialog::getOpenFileName(this, tr("Select a script file"), QS(""), QS("Shell script (*.sh)"));
 #endif
-    if(!file.isEmpty()) {
-        ui->pathLineEdit->setText("\"" + file + "\"" + " %file%");
-    }
+    if (!file.isEmpty())
+        ui->pathLineEdit->setText(QChar('"') + file + QChar('"') + QS(" %file%"));
 }

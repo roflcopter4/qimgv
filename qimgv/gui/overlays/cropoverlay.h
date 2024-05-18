@@ -40,13 +40,14 @@ signals:
     void cropSave();
 
 protected:
-    virtual void paintEvent(QPaintEvent *event);
-    virtual void mousePressEvent(QMouseEvent *event);
-    virtual void mouseMoveEvent(QMouseEvent* event);
-    virtual void mouseReleaseEvent(QMouseEvent* event);
+    void paintEvent(QPaintEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent*event) override;
+    void mouseReleaseEvent(QMouseEvent*event) override;
 
-    void keyPressEvent(QKeyEvent *event);
-    void resizeEvent(QResizeEvent *event);
+    void keyPressEvent(QKeyEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+
 private:
     QPoint startPos, endPos, moveStartPos, resizeAnchor;
     QRect imageRect, imageDrawRect, imageDrawRectDpi, selectionRect, selectionDrawRect, selectionDrawRectDpi, handles[8];
@@ -60,22 +61,23 @@ private:
     qreal dpr;
     QPointF ar;
 
-    QPoint setInsidePoint(QPoint, QRect);
-    QRect placeInside(QRect what, QRect where);
-    void drawSelection(QPainter*);
-    void drawHandles(QBrush&, QPainter*);
-    void updateHandlePositions();
-    void prepareDrawElements();
+    QPoint       setInsidePoint(QPoint, QRect);
+    QRect        placeInside(QRect what, QRect where);
+    void         drawSelection(QPainter*);
+    void         drawHandles(QBrush&, QPainter*);
+    void         updateHandlePositions();
+    void         prepareDrawElements();
     CursorAction hoverTarget(QPoint pos);
-    void resizeSelection(QPoint d);
-    void resizeSelectionAR(QPoint d);
-    void resizeSelectionFree(QPoint d);
-    void recalculateGeometry();
-    QPoint mapPointToImage(QPoint p);
-    void updateSelectionDrawRect();
-    void setCursorAction(CursorAction action);
-    void setResizeAnchor(CursorAction action);
-    bool hasSelection();
+    void         resizeSelection(QPoint d);
+    void         resizeSelectionAR(QPoint d);
+    void         resizeSelectionFree(QPoint d);
+    void         recalculateGeometry() override;
+    QPoint       mapPointToImage(QPoint p);
+    void         updateSelectionDrawRect();
+    void         setCursorAction(CursorAction action);
+    void         setResizeAnchor(CursorAction action);
+    bool         hasSelection();
+
 public slots:
     void hide();
     void onSelectionOutsideChange(QRect selection);

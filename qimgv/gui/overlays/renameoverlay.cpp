@@ -1,99 +1,110 @@
 #include "renameoverlay.h"
 #include "ui_renameoverlay.h"
 
-RenameOverlay::RenameOverlay(FloatingWidgetContainer *parent) :
-    OverlayWidget(parent),
-    ui(new Ui::RenameOverlay)
+RenameOverlay::RenameOverlay(FloatingWidgetContainer *parent)
+    : OverlayWidget(parent),
+      ui(new Ui::RenameOverlay)
 {
     ui->setupUi(this);
     connect(ui->cancelButton, &QPushButton::clicked, this, &RenameOverlay::onCancel);
-    connect(ui->closeButton,  &IconButton::clicked,  this, &RenameOverlay::hide);
-    connect(ui->okButton,     &QPushButton::clicked, this, &RenameOverlay::rename);
+    connect(ui->closeButton, &IconButton::clicked, this, &RenameOverlay::hide);
+    connect(ui->okButton, &QPushButton::clicked, this, &RenameOverlay::rename);
     ui->okButton->setHighlighted(true);
-    ui->closeButton->setIconPath(":res/icons/common/overlay/close-dim16.png");
-    ui->headerIcon->setIconPath(":res/icons/common/overlay/edit16.png");
+    ui->closeButton->setIconPath(QS(":res/icons/common/overlay/close-dim16.png"));
+    ui->headerIcon->setIconPath(QS(":res/icons/common/overlay/edit16.png"));
     setPosition(FloatingWidgetPosition::CENTER);
     setAcceptKeyboardFocus(true);
 
-    keyFilter.append(actionManager->shortcutsForAction("exit"));
-    keyFilter.append(actionManager->shortcutsForAction("renameFile"));
+    keyFilter.append(actionManager->shortcutsForAction(QS("exit")));
+    keyFilter.append(actionManager->shortcutsForAction(QS("renameFile")));
 
     hide();
-    if(parent)
+    if (parent)
         setContainerSize(parent->size());
 }
 
-RenameOverlay::~RenameOverlay() {
+RenameOverlay::~RenameOverlay()
+{
     delete ui;
 }
 
-void RenameOverlay::show() {
+void RenameOverlay::show()
+{
     selectName();
     OverlayWidget::show();
     QTimer::singleShot(0, ui->fileName, SLOT(setFocus()));
 }
 
-void RenameOverlay::hide() {
+void RenameOverlay::hide()
+{
     OverlayWidget::hide();
 }
 
-void RenameOverlay::setName(QString name) {
+void RenameOverlay::setName(QString const &name)
+{
     ui->fileName->setText(name);
     origName = name;
     selectName();
 }
 
-void RenameOverlay::setBackdropEnabled(bool mode) {
-    if(backdrop == mode)
+void RenameOverlay::setBackdropEnabled(bool mode)
+{
+    if (backdrop == mode)
         return;
     backdrop = mode;
     recalculateGeometry();
 }
 
-void RenameOverlay::recalculateGeometry() {
-    if(!backdrop)
+void RenameOverlay::recalculateGeometry()
+{
+    if (!backdrop)
         OverlayWidget::recalculateGeometry();
     else // expand
         setGeometry(0, 0, containerSize().width(), containerSize().height());
 }
 
-void RenameOverlay::selectName() {
-    int end = ui->fileName->text().lastIndexOf(".");
-    if(end < 0)
-        end = ui->fileName->text().count();
+void RenameOverlay::selectName()
+{
+    auto end = ui->fileName->text().lastIndexOf(QS("."));
+    if (end < 0)
+        end = ui->fileName->text().size();
     ui->fileName->setSelection(0, end);
 }
 
-void RenameOverlay::rename() {
-    if(ui->fileName->text().isEmpty())
+void RenameOverlay::rename()
+{
+    if (ui->fileName->text().isEmpty())
         return;
     hide();
     emit renameRequested(ui->fileName->text());
 }
 
-void RenameOverlay::onCancel() {
+void RenameOverlay::onCancel()
+{
     hide();
     ui->fileName->setText(origName);
 }
 
-void RenameOverlay::keyPressEvent(QKeyEvent *event) {
-    if(event->key() == Qt::Key_Escape) {
+void RenameOverlay::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape) {
         event->accept();
         onCancel();
-    } else if(event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
+    } else if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
         event->accept();
         rename();
     } else {
         auto shortcut = ShortcutBuilder::fromEvent(event);
-        if(!shortcut.isEmpty() && keyFilter.contains(shortcut))
+        if (!shortcut.isEmpty() && keyFilter.contains(shortcut))
             event->ignore();
         else
             event->accept();
     }
 }
 
-void RenameOverlay::mousePressEvent(QMouseEvent *event) {
+void RenameOverlay::mousePressEvent(QMouseEvent *event)
+{
     event->accept();
-    if(qApp->widgetAt(mapToGlobal(event->pos())) == this)
+    if (qApp->widgetAt(mapToGlobal(event->pos())) == this)
         this->onCancel();
 }

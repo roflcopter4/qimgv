@@ -213,7 +213,7 @@ void ThumbnailWidgetCmp::paint(QPainter *painter, const QStyleOptionGraphicsItem
             ImageLib::recolor(loadingIcon, settings->colorScheme().folderview_hc2);
         drawIcon(painter, &loadingIcon);
     } else {
-        if(thumbnail->pixmap().get()->width() == 0) { // invalid thumb
+        if(thumbnail->pixmap()->width() == 0) { // invalid thumb
             QPixmap errorIcon(*shrRes->getPixmap(ShrIcon::SHR_ICON_ERROR, dpr));
             if(isHighlighted())
                 ImageLib::recolor(errorIcon, settings->colorScheme().accent);

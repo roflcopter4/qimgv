@@ -14,49 +14,57 @@
 #include <QSurfaceFormat>
 #include <QTimer>
 
-class MpvWidget Q_DECL_FINAL: public QOpenGLWidget {
+class MpvWidget Q_DECL_FINAL : public QOpenGLWidget
+{
     Q_OBJECT
-public:
-    MpvWidget(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::Widget);
+
+  public:
+    explicit MpvWidget(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::Widget);
     ~MpvWidget() override;
 
-    void command(const QVariant& params);
-    void setOption(const QString &name, const QVariant &value);
-    void setProperty(const QString& name, const QVariant& value);
-    QVariant getProperty(const QString& name) const;
+    void command(QVariant const &params);
+    void setOption(QString const &name, QVariant const &value);
+    void setProperty(QString const &name, QVariant const &value);
+    void setMuted(bool mode);
+    void setRepeat(bool mode);
+    void setVolume(int vol);
+
+    [[nodiscard]] auto getProperty(QString const &name) const -> QVariant;
+    [[nodiscard]] auto muted() const -> bool;
+    [[nodiscard]] auto volume() const -> int;
+
+
     // Related to this:
     // https://github.com/gnome-mpv/gnome-mpv/issues/245
     // Let's hope this wont break more than it fixes
-    int width() const {
+    [[nodiscard]] int width() const
+    {
         return static_cast<int>(QOpenGLWidget::width() * this->devicePixelRatioF());
     }
-    int height() const {
+
+    [[nodiscard]] int height() const
+    {
         return static_cast<int>(QOpenGLWidget::height() * this->devicePixelRatioF());
     }
-    void setMuted(bool mode);
-    void setRepeat(bool mode);
-    bool muted();
-    int volume();
-    void setVolume(int vol);
 
-signals:
+  Q_SIGNALS:
     void durationChanged(int value);
     void positionChanged(int value);
     void videoPaused(bool);
     void playbackFinished();
 
-protected:
+  protected:
     void initializeGL() override;
     void paintGL() override;
 
-private slots:
+  private Q_SLOTS:
     void on_mpv_events();
     void maybeUpdate();
 
-private:
-    void handle_mpv_event(mpv_event *event);
+  private:
+    void        handle_mpv_event(mpv_event *event);
     static void on_update(void *ctx);
 
-    mpv_handle *mpv;
+    mpv_handle         *mpv;
     mpv_render_context *mpv_gl;
 };

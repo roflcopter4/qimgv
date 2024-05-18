@@ -15,31 +15,37 @@
 #include "gui/customwidgets/thumbnailwidget.h"
 #include "sourcecontainers/thumbnail.h"
 
-class ThumbnailStrip : public ThumbnailView
+class ThumbnailStrip final : public ThumbnailView
 {
     Q_OBJECT
-public:
-    explicit ThumbnailStrip(QWidget *parent = nullptr);
-    QSize itemSize();
-    void readSettings();
 
-private:
-    const int thumbPadding = 9;
-    int thumbMarginX = 2, thumbMarginY = 4;
-    void updateThumbnailPositions(int start, int end);
+  public:
+    explicit ThumbnailStrip(QWidget *parent = nullptr);
+
+    QSize itemSize();
+    void  readSettings();
+
+  private:
+    static constexpr int thumbPadding = 9;
+    int thumbMarginX = 2;
+    int thumbMarginY = 4;
+
+    void updateThumbnailPositions(qsizetype start, qsizetype end);
     void updateThumbnailPositions();
     void setupLayout();
+
     ThumbnailStyle mCurrentStyle;
 
-public slots:
-    virtual void focusOn(int index);
-    virtual void focusOnSelection();
+  public Q_SLOTS:
+    void focusOn(int index) override;
+    void focusOnSelection() override;
 
-protected:
-    virtual void resizeEvent(QResizeEvent *event);
-    virtual void updateScrollbarIndicator();
-    void addItemToLayout(ThumbnailWidget *widget, int pos);
-    void removeItemFromLayout(int pos);
-    void removeAll();
-    ThumbnailWidget *createThumbnailWidget();
+  protected:
+    void resizeEvent(QResizeEvent *event) override;
+    void updateScrollbarIndicator() override;
+    void addItemToLayout(ThumbnailWidget *widget, int pos) override;
+    void removeItemFromLayout(int pos) override;
+    void removeAll() override;
+
+    ThumbnailWidget *createThumbnailWidget() override;
 };

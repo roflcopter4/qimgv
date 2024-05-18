@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TREEVIEWCUSTOM_H
 #define TREEVIEWCUSTOM_H
 
@@ -8,33 +9,38 @@
 #include <QDebug>
 #include "settings.h"
 
+#include "Common.h"
+
 class TreeViewCustom : public QTreeView
 {
     Q_OBJECT
-public:
-    TreeViewCustom(QWidget *parent = nullptr);
-    virtual QSize minimumSizeHint() const override;
 
-signals:
+  public:
+    explicit TreeViewCustom(QWidget *parent = nullptr);
+
+    ND QSize minimumSizeHint() const override;
+
+  signals:
     void droppedIn(QList<QString>, QModelIndex);
     void tabbedOut();
 
-protected:
+  protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 
-    void enterEvent(QEnterEvent *event);
+    void enterEvent(QEnterEvent *event) override;
     void leaveEvent(QEvent *event) override;
     void showEvent(QShowEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
 
-private slots:
+  private slots:
     void updateScrollbarStyle();
-private:
+
+  private:
     QScrollBar overlayScrollbar;
 
-    const int SCROLLBAR_WIDTH = 12;
+    static constexpr int SCROLLBAR_WIDTH = 12;
 };
 
 #endif // TREEVIEWCUSTOM_H

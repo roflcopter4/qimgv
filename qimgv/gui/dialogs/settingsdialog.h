@@ -28,30 +28,33 @@ class SettingsDialog : public QDialog
 
 public:
     explicit SettingsDialog(QWidget *parent = nullptr);
-    ~SettingsDialog();
-    void switchToPage(int number);
+    ~SettingsDialog() override;
+    void switchToPage(int number) const;
 
 public slots:
-    int exec();
+    int exec() override;
 
 private:
     void readColorScheme();
-    void setColorScheme(ColorScheme colors);
-    void saveColorScheme();
+    void setColorScheme(ColorScheme colors) const;
+    void saveColorScheme() const;
     void readSettings();
-    void readShortcuts();
-    void readScripts();
-    Ui::SettingsDialog *ui;
+    void readShortcuts() const;
+    void readScripts() const;
 
-    void saveShortcuts();
-    void addShortcutToTable(const QString &action, const QString &shortcut);
-    void addScriptToList(const QString &name);
 
+    void saveShortcuts() const;
+    void addShortcutToTable(const QString &action, const QString &shortcut) const;
+    void addScriptToList(const QString &name) const;
     void setupSidebar();
-    void removeShortcutAt(int row);
+    void removeShortcutAt(int row) const;
     void adjustSizeToContents();
+
+    Ui::SettingsDialog *ui;
     QMap<QString, QString> langs; // <"en_US", "English">
-    QButtonGroup fitModeGrp, folderEndGrp, zoomIndGrp;
+    QButtonGroup fitModeGrp;
+    QButtonGroup folderEndGrp;
+    QButtonGroup zoomIndGrp;
 
 private slots:
     void saveSettings();
@@ -60,24 +63,24 @@ private slots:
     void addScript();
     void editScript();
     void editScript(QListWidgetItem *item);
-    void editScript(QString name);
+    void editScript(QString const &name);
     void removeScript();
 
     void addShortcut();
     void editShortcut();
-    void editShortcut(int row);
-    void removeShortcut();
-    void resetShortcuts();
+    void editShortcut(int row) const;
+    void removeShortcut() const;
+    void resetShortcuts() const;
     void selectMpvPath();
-    void onBgOpacitySliderChanged(int value);
-    void onThumbnailerThreadsSliderChanged(int value);
-    void onExpandLimitSliderChanged(int value);
-    void onZoomStepSliderChanged(int value);
-    void onJPEGQualitySliderChanged(int value);
+    void onBgOpacitySliderChanged(int value) const;
+    void onThumbnailerThreadsSliderChanged(int value) const;
+    void onExpandLimitSliderChanged(int value) const;
+    void onZoomStepSliderChanged(int value) const;
+    void onJPEGQualitySliderChanged(int value) const;
     void resetToDesktopTheme();    
-    void onAutoResizeLimitSliderChanged(int value);
+    void onAutoResizeLimitSliderChanged(int value) const;
 
-    void resetZoomLevels();
+    void resetZoomLevels() const;
 signals:
     void settingsChanged();
 };

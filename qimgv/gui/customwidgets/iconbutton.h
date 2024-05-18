@@ -9,7 +9,7 @@ class IconButton : public IconWidget {
 public:
     explicit IconButton(QWidget *parent = nullptr);
     void setCheckable(bool mode);
-    bool isChecked();
+    bool isChecked() const;
 
 public slots:
     void setChecked(bool mode);
@@ -19,8 +19,8 @@ signals:
     void toggled(bool);
 
 protected:
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
     bool mCheckable, mChecked, mPressed;
-    void mouseMoveEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event) override;
 };

@@ -9,13 +9,14 @@
 
 class FileSystemModelCustom : public QFileSystemModel
 {
-public:
+  public:
     FileSystemModelCustom(QObject *parent = nullptr);
     QVariant data(const QModelIndex &index, int role) const override;
 
-protected:
+  protected:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
-private:
+
+  private:
     QPixmap folderIcon;
 };
 

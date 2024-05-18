@@ -73,7 +73,7 @@ target_sources(qimgv PRIVATE
     folderview/foldergridview.cpp
     folderview/folderview.cpp
     folderview/folderviewproxy.cpp
-    folderview/filesystemmodelcustom.cpp
+    folderview/FileSystemModelCustom.cpp
     folderview/treeviewcustom.cpp
     folderview/bookmarkswidget.cpp
     folderview/bookmarksitem.cpp

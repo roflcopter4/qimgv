@@ -9,8 +9,8 @@ CopyOverlay::CopyOverlay(FloatingWidgetContainer *parent) :
     hide();
     setFadeEnabled(true);
 
-    ui->closeButton->setIconPath(":/res/icons/common/overlay/close-dim16.png");
-    ui->headerIcon->setIconPath(":/res/icons/common/overlay/copy16.png");
+    ui->closeButton->setIconPath(QS(":/res/icons/common/overlay/close-dim16.png"));
+    ui->headerIcon->setIconPath(QS(":/res/icons/common/overlay/copy16.png"));
     ui->headerLabel->setText(tr("Copy to..."));
     mode = OVERLAY_COPY;
 
@@ -46,10 +46,10 @@ void CopyOverlay::hide() {
 void CopyOverlay::setDialogMode(CopyOverlayMode _mode) {
     mode = _mode;
     if(mode == OVERLAY_COPY) {
-        ui->headerIcon->setIconPath(":/res/icons/common/overlay/copy16.png");
+        ui->headerIcon->setIconPath(QS(":/res/icons/common/overlay/copy16.png"));
         ui->headerLabel->setText(tr("Copy to..."));
     } else {
-        ui->headerIcon->setIconPath(":/res/icons/common/overlay/move16.png");
+        ui->headerIcon->setIconPath(QS(":/res/icons/common/overlay/move16.png"));
         ui->headerLabel->setText(tr("Move to..."));
     }
 }
@@ -85,7 +85,7 @@ void CopyOverlay::createShortcuts() {
         shortcuts.insert(QString::number(i + 1), i);
 }
 
-void CopyOverlay::requestFileOperation(QString path) {
+void CopyOverlay::requestFileOperation(QString const &path) {
     if(mode == OVERLAY_COPY)
         emit copyRequested(path);
     else
@@ -94,7 +94,7 @@ void CopyOverlay::requestFileOperation(QString path) {
 
 void CopyOverlay::readSettings() {
     // don't interfere with the main panel
-    if(settings->panelEnabled() && settings->panelPosition() == PanelPosition::PANEL_BOTTOM) {
+    if(settings->panelEnabled() && settings->panelPosition() == PanelPosition::BOTTOM) {
         setPosition(FloatingWidgetPosition::TOPLEFT);
     } else {
         setPosition(FloatingWidgetPosition::BOTTOMLEFT);
@@ -135,21 +135,21 @@ void CopyOverlay::createDefaultPaths() {
                 continue;
             } 
             else {
-                if(mfi.fileName() == "."  
-                || mfi.fileName() ==  ".."
+                if(mfi.fileName() == QSV(".")  
+                || mfi.fileName() == QSV("..")
                 // hide directory
                 || mfi.fileName()[0] ==  '.' 
                 // windows system directory
-                || mfi.fileName() ==  "3D Objects"
-                || mfi.fileName() ==  "Contacts"
-                || mfi.fileName() ==  "Favorites"
-                || mfi.fileName() ==  "Links"
-                || mfi.fileName() ==  "Saved Games"
-                || mfi.fileName() ==  "Searches"
+                || mfi.fileName() ==  QSV("3D Objects")
+                || mfi.fileName() ==  QSV("Contacts")
+                || mfi.fileName() ==  QSV("Favorites")
+                || mfi.fileName() ==  QSV("Links")
+                || mfi.fileName() ==  QSV("Saved Games")
+                || mfi.fileName() ==  QSV("Searches")
                 ) {
                     continue;
                 }
-                QString qpath(home + "/" + mfi.fileName());
+                QString qpath(home + QChar('/') + mfi.fileName());
                 QFileInfo qinfo(qpath);
                 if (qinfo.permission(QFile::WriteUser | QFile::ReadGroup)) {
                     paths << qpath;
@@ -160,7 +160,7 @@ void CopyOverlay::createDefaultPaths() {
 }
 
 // block native tab-switching so we can use it in shortcuts
-bool CopyOverlay::focusNextPrevChild(bool mode) {
+bool CopyOverlay::focusNextPrevChild(bool Mode) {
     return false;
 }
 

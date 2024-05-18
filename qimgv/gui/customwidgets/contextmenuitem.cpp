@@ -9,7 +9,7 @@ ContextMenuItem::ContextMenuItem(QWidget *parent)
 ContextMenuItem::~ContextMenuItem() {
 }
 
-void ContextMenuItem::setAction(QString text) {
+void ContextMenuItem::setAction(QString const &text) {
     this->mAction = text;
     setShortcutText(actionManager->shortcutForAction(mAction));
 }

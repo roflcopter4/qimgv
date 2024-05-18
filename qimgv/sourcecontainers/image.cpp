@@ -1,6 +1,6 @@
 #include "image.h"
 
-Image::Image(QString _path)
+Image::Image(QString const &_path)
     : mDocInfo(new DocumentInfo(_path)),
       mLoaded(false),
       mEdited(false),
@@ -16,42 +16,47 @@ Image::Image(std::unique_ptr<DocumentInfo> _info)
 {
 }
 
-Image::~Image() {
-}
-
-QString Image::filePath() const {
+QString Image::filePath() const
+{
     return mPath;
 }
 
-bool Image::isLoaded() const {
+bool Image::isLoaded() const
+{
     return mLoaded;
 }
 
-DocumentType Image::type() const {
+DocumentType Image::type() const
+{
     return mDocInfo->type();
 }
 
-QString Image::fileName() const {
+QString Image::fileName() const
+{
     return mDocInfo->fileName();
 }
 
-QString Image::baseName() const {
+QString Image::baseName() const
+{
     return mDocInfo->baseName();
 }
 
-bool Image::isEdited() const {
+bool Image::isEdited() const
+{
     return mEdited;
 }
 
-qint64 Image::fileSize() const {
+qint64 Image::fileSize() const
+{
     return mDocInfo->fileSize();
 }
 
-QDateTime Image::lastModified() const {
+QDateTime Image::lastModified() const
+{
     return mDocInfo->lastModified();
 }
 
-QMap<QString, QString> Image::getExifTags() {
+QMap<QString, QString> Image::getExifTags() const
+{
     return mDocInfo->getExifTags();
 }
-

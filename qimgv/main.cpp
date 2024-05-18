@@ -13,8 +13,14 @@
 #include "proxystyle.h"
 #include "core.h"
 
-#ifdef __APPLE__
-#include "macosapplication.h"
+#ifdef Q_OS_APPLE
+# include "macosapplication.h"
+#endif
+#ifdef Q_OS_WIN32
+# ifndef WIN32_LEAN_AND_MEAN
+#  define WIN32_LEAN_AND_MEAN
+# endif
+# include <Windows.h>
 #endif
 
 //------------------------------------------------------------------------------
@@ -33,11 +39,18 @@ QDataStream& operator>>(QDataStream& in, Script& v) {
     return in;
 }
 //------------------------------------------------------------------------------
-int main(int argc, char *argv[]) {
 
+int
+main(int argc, char *argv[])
+{
     // force some env variables
 
-#ifdef _WIN32
+#ifdef Q_OS_WIN32
+# ifdef _DEBUG
+    util::OpenConsoleWindow();
+# else
+    ::FreeConsole();
+# endif
     // if this is set by other app, platform plugin may fail to load
     // https://github.com/easymodo/qimgv/issues/410
     qputenv("QT_PLUGIN_PATH","");
@@ -59,17 +72,17 @@ int main(int argc, char *argv[]) {
     // Qt6 hidpi rendering on windows still has artifacts
     // This disables it for scale factors < 1.75
     // In this case only fonts are scaled
-#ifdef _WIN32
-#if (QT_VERSION_MAJOR == 6)
+#ifdef Q_OS_WIN32
+# if (QT_VERSION_MAJOR == 6)
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::RoundPreferFloor);
-#endif
+# endif
 #endif
 
     //qDebug() << qgetenv("QT_SCALE_FACTOR");
     //qDebug() << qgetenv("QT_SCREEN_SCALE_FACTORS");
     //qDebug() << qgetenv("QT_ENABLE_HIGHDPI_SCALING");
 
-#ifdef __APPLE__
+#ifdef Q_OS_APPLE
     MacOSApplication a(argc, argv);
     // default to "fusion" if available ("macos" has layout bugs, weird comboboxes etc)
     if(QStyleFactory::keys().contains("Fusion"))
@@ -80,12 +93,12 @@ int main(int argc, char *argv[]) {
     a.setStyle(new ProxyStyle);
 #endif
 
-    QCoreApplication::setOrganizationName("qimgv");
-    QCoreApplication::setOrganizationDomain("github.com/easymodo/qimgv");
-    QCoreApplication::setApplicationName("qimgv");
+    QCoreApplication::setOrganizationName(QS("qimgv"));
+    QCoreApplication::setOrganizationDomain(QS("github.com/easymodo/qimgv"));
+    QCoreApplication::setApplicationName(QS("qimgv"));
     QCoreApplication::setApplicationVersion(appVersion.toString());
     QApplication::setEffectEnabled(Qt::UI_AnimateCombo, false);
-    QGuiApplication::setDesktopFileName(QCoreApplication::applicationName() + ".desktop");
+    QGuiApplication::setDesktopFileName(QCoreApplication::applicationName() + QS(".desktop"));
 
     // needed for mpv
 #ifndef _MSC_VER
@@ -98,9 +111,9 @@ int main(int argc, char *argv[]) {
 #endif
 
 #ifdef USE_EXIV2
-#if EXIV2_TEST_VERSION(0,27,4)
+# if EXIV2_TEST_VERSION(0, 27, 4)
     Exiv2::enableBMFF(true);
-#endif
+# endif
 #endif
 
     // use custom types in signals
@@ -113,62 +126,64 @@ int main(int argc, char *argv[]) {
 #endif
 
     // globals
-    inputMap = InputMap::getInstance();
-    appActions = Actions::getInstance();
-    settings = Settings::getInstance();
+    inputMap      = InputMap::getInstance();
+    appActions    = Actions::getInstance();
+    settings      = Settings::getInstance();
     scriptManager = ScriptManager::getInstance();
     actionManager = ActionManager::getInstance();
-    shrRes = SharedResources::getInstance();
+    shrRes        = SharedResources::getInstance();
 
     atexit(saveSettings);
 
 // parse args ------------------------------------------------------------------
     QCommandLineParser parser;
-    QString appDescription = qApp->applicationName() + " - Fast and configurable image viewer.";
-    appDescription.append("\nVersion: " + qApp->applicationVersion());
-    appDescription.append("\nLicense: GNU GPLv3");
+    QString appDescription = qApp->applicationName() + QS(" - Fast and configurable image viewer.");
+    appDescription.append(QS("\nVersion: ") + qApp->applicationVersion());
+    appDescription.append(QS("\nLicense: GNU GPLv3"));
     parser.setApplicationDescription(appDescription);
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addPositionalArgument("path", QCoreApplication::translate("main", "File or directory path."));
     parser.addOptions({
         {"gen-thumbs",
-            QCoreApplication::translate("main", "Generate all thumbnails for directory."),
-            QCoreApplication::translate("main", "directory-path")},
+         QCoreApplication::translate("main", "Generate all thumbnails for directory."),
+         QCoreApplication::translate("main", "directory-path")},
         {"gen-thumbs-size",
-            QCoreApplication::translate("main", "Thumbnail size. Current size is used if not specified."),
-            QCoreApplication::translate("main", "thumbnail-size")},
+         QCoreApplication::translate("main", "Thumbnail size. Current size is used if not specified."),
+         QCoreApplication::translate("main", "thumbnail-size")},
         {"build-options",
-            QCoreApplication::translate("main", "Show build options.")},
+         QCoreApplication::translate("main", "Show build options.")},
     });
     parser.process(a);
 
-    if(parser.isSet("build-options")) {
+    if(parser.isSet(QS("build-options"))) {
         CmdOptionsRunner r;
         QTimer::singleShot(0, &r, &CmdOptionsRunner::showBuildOptions);
-        return a.exec();
-    } else if(parser.isSet("gen-thumbs")) {
+        return QApplication::exec();
+    }
+    if (parser.isSet(QS("gen-thumbs"))) {
         int size = settings->folderViewIconSize();
-        if(parser.isSet("gen-thumbs-size"))
-            size = parser.value("gen-thumbs-size").toInt();
+        if(parser.isSet(QS("gen-thumbs-size")))
+            size = parser.value(QS("gen-thumbs-size")).toInt();
 
         CmdOptionsRunner r;
         QTimer::singleShot(0, &r,
-                           std::bind(&CmdOptionsRunner::generateThumbs, &r, parser.value("gen-thumbs"), size));
-        return a.exec();
+                           std::bind(&CmdOptionsRunner::generateThumbs,
+                                     &r, parser.value(QS("gen-thumbs")), size));
+        return QApplication::exec();
     }
 
 // -----------------------------------------------------------------------------
 
     Core core;
 
-#ifdef __APPLE__
+#ifdef Q_OS_APPLE
     QObject::connect(&a, &MacOSApplication::fileOpened, &core, &Core::loadPath);
 #endif
 
     if(parser.positionalArguments().count())
         core.loadPath(parser.positionalArguments().at(0));
-    else if(settings->defaultViewMode() == MODE_FOLDERVIEW)
+    else if(settings->defaultViewMode() == ViewMode::FOLDERVIEW)
         core.loadPath(QDir::homePath());
 
     // wait for event queue to catch up before showing window
@@ -176,5 +191,5 @@ int main(int argc, char *argv[]) {
     qApp->processEvents();
 
     core.showGui();
-    return a.exec();
+    return QApplication::exec();
 }

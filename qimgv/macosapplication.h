@@ -8,9 +8,10 @@ class MacOSApplication : public QApplication {
 public:
     MacOSApplication(int &argc, char *argv[]) : QApplication(argc, argv) {};
 protected:
-    bool event(QEvent *event) {
+    bool event(QEvent *event) override
+    {
         if (event->type() == QEvent::FileOpen) {
-            QString filePath = static_cast<QFileOpenEvent *> (event)->file();
+            QString filePath = reinterpret_cast<QFileOpenEvent *> (event)->file();
             emit fileOpened(filePath);
         } else {
             return QApplication::event (event);

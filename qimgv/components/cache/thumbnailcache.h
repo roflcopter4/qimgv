@@ -13,10 +13,10 @@ class ThumbnailCache : public QObject
 public:
     explicit ThumbnailCache();
 
-    void saveThumbnail(QImage *image, QString id);
-    QImage* readThumbnail(QString id);
-    QString thumbnailPath(QString id);
-    bool exists(QString id);
+    void    saveThumbnail(QImage *image, QString const &id);
+    QImage* readThumbnail(QString const &id);
+    QString thumbnailPath(QString const &id);
+    bool    exists(QString const &id);
 
 signals:
 

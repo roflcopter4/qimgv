@@ -10,7 +10,7 @@
 #include <QPropertyAnimation>
 #include <QDebug>
 
-enum FloatingWidgetPosition {
+enum class FloatingWidgetPosition {
     LEFT,
     RIGHT,
     BOTTOM,
@@ -19,40 +19,45 @@ enum FloatingWidgetPosition {
     TOPRIGHT,
     BOTTOMLEFT,
     BOTTOMRIGHT,
-    CENTER
+    CENTER,
 };
 
 class OverlayWidget : public FloatingWidget
 {
     Q_OBJECT
-    Q_PROPERTY (qreal opacity READ opacity WRITE setOpacity)
-public:
-    OverlayWidget(FloatingWidgetContainer *parent);
-    ~OverlayWidget();
+    Q_PROPERTY(qreal opacity READ opacity WRITE setOpacity)
+
+  public:
+    explicit OverlayWidget(FloatingWidgetContainer *parent);
+    ~OverlayWidget() override;
+
     void setHorizontalMargin(int);
     void setVerticalMargin(int);
-    int horizontalMargin();
-    int verticalMargin();
+    int  horizontalMargin();
+    int  verticalMargin();
     void setPosition(FloatingWidgetPosition pos);
     void setFadeDuration(int duration);
     void setFadeEnabled(bool mode);
 
-public slots:
+  public slots:
     void show();
     void hide();
     void hideAnimated();
 
-private:
+  private:
     QGraphicsOpacityEffect *opacityEffect;
-    int mHorizontalMargin, mVerticalMargin;
-    bool fadeEnabled;
-    QPropertyAnimation *fadeAnimation;
+    QPropertyAnimation     *fadeAnimation;
 
-private slots:
-    void setOpacity(qreal opacity);
+    int  mHorizontalMargin;
+    int  mVerticalMargin;
+    bool fadeEnabled;
+
+  private slots:
+    void  setOpacity(qreal opacity);
     qreal opacity() const;
 
-protected:
-    virtual void recalculateGeometry();
+  protected:
+    void recalculateGeometry() override;
+
     FloatingWidgetPosition position;
 };

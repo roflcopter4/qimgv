@@ -8,10 +8,11 @@ FolderViewProxy::FolderViewProxy(QWidget *parent)
     layout.setContentsMargins(0,0,0,0);
 }
 
-void FolderViewProxy::init() {
+void FolderViewProxy::init()
+{
     qApp->processEvents(); // chew through events in case we have something that alters stateBuf in queue
     QMutexLocker ml(&m);
-    if(folderView)
+    if (folderView)
         return;
     folderView.reset(new FolderView());
     folderView->setParent(this);
@@ -34,7 +35,7 @@ void FolderViewProxy::init() {
     folderView->show();
 
     // apply buffer
-    if(!stateBuf.directory.isEmpty())
+    if (!stateBuf.directory.isEmpty())
         folderView->setDirectoryPath(stateBuf.directory);
     folderView->onFullscreenModeChanged(stateBuf.fullscreenMode);
     folderView->populate(stateBuf.itemCount);
@@ -46,10 +47,11 @@ void FolderViewProxy::init() {
     folderView->onSortingChanged(stateBuf.sortingMode);
 }
 
-void FolderViewProxy::populate(int count) {
+void FolderViewProxy::populate(int count)
+{
     QMutexLocker ml(&m);
     stateBuf.itemCount = count;
-    if(folderView) {
+    if (folderView) {
         ml.unlock();
         folderView->populate(stateBuf.itemCount);
     } else {
@@ -57,22 +59,23 @@ void FolderViewProxy::populate(int count) {
     }
 }
 
-void FolderViewProxy::setThumbnail(int pos, std::shared_ptr<Thumbnail> thumb) {
-    if(folderView) {
+void FolderViewProxy::setThumbnail(int pos, std::shared_ptr<Thumbnail> thumb)
+{
+    if (folderView)
         folderView->setThumbnail(pos, thumb);
-    }
 }
 
-void FolderViewProxy::select(QList<int> indices) {
-    if(folderView) {
+void FolderViewProxy::select(QList<int> indices)
+{
+    if (folderView)
         folderView->select(indices);
-    } else {
+    else
         stateBuf.selection = indices;
-    }
 }
 
-void FolderViewProxy::select(int index) {
-    if(folderView) {
+void FolderViewProxy::select(int index)
+{
+    if (folderView) {
         folderView->select(index);
     } else {
         stateBuf.selection.clear();
@@ -80,92 +83,101 @@ void FolderViewProxy::select(int index) {
     }
 }
 
-QList<int> FolderViewProxy::selection() {
-    if(folderView) {
-        return folderView->selection();
-    } else {
-        return stateBuf.selection;
-    }
+QList<int> &
+FolderViewProxy::selection()
+{
+    return folderView ? folderView->selection()
+                      : stateBuf.selection;
 }
 
-void FolderViewProxy::focusOn(int index) {
-    if(folderView) {
+QList<int> const &
+FolderViewProxy::selection() const
+{
+    return folderView ? folderView->selection()
+                      : stateBuf.selection;
+}
+
+void FolderViewProxy::focusOn(int index)
+{
+    if (folderView)
         folderView->focusOn(index);
-    }
 }
 
-void FolderViewProxy::focusOnSelection() {
-    if(folderView) {
+void FolderViewProxy::focusOnSelection()
+{
+    if (folderView)
         folderView->focusOnSelection();
-    }
 }
 
-void FolderViewProxy::setDirectoryPath(QString path) {
-    if(folderView) {
+void FolderViewProxy::setDirectoryPath(QString path)
+{
+    if (folderView)
         folderView->setDirectoryPath(path);
-    } else {
+    else
         stateBuf.directory = path;
-    }
 }
 
-void FolderViewProxy::insertItem(int index) {
-    if(folderView) {
+void FolderViewProxy::insertItem(int index)
+{
+    if (folderView)
         folderView->insertItem(index);
-    } else {
+    else
         stateBuf.itemCount++;
-    }
 }
 
-void FolderViewProxy::removeItem(int index) {
-    if(folderView) {
+void FolderViewProxy::removeItem(int index)
+{
+    if (folderView) {
         folderView->removeItem(index);
     } else {
         stateBuf.itemCount--;
         stateBuf.selection.removeAll(index);
-        for(int i=0; i < stateBuf.selection.count(); i++) {
-            if(stateBuf.selection[i] > index)
+        for (qsizetype i = 0; i < stateBuf.selection.count(); ++i)
+            if (stateBuf.selection[i] > index)
                 stateBuf.selection[i]--;
-        }
-        if(!stateBuf.selection.count())
+        if (!stateBuf.selection.count())
             stateBuf.selection << ((index >= stateBuf.itemCount) ? stateBuf.itemCount - 1 : index);
     }
 }
 
-void FolderViewProxy::reloadItem(int index) {
-    if(folderView)
+void FolderViewProxy::reloadItem(int index)
+{
+    if (folderView)
         folderView->reloadItem(index);
 }
 
-void FolderViewProxy::setDragHover(int index) {
-    if(folderView)
+void FolderViewProxy::setDragHover(int index)
+{
+    if (folderView)
         folderView->setDragHover(index);
 }
 
-void FolderViewProxy::addItem() {
-    if(folderView) {
+void FolderViewProxy::addItem()
+{
+    if (folderView)
         folderView->addItem();
-    } else {
+    else
         stateBuf.itemCount++;
-    }
 }
 
-void FolderViewProxy::onFullscreenModeChanged(bool mode) {
-    if(folderView) {
+void FolderViewProxy::onFullscreenModeChanged(bool mode)
+{
+    if (folderView)
         folderView->onFullscreenModeChanged(mode);
-    } else {
+    else
         stateBuf.fullscreenMode = mode;
-    }
 }
 
-void FolderViewProxy::onSortingChanged(SortingMode mode) {
-    if(folderView) {
+void FolderViewProxy::onSortingChanged(SortingMode mode)
+{
+    if (folderView)
         folderView->onSortingChanged(mode);
-    } else {
+    else
         stateBuf.sortingMode = mode;
-    }
 }
 
-void FolderViewProxy::showEvent(QShowEvent *event) {
+void FolderViewProxy::showEvent(QShowEvent *event)
+{
     init();
     QWidget::showEvent(event);
 }

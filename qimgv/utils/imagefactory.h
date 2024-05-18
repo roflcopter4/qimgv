@@ -7,7 +7,8 @@
 #include "sourcecontainers/imagestatic.h"
 #include "sourcecontainers/video.h"
 
-class ImageFactory {
-public:
-    static std::shared_ptr<Image> createImage(QString path);
+class ImageFactory
+{
+  public:
+    static std::shared_ptr<Image> createImage(QString const &path);
 };

@@ -18,13 +18,13 @@ class ScriptEditorDialog : public QDialog
 
 public:
     explicit ScriptEditorDialog(QWidget *parent = nullptr);
-    explicit ScriptEditorDialog(QString name, Script script, QWidget *parent = nullptr);
-    ~ScriptEditorDialog();
-    QString scriptName();
-    Script script();
+    explicit ScriptEditorDialog(QString name, Script const &script, QWidget *parent = nullptr);
+    ~ScriptEditorDialog() override;
+    QString scriptName() const;
+    Script  script() const;
 
 private slots:
-    void onNameChanged(QString name);
+    void onNameChanged(QString const &name);
 
     void selectScriptPath();
 private:

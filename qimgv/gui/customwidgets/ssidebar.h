@@ -14,8 +14,8 @@ class SSideBar : public QWidget {
     Q_OBJECT
 public:
     explicit SSideBar(QWidget *parent = nullptr);
-    void addEntry(QString icon, QString name);
-    void selectEntry(int idx);
+    void     addEntry(QString const &icon, QString const &name);
+    void     selectEntry(int idx);
 
 private:
     QBoxLayout *layout;
@@ -27,10 +27,10 @@ signals:
     void entrySelected(int);
 
 protected:
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 
-    void paintEvent(QPaintEvent *event);
+    void paintEvent(QPaintEvent *event) override;
 };
 
 class SSideBarItem : public QWidget {
@@ -47,7 +47,7 @@ private:
     bool mHighlighted = false;
 
 protected:
-    void paintEvent(QPaintEvent *event);
+    void paintEvent(QPaintEvent *event) override;
 };
 
 #endif // SSIDEBAR_H

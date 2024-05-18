@@ -1,31 +1,36 @@
 #include "thumbnail.h"
 
-Thumbnail::Thumbnail(QString _name, QString _info, int _size, std::shared_ptr<QPixmap> _pixmap)
-    : mName(_name),
-      mInfo(_info),
-      mPixmap(_pixmap),
-      mSize(_size)
+Thumbnail::Thumbnail(QString name, QString info, int size, std::shared_ptr<QPixmap> const &pixmap)
+    : mPixmap(pixmap),
+      mName(std::move(name)),
+      mInfo(std::move(info)),
+      mSize(size)
 {
-    if(_pixmap)
-        mHasAlphaChannel = _pixmap->hasAlphaChannel();
+    if (pixmap)
+        mHasAlphaChannel = pixmap->hasAlphaChannel();
 }
 
-QString Thumbnail::name() {
+QString const &Thumbnail::name() const &
+{
     return mName;
 }
 
-QString Thumbnail::info() {
+QString const &Thumbnail::info() const &
+{
     return mInfo;
 }
 
-int Thumbnail::size() {
+int Thumbnail::size() const
+{
     return mSize;
 }
 
-bool Thumbnail::hasAlphaChannel() {
+bool Thumbnail::hasAlphaChannel() const
+{
     return mHasAlphaChannel;
 }
 
-std::shared_ptr<QPixmap> Thumbnail::pixmap() {
+std::shared_ptr<QPixmap> Thumbnail::pixmap()
+{
     return mPixmap;
 }

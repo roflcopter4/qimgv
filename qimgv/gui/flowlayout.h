@@ -54,51 +54,61 @@
 #include <QDebug>
 #include <QElapsedTimer>
 
+#include "Common.h"
+
 struct GridInfo {
-    GridInfo(int _columns, int _rows, qreal _height) {
+    GridInfo(qsizetype _columns, qsizetype _rows, qreal _height)
+    {
         columns = _columns;
-        rows = _rows;
-        height = _height;
+        rows    = _rows;
+        height  = _height;
     }
-    int columns, rows;
-    qreal height;
+
+    qsizetype columns;
+    qsizetype rows;
+    qreal     height;
 };
 
 class FlowLayout : public QGraphicsLayout
 {
-public:
+  public:
     FlowLayout();
-    void insertItem(int index, QGraphicsLayoutItem *item);
+
+    void insertItem(qsizetype index, QGraphicsLayoutItem *item);
     void setSpacing(Qt::Orientations o, qreal spacing);
-    qreal spacing(Qt::Orientation o) const;
+
+    ND qreal spacing(Qt::Orientation o) const;
 
     // inherited functions
-    void setGeometry(const QRectF &geom) override;
+    void setGeometry(QRectF const &geom) override;
 
-    int count() const override;
-    QGraphicsLayoutItem *itemAt(int index) const override;
-    void removeAt(int index) override;
+    ND int  count() const override;
+    ND auto itemAt(int index) const -> QGraphicsLayoutItem * override;
+    void    removeAt(int index) override;
 
     // returns the index of item above / below
-    int itemAbove(int index);
-    int itemBelow(int index);
-    int rows();
-    int columns();
+    ND qsizetype itemAbove(qsizetype index) const;
+    ND qsizetype itemBelow(qsizetype index) const;
+    ND qsizetype rows() const;
+    ND qsizetype columns() const;
+
     void clear();
 
-    int columnOf(int index);
-    bool sameRow(int one, int two);
+    ND qsizetype columnOf(qsizetype index) const;
+    ND bool      sameRow(qsizetype one, qsizetype two) const;
 
-protected:
-    QSizeF sizeHint(Qt::SizeHint which, const QSizeF &constraint = QSizeF()) const override;
+  protected:
+    ND QSizeF sizeHint(Qt::SizeHint which, QSizeF const &constraint = QSizeF()) const override;
 
-private:
-    GridInfo doLayout(const QRectF &geom, bool applyNewGeometry) const;
-    QSizeF minSize(const QSizeF &constraint) const;
-    QSizeF prefSize() const;
-    QSizeF maxSize() const;
+  private:
+    ND GridInfo doLayout(QRectF const &geom, bool applyNewGeometry) const;
+    ND QSizeF   minSize(QSizeF const &constraint) const;
+    ND QSizeF   prefSize() const;
+    ND QSizeF   maxSize() const;
 
-    QList<QGraphicsLayoutItem*> m_items;
-    qreal m_spacing[2];
-    int m_rows, m_columns;
+    QList<QGraphicsLayoutItem *> m_items;
+
+    qreal     m_spacing[2];
+    qsizetype m_rows;
+    qsizetype m_columns;
 };

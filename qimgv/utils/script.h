@@ -3,12 +3,11 @@
 #include <QMetaType>
 #include <QString>
 
-class Script {
-public:
-    Script();
+struct Script {
+    Script() = default;;
     Script(QString _path, bool _blocking);
     QString command;
-    bool blocking;
+    bool    blocking = false;
 };
 
 Q_DECLARE_METATYPE(Script)

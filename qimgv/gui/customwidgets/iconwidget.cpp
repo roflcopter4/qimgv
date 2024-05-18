@@ -16,11 +16,11 @@ IconWidget::IconWidget(QWidget *parent)
 }
 
 IconWidget::~IconWidget() {
-    if(pixmap)
-        delete pixmap;
+
+    delete pixmap;
 }
 
-void IconWidget::setIconPath(QString path) {
+void IconWidget::setIconPath(QString const &path) {
     if(iconPath == path)
         return;
     iconPath = path;
@@ -29,10 +29,10 @@ void IconWidget::setIconPath(QString path) {
 
 void IconWidget::loadIcon() {
     auto path = iconPath;
-    if(pixmap)
-        delete pixmap;
+    delete pixmap;
+    pixmap = nullptr;
     if(dpr >= (1.0 + 0.001)) {
-        path.replace(".", "@2x.");
+        path.replace(QS("."), QS("@2x."));
         hiResPixmap = true;
         pixmap = new QPixmap(path);
         if(dpr >= (2.0 - 0.001))
@@ -46,7 +46,7 @@ void IconWidget::loadIcon() {
         pixmapDrawScale = dpr;
     }
     applyColor();
-    if(pixmap->isNull()) {
+    if(pixmap && pixmap->isNull()) {
         delete pixmap;
         pixmap = nullptr;
     }
@@ -77,7 +77,7 @@ void IconWidget::setColorMode(IconColorMode _mode) {
     }
 }
 
-void IconWidget::setColor(QColor _color) {
+void IconWidget::setColor(QColor const &_color) {
     colorMode = ICON_COLOR_CUSTOM;
     color = _color;
     applyColor();
@@ -101,11 +101,11 @@ void IconWidget::paintEvent(QPaintEvent *event) {
         p.setRenderHint(QPainter::SmoothPixmapTransform);
         QPointF pos;
         if(hiResPixmap) {
-            pos = QPointF(width()  / 2 - pixmap->width()  / (2 * pixmapDrawScale),
-                          height() / 2 - pixmap->height() / (2 * pixmapDrawScale));
+            pos = QPointF(static_cast<qreal>(width())  / 2.0 - static_cast<qreal>(pixmap->width())  / (2.0 * pixmapDrawScale),
+                          static_cast<qreal>(height()) / 2.0 - static_cast<qreal>(pixmap->height()) / (2.0 * pixmapDrawScale));
         } else {
-            pos = QPointF(width()  / 2 - pixmap->width()  / 2,
-                          height() / 2 - pixmap->height() / 2);
+            pos = QPointF(static_cast<qreal>(width())  / 2.0 - static_cast<qreal>(pixmap->width())  / 2.0,
+                          static_cast<qreal>(height()) / 2.0 - static_cast<qreal>(pixmap->height()) / 2.0);
         }
         p.drawPixmap(pos + iconOffset, *pixmap);
     }

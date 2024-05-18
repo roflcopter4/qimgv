@@ -12,10 +12,10 @@ public:
     QString path();
 
 public slots:
-    void setDirectory(QString path);
+    void setDirectory(QString const &path);
 
 protected:
-    virtual void onPress() override;
+    void onPress() override;
 
 signals:
     void directorySelected(QString);

@@ -1,6 +1,6 @@
 #include "thumbnailerrunnable.h"
 
-ThumbnailerRunnable::ThumbnailerRunnable(ThumbnailCache* _cache, QString _path, int _size, bool _crop, bool _force) :
+ThumbnailerRunnable::ThumbnailerRunnable(ThumbnailCache*_cache, QString const &_path, int _size, bool _crop, bool _force) :
     path(_path),
     size(_size),
     crop(_crop),
@@ -15,15 +15,15 @@ void ThumbnailerRunnable::run() {
     emit taskEnd(thumbnail, path);
 }
 
-QString ThumbnailerRunnable::generateIdString(QString path, int size, bool crop) {
+QString ThumbnailerRunnable::generateIdString(QString const &path, int size, bool crop) {
     QString queryStr = path + QString::number(size);
     if(crop)
-        queryStr.append("s");
-    queryStr = QString("%1").arg(QString(QCryptographicHash::hash(queryStr.toUtf8(),QCryptographicHash::Md5).toHex()));
+        queryStr.append(QS("s"));
+    queryStr = QS("%1").arg(QString(QCryptographicHash::hash(queryStr.toUtf8(),QCryptographicHash::Md5).toHex()));
     return queryStr;
 }
 
-std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, QString path, int size, bool crop, bool force) {
+std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache*cache, QString const &path, int size, bool crop, bool force) {
     DocumentInfo imgInfo(path);
     QString thumbnailId = generateIdString(path, size, crop);
     std::unique_ptr<QImage> image;
@@ -32,17 +32,17 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, 
 
     if(!force && cache) {
         image.reset(cache->readThumbnail(thumbnailId));
-        if(image && image->text("lastModified") != time)
+        if(image && image->text(QS("lastModified")) != time)
             image.reset(nullptr);
     }
 
     if(!image) {
         if(imgInfo.type() == DocumentType::NONE) {
-            std::shared_ptr<Thumbnail> thumbnail(new Thumbnail(imgInfo.fileName(), "", size, nullptr));
+            std::shared_ptr<Thumbnail> thumbnail(new Thumbnail(imgInfo.fileName(), QS(""), size, nullptr));
             return thumbnail;
         }
         std::pair<QImage*, QSize> pair;
-        if(imgInfo.type() == VIDEO)
+        if(imgInfo.type() == DocumentType::VIDEO)
             pair = createVideoThumbnail(path, size, crop);
         else
             pair = createThumbnail(imgInfo.filePath(), imgInfo.format().toStdString().c_str(), size, crop);
@@ -52,14 +52,14 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, 
         image = ImageLib::exifRotated(std::move(image), imgInfo.exifOrientation());
 
         // put in image info
-        image->setText("originalWidth", QString::number(originalSize.width()));
-        image->setText("originalHeight", QString::number(originalSize.height()));
-        image->setText("lastModified", time);
+        image->setText(QS("originalWidth"), QString::number(originalSize.width()));
+        image->setText(QS("originalHeight"), QString::number(originalSize.height()));
+        image->setText(QS("lastModified"), time);
 
-        if(imgInfo.type() == ANIMATED)
-            image->setText("label", " [a]");
-        else if(imgInfo.type() == VIDEO)
-            image->setText("label", " [v]");
+        if(imgInfo.type() == DocumentType::ANIMATED)
+            image->setText(QS("label"), QS(" [a]"));
+        else if(imgInfo.type() == DocumentType::VIDEO)
+            image->setText(QS("label"), QS(" [v]"));
 
         if(cache) {
             // save thumbnail if it makes sense
@@ -74,13 +74,13 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, 
 
     QString label;
     if(tmpPixmap->width() == 0) {
-        label = "error";
+        label = QS("error");
     } else  {
         // put info into Thumbnail object
-        label = image->text("originalWidth") +
-                "x" +
-                image->text("originalHeight") +
-                image->text("label");
+        label = image->text(QS("originalWidth")) +
+                QS("x") +
+                image->text(QS("originalHeight")) +
+                image->text(QS("label"));
     }
     std::shared_ptr<QPixmap> pixmapPtr(tmpPixmap);
     std::shared_ptr<Thumbnail> thumbnail(new Thumbnail(imgInfo.fileName(), label, size, pixmapPtr));
@@ -90,7 +90,7 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, 
 ThumbnailerRunnable::~ThumbnailerRunnable() {
 }
 
-std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(QString path, const char *format, int size, bool squared) {
+std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(QString const &path, const char *format, int size, bool squared) {
     QImageReader *reader = new QImageReader(path, format);
     Qt::AspectRatioMode ARMode = squared?
                 (Qt::KeepAspectRatioByExpanding):(Qt::KeepAspectRatio);
@@ -118,7 +118,7 @@ std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(QString path, con
             result = nullptr;
             // Force reset reader because it is really finicky
             // and can fail on the second read attempt (yeah wtf)
-            reader->setFileName("");
+            reader->setFileName(QS(""));
             delete reader;
             reader = new QImageReader(path, format);
         }
@@ -148,28 +148,28 @@ std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(QString path, con
         delete fullSize;
     }
     // force reader to close file so it can be deleted later
-    reader->setFileName("");
+    reader->setFileName(QS(""));
     delete reader;
     return std::make_pair(result, originalSize);
 }
 
-std::pair<QImage*, QSize> ThumbnailerRunnable::createVideoThumbnail(QString path, int size, bool squared) {
+std::pair<QImage*, QSize> ThumbnailerRunnable::createVideoThumbnail(QString const &path, int size, bool squared) {
     QFileInfo fi(path);
     QImageReader reader;
-    QString tmpFilePath = settings->tmpDir() + fi.fileName() + ".png";
+    QString tmpFilePath = settings->tmpDir() + fi.fileName() + QS(".png");
     QString tmpFilePathEsc = tmpFilePath;
-    tmpFilePathEsc.replace("%", "%%");
+    tmpFilePathEsc.replace(QS("%"), QS("%%"));
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(settings->mpvBinary(),
-                  QStringList() << "--start=30%"
-                                << "--frames=1"
-                                << "--aid=no"
-                                << "--sid=no"
-                                << "--no-config"
-                                << "--load-scripts=no"
-                                << "--no-terminal"
-                                << "--o=" + tmpFilePathEsc
+                  QStringList() << QS("--start=30%")
+                                << QS("--frames=1")
+                                << QS("--aid=no")
+                                << QS("--sid=no")
+                                << QS("--no-config")
+                                << QS("--load-scripts=no")
+                                << QS("--no-terminal")
+                                << QS("--o=") + tmpFilePathEsc
                                 << path
                   );
     process.waitForFinished(8000);
@@ -194,7 +194,7 @@ std::pair<QImage*, QSize> ThumbnailerRunnable::createVideoThumbnail(QString path
     result = new QImage(reader.read());
 
     // force reader to close file so it can be deleted later
-    reader.setFileName("");
+    reader.setFileName(QS(""));
 
     // remove temporary file
     QFile tmpFile(tmpFilePath);

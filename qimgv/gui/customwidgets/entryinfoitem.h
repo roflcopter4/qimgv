@@ -13,10 +13,10 @@ class EntryInfoItem : public QWidget
     Q_OBJECT
 public:
     explicit EntryInfoItem(QWidget *parent = nullptr);
-    void setInfo(QString _name, QString _value);
+    void     setInfo(QString const &_name, QString const &_value);
 
 protected:
-    void paintEvent(QPaintEvent *event);
+    void paintEvent(QPaintEvent *event) override;
 
 private:
     QString name;

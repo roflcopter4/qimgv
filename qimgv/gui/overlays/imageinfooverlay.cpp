@@ -6,8 +6,8 @@ ImageInfoOverlay::ImageInfoOverlay(FloatingWidgetContainer *parent) :
     ui(new Ui::ImageInfoOverlay)
 {
     ui->setupUi(this);
-    ui->closeButton->setIconPath(":res/icons/common/overlay/close-dim16.png");
-    ui->headerIcon->setIconPath(":res/icons/common/overlay/info16.png");
+    ui->closeButton->setIconPath(QS(":res/icons/common/overlay/close-dim16.png"));
+    ui->headerIcon->setIconPath(QS(":res/icons/common/overlay/info16.png"));
     entryStub.setFixedSize(280, 48);
     entryStub.setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     connect(ui->closeButton,  &IconButton::clicked, this, &ImageInfoOverlay::hide);
@@ -23,9 +23,9 @@ ImageInfoOverlay::~ImageInfoOverlay() {
         delete entries.takeAt(i);
 }
 
-void ImageInfoOverlay::setExifInfo(QMap<QString, QString> info) {
+void ImageInfoOverlay::setExifInfo(QMap<QString, QString> const &info) {
     // remove/add entries
-    int entryCount = entries.count();
+    qsizetype entryCount = entries.count();
     if(entryCount > info.count()) {
         for(auto i = entryCount - 1; i >= info.count(); i--) {
             ui->entryLayout->removeWidget(entries.last());
@@ -50,10 +50,10 @@ void ImageInfoOverlay::setExifInfo(QMap<QString, QString> info) {
     // It's still there but basically not visible
     if(entries.count()) {
         ui->entryLayout->removeWidget(&entryStub);
-        entryStub.setText("");
+        entryStub.setText(QS(""));
     } else {
         ui->entryLayout->addWidget(&entryStub);
-        entryStub.setText("<no metadata found>");
+        entryStub.setText(QS("<no metadata found>"));
     }
 
     if(!isHidden() && entryCount != info.count()) {

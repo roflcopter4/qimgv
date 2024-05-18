@@ -10,8 +10,8 @@ SaveConfirmOverlay::SaveConfirmOverlay(FloatingWidgetContainer *parent) :
     connect(ui->saveAsButton,  &QPushButton::clicked, this, &SaveConfirmOverlay::saveAsClicked);
     connect(ui->discardButton, &QPushButton::clicked, this, &SaveConfirmOverlay::discardClicked);
     this->setFocusPolicy(Qt::NoFocus);
-    ui->closeButton->setIconPath(":res/icons/common/overlay/close-dim16.png");
-    ui->headerIcon->setIconPath(":res/icons/common/overlay/edit16.png");
+    ui->closeButton->setIconPath(QS(":res/icons/common/overlay/close-dim16.png"));
+    ui->headerIcon->setIconPath(QS(":res/icons/common/overlay/edit16.png"));
     readSettings();
     connect(settings, &Settings::settingsChanged, this, &SaveConfirmOverlay::readSettings);
 
@@ -23,7 +23,7 @@ SaveConfirmOverlay::SaveConfirmOverlay(FloatingWidgetContainer *parent) :
 
 void SaveConfirmOverlay::readSettings() {
     // don't interfere with the main panel
-    if(settings->panelEnabled() && settings->panelPosition() == PanelPosition::PANEL_BOTTOM) {
+    if(settings->panelEnabled() && settings->panelPosition() == PanelPosition::BOTTOM) {
         setPosition(FloatingWidgetPosition::TOPRIGHT);
     } else {
         setPosition(FloatingWidgetPosition::BOTTOMRIGHT);

@@ -6,35 +6,30 @@ MW::MW(QWidget *parent)
     : FloatingWidgetContainer(parent),
       currentDisplay(0),
       maximized(false),
-      activeSidePanel(SIDEPANEL_NONE),
-      copyOverlay(nullptr),
-      saveOverlay(nullptr),
-      renameOverlay(nullptr),
-      infoBarFullscreen(nullptr),
-      imageInfoOverlay(nullptr),
-      floatingMessage(nullptr),
+      activeSidePanel(ActiveSidePanel::NONE),
       cropPanel(nullptr),
-      cropOverlay(nullptr)
+      cropOverlay(nullptr),
+      saveOverlay(nullptr),
+      copyOverlay(nullptr),
+      renameOverlay(nullptr),
+      imageInfoOverlay(nullptr),
+      infoBarFullscreen(nullptr),
+      floatingMessage(nullptr)
 {
     setAttribute(Qt::WA_TranslucentBackground, true);
-    layout.setContentsMargins(0,0,0,0);
+    layout.setContentsMargins(0, 0, 0, 0);
     layout.setSpacing(0);
-
-    setMinimumSize(10,10);
+    setMinimumSize(10, 10);
 
     // do not steal focus when clicked
     // this is just a container. accept key events only
     // via passthrough from child widgets
     setFocusPolicy(Qt::NoFocus);
-
     this->setLayout(&layout);
-
-    setWindowTitle(QCoreApplication::applicationName() + " " +
-                   QCoreApplication::applicationVersion());
-
+    setWindowTitle(QCoreApplication::applicationName() + QS(" ") + QCoreApplication::applicationVersion());
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
-    this->setAccessibleName("mainwindow");
+    this->setAccessibleName(QS("mainwindow"));
     windowGeometryChangeTimer.setSingleShot(true);
     windowGeometryChangeTimer.setInterval(30);
     setupUi();
@@ -45,7 +40,7 @@ MW::MW(QWidget *parent)
 
     readSettings();
     currentDisplay = settings->lastDisplay();
-    maximized = settings->maximizedWindow();
+    maximized      = settings->maximizedWindow();
     restoreWindowGeometry();
 }
 
@@ -57,51 +52,56 @@ MW::MW(QWidget *parent)
  *  (not counting floating widgets)
  *  ViewerWidget exists for input handling reasons (correct overlay hover handling)
  */
-void MW::setupUi() {
+void MW::setupUi()
+{
     viewerWidget.reset(new ViewerWidget(this));
     infoBarWindowed.reset(new InfoBarProxy(this));
     docWidget.reset(new DocumentWidget(viewerWidget, infoBarWindowed));
     folderView.reset(new FolderViewProxy(this));
-    connect(folderView.get(), &FolderViewProxy::sortingSelected, this, &MW::sortingSelected);
-    connect(folderView.get(), &FolderViewProxy::directorySelected, this, &MW::opened);
-    connect(folderView.get(), &FolderViewProxy::copyUrlsRequested, this, &MW::copyUrlsRequested);
-    connect(folderView.get(), &FolderViewProxy::moveUrlsRequested, this, &MW::moveUrlsRequested);
+    connect(folderView.get(), &FolderViewProxy::sortingSelected,    this, &MW::sortingSelected);
+    connect(folderView.get(), &FolderViewProxy::directorySelected,  this, &MW::opened);
+    connect(folderView.get(), &FolderViewProxy::copyUrlsRequested,  this, &MW::copyUrlsRequested);
+    connect(folderView.get(), &FolderViewProxy::moveUrlsRequested,  this, &MW::moveUrlsRequested);
     connect(folderView.get(), &FolderViewProxy::showFoldersChanged, this, &MW::showFoldersChanged);
+
+    controlsOverlay   = new ControlsOverlay(docWidget.get());
+    infoBarFullscreen = new FullscreenInfoOverlayProxy(viewerWidget.get());
+    imageInfoOverlay  = new ImageInfoOverlayProxy(viewerWidget.get());
+    floatingMessage   = new FloatingMessageProxy(viewerWidget.get()); // todo: use additional one for folderview?
+    sidePanel         = new SidePanel(this);
 
     centralWidget.reset(new CentralWidget(docWidget, folderView, this));
     layout.addWidget(centralWidget.get());
-    controlsOverlay = new ControlsOverlay(docWidget.get());
-    infoBarFullscreen = new FullscreenInfoOverlayProxy(viewerWidget.get());
-    sidePanel = new SidePanel(this);
     layout.addWidget(sidePanel);
-    imageInfoOverlay = new ImageInfoOverlayProxy(viewerWidget.get());
-    floatingMessage = new FloatingMessageProxy(viewerWidget.get()); // todo: use additional one for folderview?
-    connect(viewerWidget.get(), &ViewerWidget::scalingRequested, this, &MW::scalingRequested);
-    connect(viewerWidget.get(), &ViewerWidget::draggedOut, this, qOverload<>(&MW::draggedOut));
-    connect(viewerWidget.get(), &ViewerWidget::playbackFinished, this, &MW::playbackFinished);
+
+    connect(viewerWidget.get(), &ViewerWidget::scalingRequested,   this, &MW::scalingRequested);
+    connect(viewerWidget.get(), &ViewerWidget::draggedOut,         this, qOverload<>(&MW::draggedOut));
+    connect(viewerWidget.get(), &ViewerWidget::playbackFinished,   this, &MW::playbackFinished);
     connect(viewerWidget.get(), &ViewerWidget::showScriptSettings, this, &MW::showScriptSettings);
-    connect(this, &MW::zoomIn,        viewerWidget.get(), &ViewerWidget::zoomIn);
-    connect(this, &MW::zoomOut,       viewerWidget.get(), &ViewerWidget::zoomOut);
-    connect(this, &MW::zoomInCursor,  viewerWidget.get(), &ViewerWidget::zoomInCursor);
-    connect(this, &MW::zoomOutCursor, viewerWidget.get(), &ViewerWidget::zoomOutCursor);
-    connect(this, &MW::scrollUp,    viewerWidget.get(), &ViewerWidget::scrollUp);
-    connect(this, &MW::scrollDown,  viewerWidget.get(), &ViewerWidget::scrollDown);
-    connect(this, &MW::scrollLeft,  viewerWidget.get(), &ViewerWidget::scrollLeft);
-    connect(this, &MW::scrollRight, viewerWidget.get(), &ViewerWidget::scrollRight);
-    connect(this, &MW::pauseVideo,     viewerWidget.get(), &ViewerWidget::pauseResumePlayback);
-    connect(this, &MW::stopPlayback,   viewerWidget.get(), &ViewerWidget::stopPlayback);
-    connect(this, &MW::seekVideoForward, viewerWidget.get(), &ViewerWidget::seekForward);
-    connect(this, &MW::seekVideoBackward,  viewerWidget.get(), &ViewerWidget::seekBackward);
-    connect(this, &MW::frameStep,      viewerWidget.get(), &ViewerWidget::frameStep);
-    connect(this, &MW::frameStepBack,  viewerWidget.get(), &ViewerWidget::frameStepBack);
-    connect(this, &MW::toggleMute,  viewerWidget.get(), &ViewerWidget::toggleMute);
-    connect(this, &MW::volumeUp,  viewerWidget.get(), &ViewerWidget::volumeUp);
-    connect(this, &MW::volumeDown,  viewerWidget.get(), &ViewerWidget::volumeDown);
+
+    connect(this, &MW::zoomIn,                 viewerWidget.get(), &ViewerWidget::zoomIn);
+    connect(this, &MW::zoomOut,                viewerWidget.get(), &ViewerWidget::zoomOut);
+    connect(this, &MW::zoomInCursor,           viewerWidget.get(), &ViewerWidget::zoomInCursor);
+    connect(this, &MW::zoomOutCursor,          viewerWidget.get(), &ViewerWidget::zoomOutCursor);
+    connect(this, &MW::scrollUp,               viewerWidget.get(), &ViewerWidget::scrollUp);
+    connect(this, &MW::scrollDown,             viewerWidget.get(), &ViewerWidget::scrollDown);
+    connect(this, &MW::scrollLeft,             viewerWidget.get(), &ViewerWidget::scrollLeft);
+    connect(this, &MW::scrollRight,            viewerWidget.get(), &ViewerWidget::scrollRight);
+    connect(this, &MW::pauseVideo,             viewerWidget.get(), &ViewerWidget::pauseResumePlayback);
+    connect(this, &MW::stopPlayback,           viewerWidget.get(), &ViewerWidget::stopPlayback);
+    connect(this, &MW::seekVideoForward,       viewerWidget.get(), &ViewerWidget::seekForward);
+    connect(this, &MW::seekVideoBackward,      viewerWidget.get(), &ViewerWidget::seekBackward);
+    connect(this, &MW::frameStep,              viewerWidget.get(), &ViewerWidget::frameStep);
+    connect(this, &MW::frameStepBack,          viewerWidget.get(), &ViewerWidget::frameStepBack);
+    connect(this, &MW::toggleMute,             viewerWidget.get(), &ViewerWidget::toggleMute);
+    connect(this, &MW::volumeUp,               viewerWidget.get(), &ViewerWidget::volumeUp);
+    connect(this, &MW::volumeDown,             viewerWidget.get(), &ViewerWidget::volumeDown);
     connect(this, &MW::toggleTransparencyGrid, viewerWidget.get(), &ViewerWidget::toggleTransparencyGrid);
-    connect(this, &MW::setLoopPlayback,  viewerWidget.get(), &ViewerWidget::setLoopPlayback);
+    connect(this, &MW::setLoopPlayback,        viewerWidget.get(), &ViewerWidget::setLoopPlayback);
 }
 
-void MW::setupFullUi() {
+void MW::setupFullUi()
+{
     setupCropPanel();
     docWidget->allowPanelInit();
     docWidget->setupMainPanel();
@@ -109,42 +109,47 @@ void MW::setupFullUi() {
     infoBarFullscreen->init();
 }
 
-void MW::setupCropPanel() {
-    if(cropPanel)
+void MW::setupCropPanel()
+{
+    if (cropPanel)
         return;
     cropOverlay = new CropOverlay(viewerWidget.get());
-    cropPanel = new CropPanel(cropOverlay, this);
-    connect(cropPanel, &CropPanel::cancel, this, &MW::hideCropPanel);
-    connect(cropPanel, &CropPanel::crop,   this, &MW::hideCropPanel);
-    connect(cropPanel, &CropPanel::crop,   this, &MW::cropRequested);
+    cropPanel   = new CropPanel(cropOverlay, this);
+    connect(cropPanel, &CropPanel::cancel,      this, &MW::hideCropPanel);
+    connect(cropPanel, &CropPanel::crop,        this, &MW::hideCropPanel);
+    connect(cropPanel, &CropPanel::crop,        this, &MW::cropRequested);
     connect(cropPanel, &CropPanel::cropAndSave, this, &MW::hideCropPanel);
     connect(cropPanel, &CropPanel::cropAndSave, this, &MW::cropAndSaveRequested);
 }
 
-void MW::setupCopyOverlay() {
+void MW::setupCopyOverlay()
+{
     copyOverlay = new CopyOverlay(viewerWidget.get());
     connect(copyOverlay, &CopyOverlay::copyRequested, this, &MW::copyRequested);
     connect(copyOverlay, &CopyOverlay::moveRequested, this, &MW::moveRequested);
 }
 
-void MW::setupSaveOverlay() {
+void MW::setupSaveOverlay()
+{
     saveOverlay = new SaveConfirmOverlay(viewerWidget.get());
     connect(saveOverlay, &SaveConfirmOverlay::saveClicked,    this, &MW::saveRequested);
     connect(saveOverlay, &SaveConfirmOverlay::saveAsClicked,  this, &MW::saveAsClicked);
     connect(saveOverlay, &SaveConfirmOverlay::discardClicked, this, &MW::discardEditsRequested);
 }
 
-void MW::setupRenameOverlay() {
+void MW::setupRenameOverlay()
+{
     renameOverlay = new RenameOverlay(this);
     renameOverlay->setName(info.fileName);
     connect(renameOverlay, &RenameOverlay::renameRequested, this, &MW::renameRequested);
 }
 
-void MW::toggleFolderView() {
+void MW::toggleFolderView()
+{
     hideCropPanel();
-    if(copyOverlay)
+    if (copyOverlay)
         copyOverlay->hide();
-    if(renameOverlay)
+    if (renameOverlay)
         renameOverlay->hide();
     docWidget->hideFloatingPanel();
     imageInfoOverlay->hide();
@@ -152,11 +157,12 @@ void MW::toggleFolderView() {
     onInfoUpdated();
 }
 
-void MW::enableFolderView() {
+void MW::enableFolderView()
+{
     hideCropPanel();
-    if(copyOverlay)
+    if (copyOverlay)
         copyOverlay->hide();
-    if(renameOverlay)
+    if (renameOverlay)
         renameOverlay->hide();
     docWidget->hideFloatingPanel();
     imageInfoOverlay->hide();
@@ -164,49 +170,53 @@ void MW::enableFolderView() {
     onInfoUpdated();
 }
 
-void MW::enableDocumentView() {
+void MW::enableDocumentView()
+{
     centralWidget->showDocumentView();
     onInfoUpdated();
 }
 
-ViewMode MW::currentViewMode() {
+ViewMode MW::currentViewMode() const
+{
     return centralWidget->currentViewMode();
 }
 
-void MW::fitWindow() {
-    if(viewerWidget->interactionEnabled()) {
+void MW::fitWindow()
+{
+    if (viewerWidget->interactionEnabled())
         viewerWidget->fitWindow();
-    } else {
-        showMessage("Zoom temporary disabled");
-    }
+    else
+        showMessage(QS("Zoom temporary disabled"));
 }
 
-void MW::fitWidth() {
-    if(viewerWidget->interactionEnabled()) {
+void MW::fitWidth()
+{
+    if (viewerWidget->interactionEnabled())
         viewerWidget->fitWidth();
-    } else {
-        showMessage("Zoom temporary disabled");
-    }
+    else
+        showMessage(QS("Zoom temporary disabled"));
 }
 
-void MW::fitOriginal() {
-    if(viewerWidget->interactionEnabled()) {
+void MW::fitOriginal()
+{
+    if (viewerWidget->interactionEnabled())
         viewerWidget->fitOriginal();
-    } else {
-        showMessage("Zoom temporary disabled");
-    }
+    else
+        showMessage(QS("Zoom temporary disabled"));
 }
 
 // switch between 1:1 and Fit All
 // TODO: move to viewerWidget?
-void MW::switchFitMode() {
-    if(viewerWidget->fitMode() == FIT_WINDOW)
-        viewerWidget->setFitMode(FIT_ORIGINAL);
+void MW::switchFitMode()
+{
+    if (viewerWidget->fitMode() == ImageFitMode::WINDOW)
+        viewerWidget->setFitMode(ImageFitMode::ORIGINAL);
     else
-        viewerWidget->setFitMode(FIT_WINDOW);
+        viewerWidget->setFitMode(ImageFitMode::WINDOW);
 }
 
-void MW::closeImage() {
+void MW::closeImage()
+{
     info.fileName = "";
     info.filePath = "";
     viewerWidget->closeImage();
@@ -214,120 +224,137 @@ void MW::closeImage() {
 
 // todo: fix flicker somehow
 // ideally it should change img & resize in one go
-void MW::preShowResize(QSize sz) {
+void MW::preShowResize(QSize sz)
+{
     auto screens = qApp->screens();
-    if(this->windowState() != Qt::WindowNoState || !screens.count() || screens.count() <= currentDisplay)
+
+    if (this->windowState() != Qt::WindowNoState || !screens.count() || screens.count() <= currentDisplay)
         return;
-    int decorationSize = frameGeometry().height() - height();
-    float maxSzMulti = settings->autoResizeLimit() / 100.f;
-    QRect availableGeom = screens.at(currentDisplay)->availableGeometry();
-    QSize maxSz = availableGeom.size() * maxSzMulti;
+
+    int   decorationSize = frameGeometry().height() - height();
+    qreal maxSzMulti     = settings->autoResizeLimit() / 100.0;
+    QRect availableGeom  = screens.at(currentDisplay)->availableGeometry();
+    QSize maxSz          = availableGeom.size() * maxSzMulti;
     maxSz.setHeight(maxSz.height() - decorationSize);
-    if(!sz.isEmpty()) {
-        if(sz.width() > maxSz.width() || sz.height() > maxSz.height())
+
+    if (!sz.isEmpty()) {
+        if (sz.width() > maxSz.width() || sz.height() > maxSz.height())
             sz.scale(maxSz, Qt::KeepAspectRatio);
     } else {
         sz = maxSz;
     }
-    QRect newGeom(0,0, sz.width(), sz.height());
+
+    QRect newGeom(0, 0, sz.width(), sz.height());
     newGeom.moveCenter(availableGeom.center());
     newGeom.translate(0, decorationSize / 2);
 
-    if(this->isVisible())
+    if (this->isVisible())
         setGeometry(newGeom);
     else // setGeometry wont work on hidden windows, so we just save for it to be restored later
         settings->setWindowGeometry(newGeom);
+
     qApp->processEvents(); // not needed anymore with patched qt?
 }
 
-void MW::showImage(std::unique_ptr<QPixmap> pixmap) {
-    if(settings->autoResizeWindow())
+void MW::showImage(std::unique_ptr<QPixmap> pixmap)
+{
+    if (settings->autoResizeWindow())
         preShowResize(pixmap->size());
     viewerWidget->showImage(std::move(pixmap));
     updateCropPanelData();
 }
 
-void MW::showAnimation(std::shared_ptr<QMovie> movie) {
-    if(settings->autoResizeWindow())
+void MW::showAnimation(std::shared_ptr<QMovie> const &movie)
+{
+    if (settings->autoResizeWindow())
         preShowResize(movie->frameRect().size());
     viewerWidget->showAnimation(movie);
     updateCropPanelData();
 }
 
-void MW::showVideo(QString file) {
-    if(settings->autoResizeWindow())
+void MW::showVideo(QString const &file)
+{
+    if (settings->autoResizeWindow())
         preShowResize(QSize()); // tmp. find a way to get this though mpv BEFORE playback
     viewerWidget->showVideo(file);
 }
 
-void MW::showContextMenu() {
+void MW::showContextMenu()
+{
     viewerWidget->showContextMenu();
 }
 
-void MW::onSortingChanged(SortingMode mode) {
-    folderView.get()->onSortingChanged(mode);
-    if(centralWidget.get()->currentViewMode() == ViewMode::MODE_DOCUMENT) {
-        switch(mode) {
-            case SortingMode::SORT_NAME:      showMessage("Sorting: By Name");              break;
-            case SortingMode::SORT_NAME_DESC: showMessage("Sorting: By Name (desc.)");      break;
-            case SortingMode::SORT_TIME:      showMessage("Sorting: By Time");              break;
-            case SortingMode::SORT_TIME_DESC: showMessage("Sorting: By Time (desc.)");      break;
-            case SortingMode::SORT_SIZE:      showMessage("Sorting: By File Size");         break;
-            case SortingMode::SORT_SIZE_DESC: showMessage("Sorting: By File Size (desc.)"); break;
+void MW::onSortingChanged(SortingMode mode)
+{
+    folderView->onSortingChanged(mode);
+    if (centralWidget->currentViewMode() == ViewMode::DOCUMENT) {
+        switch (mode) {
+        case SortingMode::NAME:      showMessage(QS("Sorting: By Name"));              break;
+        case SortingMode::NAME_DESC: showMessage(QS("Sorting: By Name (desc.)"));      break;
+        case SortingMode::TIME:      showMessage(QS("Sorting: By Time"));              break;
+        case SortingMode::TIME_DESC: showMessage(QS("Sorting: By Time (desc.)"));      break;
+        case SortingMode::SIZE:      showMessage(QS("Sorting: By File Size"));         break;
+        case SortingMode::SIZE_DESC: showMessage(QS("Sorting: By File Size (desc.)")); break;
         }
     }
 }
 
-void MW::setDirectoryPath(QString path) {
-    //closeImage();
+void MW::setDirectoryPath(QString const &path)
+{
+    // closeImage();
     info.directoryPath = path;
     info.directoryName = path.split("/").last();
     folderView->setDirectoryPath(path);
     onInfoUpdated();
 }
 
-void MW::toggleLockZoom() {
+void MW::toggleLockZoom()
+{
     viewerWidget->toggleLockZoom();
-    if(viewerWidget->lockZoomEnabled())
-        showMessage("Zoom lock: ON");
+    if (viewerWidget->lockZoomEnabled())
+        showMessage(QS("Zoom lock: ON"));
     else
-        showMessage("Zoom lock: OFF");
+        showMessage(QS("Zoom lock: OFF"));
     onInfoUpdated();
 }
 
-void MW::toggleLockView() {
+void MW::toggleLockView()
+{
     viewerWidget->toggleLockView();
-    if(viewerWidget->lockViewEnabled())
-        showMessage("View lock: ON");
+    if (viewerWidget->lockViewEnabled())
+        showMessage(QS("View lock: ON"));
     else
-        showMessage("View lock: OFF");
+        showMessage(QS("View lock: OFF"));
     onInfoUpdated();
 }
 
-void MW::toggleFullscreenInfoBar() {
-    if(!this->isFullScreen())
+void MW::toggleFullscreenInfoBar()
+{
+    if (!this->isFullScreen())
         return;
     showInfoBarFullscreen = !showInfoBarFullscreen;
-    if(showInfoBarFullscreen)
+    if (showInfoBarFullscreen)
         infoBarFullscreen->showWhenReady();
     else
         infoBarFullscreen->hide();
 }
 
-void MW::toggleImageInfoOverlay() {
-    if(centralWidget->currentViewMode() == MODE_FOLDERVIEW)
+void MW::toggleImageInfoOverlay()
+{
+    if (centralWidget->currentViewMode() == ViewMode::FOLDERVIEW)
         return;
-    if(imageInfoOverlay->isHidden())
+    if (imageInfoOverlay->isHidden())
         imageInfoOverlay->show();
     else
         imageInfoOverlay->hide();
 }
 
-void MW::toggleRenameOverlay(QString currentName) {
-    if(!renameOverlay)
+void MW::toggleRenameOverlay(QString const &currentName)
+{
+    if (!renameOverlay)
         setupRenameOverlay();
-    if(renameOverlay->isHidden()) {
-        renameOverlay->setBackdropEnabled((centralWidget->currentViewMode() == MODE_FOLDERVIEW));
+    if (renameOverlay->isHidden()) {
+        renameOverlay->setBackdropEnabled((centralWidget->currentViewMode() == ViewMode::FOLDERVIEW));
         renameOverlay->setName(currentName);
         renameOverlay->show();
     } else {
@@ -335,89 +362,88 @@ void MW::toggleRenameOverlay(QString currentName) {
     }
 }
 
-void MW::toggleScalingFilter() {
+void MW::toggleScalingFilter()
+{
     ScalingFilter configuredFilter = settings->scalingFilter();
-    if(viewerWidget->scalingFilter() == configuredFilter) {
+    if (viewerWidget->scalingFilter() == configuredFilter)
         setFilterNearest();
-    }
-    else {
+    else
         setFilter(configuredFilter);
-    }
 }
 
-void MW::setFilterNearest() {
-    showMessage("Filter: nearest", 600);
+void MW::setFilterNearest()
+{
+    showMessage(QS("Filter: nearest"), 600);
     viewerWidget->setFilterNearest();
 }
 
-void MW::setFilterBilinear() {
-    showMessage("Filter: bilinear", 600);
+void MW::setFilterBilinear()
+{
+    showMessage(QS("Filter: bilinear"), 600);
     viewerWidget->setFilterBilinear();
 }
 
-void MW::setFilter(ScalingFilter filter) {
+void MW::setFilter(ScalingFilter filter)
+{
     QString filterName;
     switch (filter) {
-        case QI_FILTER_NEAREST:
-            filterName = "nearest";
-            break;
-        case ScalingFilter::QI_FILTER_BILINEAR:
-            filterName = "bilinear";
-            break;
-        case QI_FILTER_CV_BILINEAR_SHARPEN:
-            filterName = "bilinear + sharpen";
-            break;
-        case QI_FILTER_CV_CUBIC:
-            filterName = "bicubic";
-            break;
-        case QI_FILTER_CV_CUBIC_SHARPEN:
-            filterName = "bicubic + sharpen";
-            break;
-        default:
-            filterName = "configured " + QString::number(static_cast<int>(filter));
-            break;
+    case ScalingFilter::NEAREST:             filterName = QS("nearest");            break;
+    case ScalingFilter::BILINEAR:            filterName = QS("bilinear");           break;
+    case ScalingFilter::CV_BILINEAR_SHARPEN: filterName = QS("bilinear + sharpen"); break;
+    case ScalingFilter::CV_CUBIC:            filterName = QS("bicubic");            break;
+    case ScalingFilter::CV_CUBIC_SHARPEN:    filterName = QS("bicubic + sharpen");  break;
+    default:
+        filterName = QS("configured ") + QString::number(static_cast<int>(filter));
+        break;
     }
     showMessage("Filter " + filterName, 600);
     viewerWidget->setScalingFilter(filter);
 }
 
-bool MW::isCropPanelActive() {
-    return (activeSidePanel == SIDEPANEL_CROP);
+bool MW::isCropPanelActive() const
+{
+    return (activeSidePanel == ActiveSidePanel::CROP);
 }
 
-void MW::onScalingFinished(std::unique_ptr<QPixmap> scaled) {
+void MW::onScalingFinished(std::unique_ptr<QPixmap> scaled)
+{
     viewerWidget->onScalingFinished(std::move(scaled));
 }
 
-void MW::saveWindowGeometry() {
-    if(this->windowState() == Qt::WindowNoState)
+void MW::saveWindowGeometry()
+{
+    if (this->windowState() == Qt::WindowNoState)
         settings->setWindowGeometry(geometry());
     settings->setMaximizedWindow(maximized);
 }
 
 // does not apply fullscreen; window size / maximized state only
-void MW::restoreWindowGeometry() {
+void MW::restoreWindowGeometry()
+{
     this->setGeometry(settings->windowGeometry());
-    if(settings->maximizedWindow())
+    if (settings->maximizedWindow())
         this->setWindowState(Qt::WindowMaximized);
     updateCurrentDisplay();
 }
 
-void MW::updateCurrentDisplay() {
+void MW::updateCurrentDisplay()
+{
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     currentDisplay = desktopWidget.screenNumber(this);
 #else
-    auto screens = qApp->screens();
+    auto screens   = qApp->screens();
     currentDisplay = screens.indexOf(this->window()->screen());
 #endif
 }
 
-void MW::onWindowGeometryChanged() {
+void MW::onWindowGeometryChanged()
+{
     saveWindowGeometry();
     updateCurrentDisplay();
 }
 
-void MW::saveCurrentDisplay() {
+void MW::saveCurrentDisplay()
+{
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     settings->setLastDisplay(desktopWidget.screenNumber(this));
 #else
@@ -425,53 +451,65 @@ void MW::saveCurrentDisplay() {
 #endif
 }
 
-//#############################################################
-//######################### EVENTS ############################
-//#############################################################
+// #############################################################
+// ######################### EVENTS ############################
+// #############################################################
 
-void MW::mouseMoveEvent(QMouseEvent *event) {
+void MW::mouseMoveEvent(QMouseEvent *event)
+{
     event->ignore();
 }
 
-bool MW::event(QEvent *event) {
+bool MW::event(QEvent *event)
+{
     // only save maximized state if we are already visible
     // this filter out out events while the window is still being set up
-    if(event->type() == QEvent::WindowStateChange && this->isVisible() && !this->isFullScreen())
+    if (event->type() == QEvent::WindowStateChange && isVisible() && !isFullScreen())
         maximized = isMaximized();
-    if(event->type() == QEvent::Move || event->type() == QEvent::Resize)
+    else if (event->type() == QEvent::Move || event->type() == QEvent::Resize)
         windowGeometryChangeTimer.start();
     return QWidget::event(event);
 }
 
 // hook up to actionManager
-void MW::keyPressEvent(QKeyEvent *event) {
+void MW::keyPressEvent(QKeyEvent *event)
+{
     event->accept();
     actionManager->processEvent(event);
 }
 
-void MW::wheelEvent(QWheelEvent *event) {
+void MW::wheelEvent(QWheelEvent *event)
+{
     event->accept();
     actionManager->processEvent(event);
 }
 
-void MW::mousePressEvent(QMouseEvent *event) {
+void MW::mousePressEvent(QMouseEvent *event)
+{
     event->accept();
     actionManager->processEvent(event);
 }
 
-void MW::mouseReleaseEvent(QMouseEvent *event) {
+void MW::mouseReleaseEvent(QMouseEvent *event)
+{
     event->accept();
     actionManager->processEvent(event);
 }
 
-void MW::mouseDoubleClickEvent(QMouseEvent *event) {
+void MW::mouseDoubleClickEvent(QMouseEvent *event)
+{
     event->accept();
-    QMouseEvent *fakePressEvent = new QMouseEvent(QEvent::MouseButtonPress, event->pos(), event->button(), event->buttons(), event->modifiers());
-    actionManager->processEvent(fakePressEvent);
+    auto fakePressEvent = std::make_unique<QMouseEvent>(
+        QEvent::MouseButtonPress,
+        event->position(), event->globalPosition(),
+        event->button(), event->buttons(), event->modifiers()
+    );
+    actionManager->processEvent(fakePressEvent.get());
     actionManager->processEvent(event);
 }
 
-void MW::close() {
+void MW::close()
+{
     saveWindowGeometry();
     saveCurrentDisplay();
     // try to close window sooner
@@ -479,85 +517,105 @@ void MW::close() {
 #if QT_VERSION < QT_VERSION_CHECK(6, 3, 0)
     this->hide();
 #endif
-    if(copyOverlay)
+    if (copyOverlay)
         copyOverlay->saveSettings();
     QWidget::close();
 }
 
-void MW::closeEvent(QCloseEvent *event) {
+void MW::closeEvent(QCloseEvent *event)
+{
     // catch the close event when user presses X on the window itself
     event->accept();
     actionManager->invokeAction("exit");
 }
 
-void MW::dragEnterEvent(QDragEnterEvent *e) {
-    if(e->mimeData()->hasUrls()) {
+void MW::dragEnterEvent(QDragEnterEvent *e)
+{
+    if (e->mimeData()->hasUrls())
         e->acceptProposedAction();
-    }
 }
 
-void MW::dropEvent(QDropEvent *event) {
+void MW::dropEvent(QDropEvent *event)
+{
     emit droppedIn(event->mimeData(), event->source());
 }
 
-void MW::resizeEvent(QResizeEvent *event) {
-    if(activeSidePanel == SIDEPANEL_CROP) {
+void MW::resizeEvent(QResizeEvent *event)
+{
+    if (activeSidePanel == ActiveSidePanel::CROP) {
         cropOverlay->setImageScale(viewerWidget->currentScale());
         cropOverlay->setImageDrawRect(viewerWidget->imageRect());
     }
     FloatingWidgetContainer::resizeEvent(event);
 }
 
-void MW::showDefault() {
-    if(!this->isVisible()) {
-        if(settings->fullscreenMode())
+void MW::showDefault()
+{
+    if (!this->isVisible()) {
+        if (settings->fullscreenMode())
             showFullScreen();
         else
             showWindowed();
     }
 }
 
-void MW::showSaveDialog(QString filePath) {
+void MW::showSaveDialog(QString const &filePath)
+{
     QString newFilePath = getSaveFileName(filePath);
-    if(!newFilePath.isEmpty())
+    if (!newFilePath.isEmpty())
         emit saveAsRequested(newFilePath);
 }
 
-QString MW::getSaveFileName(QString filePath) {
+QString MW::getSaveFileName(QString const &filePath)
+{
     docWidget->hideFloatingPanel();
     QStringList filters;
     // generate filter for writable images
     // todo: some may need to be blacklisted
     auto writerFormats = QImageWriter::supportedImageFormats();
-    if(writerFormats.contains("jpg"))  filters.append("JPEG (*.jpg *.jpeg *jpe *jfif)");
-    if(writerFormats.contains("png"))  filters.append("PNG (*.png)");
-    if(writerFormats.contains("webp")) filters.append("WebP (*.webp)");
+    if (writerFormats.contains(QS("jpg")))
+        filters.append(QS("JPEG (*.jpg *.jpeg *jpe *jfif)"));
+    if (writerFormats.contains(QS("png")))
+        filters.append(QS("PNG (*.png)"));
+    if (writerFormats.contains(QS("webp")))
+        filters.append(QS("WebP (*.webp)"));
     // may not work..
-    if(writerFormats.contains("jp2"))  filters.append("JPEG 2000 (*.jp2 *.j2k *.jpf *.jpx *.jpm *.jpgx)");
-    if(writerFormats.contains("jxl"))  filters.append("JPEG-XL (*.jxl)");
-    if(writerFormats.contains("avif")) filters.append("AVIF (*.avif *.avifs)");
-    if(writerFormats.contains("tif"))  filters.append("TIFF (*.tif *.tiff)");
-    if(writerFormats.contains("bmp"))  filters.append("BMP (*.bmp)");
-#ifdef _WIN32
-    if(writerFormats.contains("ico"))  filters.append("Icon Files (*.ico)");
+    if (writerFormats.contains(QS("jp2")))
+        filters.append(QS("JPEG 2000 (*.jp2 *.j2k *.jpf *.jpx *.jpm *.jpgx)"));
+    if (writerFormats.contains(QS("jxl")))
+        filters.append(QS("JPEG-XL (*.jxl)"));
+    if (writerFormats.contains(QS("avif")))
+        filters.append(QS("AVIF (*.avif *.avifs)"));
+    if (writerFormats.contains(QS("tif")))
+        filters.append(QS("TIFF (*.tif *.tiff)"));
+    if (writerFormats.contains(QS("bmp")))
+        filters.append(QS("BMP (*.bmp)"));
+#ifdef Q_OS_WIN32
+    if (writerFormats.contains(QS("ico")))
+        filters.append(QS("Icon Files (*.ico)"));
 #endif
-    if(writerFormats.contains("ppm"))  filters.append("PPM (*.ppm)");
-    if(writerFormats.contains("xbm"))  filters.append("XBM (*.xbm)");
-    if(writerFormats.contains("xpm"))  filters.append("XPM (*.xpm)");
-    if(writerFormats.contains("dds"))  filters.append("DDS (*.dds)");
-    if(writerFormats.contains("wbmp")) filters.append("WBMP (*.wbmp)");
+    if (writerFormats.contains(QS("ppm")))
+        filters.append(QS("PPM (*.ppm)"));
+    if (writerFormats.contains(QS("xbm")))
+        filters.append(QS("XBM (*.xbm)"));
+    if (writerFormats.contains(QS("xpm")))
+        filters.append(QS("XPM (*.xpm)"));
+    if (writerFormats.contains(QS("dds")))
+        filters.append(QS("DDS (*.dds)"));
+    if (writerFormats.contains(QS("wbmp")))
+        filters.append(QS("WBMP (*.wbmp)"));
     // add everything else from imagewriter
-    for(auto fmt : writerFormats) {
-        if(filters.filter(fmt).isEmpty())
-            filters.append(fmt.toUpper() + " (*." + fmt + ")");
-    }
-    QString filterString = filters.join(";; ");
+    for (auto const &fmt : writerFormats)
+        if (filters.filter(fmt).isEmpty())
+            filters.append(QString::fromUtf8(fmt.toUpper()) + QS(" (*.") + fmt + QS(")"));
+    QString filterString = filters.join(QSV(";; "));
 
     // find matching filter for the current image
-    QString selectedFilter = "JPEG (*.jpg *.jpeg *jpe *jfif)";
-    QFileInfo fi(filePath);
-    for(auto filter : filters) {
-        if(filter.contains(fi.suffix().toLower())) {
+    auto selectedFilter = QS("JPEG (*.jpg *.jpeg *jpe *jfif)");
+    auto fi = QFileInfo(filePath);
+
+    for (auto const &filter : filters) {
+        if (filter.contains(fi.suffix().toLower())) {
             selectedFilter = filter;
             break;
         }
@@ -566,85 +624,92 @@ QString MW::getSaveFileName(QString filePath) {
     return newFilePath;
 }
 
-void MW::showOpenDialog(QString path) {
+void MW::showOpenDialog(QString const &path)
+{
     docWidget->hideFloatingPanel();
 
     QFileDialog dialog(this);
     QStringList imageFilter;
     imageFilter.append(settings->supportedFormatsFilter());
-    imageFilter.append("All Files (*)");
+    imageFilter.append(QS("All Files (*)"));
     dialog.setDirectory(path);
     dialog.setNameFilters(imageFilter);
-    dialog.setWindowTitle("Open image");
+    dialog.setWindowTitle(QS("Open image"));
     dialog.setWindowModality(Qt::ApplicationModal);
     connect(&dialog, &QFileDialog::fileSelected, this, &MW::opened);
     dialog.exec();
 }
 
-void MW::showResizeDialog(QSize initialSize) {
+void MW::showResizeDialog(QSize initialSize)
+{
     ResizeDialog dialog(initialSize, this);
     connect(&dialog, &ResizeDialog::sizeSelected, this, &MW::resizeRequested);
     dialog.exec();
 }
 
-DialogResult MW::fileReplaceDialog(QString src, QString dst, FileReplaceMode mode, bool multiple) {
+DialogResult MW::fileReplaceDialog(QString const &source, QString const &dest, FileReplaceMode mode, bool multiple)
+{
     FileReplaceDialog dialog(this);
     dialog.setModal(true);
-    dialog.setSource(src);
-    dialog.setDestination(dst);
+    dialog.setSource(source);
+    dialog.setDestination(dest);
     dialog.setMode(mode);
     dialog.setMulti(multiple);
-
     dialog.exec();
-
     return dialog.getResult();
 }
 
-void MW::showSettings() {
+void MW::showSettings()
+{
     docWidget->hideFloatingPanel();
     SettingsDialog settingsDialog(this);
     settingsDialog.exec();
 }
 
-void MW::showScriptSettings() {
+void MW::showScriptSettings()
+{
     docWidget->hideFloatingPanel();
     SettingsDialog settingsDialog(this);
     settingsDialog.switchToPage(4);
     settingsDialog.exec();
 }
 
-void MW::triggerFullScreen() {
-    if(!isFullScreen()) {
+void MW::triggerFullScreen()
+{
+    if (!isFullScreen())
         showFullScreen();
-    } else {
+    else
         showWindowed();
-    }
 }
 
-void MW::showFullScreen() {
-    //do not save immediately on application start
-    if(!isHidden())
+void MW::showFullScreen()
+{
+    // do not save immediately on application start
+    if (!isHidden())
         saveWindowGeometry();
     auto screens = qApp->screens();
+
     // todo: why check the screen again?
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    int _currentDisplay = desktopWidget.screenNumber(this);
+    qsizetype trueCurrentDisplay = desktopWidget.screenNumber(this);
 #else
-    int _currentDisplay = screens.indexOf(this->window()->screen());
+    qsizetype trueCurrentDisplay = screens.indexOf(this->window()->screen());
 #endif
-    //move to target screen
-    if(screens.count() > currentDisplay && currentDisplay != _currentDisplay) {
+
+    // move to target screen
+    if (screens.count() > currentDisplay && currentDisplay != trueCurrentDisplay)
         this->move(screens.at(currentDisplay)->geometry().x(),
                    screens.at(currentDisplay)->geometry().y());
-    }
     QWidget::showFullScreen();
+
     // try to repaint sooner
     qApp->processEvents();
     emit fullscreenStateChanged(true);
 }
 
-void MW::showWindowed() {
-    if(isFullScreen())
+void MW::showWindowed()
+{
+    if (isFullScreen())
         QWidget::showNormal();
     restoreWindowGeometry();
     QWidget::show();
@@ -653,8 +718,9 @@ void MW::showWindowed() {
     emit fullscreenStateChanged(false);
 }
 
-void MW::updateCropPanelData() {
-    if(cropPanel && activeSidePanel == SIDEPANEL_CROP) {
+void MW::updateCropPanelData()
+{
+    if (cropPanel && activeSidePanel == ActiveSidePanel::CROP) {
         cropPanel->setImageRealSize(viewerWidget->sourceSize());
         cropOverlay->setImageDrawRect(viewerWidget->imageRect());
         cropOverlay->setImageScale(viewerWidget->currentScale());
@@ -662,47 +728,52 @@ void MW::updateCropPanelData() {
     }
 }
 
-void MW::showSaveOverlay() {
-    if(!settings->showSaveOverlay())
+void MW::showSaveOverlay()
+{
+    if (!settings->showSaveOverlay())
         return;
-    if(!saveOverlay)
+    if (!saveOverlay)
         setupSaveOverlay();
     saveOverlay->show();
 }
 
-void MW::hideSaveOverlay() {
-    if(!saveOverlay)
+void MW::hideSaveOverlay()
+{
+    if (!saveOverlay)
         return;
     saveOverlay->hide();
 }
 
-void MW::showChangelogWindow() {
+void MW::showChangelogWindow()
+{
     changelogWindow->show();
 }
 
-void MW::showChangelogWindow(QString text) {
+void MW::showChangelogWindow(QString const &text)
+{
     changelogWindow->setText(text);
     changelogWindow->show();
 }
 
-void MW::triggerCropPanel() {
-    if(activeSidePanel != SIDEPANEL_CROP) {
+void MW::triggerCropPanel()
+{
+    if (activeSidePanel != ActiveSidePanel::CROP)
         showCropPanel();
-    } else {
+    else
         hideCropPanel();
-    }
 }
 
-void MW::showCropPanel() {
-    if(centralWidget->currentViewMode() == MODE_FOLDERVIEW)
+void MW::showCropPanel()
+{
+    if (centralWidget->currentViewMode() == ViewMode::FOLDERVIEW)
         return;
 
-    if(activeSidePanel != SIDEPANEL_CROP) {
+    if (activeSidePanel != ActiveSidePanel::CROP) {
         docWidget->hideFloatingPanel();
         sidePanel->setWidget(cropPanel);
         sidePanel->show();
         cropOverlay->show();
-        activeSidePanel = SIDEPANEL_CROP;
+        activeSidePanel = ActiveSidePanel::CROP;
         // reset & lock zoom so CropOverlay won't go crazy
         viewerWidget->fitWindow();
         setInteractionEnabled(false);
@@ -711,29 +782,32 @@ void MW::showCropPanel() {
     }
 }
 
-void MW::setInteractionEnabled(bool mode) {
+void MW::setInteractionEnabled(bool mode)
+{
     docWidget->setInteractionEnabled(mode);
     viewerWidget->setInteractionEnabled(mode);
 }
 
-void MW::hideCropPanel() {
+void MW::hideCropPanel()
+{
     sidePanel->hide();
-    if(activeSidePanel == SIDEPANEL_CROP) {
+    if (activeSidePanel == ActiveSidePanel::CROP) {
         cropOverlay->hide();
         setInteractionEnabled(true);
     }
-    activeSidePanel = SIDEPANEL_NONE;
+    activeSidePanel = ActiveSidePanel::NONE;
 }
 
-void MW::triggerCopyOverlay() {
-    if(!viewerWidget->isDisplaying())
+void MW::triggerCopyOverlay()
+{
+    if (!viewerWidget->isDisplaying())
         return;
-    if(!copyOverlay)
+    if (!copyOverlay)
         setupCopyOverlay();
 
-    if(centralWidget->currentViewMode() == MODE_FOLDERVIEW)
+    if (centralWidget->currentViewMode() == ViewMode::FOLDERVIEW)
         return;
-    if(copyOverlay->operationMode() == OVERLAY_COPY) {
+    if (copyOverlay->operationMode() == OVERLAY_COPY) {
         copyOverlay->isHidden() ? copyOverlay->show() : copyOverlay->hide();
     } else {
         copyOverlay->setDialogMode(OVERLAY_COPY);
@@ -741,15 +815,16 @@ void MW::triggerCopyOverlay() {
     }
 }
 
-void MW::triggerMoveOverlay() {
-    if(!viewerWidget->isDisplaying())
+void MW::triggerMoveOverlay()
+{
+    if (!viewerWidget->isDisplaying())
         return;
-    if(!copyOverlay)
+    if (!copyOverlay)
         setupCopyOverlay();
 
-    if(centralWidget->currentViewMode() == MODE_FOLDERVIEW)
+    if (centralWidget->currentViewMode() == ViewMode::FOLDERVIEW)
         return;
-    if(copyOverlay->operationMode() == OVERLAY_MOVE) {
+    if (copyOverlay->operationMode() == OVERLAY_MOVE) {
         copyOverlay->isHidden() ? copyOverlay->show() : copyOverlay->hide();
     } else {
         copyOverlay->setDialogMode(OVERLAY_MOVE);
@@ -758,144 +833,174 @@ void MW::triggerMoveOverlay() {
 }
 
 // quit fullscreen or exit the program
-void MW::closeFullScreenOrExit() {
-    if(this->isFullScreen()) {
+void MW::closeFullScreenOrExit()
+{
+    if (this->isFullScreen())
         this->showWindowed();
-    } else {
-        actionManager->invokeAction("exit");
-    }
+    else
+        actionManager->invokeAction(QS("exit"));
 }
 
 // todo: this is crap, use shared state object
-void MW::setCurrentInfo(int _index, int _fileCount, QString _filePath, QString _fileName, QSize _imageSize, qint64 _fileSize, bool slideshow, bool shuffle, bool edited) {
-    info.index = _index;
-    info.fileCount = _fileCount;
-    info.fileName = _fileName;
-    info.filePath = _filePath;
-    info.imageSize = _imageSize;
-    info.fileSize = _fileSize;
+void MW::setCurrentInfo(int            fileIndex,
+                        int            fileCount,
+                        QString const &filePath,
+                        QString const &fileName,
+                        QSize          imageSize,
+                        qint64         fileSize,
+                        bool           slideshow,
+                        bool           shuffle,
+                        bool           edited)
+{
+    info.index     = fileIndex;
+    info.fileCount = fileCount;
+    info.fileName  = fileName;
+    info.filePath  = filePath;
+    info.imageSize = imageSize;
+    info.fileSize  = fileSize;
     info.slideshow = slideshow;
-    info.shuffle = shuffle;
-    info.edited = edited;
+    info.shuffle   = shuffle;
+    info.edited    = edited;
     onInfoUpdated();
 }
 
 // todo: nuke and rewrite
-void MW::onInfoUpdated() {
+void MW::onInfoUpdated()
+{
     QString posString;
-    if(info.fileCount)
-        posString = "[ " + QString::number(info.index + 1) + "/" + QString::number(info.fileCount) + " ]";
+    if (info.fileCount)
+        posString = QS("[ ") + QString::number(info.index + 1) + QS("/") + QString::number(info.fileCount) + QS(" ]");
     QString resString;
-    if(info.imageSize.width())
-        resString = QString::number(info.imageSize.width()) + " x " + QString::number(info.imageSize.height());
+    if (info.imageSize.width())
+        resString = QString::number(info.imageSize.width()) + QS(" x ") + QString::number(info.imageSize.height());
     QString sizeString;
-    if(info.fileSize)
+    if (info.fileSize)
         sizeString = this->locale().formattedDataSize(info.fileSize, 1);
 
-    if(renameOverlay)
+    if (renameOverlay)
         renameOverlay->setName(info.fileName);
 
     QString windowTitle;
-    if(centralWidget->currentViewMode() == MODE_FOLDERVIEW) {
+    if (centralWidget->currentViewMode() == ViewMode::FOLDERVIEW) {
         windowTitle = tr("Folder view");
         infoBarFullscreen->setInfo("", tr("No file opened."), "");
         infoBarWindowed->setInfo("", tr("No file opened."), "");
-    } else if(info.fileName.isEmpty()) {
+    } else if (info.fileName.isEmpty()) {
         windowTitle = qApp->applicationName();
         infoBarFullscreen->setInfo("", tr("No file opened."), "");
         infoBarWindowed->setInfo("", tr("No file opened."), "");
     } else {
         windowTitle = info.fileName;
-        if(settings->windowTitleExtendedInfo()) {
-            windowTitle.prepend(posString + "  ");
-            if(!resString.isEmpty())
-                windowTitle.append("  -  " + resString);
-            if(!sizeString.isEmpty())
-                windowTitle.append("  -  " + sizeString);
+        if (settings->windowTitleExtendedInfo()) {
+            windowTitle.prepend(posString + QS("  "));
+            if (!resString.isEmpty())
+                windowTitle.append(QS("  -  ") + resString);
+            if (!sizeString.isEmpty())
+                windowTitle.append(QS("  -  ") + sizeString);
         }
 
         // toggleable states
         QString states;
-        if(info.slideshow)
-            states.append(" [slideshow]");
-        if(info.shuffle)
-            states.append(" [shuffle]");
-        if(viewerWidget->lockZoomEnabled())
-            states.append(" [zoom lock]");
-        if(viewerWidget->lockViewEnabled())
-            states.append(" [view lock]");
+        if (info.slideshow)
+            states.append(QSV(" [slideshow]"));
+        if (info.shuffle)
+            states.append(QSV(" [shuffle]"));
+        if (viewerWidget->lockZoomEnabled())
+            states.append(QSV(" [zoom lock]"));
+        if (viewerWidget->lockViewEnabled())
+            states.append(QSV(" [view lock]"));
 
-        if(!settings->infoBarWindowed() && !states.isEmpty())
-            windowTitle.append(" -" + states);
-        if(info.edited)
-            windowTitle.prepend("* ");
+        if (!settings->infoBarWindowed() && !states.isEmpty())
+            windowTitle.append(QS(" -") + states);
+        if (info.edited)
+            windowTitle.prepend(QSV("* "));
 
-        infoBarFullscreen->setInfo(posString, info.fileName + (info.edited ? "  *" : ""), resString + "  " + sizeString);
-        infoBarWindowed->setInfo(posString, info.fileName + (info.edited ? "  *" : ""), resString + "  " + sizeString + " " + states);
+        infoBarFullscreen->setInfo(posString,
+                                   info.fileName + (info.edited ? QS("  *") : QS("")),
+                                   resString + QS("  ") + sizeString);
+
+        infoBarWindowed->setInfo(posString,
+                                 info.fileName + (info.edited ? QS("  *") : QS("")),
+                                 resString + QS("  ") + sizeString + QS(" ") + states);
     }
     setWindowTitle(windowTitle);
 }
 
 // TODO!!! buffer this in mw
-void MW::setExifInfo(QMap<QString, QString> info) {
-    if(imageInfoOverlay)
-        imageInfoOverlay->setExifInfo(info);
+void MW::setExifInfo(QMap<QString, QString> const &xinfo)
+{
+    if (imageInfoOverlay)
+        imageInfoOverlay->setExifInfo(xinfo);
 }
 
-std::shared_ptr<FolderViewProxy> MW::getFolderView() {
+std::shared_ptr<FolderViewProxy> MW::getFolderView()
+{
     return folderView;
 }
 
-std::shared_ptr<ThumbnailStripProxy> MW::getThumbnailPanel() {
+std::shared_ptr<ThumbnailStripProxy> MW::getThumbnailPanel() const
+{
     return docWidget->thumbPanel();
 }
 
 // todo: this is crap
-void MW::showMessageDirectory(QString dirName) {
-    floatingMessage->showMessage(dirName, FloatingMessageIcon::ICON_DIRECTORY, 1700);
+void MW::showMessageDirectory(QString const &dirName)
+{
+    floatingMessage->showMessage(dirName, FloatingMessageIcon::DIRECTORY, 1700);
 }
 
-void MW::showMessageDirectoryEnd() {
-    floatingMessage->showMessage("", FloatingWidgetPosition::RIGHT, FloatingMessageIcon::ICON_RIGHT_EDGE, 400);
+void MW::showMessageDirectoryEnd()
+{
+    floatingMessage->showMessage("", FloatingWidgetPosition::RIGHT, FloatingMessageIcon::RIGHT_EDGE, 400);
 }
 
-void MW::showMessageDirectoryStart() {
-    floatingMessage->showMessage("", FloatingWidgetPosition::LEFT, FloatingMessageIcon::ICON_LEFT_EDGE, 400);
+void MW::showMessageDirectoryStart()
+{
+    floatingMessage->showMessage("", FloatingWidgetPosition::LEFT, FloatingMessageIcon::LEFT_EDGE, 400);
 }
 
-void MW::showMessageFitWindow() {
-    floatingMessage->showMessage(tr("Fit Window"), FloatingMessageIcon::NO_ICON, 350);
+void MW::showMessageFitWindow()
+{
+    floatingMessage->showMessage(tr("Fit Window"), FloatingMessageIcon::NONE, 350);
 }
 
-void MW::showMessageFitWidth() {
-    floatingMessage->showMessage(tr("Fit Width"), FloatingMessageIcon::NO_ICON, 350);
+void MW::showMessageFitWidth()
+{
+    floatingMessage->showMessage(tr("Fit Width"), FloatingMessageIcon::NONE, 350);
 }
 
-void MW::showMessageFitOriginal() {
-    floatingMessage->showMessage(tr("Fit 1:1"), FloatingMessageIcon::NO_ICON, 350);
+void MW::showMessageFitOriginal()
+{
+    floatingMessage->showMessage(tr("Fit 1:1"), FloatingMessageIcon::NONE, 350);
 }
 
-void MW::showMessage(QString text) {
-    floatingMessage->showMessage(text,  FloatingMessageIcon::NO_ICON, 1500);
+void MW::showMessage(QString const &text)
+{
+    floatingMessage->showMessage(text, FloatingMessageIcon::NONE, 1500);
 }
 
-void MW::showMessage(QString text, int duration) {
-    floatingMessage->showMessage(text, FloatingMessageIcon::NO_ICON, duration);
+void MW::showMessage(QString const &text, int duration)
+{
+    floatingMessage->showMessage(text, FloatingMessageIcon::NONE, duration);
 }
 
-void MW::showMessageSuccess(QString text) {
-    floatingMessage->showMessage(text,  FloatingMessageIcon::ICON_SUCCESS, 1500);
+void MW::showMessageSuccess(QString const &text)
+{
+    floatingMessage->showMessage(text, FloatingMessageIcon::SUCCESS, 1500);
 }
 
-void MW::showWarning(QString text) {
-    floatingMessage->showMessage(text,  FloatingMessageIcon::ICON_WARNING, 1500);
+void MW::showWarning(QString const &text)
+{
+    floatingMessage->showMessage(text, FloatingMessageIcon::WARNING, 1500);
 }
 
-void MW::showError(QString text) {
-    floatingMessage->showMessage(text,  FloatingMessageIcon::ICON_ERROR, 2800);
+void MW::showError(QString const &text)
+{
+    floatingMessage->showMessage(text, FloatingMessageIcon::ERROR, 2800);
 }
 
-bool MW::showConfirmation(QString title, QString msg) {
+bool MW::showConfirmation(QString const &title, QString const &msg)
+{
     QMessageBox msgBox(this);
     msgBox.setWindowTitle(title);
     msgBox.setText(msg);
@@ -904,48 +1009,49 @@ bool MW::showConfirmation(QString title, QString msg) {
     msgBox.addButton(QMessageBox::No);
     msgBox.setDefaultButton(QMessageBox::Yes);
     msgBox.setModal(true);
-    if(msgBox.exec() == QMessageBox::Yes)
-        return true;
-    else
-        return false;
+    return msgBox.exec() == QMessageBox::Yes;
 }
 
-void MW::readSettings() {
+void MW::readSettings()
+{
     showInfoBarFullscreen = settings->infoBarFullscreen();
-    showInfoBarWindowed = settings->infoBarWindowed();
+    showInfoBarWindowed   = settings->infoBarWindowed();
     adaptToWindowState();
 }
 
 // todo: remove/rename?
-void MW::applyWindowedBackground() {
+void MW::applyWindowedBackground()
+{
 #ifdef USE_KDE_BLUR
-    if(settings->backgroundOpacity() == 1.0)
+    if (settings->backgroundOpacity() == 1.0)
         KWindowEffects::enableBlurBehind(winId(), false);
     else
         KWindowEffects::enableBlurBehind(winId(), settings->blurBackground());
 #endif
 }
 
-void MW::applyFullscreenBackground() {
+void MW::applyFullscreenBackground()
+{
 #ifdef USE_KDE_BLUR
     KWindowEffects::enableBlurBehind(winId(), false);
 #endif
 }
 
 // changes ui elements according to fullscreen state
-void MW::adaptToWindowState() {
+void MW::adaptToWindowState()
+{
     docWidget->hideFloatingPanel();
-    if(isFullScreen()) { //-------------------------------------- fullscreen ---
+    if (isFullScreen()) { //-------------------------------------- fullscreen ---
         applyFullscreenBackground();
         infoBarWindowed->hide();
 
-        if(showInfoBarFullscreen)
+        if (showInfoBarFullscreen)
             infoBarFullscreen->showWhenReady();
         else
-            infoBarFullscreen->hide();    
+            infoBarFullscreen->hide();
 
         auto pos = settings->panelPosition();
-        if(!settings->panelEnabled() || pos == PANEL_BOTTOM || pos == PANEL_LEFT)
+        if (!settings->panelEnabled() || pos == PanelPosition::BOTTOM || pos == PanelPosition::LEFT)
             controlsOverlay->show();
         else
             controlsOverlay->hide();
@@ -953,7 +1059,7 @@ void MW::adaptToWindowState() {
         applyWindowedBackground();
         infoBarFullscreen->hide();
 
-        if(showInfoBarWindowed)
+        if (showInfoBarWindowed)
             infoBarWindowed->show();
         else
             infoBarWindowed->hide();
@@ -965,18 +1071,20 @@ void MW::adaptToWindowState() {
     viewerWidget->onFullscreenModeChanged(isFullScreen());
 }
 
-void MW::paintEvent(QPaintEvent *event) {
+void MW::paintEvent(QPaintEvent *event)
+{
     QPainter p(this);
     p.fillRect(rect(), Qt::black);
     FloatingWidgetContainer::paintEvent(event);
 }
 
-void MW::leaveEvent(QEvent *event) {
+void MW::leaveEvent(QEvent *event)
+{
     QWidget::leaveEvent(event);
     docWidget->hideFloatingPanel(true);
 }
 
 // block native tab-switching so we can use it in shortcuts
-//bool MW::focusNextPrevChild(bool) {
+// bool MW::focusNextPrevChild(bool) {
 //    return false;
 //}

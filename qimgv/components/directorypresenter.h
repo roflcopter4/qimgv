@@ -16,23 +16,23 @@ class DirectoryPresenter : public QObject {
 public:
     explicit DirectoryPresenter(QObject *parent = nullptr);
 
-    void setView(std::shared_ptr<IDirectoryView>);
-    void setModel(std::shared_ptr<DirectoryModel> newModel);
+    void setView(std::shared_ptr<IDirectoryView> const &);
+    void setModel(std::shared_ptr<DirectoryModel> const &newModel);
     void unsetModel();
 
-    void selectAndFocus(int index);
-    void selectAndFocus(QString path);
+    void selectAndFocus(int index) const;
+    void selectAndFocus(QString const &path) const;
 
-    void onFileRemoved(QString filePath, int index);
-    void onFileRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo);
-    void onFileAdded(QString filePath);
-    void onFileModified(QString filePath);
+    void onFileRemoved(QString const &filePath, int index) const;
+    void onFileRenamed(QString const &fromPath, int indexFrom, QString const &toPath, int indexTo) const;
+    void onFileAdded(QString const &filePath) const;
+    void onFileModified(QString const &filePath) const;
 
-    void onDirRemoved(QString dirPath, int index);
-    void onDirRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo);
-    void onDirAdded(QString dirPath);
+    void onDirRemoved(QString const &dirPath, int index) const;
+    void onDirRenamed(QString const &fromPath, int indexFrom, QString const &toPath, int indexTo) const;
+    void onDirAdded(QString const &dirPath) const;
 
-    bool showDirs();
+    bool showDirs() const;
     void setShowDirs(bool mode);
 
     QList<QString> selectedPaths() const;
@@ -49,14 +49,14 @@ public slots:
     void reloadModel();
 
 private slots:
-    void generateThumbnails(QList<int>, int, bool, bool);
-    void onThumbnailReady(std::shared_ptr<Thumbnail> thumb, QString filePath);
+    void generateThumbnails(QList<int> const &, int, bool, bool);
+    void onThumbnailReady(std::shared_ptr<Thumbnail> const &thumb, QString const &filePath) const;
     void populateView();
     void onItemActivated(int absoluteIndex);
     void onDraggedOut();
-    void onDraggedOver(int index);
+    void onDraggedOver(int index) const;
 
-    void onDroppedInto(const QMimeData *data, QObject *source, int targetIndex);
+    void onDroppedInto(QMimeData const *data, QObject *source, int targetIndex);
 private:
     std::shared_ptr<IDirectoryView> view = nullptr;
     std::shared_ptr<DirectoryModel> model = nullptr;

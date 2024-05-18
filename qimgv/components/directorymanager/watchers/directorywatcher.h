@@ -9,7 +9,7 @@ class DirectoryWatcher : public QObject {
 public:
     static DirectoryWatcher* newInstance();
 
-    virtual ~DirectoryWatcher();
+    ~DirectoryWatcher() override;
 
     virtual void setWatchPath(const QString& watchPath);
     virtual QString watchPath() const;
@@ -19,7 +19,7 @@ public Q_SLOTS:
     void observe();
     void stopObserving();
 
-signals:
+Q_SIGNALS:
     void fileCreated(const QString& filePath);
     void fileDeleted(const QString& filePath);
     void fileRenamed(const QString& old, const QString& now);

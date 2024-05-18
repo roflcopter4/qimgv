@@ -9,6 +9,6 @@
 class CmdOptionsRunner : public QObject {
     Q_OBJECT
 public slots:
-    void generateThumbs(QString dirPath, int size);
+    void generateThumbs(QString const &dirPath, int size);
     void showBuildOptions();
 };

@@ -8,17 +8,20 @@
 #include "utils/stuff.h"
 #include "components/actionmanager/actionmanager.h"
 
-class FolderGridView : public ThumbnailView {
+class FolderGridView : public ThumbnailView
+{
     Q_OBJECT
-public:
+
+  public:
     explicit FolderGridView(QWidget *parent = nullptr);
 
-    const int THUMBNAIL_SIZE_MIN = 80;  // px
-    const int THUMBNAIL_SIZE_MAX = 400;  // these should be divisible by ZOOM_STEP
-    const int ZOOM_STEP = 20;
+    static constexpr int THUMBNAIL_SIZE_MIN = 80;  // px
+    static constexpr int THUMBNAIL_SIZE_MAX = 400; // these should be divisible by ZOOM_STEP
+    static constexpr int ZOOM_STEP          = 20;
+
     void selectAll();
 
-public slots:
+  public Q_SLOTS:
     void show();
     void hide();
 
@@ -35,33 +38,35 @@ public slots:
     void zoomOut();
     void setThumbnailSize(int newSize);
     void setShowLabels(bool mode);
-    virtual void focusOn(int index) override;
-    virtual void focusOnSelection() override;
-    virtual void setDragHover(int index) override;
+    void focusOn(int index) override;
+    void focusOnSelection() override;
+    void setDragHover(int index) override;
 
-private:
-    FlowLayout *flowLayout;
-    QGraphicsWidget holderWidget;
-    int shiftedCol;
+  private:
     void scrollToCurrent();
-    int lastDragTarget = -1;
 
-private slots:
+    FlowLayout     *flowLayout;
+    QGraphicsWidget holderWidget;
+    int             shiftedCol;
+    int             lastDragTarget = -1;
+
+  private Q_SLOTS:
     void onitemSelected();
 
-protected:
+  protected:
     void resizeEvent(QResizeEvent *event) override;
-    virtual void updateScrollbarIndicator() override;
+    void updateScrollbarIndicator() override;
     void addItemToLayout(ThumbnailWidget *widget, int pos) override;
     void removeItemFromLayout(int pos) override;
     void removeAll() override;
     void setupLayout();
-    ThumbnailWidget *createThumbnailWidget() override;
     void updateLayout() override;
-    virtual void fitSceneToContents() override;
+    void fitSceneToContents() override;
+
+    ThumbnailWidget *createThumbnailWidget() override;
 
     void keyPressEvent(QKeyEvent *event) override;
-    void wheelEvent(QWheelEvent *event) override;    
+    void wheelEvent(QWheelEvent *event) override;
     void dropEvent(QDropEvent *event) override;
 
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -69,6 +74,6 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent *event) override;
     bool focusNextPrevChild(bool) override;
 
-signals:
+  Q_SIGNALS:
     void thumbnailSizeChanged(int);
 };

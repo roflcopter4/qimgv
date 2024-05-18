@@ -1,70 +1,80 @@
+#include "Common.h"
 #include "windowsworker.h"
 
-WindowsWorker::WindowsWorker() : WatcherWorker() {
+#include <QMessageBox>
 
-}
 
-void WindowsWorker::setDirectoryHandle(HANDLE hDir) {
-    //qDebug() << "setHandle" << this->hDir << " -> " << hDir;
+void WindowsWorker::setDirectoryHandle(HANDLE handle)
+{
+    // qDebug() << "setHandle" << this->handle << " -> " << handle;
     freeHandle();
-    this->hDir = hDir;
+    hDir = handle;
 }
 
-void WindowsWorker::freeHandle() {
-    CancelIoEx(this->hDir, NULL);
-    CloseHandle(this->hDir);
+void WindowsWorker::freeHandle()
+{
+    if (hDir == INVALID_HANDLE_VALUE)
+        return;
+    CancelIoEx(hDir, nullptr);
+    CloseHandle(hDir);
+    hDir = INVALID_HANDLE_VALUE;
 }
 
-void WindowsWorker::run() {
-    isRunning = true;
-    DWORD error = 0;
-    bool bPending = false;
-    DWORD dwBytes = 0;
-    OVERLAPPED ovl = {0};
-    std::vector<BYTE> buffer(1024*64);
 
-    ovl.hEvent = ::CreateEvent(nullptr, TRUE, FALSE, nullptr);
+void WindowsWorker::run()
+{
+    using namespace std::literals;
 
-    if(!ovl.hEvent) {
-        qDebug() << "[WindowsWorker] CreateEvent failed?";
+    //if (isRunning.exchange(true, std::memory_order::seq_cst))
+    //    return;
+
+    DWORD      dwBytes = 0;
+    OVERLAPPED ovl = {.hEvent = ::CreateEventW(nullptr, TRUE, FALSE, nullptr)};
+
+    if (!ovl.hEvent || ovl.hEvent == INVALID_HANDLE_VALUE) {
+        qDebug() << QSV(u"[WindowsWorker] CreateEvent failed?");
+        QMessageBox::warning(
+            nullptr, QS("Error"),
+            QS("CreateEvent failed in " __FILE__ ". \n"
+               "This probably means everything will break catastrophically. Fairly warned, be thee, says I.")
+        );
     }
 
-    ::ResetEvent(ovl.hEvent); // is this needed?
+    static constexpr size_t BUFFER_SIZE = 1024ULL * 64ULL;
+    auto buffer = std::make_unique<BYTE[]>(BUFFER_SIZE);
 
-    while(isRunning) {
-        //qDebug() << "_1";
-        bPending = ReadDirectoryChangesW(hDir,
-                                         &buffer[0],
-                                         buffer.size(),
-                                         FALSE,
-                                         FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE,
-                                         &dwBytes,
-                                         &ovl,
-                                         nullptr);
-        //qDebug() << "_2";
-        if(!bPending) {
-            error = GetLastError();
-            if(error == ERROR_IO_INCOMPLETE) {
-                qDebug() << "ERROR_IO_INCOMPLETE";
-                continue;
-            }
+    while (isRunning.load(std::memory_order::relaxed))
+    {
+        bool bPending = ReadDirectoryChangesW(
+            hDir,
+            buffer.get(),
+            BUFFER_SIZE,
+            FALSE,
+            FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE,
+            &dwBytes,
+            &ovl,
+            nullptr
+        );
+
+        if (!bPending) {
+            DWORD error = GetLastError();
+            if (error == ERROR_IO_INCOMPLETE)
+                qDebug() << QSV(u"ERROR_IO_INCOMPLETE");
         }
-        //qDebug() << "_3";
-        bool WAIT = false;
-        if(GetOverlappedResult(hDir, &ovl, &dwBytes, WAIT)) {
-            bPending = false;
+        else if (::GetOverlappedResult(hDir, &ovl, &dwBytes, false)) {
             if(dwBytes != 0) {
-                FILE_NOTIFY_INFORMATION *fni = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(&buffer[0]);
+                auto *fni = reinterpret_cast<FILE_NOTIFY_INFORMATION *>(buffer.get());
                 do {
                     if(fni->Action != 0) {
                         emit notifyEvent(fni);
                     }
                     if(fni->NextEntryOffset == 0)
                         break;
-                    fni = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(reinterpret_cast<PCHAR>(fni) + fni->NextEntryOffset);
+                    fni = reinterpret_cast<FILE_NOTIFY_INFORMATION *>(reinterpret_cast<PCHAR>(fni) + fni->NextEntryOffset);
                 } while (true);
             }
         }
-        Sleep(POLL_RATE_MS);
+
+        ::Sleep(POLL_RATE_MS);
     }
 }

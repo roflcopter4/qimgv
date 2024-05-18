@@ -15,7 +15,7 @@ Scaler::Scaler(Cache *_cache, QObject *parent)
       currentRequestTimestamp(0),
       cache(_cache)
 {
-    sem = new QSemaphore(1);
+    sem  = new QSemaphore(1);
     pool = new QThreadPool(this);
     pool->setMaxThreadCount(1);
     runnable = new ScalerRunnable();
@@ -26,84 +26,82 @@ Scaler::Scaler(Cache *_cache, QObject *parent)
     connect(this, &Scaler::acceptScalingResult, this, &Scaler::slotForwardScaledResult, Qt::QueuedConnection);
 }
 
-void Scaler::requestScaled(ScalerRequest req) {
+void Scaler::requestScaled(ScalerRequest const &req)
+{
     sem->acquire(1);
-    if(!running) {
-//////////////////////////////////
-        if(!buffered) {
+    if (!running) {
+        //////////////////////////////////
+        if (!buffered) {
             bufferedRequest = req;
-            buffered = true;
-          //qDebug() << "1 requestScaled() - locking..  " <<  req.image->name();
+            buffered        = true;
+            // qDebug() << "1 requestScaled() - locking..  " <<  req.image->name();
             cache->reserve(req.image->fileName());
-          //qDebug() << "1 requestScaled() - LOCKED!  " <<  req.image->name();
+            // qDebug() << "1 requestScaled() - LOCKED!  " <<  req.image->name();
             startRequest(req);
-        } else if(bufferedRequest.image != req.image) {
-          //qDebug() << "2 requestScaled() - locking...  " <<  req.image->name();
+        } else if (bufferedRequest.image != req.image) {
+            // qDebug() << "2 requestScaled() - locking...  " <<  req.image->name();
             cache->reserve(req.image->fileName());
-          //qDebug() << "2 requestScaled() - LOCKED!  " <<  req.image->name();
-            auto tmp = bufferedRequest;
+            // qDebug() << "2 requestScaled() - LOCKED!  " <<  req.image->name();
+            auto tmp        = bufferedRequest;
             bufferedRequest = req;
-            buffered = true;
-            if(startedRequest.image != tmp.image) {
+            buffered        = true;
+            if (startedRequest.image != tmp.image) {
                 cache->release(tmp.image->fileName());
-              //qDebug() << "2 requestScaled() - RELEASED!  " <<  tmp.image->name();
+                // qDebug() << "2 requestScaled() - RELEASED!  " <<  tmp.image->name();
             }
         } else {
             bufferedRequest = req;
-            buffered = true;
+            buffered        = true;
         }
-//////////////////////////////
+        //////////////////////////////
+    } else if (!buffered) {
+        if (req.image != startedRequest.image)
+            cache->reserve(req.image->fileName());
+        bufferedRequest = req;
+        buffered        = true;
+    } else if (req.image == bufferedRequest.image) {
+        bufferedRequest = req;
+        buffered        = true;
     } else {
-        if(!buffered) {
-            if(req.image != startedRequest.image)
-                cache->reserve(req.image->fileName());
-            bufferedRequest = req;
-            buffered = true;
-        } else {
-            if(req.image == bufferedRequest.image) {
-                bufferedRequest = req;
-                buffered = true;
-            } else {
-                if(bufferedRequest.image != startedRequest.image) {
-                    //qDebug() << "4 RELEASING " << bufferedRequest.image->name();
-                    cache->release(bufferedRequest.image->fileName());
-                }
-                if(req.image != startedRequest.image)
-                    cache->reserve(req.image->fileName());
-                bufferedRequest = req;
-                buffered = true;
-            }
+        if (bufferedRequest.image != startedRequest.image) {
+            // qDebug() << "4 RELEASING " << bufferedRequest.image->name();
+            cache->release(bufferedRequest.image->fileName());
         }
+        if (req.image != startedRequest.image)
+            cache->reserve(req.image->fileName());
+        bufferedRequest = req;
+        buffered        = true;
     }
     sem->release(1);
 }
 
-void Scaler::onTaskStart(ScalerRequest req) {
+void Scaler::onTaskStart(ScalerRequest const &req)
+{
     sem->acquire(1);
     running = true;
     // clear buffered flag if there were no requests after us
-    if(buffered && bufferedRequest == req) {
+    if (buffered && bufferedRequest == req)
         buffered = false;
-    }
     startedRequest = req;
-  //qDebug() << "onTaskStart(): " << req.image->name();
+    // qDebug() << "onTaskStart(): " << req.image->name();
     sem->release(1);
 }
 
-void Scaler::onTaskFinish(QImage *scaled, ScalerRequest req) {
+void Scaler::onTaskFinish(QImage *scaled, ScalerRequest const &req)
+{
     sem->acquire(1);
     running = false;
-    if(buffered && bufferedRequest.image == req.image) {
+    if (buffered && bufferedRequest.image == req.image) {
     } else {
-      //qDebug() << "onTaskFinish() - 2 releasing..  " <<  req.image->name();
+        // qDebug() << "onTaskFinish() - 2 releasing..  " <<  req.image->name();
         QString name = req.image->fileName();
         cache->release(req.image->fileName());
-      //qDebug() << "onTaskFinish() - 2 RELEASED!  " <<  name;
+        // qDebug() << "onTaskFinish() - 2 RELEASED!  " <<  name;
     }
-    if(buffered) {
-      //qDebug() << "onTaskFinish - startingBuffered: " << bufferedRequest.string;
+    if (buffered) {
+        // qDebug() << "onTaskFinish - startingBuffered: " << bufferedRequest.string;
         delete scaled;
-        //startRequest(bufferedRequest);
+        // startRequest(bufferedRequest);
         emit startBufferedRequest();
         sem->release(1);
     } else {
@@ -112,18 +110,21 @@ void Scaler::onTaskFinish(QImage *scaled, ScalerRequest req) {
     }
 }
 
-void Scaler::slotStartBufferedRequest() {
+void Scaler::slotStartBufferedRequest()
+{
     startRequest(bufferedRequest);
 }
 
-void Scaler::slotForwardScaledResult(QImage *image, ScalerRequest req) {
+void Scaler::slotForwardScaledResult(QImage *image, ScalerRequest const &req)
+{
     QPixmap *pixmap = new QPixmap();
-    *pixmap = QPixmap::fromImage(*image);
+    *pixmap         = QPixmap::fromImage(*image);
     delete image;
     emit scalingFinished(pixmap, req);
 }
 
-void Scaler::startRequest(ScalerRequest req) {
+void Scaler::startRequest(ScalerRequest const &req)
+{
     runnable->setRequest(req);
     pool->start(runnable);
 }

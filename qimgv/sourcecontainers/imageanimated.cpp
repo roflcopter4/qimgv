@@ -1,96 +1,107 @@
 #include "imageanimated.h"
-#include <time.h>
+#include <QMessageBox>
 
 // TODO: this class is kinda useless now. redesign?
 
-ImageAnimated::ImageAnimated(QString _path)
-    : Image(_path)
+ImageAnimated::ImageAnimated(QString const &path)
+    : Image(path)
 {
     mSize.setWidth(0);
     mSize.setHeight(0);
     load();
 }
 
-ImageAnimated::ImageAnimated(std::unique_ptr<DocumentInfo> _info)
-    : Image(std::move(_info))
+ImageAnimated::ImageAnimated(std::unique_ptr<DocumentInfo> info)
+    : Image(std::move(info))
 {
     mSize.setWidth(0);
     mSize.setHeight(0);
     load();
 }
 
-ImageAnimated::~ImageAnimated() {
-}
-
-void ImageAnimated::load() {
-    if(isLoaded())
+void ImageAnimated::load()
+{
+    if (isLoaded())
         return;
     loadMovie();
     mLoaded = true;
 }
 
-void ImageAnimated::loadMovie() {
+void ImageAnimated::loadMovie()
+{
     movie.reset(new QMovie());
     movie->setFileName(mPath);
     movie->setFormat(mDocInfo->format().toStdString().c_str());
     movie->jumpToFrame(0);
-    mSize = movie->frameRect().size();
+    mSize       = movie->frameRect().size();
     mFrameCount = movie->frameCount();
 }
 
-int ImageAnimated::frameCount() {
+int ImageAnimated::frameCount() const
+{
     return mFrameCount;
 }
 
 // TODO: overwrite (self included)
-bool ImageAnimated::save(QString destPath) {
+bool ImageAnimated::save(QString destPath)
+{
+    static constexpr auto warning1 = QSV("Unable to save file.");
+    static constexpr auto warning2 = QSV("Unable to save file. Perhaps the source file was deleted?");
+
     QFile file(mPath);
-    if(file.exists()) {
-        if(!file.copy(destPath)) {
-            qDebug() << "Unable to save file.";
+
+    if (file.exists()) {
+        if (!file.copy(destPath)) {
+            QMessageBox::warning(nullptr, QS("Error"), util::QStringViewToQString(warning1));
+            qDebug() << warning1;
             return false;
-        } else {
-            qDebug() << destPath << this->filePath();
-            if(destPath == this->filePath()) {
-                mDocInfo->refresh();
-            }
-            return true;
         }
-    } else {
-        qDebug() << "Unable to save file. Perhaps the source file was deleted?";
-        return false;
+        qDebug() << destPath << this->filePath();
+        if (destPath == this->filePath())
+            mDocInfo->refresh();
+        return true;
     }
+
+    QMessageBox::warning(nullptr, QS("Error"), util::QStringViewToQString(warning2));
+    qDebug() << warning2;
+    return false;
 }
 
-bool ImageAnimated::save() {
-    //TODO
+bool ImageAnimated::save()
+{
+    // TODO
     return false;
 }
 
 // in case of gif returns current frame
-std::unique_ptr<QPixmap> ImageAnimated::getPixmap() {
-    return std::unique_ptr<QPixmap>(new QPixmap(mPath, mDocInfo->format().toStdString().c_str()));
+std::unique_ptr<QPixmap> ImageAnimated::getPixmap()
+{
+    return std::make_unique<QPixmap>(mPath, mDocInfo->format().toStdString().c_str());
 }
 
-std::shared_ptr<const QImage> ImageAnimated::getImage() {
-    std::shared_ptr<const QImage> img(new QImage(mPath, mDocInfo->format().toStdString().c_str()));
-    return img;
+std::shared_ptr<QImage const> ImageAnimated::getImage()
+{
+    return std::make_shared<QImage const>(mPath, mDocInfo->format().toStdString().c_str());
 }
 
-std::shared_ptr<QMovie> ImageAnimated::getMovie() {
-    if(movie == nullptr)
+std::shared_ptr<QMovie> ImageAnimated::getMovie()
+{
+    if (movie == nullptr)
         loadMovie();
     return movie;
 }
 
-int ImageAnimated::height() {
+int ImageAnimated::height()
+{
     return mSize.height();
 }
 
-int ImageAnimated::width() {
+int ImageAnimated::width()
+{
     return mSize.width();
 }
 
-QSize ImageAnimated::size() {
+QSize ImageAnimated::size()
+{
     return mSize;
 }

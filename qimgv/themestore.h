@@ -4,17 +4,17 @@
 #include <QColor>
 #include <QPalette>
 
-enum ColorSchemes {
-    COLORS_SYSTEM,
-    COLORS_LIGHT,
-    COLORS_BLACK,
-    COLORS_DARK,
-    COLORS_DARKBLUE,
-    COLORS_CUSTOMIZED
+enum class ColorSchemes {
+    SYSTEM,
+    LIGHT,
+    BLACK,
+    DARK,
+    DARKBLUE,
+    CUSTOMIZED
 };
 
 struct BaseColorScheme {
-    int tid;
+    int    tid;
     QColor background;
     QColor background_fullscreen;
     QColor text;
@@ -32,8 +32,8 @@ struct BaseColorScheme {
 class ColorScheme {
 public:
     ColorScheme();
-    ColorScheme(BaseColorScheme base);
-    void setBaseColors(BaseColorScheme base);
+    ColorScheme(BaseColorScheme const &base);
+    void setBaseColors(BaseColorScheme const &base);
     // index of theme name
     int tid;
     // base

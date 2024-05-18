@@ -1,3 +1,4 @@
+#include "Common.h"
 #include "printdialog.h"
 #include "ui_printdialog.h"
 
@@ -55,7 +56,7 @@ PrintDialog::~PrintDialog() {
     delete ui;
 }
 
-void PrintDialog::setImage(std::shared_ptr<const QImage> _img) {
+void PrintDialog::setImage(std::shared_ptr<const QImage> const &_img) {
     img = _img;
     updatePreview();
 }
@@ -67,7 +68,7 @@ void PrintDialog::setOutputPath(QString path) {
 }
 
 QString PrintDialog::pdfPathDialog() {
-    return QFileDialog::getSaveFileName(this, tr("Choose pdf location"), pdfPrinter.outputFileName(), "*.pdf");
+    return QFileDialog::getSaveFileName(this, tr("Choose pdf location"), pdfPrinter.outputFileName(), QS("*.pdf"));
 }
 
 void PrintDialog::updatePreview() {
@@ -134,7 +135,7 @@ void PrintDialog::setLandscape(bool mode) {
     updatePreview();
 }
 
-void PrintDialog::onPrinterSelected(QString name) {
+void PrintDialog::onPrinterSelected(QString const &name) {
     if(printer)
         delete printer;
     printer = new QPrinter(QPrinterInfo::printerInfo(name));

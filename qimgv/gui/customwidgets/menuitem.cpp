@@ -6,7 +6,7 @@ MenuItem::MenuItem(QWidget *parent)
     mLayout.setContentsMargins(6,0,8,0);
     mLayout.setSpacing(2);
 
-    setAccessibleName("MenuItem");
+    setAccessibleName(QS("MenuItem"));
     this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     mTextLabel.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     mShortcutLabel.setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -16,9 +16,9 @@ MenuItem::MenuItem(QWidget *parent)
 
     spacer = new QSpacerItem(3, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     mIconWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    mIconWidget.setAccessibleName("MenuItemIcon");
-    mTextLabel.setAccessibleName("MenuItemText");
-    mShortcutLabel.setAccessibleName("MenuItemShortcutLabel");
+    mIconWidget.setAccessibleName(QS("MenuItemIcon"));
+    mTextLabel.setAccessibleName(QS("MenuItemText"));
+    mShortcutLabel.setAccessibleName(QS("MenuItemShortcutLabel"));
     mLayout.addWidget(&mIconWidget);
     mLayout.addWidget(&mTextLabel);
     mLayout.addSpacerItem(spacer);
@@ -32,24 +32,26 @@ MenuItem::~MenuItem() {
     delete spacer;
 }
 
-void MenuItem::setText(QString text) {
+void MenuItem::setText(QString const &text) {
     this->mTextLabel.setText(text);
 }
 
-QString MenuItem::text() {
+QString MenuItem::text() const
+{
     return mTextLabel.text();
 }
 
-void MenuItem::setShortcutText(QString text) {
+void MenuItem::setShortcutText(QString const &text) {
     this->mShortcutLabel.setText(text);
     this->adjustSize();
 }
 
-QString MenuItem::shortcut() {
+QString MenuItem::shortcut() const
+{
     return mShortcutLabel.text();
 }
 
-void MenuItem::setIconPath(QString path) {
+void MenuItem::setIconPath(QString const &path) {
     mIconWidget.setIconPath(path);
 }
 

@@ -1,79 +1,86 @@
 #include "randomizer.h"
 
-Randomizer::Randomizer() {
+Randomizer::Randomizer()
+{
     setCount(0);
 }
 
-Randomizer::Randomizer(int _count) : currentIndex(0) {
-    setCount(_count);
+Randomizer::Randomizer(qsizetype count) : currentIndex(0)
+{
+    setCount(count);
 }
 
-void Randomizer::setCount(int _count) {
-    vec.resize(_count);
+void Randomizer::setCount(qsizetype count)
+{
+    vec.resize(count);
     fill();
 }
 
-void Randomizer::shuffle() {
-    std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
-    std::shuffle(vec.begin(), vec.end(), rng);
+void Randomizer::shuffle()
+{
+    static std::random_device dev;
+    static std::mt19937       rng(dev());
+
+    std::ranges::shuffle(vec, rng);
 }
 
-void Randomizer::setCurrent(int _current) {
-    currentIndex = indexOf(_current);
+void Randomizer::setCurrent(qsizetype current)
+{
+    currentIndex = indexOf(current);
 }
 
 // this assumes our array contains shuffled int values [0 ... count]
 // which it does in our case
-int Randomizer::indexOf(int item) {
-    int index = -1;
-    if(item >= vec.size())
+qsizetype Randomizer::indexOf(qsizetype item) const
+{
+    qsizetype index = -1;
+    qsizetype i     = 0;
+
+    if (item >= static_cast<qsizetype>(vec.size()))
         return index;
-    std::vector<int>::iterator it;
-    int i = 0;
-    for (it = vec.begin(); it != vec.end(); ++it, ++i) {
-        if(vec[i] == item) {
+    for (uint32_t it : vec) {
+        if (it == item) {
             index = i;
             break;
         }
+        ++i;
     }
     return index;
 }
 
-void Randomizer::fill() {
-    std::vector<int>::iterator it;
-    int i = 0;
-    for (it = vec.begin(); it != vec.end(); ++it, ++i) {
-        *it = i;
-    }
+void Randomizer::fill()
+{
+    uint32_t i = 0;
+    for (uint32_t &it : vec)
+        it = i++;
 }
 
-void Randomizer::print() {
-    qDebug() << "---vector---";
-    std::vector<int>::iterator it;
-    for (it = vec.begin(); it != vec.end(); ++it) {
-        std::cout << *it << std::endl;
-    }
-    qDebug() << "----end----";
+void Randomizer::print() const
+{
+    qDebug() << QSV("---vector---");
+    for (uint32_t it : vec)
+        qDebug() << it;
+    qDebug() << QSV("----end----");
 }
 
-int Randomizer::next() {
+uint32_t Randomizer::next()
+{
     // re-shuffle when needed
     // because vector gets rearranged this will break prev()
-    while(currentIndex == vec.size() - 1) {
-        int currentItem = vec[currentIndex];
+    while (currentIndex == static_cast<qsizetype>(vec.size()) - 1) {
+        uint32_t currentItem = vec[currentIndex];
         shuffle();
         setCurrent(currentItem);
     }
-    currentIndex++;
-    return vec[currentIndex];
+    return vec[currentIndex++];
 }
 
-int Randomizer::prev() {
-    while(currentIndex == 0) {
-        int currentItem = vec[currentIndex];
+uint32_t Randomizer::prev()
+{
+    while (currentIndex == 0) {
+        uint32_t currentItem = vec[currentIndex];
         shuffle();
         setCurrent(currentItem);
     }
-    currentIndex--;
-    return vec[currentIndex];
+    return vec[--currentIndex];
 }

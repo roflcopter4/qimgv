@@ -11,47 +11,49 @@
 
 class MpvWidget;
 
-class VideoPlayerMpv : public VideoPlayer {
+class VideoPlayerMpv final : public VideoPlayer
+{
     Q_OBJECT
-public:
+
+  public:
     explicit VideoPlayerMpv(QWidget *parent = nullptr);
-    bool showVideo(QString file);
-    void setVideoUnscaled(bool mode);
-    int volume();
 
-public slots:
-    void seek(int pos);
-    void seekRelative(int pos);
-    void pauseResume();
-    void frameStep();
-    void frameStepBack();
-    void stop();
-    void setPaused(bool mode);
-    void setMuted(bool);
-    bool muted();
-    void volumeUp();
-    void volumeDown();
-    void setVolume(int);
-    void show();
-    void hide();
-    void setLoopPlayback(bool mode);
+    bool showVideo(QString const &file) override;
+    void setVideoUnscaled(bool mode) override;
+    [[nodiscard]] int volume() const override;
 
-protected:
-    void paintEvent(QPaintEvent *event);
+  public Q_SLOTS:
+    void seek(int pos) override;
+    void seekRelative(int pos) override;
+    void pauseResume() override;
+    void frameStep() override;
+    void frameStepBack() override;
+    void stop() override;
+    void setPaused(bool mode) override;
+    void setMuted(bool) override;
+    [[nodiscard]] bool muted() const override;
+    void volumeUp() override;
+    void volumeDown() override;
+    void setVolume(int) override;
+    void show() override;
+    void hide() override;
+    void setLoopPlayback(bool mode) override;
 
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
+  protected:
+    void paintEvent(QPaintEvent *event) override;
 
-signals:
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
+  Q_SIGNALS:
     void playbackFinished();
 
-private slots:
+  private Q_SLOTS:
     void readSettings();
 
-private:
+  private:
     MpvWidget *m_mpv;
-
 };
 
 extern "C" TEST_COMMON_DLLSPEC VideoPlayer *CreatePlayerWidget();

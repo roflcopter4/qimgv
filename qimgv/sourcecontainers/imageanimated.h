@@ -4,34 +4,40 @@
 #include <QMovie>
 #include <QTimer>
 
-class ImageAnimated : public Image {
-public:
-    ImageAnimated(QString _path);
-    ImageAnimated(std::unique_ptr<DocumentInfo> _info);
-    ~ImageAnimated();
+#include "Common.h"
 
-    std::unique_ptr<QPixmap> getPixmap();
-    std::shared_ptr<const QImage> getImage();
-    std::shared_ptr<QMovie> getMovie();
-    int height();
-    int width();
-    QSize size();
+class ImageAnimated : public Image
+{
+  public:
+    explicit ImageAnimated(QString const &path);
+    explicit ImageAnimated(std::unique_ptr<DocumentInfo> info);
+    ~ImageAnimated() override = default;
+
+    std::unique_ptr<QPixmap>      getPixmap() override;
+    std::shared_ptr<QImage const> getImage() override;
+    std::shared_ptr<QMovie>       getMovie();
+
+    int   height() override;
+    int   width() override;
+    QSize size() override;
 
     bool isEditable();
     bool isEdited();
 
-    int frameCount();
-public slots:
-    bool save();
-    bool save(QString destPath);
+    ND int frameCount() const;
 
-signals:
-    void frameChanged(QPixmap*);
+  public slots:
+    bool save() override;
+    bool save(QString destPath) override;
 
-private:
-    void load();
+  signals:
+    void frameChanged(QPixmap *);
+
+  private:
     QSize mSize;
-    int mFrameCount;
+    int   mFrameCount;
     std::shared_ptr<QMovie> movie;
+
+    void load() override;
     void loadMovie();
 };

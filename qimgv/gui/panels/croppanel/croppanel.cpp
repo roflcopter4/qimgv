@@ -12,13 +12,13 @@ CropPanel::CropPanel(CropOverlay *_overlay, QWidget *parent) :
     ui->ARcomboBox->setItemDelegate(new QStyledItemDelegate(ui->ARcomboBox));
     ui->ARcomboBox->view()->setTextElideMode(Qt::ElideNone);
 
-    ui->headerIcon->setIconPath(":/res/icons/common/other/image-crop48.png");
+    ui->headerIcon->setIconPath(QS(":/res/icons/common/other/image-crop48.png"));
 
-    ui->ARcomboBox->setIconPath(":res/icons/common/other/dropDownArrow.png");
+    ui->ARcomboBox->setIconPath(QS(":res/icons/common/other/dropDownArrow.png"));
 
     hide();
 
-    if(settings->defaultCropAction() == ACTION_CROP)
+    if(settings->defaultCropAction() == DefaultCropAction::CROP)
         setFocusCropBtn();
     else
         setFocusCropSaveBtn();
@@ -37,12 +37,9 @@ CropPanel::CropPanel(CropOverlay *_overlay, QWidget *parent) :
     connect(ui->ARY, SIGNAL(valueChanged(double)), this, SLOT(onAspectRatioChange()));
     connect(ui->ARcomboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onAspectRatioSelected()));
 
-    connect(overlay, SIGNAL(selectionChanged(QRect)),
-            this, SLOT(onSelectionOutsideChange(QRect)));
-    connect(this, SIGNAL(selectionChanged(QRect)),
-            overlay, SLOT(onSelectionOutsideChange(QRect)));
-    connect(this, SIGNAL(aspectRatioChanged(QPointF)),
-            overlay, SLOT(setAspectRatio(QPointF)));
+    connect(overlay, SIGNAL(selectionChanged(QRect)), this, SLOT(onSelectionOutsideChange(QRect)));
+    connect(this, SIGNAL(selectionChanged(QRect)), overlay, SLOT(onSelectionOutsideChange(QRect)));
+    connect(this, SIGNAL(aspectRatioChanged(QPointF)), overlay, SLOT(setAspectRatio(QPointF)));
     connect(overlay, SIGNAL(escPressed()), this, SIGNAL(cancel()));
     connect(overlay, SIGNAL(cropDefault()), this, SLOT(doCropDefaultAction()));
     connect(overlay, SIGNAL(cropSave()), this, SLOT(doCropSave()));
@@ -65,7 +62,7 @@ void CropPanel::setImageRealSize(QSize sz) {
 }
 
 void CropPanel::doCropDefaultAction() {
-    if(settings->defaultCropAction() == ACTION_CROP)
+    if(settings->defaultCropAction() == DefaultCropAction::CROP)
         doCrop();
     else
         doCropSave();
@@ -98,7 +95,7 @@ void CropPanel::onSelectionChange() {
 }
 
 void CropPanel::onAspectRatioChange() {
-    ui->ARcomboBox->setCurrentIndex(1); // "Custom"
+    ui->ARcomboBox->setCurrentIndex(1); // QS("Custom")
     if(ui->ARX->value() && ui->ARY->value())
         emit aspectRatioChanged(QPointF(ui->ARX->value(), ui->ARY->value()));
 }
@@ -180,13 +177,13 @@ void CropPanel::onAspectRatioSelected() {
 }
 
 void CropPanel::setFocusCropBtn() {
-    settings->setDefaultCropAction(ACTION_CROP);
+    settings->setDefaultCropAction(DefaultCropAction::CROP);
     ui->cropSaveButton->setHighlighted(false);
     ui->cropButton->setHighlighted(true);
 }
 
 void CropPanel::setFocusCropSaveBtn() {
-    settings->setDefaultCropAction(ACTION_CROP_SAVE);
+    settings->setDefaultCropAction(DefaultCropAction::CROP_SAVE);
     ui->cropSaveButton->setHighlighted(true);
     ui->cropButton->setHighlighted(false);
 }

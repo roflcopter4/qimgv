@@ -1,22 +1,22 @@
+#include "Common.h"
 #include "sidepanel.h"
 #include "ui_sidepanel.h"
 
-SidePanel::SidePanel(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::SidePanel),
-    mWidget(nullptr)
+SidePanel::SidePanel(QWidget *parent) : QWidget(parent), ui(new Ui::SidePanel), mWidget(nullptr)
 {
     ui->setupUi(this);
-    this->setObjectName("SidePanel");
+    this->setObjectName(QS("SidePanel"));
     this->hide();
 }
 
-SidePanel::~SidePanel() {
+SidePanel::~SidePanel()
+{
     delete ui;
 }
 
-void SidePanel::setWidget(SidePanelWidget* w) {
-    if(mWidget) {
+void SidePanel::setWidget(SidePanelWidget *w)
+{
+    if (mWidget) {
         mWidget->hide();
         ui->layout->removeWidget(mWidget);
     }
@@ -25,24 +25,27 @@ void SidePanel::setWidget(SidePanelWidget* w) {
     w->show();
 }
 
-SidePanelWidget* SidePanel::widget() {
+SidePanelWidget *SidePanel::widget() const
+{
     return mWidget;
 }
 
-void SidePanel::show() {
+void SidePanel::show()
+{
     QWidget::show();
-    if(mWidget)
+    if (mWidget)
         mWidget->show();
 }
 
-void SidePanel::hide() {
-    if(mWidget) {
+void SidePanel::hide()
+{
+    if (mWidget)
         mWidget->hide();
-    }
     QWidget::hide();
 }
 
-void SidePanel::paintEvent(QPaintEvent *) {
+void SidePanel::paintEvent(QPaintEvent *)
+{
     QStyleOption opt;
     opt.initFrom(this);
     QPainter p(this);

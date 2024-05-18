@@ -7,71 +7,74 @@
 #include "loader/loader.h"
 #include "utils/fileoperations.h"
 
-class DirectoryModel : public QObject {
+#include "Common.h"
+
+class DirectoryModel : public QObject
+{
     Q_OBJECT
+
 public:
     explicit DirectoryModel(QObject *parent = nullptr);
-    ~DirectoryModel();
+    ~DirectoryModel() override;
 
     Scaler *scaler;
 
-    void load(QString filePath, bool asyncHint);
-    void preload(QString filePath);
+    void load(QString const &filePath, bool asyncHint);
+    void preload(QString const &filePath);
 
-    int fileCount() const;
-    int dirCount() const;
-    int indexOfFile(QString filePath) const;
-    int indexOfDir(QString filePath) const;
-    QString fileNameAt(int index) const;
-    bool containsFile(QString filePath) const;
-    bool isEmpty() const;
-    QString nextOf(QString filePath) const;
-    QString prevOf(QString filePath) const;
-    QString firstFile() const;
-    QString lastFile() const;
-    QDateTime lastModified(QString filePath) const;
+    ND int fileCount() const;
+    ND int dirCount() const;
+    ND int totalCount() const;
+    ND int indexOfFile(QString const &filePath) const;
+    ND int indexOfDir(QString const &filePath) const;
 
-    bool forceInsert(QString filePath);
-    void copyFileTo(const QString &srcFile, const QString &destDirPath, bool force, FileOpResult &result);
-    void moveFileTo(const QString &srcFile, const QString &destDirPath, bool force, FileOpResult &result);
-    void renameEntry(const QString &oldFilePath, const QString &newName, bool force, FileOpResult &result);
-    void removeFile(const QString &filePath, bool trash, FileOpResult &result);
-    void removeDir(const QString &dirPath, bool trash, bool recursive, FileOpResult &result);
+    ND QString   fileNameAt(int index) const;
+    ND bool      containsFile(QString const &filePath) const;
+    ND bool      isEmpty() const;
+    ND QString   nextOf(QString const &filePath) const;
+    ND QString   prevOf(QString const &filePath) const;
+    ND QString   firstFile() const;
+    ND QString   lastFile() const;
+    ND QDateTime lastModified(QString const &filePath) const;
 
-    bool setDirectory(QString);
+    static void copyFileTo(QString const &srcFile, QString const &destDirPath, bool force, FileOpResult &result);
+    bool forceInsert(QString const &filePath);
+    void moveFileTo(QString const &srcFile, QString const &destDirPath, bool force, FileOpResult &result);
+    void renameEntry(QString const &oldPath, QString const &newName, bool force, FileOpResult &result);
+    void removeFile(QString const &filePath, bool trash, FileOpResult &result);
+    void removeDir(QString const &dirPath, bool trash, bool recursive, FileOpResult &result);
 
-    void unload(int index);
-
-    bool loaderBusy() const;
+    bool    setDirectory(QString const &);
+    void    unload(int index);
+    ND bool loaderBusy() const;
 
     std::shared_ptr<Image> getImageAt(int index);
-    std::shared_ptr<Image> getImage(QString filePath);
+    std::shared_ptr<Image> getImage(QString const &filePath);
 
-    void updateImage(QString filePath, std::shared_ptr<Image> img);
+    void updateImage(QString const &filePath, std::shared_ptr<Image> const &img);
 
+    ND SortingMode sortingMode() const;
     void setSortingMode(SortingMode mode);
-    SortingMode sortingMode() const;
+    void unload(QString const &filePath);
+    void reload(QString const &filePath);
+    void unloadExcept(QString const &filePath, bool keepNearby);
 
-    QString directoryPath() const;
-    void unload(QString filePath);
-    bool isLoaded(int index) const;
-    bool isLoaded(QString filePath) const;
-    void reload(QString filePath);
-    QString filePathAt(int index) const;
-    void unloadExcept(QString filePath, bool keepNearby);
-    const FSEntry &fileEntryAt(int index) const;
+    ND bool isLoaded(int index) const;
+    ND bool isLoaded(QString const &filePath) const;
 
-    int totalCount() const;
-    QString dirNameAt(int index) const;
-    QString dirPathAt(int index) const;
+    ND QString directoryPath() const;
+    ND QString filePathAt(int index) const;
+    ND FSEntry const &fileEntryAt(int index) const;
+    ND QString dirNameAt(int index) const;
+    ND QString dirPathAt(int index) const;
 
-    bool autoRefresh();
+    bool saveFile(QString const &filePath);
+    bool saveFile(QString const &filePath, QString const &destPath);
 
-    bool saveFile(const QString &filePath);
-    bool saveFile(const QString &filePath, const QString &destPath);
+    ND bool autoRefresh() const;
+    ND bool containsDir(QString const &dirPath) const;
+    ND FileListSource source() const;
 
-    bool containsDir(QString dirPath) const;
-    FileListSource source();
 signals:
     void fileRemoved(QString filePath, int index);
     void fileRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo);
@@ -81,10 +84,10 @@ signals:
     void dirRenamed(QString dirPath, int indexFrom, QString toPath, int indexTo);
     void dirAdded(QString dirPath);
     void loaded(QString filePath);
-    void loadFailed(const QString &path);
+    void loadFailed(QString const &path);
     void sortingChanged(SortingMode);
     void indexChanged(int oldIndex, int index);
-    void imageReady(std::shared_ptr<Image> img, const QString&);
+    void imageReady(std::shared_ptr<Image> img, QString const &);
     void imageUpdated(QString filePath);
 
 private:
@@ -94,10 +97,10 @@ private:
     FileListSource fileListSource;
 
 private slots:
-    void onImageReady(std::shared_ptr<Image> img, const QString &path);
+    void onImageReady(std::shared_ptr<Image> const &img, QString const &path);
     void onSortingChanged();
-    void onFileAdded(QString filePath);
-    void onFileRemoved(QString filePath, int index);
-    void onFileRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo);
-    void onFileModified(QString filePath);
+    void onFileAdded(QString const &filePath);
+    void onFileRemoved(QString const &filePath, int index);
+    void onFileRenamed(QString const &fromPath, int indexFrom, QString const &toPath, int indexTo);
+    void onFileModified(QString const &filePath);
 };

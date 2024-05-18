@@ -19,13 +19,13 @@ signals:
     void startBufferedRequest();
 
 public slots:
-    void requestScaled(ScalerRequest req);
+    void requestScaled(ScalerRequest const &req);
 
 private slots:
-    void onTaskStart(ScalerRequest req);
-    void onTaskFinish(QImage* scaled, ScalerRequest req);
+    void onTaskStart(ScalerRequest const &req);
+    void onTaskFinish(QImage*scaled, ScalerRequest const &req);
     void slotStartBufferedRequest();
-    void slotForwardScaledResult(QImage *image, ScalerRequest req);
+    void slotForwardScaledResult(QImage *image, ScalerRequest const &req);
 
 private:
     QThreadPool *pool;
@@ -36,7 +36,7 @@ private:
 
     Cache *cache;
 
-    void startRequest(ScalerRequest req);
+    void startRequest(ScalerRequest const &req);
 
     QSemaphore *sem;
 };

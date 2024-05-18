@@ -11,109 +11,111 @@ ViewerWidget::ViewerWidget(QWidget *parent)
       videoPlayer(nullptr),
       contextMenu(nullptr),
       videoControls(nullptr),
-      currentWidget(UNSET),
+      currentWidget(CurrentWidget::UNSET),
       mInteractionEnabled(false),
       mWaylandCursorWorkaround(false),
       mIsFullscreen(false)
 {
     setAttribute(Qt::WA_TranslucentBackground, true);
     setMouseTracking(true);
+
 #ifdef Q_OS_LINUX
     // we cant check cursor position on wayland until the mouse is moved
     // use this to skip cursor check once
-    if(qgetenv("XDG_SESSION_TYPE") == "wayland")
+    if (qgetenv("XDG_SESSION_TYPE") == "wayland")
         mWaylandCursorWorkaround = true;
 #endif
+
     layout.setContentsMargins(0, 0, 0, 0);
     layout.setSpacing(0);
     this->setLayout(&layout);
-
     imageViewer.reset(new ImageViewerV2(this));
     layout.addWidget(imageViewer.get());
     imageViewer->hide();
 
     connect(imageViewer.get(), &ImageViewerV2::scalingRequested, this, &ViewerWidget::scalingRequested);
-    connect(imageViewer.get(), &ImageViewerV2::scaleChanged, this, &ViewerWidget::onScaleChanged);
+    connect(imageViewer.get(), &ImageViewerV2::scaleChanged,     this, &ViewerWidget::onScaleChanged);
     connect(imageViewer.get(), &ImageViewerV2::playbackFinished, this, &ViewerWidget::onAnimationPlaybackFinished);
+
     connect(this, &ViewerWidget::toggleTransparencyGrid, imageViewer.get(), &ImageViewerV2::toggleTransparencyGrid);
     connect(this, &ViewerWidget::setFilterNearest,       imageViewer.get(), &ImageViewerV2::setFilterNearest);
     connect(this, &ViewerWidget::setFilterBilinear,      imageViewer.get(), &ImageViewerV2::setFilterBilinear);
     connect(this, &ViewerWidget::setScalingFilter,       imageViewer.get(), &ImageViewerV2::setScalingFilter);
 
-
     videoPlayer.reset(new VideoPlayerInitProxy(this));
     layout.addWidget(videoPlayer.get());
     videoPlayer->hide();
     videoControls = new VideoControlsProxyWrapper(this);
-
     // tmp no wrapper
     zoomIndicator = new ZoomIndicatorOverlayProxy(this);
 
     connect(videoPlayer.get(), &VideoPlayer::playbackFinished, this, &ViewerWidget::onVideoPlaybackFinished);
-
-    connect(videoControls, &VideoControlsProxyWrapper::seekBackward,  this, &ViewerWidget::seekBackward);
-    connect(videoControls, &VideoControlsProxyWrapper::seekForward, this, &ViewerWidget::seekForward);
-    connect(videoControls, &VideoControlsProxyWrapper::seek,      this, &ViewerWidget::seek);
+    connect(videoControls, &VideoControlsProxyWrapper::seekBackward, this, &ViewerWidget::seekBackward);
+    connect(videoControls, &VideoControlsProxyWrapper::seekForward,  this, &ViewerWidget::seekForward);
+    connect(videoControls, &VideoControlsProxyWrapper::seek,         this, &ViewerWidget::seek);
 
     enableImageViewer();
     setInteractionEnabled(true);
 
     connect(&cursorTimer, &QTimer::timeout, this, &ViewerWidget::hideCursor);
-
     connect(settings, &Settings::settingsChanged, this, &ViewerWidget::readSettings);
+
     readSettings();
 }
 
-QRect ViewerWidget::imageRect() {
-    if(imageViewer && currentWidget == IMAGEVIEWER)
-        return imageViewer->scaledRectR();
-    else
-        return QRect(0,0,0,0);
+QRect ViewerWidget::imageRect() const
+{
+    return imageViewer && currentWidget == CurrentWidget::IMAGE_VIEWER
+        ? imageViewer->scaledRectR()
+        : QRect{0, 0, 0, 0};
 }
 
-float ViewerWidget::currentScale() {
-    if(currentWidget == IMAGEVIEWER)
-        return imageViewer->currentScale();
-    else
-        return 1.0f;
+qreal ViewerWidget::currentScale() const
+{
+    return imageViewer && currentWidget == CurrentWidget::IMAGE_VIEWER
+        ? imageViewer->currentScale()
+        : 1.0;
 }
 
-QSize ViewerWidget::sourceSize() {
-    if(currentWidget == IMAGEVIEWER)
-        return imageViewer->sourceSize();
-    else
-        return QSize(0,0);
+QSize ViewerWidget::sourceSize() const
+{
+    return imageViewer && currentWidget == CurrentWidget::IMAGE_VIEWER
+        ? imageViewer->sourceSize()
+        : QSize{0, 0};
 }
 
 // hide videoPlayer, show imageViewer
-void ViewerWidget::enableImageViewer() {
-    if(currentWidget != IMAGEVIEWER) {
+void ViewerWidget::enableImageViewer()
+{
+    if (currentWidget != CurrentWidget::IMAGE_VIEWER) {
         disableVideoPlayer();
-        videoControls->setMode(PLAYBACK_ANIMATION);
+        videoControls->setMode(PlaybackMode::ANIMATION);
         connect(imageViewer.get(), &ImageViewerV2::durationChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackDuration);
         connect(imageViewer.get(), &ImageViewerV2::frameChanged,    videoControls, &VideoControlsProxyWrapper::setPlaybackPosition);
         connect(imageViewer.get(), &ImageViewerV2::animationPaused, videoControls, &VideoControlsProxyWrapper::onPlaybackPaused);
         imageViewer->show();
-        currentWidget = IMAGEVIEWER;
+        currentWidget = CurrentWidget::IMAGE_VIEWER;
     }
 }
 
 // hide imageViewer, show videoPlayer
-void ViewerWidget::enableVideoPlayer() {
-    if(currentWidget != VIDEOPLAYER) {
+void ViewerWidget::enableVideoPlayer()
+{
+    if (currentWidget != CurrentWidget::VIDEO_PLAYER) {
         disableImageViewer();
-        videoControls->setMode(PLAYBACK_VIDEO);
+        videoControls->setMode(PlaybackMode::VIDEO);
         connect(videoPlayer.get(), &VideoPlayer::durationChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackDuration);
         connect(videoPlayer.get(), &VideoPlayer::positionChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackPosition);
         connect(videoPlayer.get(), &VideoPlayer::videoPaused,     videoControls, &VideoControlsProxyWrapper::onPlaybackPaused);
         videoPlayer->show();
-        currentWidget = VIDEOPLAYER;
+        currentWidget = CurrentWidget::VIDEO_PLAYER;
     }
 }
 
-void ViewerWidget::disableImageViewer() {
-    if(currentWidget == IMAGEVIEWER) {
-        currentWidget = UNSET;
+void ViewerWidget::disableImageViewer()
+{
+    if (currentWidget == CurrentWidget::IMAGE_VIEWER) {
+        currentWidget = CurrentWidget::UNSET;
         imageViewer->closeImage();
         imageViewer->hide();
         zoomIndicator->hide();
@@ -123,10 +125,11 @@ void ViewerWidget::disableImageViewer() {
     }
 }
 
-void ViewerWidget::disableVideoPlayer() {
-    if(currentWidget == VIDEOPLAYER) {
-        currentWidget = UNSET;
-        //videoControls->hide();
+void ViewerWidget::disableVideoPlayer()
+{
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER) {
+        currentWidget = CurrentWidget::UNSET;
+        // videoControls->hide();
         disconnect(videoPlayer.get(), &VideoPlayer::durationChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackDuration);
         disconnect(videoPlayer.get(), &VideoPlayer::positionChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackPosition);
         disconnect(videoPlayer.get(), &VideoPlayer::videoPaused,     videoControls, &VideoControlsProxyWrapper::onPlaybackPaused);
@@ -135,40 +138,44 @@ void ViewerWidget::disableVideoPlayer() {
         // which paints over the imageviewer, causing corruption
         // so we do not HIDE it, but rather just cover it by imageviewer's widget
         // seems to work fine, might even feel a bit snappier
-        if(!videoPlayer->isInitialized())
+        if (!videoPlayer->isInitialized())
             videoPlayer->hide();
     }
 }
 
-void ViewerWidget::onScaleChanged(qreal scale) {
-    if(!this->isVisible())
+void ViewerWidget::onScaleChanged(qreal scale)
+{
+    if (!this->isVisible())
         return;
-    if(scale != 1.0f) {
+    if (scale != 1.0) {
         zoomIndicator->setScale(scale);
-        if(settings->zoomIndicatorMode() == ZoomIndicatorMode::INDICATOR_ENABLED)
+        if (settings->zoomIndicatorMode() == ZoomIndicatorMode::ENABLED)
             zoomIndicator->show();
-        else if((settings->zoomIndicatorMode() == ZoomIndicatorMode::INDICATOR_AUTO))
+        else if ((settings->zoomIndicatorMode() == ZoomIndicatorMode::AUTO))
             zoomIndicator->show(1500);
     } else {
         zoomIndicator->hide();
     }
 }
 
-void ViewerWidget::onVideoPlaybackFinished() {
-    if(currentWidget == VIDEOPLAYER)
+void ViewerWidget::onVideoPlaybackFinished()
+{
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER)
         emit playbackFinished();
 }
 
-void ViewerWidget::onAnimationPlaybackFinished() {
-    if(currentWidget == IMAGEVIEWER)
+void ViewerWidget::onAnimationPlaybackFinished()
+{
+    if (currentWidget == CurrentWidget::IMAGE_VIEWER)
         emit playbackFinished();
 }
 
-void ViewerWidget::setInteractionEnabled(bool mode) {
-    if(mInteractionEnabled == mode)
+void ViewerWidget::setInteractionEnabled(bool mode)
+{
+    if (mInteractionEnabled == mode)
         return;
     mInteractionEnabled = mode;
-    if(mInteractionEnabled) {
+    if (mInteractionEnabled) {
         connect(this, &ViewerWidget::toggleLockZoom, imageViewer.get(), &ImageViewerV2::toggleLockZoom);
         connect(this, &ViewerWidget::toggleLockView, imageViewer.get(), &ImageViewerV2::toggleLockView);
         connect(this, &ViewerWidget::zoomIn,         imageViewer.get(), &ImageViewerV2::zoomIn);
@@ -202,12 +209,14 @@ void ViewerWidget::setInteractionEnabled(bool mode) {
     }
 }
 
-bool ViewerWidget::interactionEnabled() {
+bool ViewerWidget::interactionEnabled() const
+{
     return mInteractionEnabled;
 }
 
-bool ViewerWidget::showImage(std::unique_ptr<QPixmap> pixmap) {
-    if(!pixmap)
+bool ViewerWidget::showImage(std::unique_ptr<QPixmap> pixmap)
+{
+    if (!pixmap)
         return false;
     stopPlayback();
     videoControls->hide();
@@ -217,8 +226,9 @@ bool ViewerWidget::showImage(std::unique_ptr<QPixmap> pixmap) {
     return true;
 }
 
-bool ViewerWidget::showAnimation(std::shared_ptr<QMovie> movie) {
-    if(!movie)
+bool ViewerWidget::showAnimation(std::shared_ptr<QMovie> const &movie)
+{
+    if (!movie)
         return false;
     stopPlayback();
     enableImageViewer();
@@ -227,7 +237,8 @@ bool ViewerWidget::showAnimation(std::shared_ptr<QMovie> movie) {
     return true;
 }
 
-bool ViewerWidget::showVideo(QString file) {
+bool ViewerWidget::showVideo(QString const &file)
+{
     stopPlayback();
     enableVideoPlayer();
     videoPlayer->showVideo(file);
@@ -235,156 +246,174 @@ bool ViewerWidget::showVideo(QString file) {
     return true;
 }
 
-void ViewerWidget::stopPlayback() {
-    if(currentWidget == IMAGEVIEWER && imageViewer->hasAnimation())
+void ViewerWidget::stopPlayback()
+{
+    if (currentWidget == CurrentWidget::IMAGE_VIEWER && imageViewer->hasAnimation())
         imageViewer->stopAnimation();
-    if(currentWidget == VIDEOPLAYER) {
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER) {
         // stopping is visibly slower
-        //videoPlayer->stop();
+        // videoPlayer->stop();
         videoPlayer->setPaused(true);
     }
 }
 
-void ViewerWidget::startPlayback() {
-    if(currentWidget == IMAGEVIEWER && imageViewer->hasAnimation())
+void ViewerWidget::startPlayback()
+{
+    if (currentWidget == CurrentWidget::IMAGE_VIEWER && imageViewer->hasAnimation())
         imageViewer->startAnimation();
-    if(currentWidget == VIDEOPLAYER) {
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER) {
         // stopping is visibly slower
-        //videoPlayer->stop();
+        // videoPlayer->stop();
         videoPlayer->setPaused(false);
     }
 }
 
-void ViewerWidget::setFitMode(ImageFitMode mode) {
-    if(mode == FIT_WINDOW)
+void ViewerWidget::setFitMode(ImageFitMode mode)
+{
+    if (mode == ImageFitMode::WINDOW)
         emit fitWindow();
-    else if(mode == FIT_WIDTH)
+    else if (mode == ImageFitMode::WIDTH)
         emit fitWidth();
-    else if(mode == FIT_ORIGINAL)
+    else if (mode == ImageFitMode::ORIGINAL)
         emit fitOriginal();
 }
 
-ImageFitMode ViewerWidget::fitMode() {
+ImageFitMode ViewerWidget::fitMode() const
+{
     return imageViewer->fitMode();
 }
 
-void ViewerWidget::onScalingFinished(std::unique_ptr<QPixmap> scaled) {
+void ViewerWidget::onScalingFinished(std::unique_ptr<QPixmap> scaled)
+{
     imageViewer->setScaledPixmap(std::move(scaled));
 }
 
-void ViewerWidget::closeImage() {
+void ViewerWidget::closeImage()
+{
     imageViewer->closeImage();
     videoPlayer->stop();
     showCursor();
 }
 
-void ViewerWidget::pauseResumePlayback() {
-    if(currentWidget == VIDEOPLAYER)
-        videoPlayer.get()->pauseResume();
-    else if(imageViewer->hasAnimation())
+void ViewerWidget::pauseResumePlayback()
+{
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER)
+        videoPlayer->pauseResume();
+    else if (imageViewer->hasAnimation())
         imageViewer->pauseResume();
 }
 
-void ViewerWidget::seek(int pos) {
-    if(currentWidget == VIDEOPLAYER) {
-        videoPlayer.get()->seek(pos);
-    } else if(imageViewer->hasAnimation()) {
+void ViewerWidget::seek(int pos)
+{
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER) {
+        videoPlayer->seek(pos);
+    } else if (imageViewer->hasAnimation()) {
         imageViewer->stopAnimation();
         imageViewer->showAnimationFrame(pos);
     }
 }
 
-void ViewerWidget::seekRelative(int pos) {
-    if(currentWidget == VIDEOPLAYER)
-        videoPlayer.get()->seekRelative(pos);
+void ViewerWidget::seekRelative(int pos)
+{
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER)
+        videoPlayer->seekRelative(pos);
 }
 
-void ViewerWidget::seekBackward() {
-    if(currentWidget == VIDEOPLAYER)
-        videoPlayer.get()->seekRelative(-10);
+void ViewerWidget::seekBackward()
+{
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER)
+        videoPlayer->seekRelative(-10);
 }
 
-void ViewerWidget::seekForward() {
-    if(currentWidget == VIDEOPLAYER)
-        videoPlayer.get()->seekRelative(10);
+void ViewerWidget::seekForward()
+{
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER)
+        videoPlayer->seekRelative(10);
 }
 
-void ViewerWidget::frameStep() {
-    if(currentWidget == VIDEOPLAYER)
-        videoPlayer.get()->frameStep();
-    else if(imageViewer->hasAnimation()) {
+void ViewerWidget::frameStep()
+{
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER)
+        videoPlayer->frameStep();
+    else if (imageViewer->hasAnimation()) {
         imageViewer->stopAnimation();
         imageViewer->nextFrame();
     }
 }
 
-void ViewerWidget::frameStepBack() {
-    if(currentWidget == VIDEOPLAYER)
-        videoPlayer.get()->frameStepBack();
-    else if(imageViewer->hasAnimation()) {
+void ViewerWidget::frameStepBack()
+{
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER)
+        videoPlayer->frameStepBack();
+    else if (imageViewer->hasAnimation()) {
         imageViewer->stopAnimation();
         imageViewer->prevFrame();
     }
 }
 
-void ViewerWidget::toggleMute() {
-    if(currentWidget == VIDEOPLAYER) {
+void ViewerWidget::toggleMute()
+{
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER) {
         videoPlayer->setMuted(!videoPlayer->muted());
         videoControls->onVideoMuted(videoPlayer->muted());
     }
 }
 
-void ViewerWidget::volumeUp() {
-    if(currentWidget == VIDEOPLAYER)
+void ViewerWidget::volumeUp()
+{
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER)
         videoPlayer->volumeUp();
 }
 
-void ViewerWidget::volumeDown() {
-    if(currentWidget == VIDEOPLAYER) {
+void ViewerWidget::volumeDown()
+{
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER)
         videoPlayer->volumeDown();
-    }
 }
 
-bool ViewerWidget::isDisplaying() {
-    if(currentWidget == IMAGEVIEWER && imageViewer->isDisplaying())
-        return true;
-    if(currentWidget == VIDEOPLAYER)
-        return true;
-    else
-        return false;
+bool ViewerWidget::isDisplaying() const
+{
+    return (currentWidget == CurrentWidget::IMAGE_VIEWER && imageViewer->isDisplaying()) ||
+           (currentWidget == CurrentWidget::VIDEO_PLAYER);
 }
 
-bool ViewerWidget::lockZoomEnabled() {
+bool ViewerWidget::lockZoomEnabled() const
+{
     return imageViewer->lockZoomEnabled();
 }
 
-bool ViewerWidget::lockViewEnabled() {
+bool ViewerWidget::lockViewEnabled() const
+{
     return imageViewer->lockViewEnabled();
 }
 
-ScalingFilter ViewerWidget::scalingFilter() {
+ScalingFilter ViewerWidget::scalingFilter() const
+{
     return imageViewer->scalingFilter();
 }
 
-void ViewerWidget::mousePressEvent(QMouseEvent *event) {
+void ViewerWidget::mousePressEvent(QMouseEvent *event)
+{
     hideContextMenu();
     event->ignore();
 }
 
-void ViewerWidget::mouseReleaseEvent(QMouseEvent *event) {
+void ViewerWidget::mouseReleaseEvent(QMouseEvent *event)
+{
     showCursor();
     hideCursorTimed(false);
     event->ignore();
 }
 
-void ViewerWidget::mouseMoveEvent(QMouseEvent *event) {
+void ViewerWidget::mouseMoveEvent(QMouseEvent *event)
+{
     mWaylandCursorWorkaround = false;
-    if(!(event->buttons() & Qt::LeftButton) && !(event->buttons() & Qt::RightButton)) {
+    if (!(event->buttons() & Qt::LeftButton) && !(event->buttons() & Qt::RightButton)) {
         showCursor();
         hideCursorTimed(true);
     }
-    if(currentWidget == VIDEOPLAYER || imageViewer->hasAnimation()) {
-        if(videoControlsArea().contains(event->pos()))
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER || imageViewer->hasAnimation()) {
+        if (videoControlsArea().contains(event->pos()))
             videoControls->show();
         else
             videoControls->hide();
@@ -392,29 +421,31 @@ void ViewerWidget::mouseMoveEvent(QMouseEvent *event) {
     event->ignore();
 }
 
-void ViewerWidget::hideCursorTimed(bool restartTimer) {
-    if(restartTimer || !cursorTimer.isActive())
+void ViewerWidget::hideCursorTimed(bool restartTimer)
+{
+    if (restartTimer || !cursorTimer.isActive())
         cursorTimer.start(CURSOR_HIDE_TIMEOUT_MS);
 }
 
-void ViewerWidget::hideCursor() {
+void ViewerWidget::hideCursor()
+{
     cursorTimer.stop();
     // ignore if we have something else open like settings window
-    if(!isDisplaying() || !isActiveWindow())
+    if (!isDisplaying() || !isActiveWindow())
         return;
     // ignore when menu is up
-    if(contextMenu && contextMenu->isVisible())
+    if (contextMenu && contextMenu->isVisible())
         return;
-    if(settings->cursorAutohide()) {
+    if (settings->cursorAutohide()) {
         // force hide on wayland until we can get the cursor pos
-        if(mWaylandCursorWorkaround) {
+        if (mWaylandCursorWorkaround) {
             setCursor(QCursor(Qt::BlankCursor));
             videoControls->hide();
         } else {
             // only hide when we are under viewer or player widget
             QWidget *w = qApp->widgetAt(QCursor::pos());
-            if(w && (w == imageViewer.get()->viewport() || w == videoPlayer->getPlayer().get())) {
-                if(!videoControls->isVisible() || !videoControlsArea().contains(mapFromGlobal(QCursor::pos()))) {
+            if (w && (w == imageViewer->viewport() || w == videoPlayer->getPlayer().get())) {
+                if (!videoControls->isVisible() || !videoControlsArea().contains(mapFromGlobal(QCursor::pos()))) {
                     setCursor(QCursor(Qt::BlankCursor));
                     videoControls->hide();
                 }
@@ -423,79 +454,92 @@ void ViewerWidget::hideCursor() {
     }
 }
 
-QRect ViewerWidget::videoControlsArea() {
+QRect ViewerWidget::videoControlsArea() const
+{
     QRect vcontrolsRect;
-    if(settings->panelEnabled() && settings->panelPosition() == PANEL_BOTTOM)
+    if (settings->panelEnabled() && settings->panelPosition() == PanelPosition::BOTTOM)
         vcontrolsRect = QRect(0, 0, width(), 160); // inverted (top)
     else
         vcontrolsRect = QRect(0, height() - 160, width(), height());
     return vcontrolsRect;
 }
 
-void ViewerWidget::showCursor() {
+void ViewerWidget::showCursor()
+{
     cursorTimer.stop();
-    if(cursor().shape() == Qt::BlankCursor)
+    if (cursor().shape() == Qt::BlankCursor)
         setCursor(QCursor(Qt::ArrowCursor));
 }
 
-void ViewerWidget::showContextMenu() {
-    QPoint pos = cursor().pos();
+void ViewerWidget::showContextMenu()
+{
+    this->setFocus();
+    auto pos = QCursor::pos();
     showContextMenu(pos);
 }
 
-void ViewerWidget::showContextMenu(QPoint pos) {
-    if(isVisible() && interactionEnabled()) {
-        if(!contextMenu) {
+void ViewerWidget::showContextMenu(QPoint pos)
+{
+    if (isVisible() && interactionEnabled()) {
+        if (!contextMenu) {
             contextMenu.reset(new ContextMenu(this));
             connect(contextMenu.get(), &ContextMenu::showScriptSettings, this, &ViewerWidget::showScriptSettings);
         }
         contextMenu->setImageEntriesEnabled(isDisplaying());
-        if(!contextMenu->isVisible())
+        if (!contextMenu->isVisible())
             contextMenu->showAt(pos);
         else
             contextMenu->hide();
     }
 }
 
-void ViewerWidget::onFullscreenModeChanged(bool mode) {
+void ViewerWidget::onFullscreenModeChanged(bool mode)
+{
     imageViewer->onFullscreenModeChanged(mode);
     mIsFullscreen = mode;
 }
 
-void ViewerWidget::readSettings() {
+void ViewerWidget::readSettings()
+{
     videoControls->onVideoMuted(!settings->playVideoSounds());
 }
 
-void ViewerWidget::setLoopPlayback(bool mode) {
+void ViewerWidget::setLoopPlayback(bool mode)
+{
     imageViewer->setLoopPlayback(mode);
     videoPlayer->setLoopPlayback(mode);
 }
 
-void ViewerWidget::hideContextMenu() {
-    if(contextMenu)
+void ViewerWidget::hideContextMenu()
+{
+    if (contextMenu)
         contextMenu->hide();
 }
 
-void ViewerWidget::hideEvent(QHideEvent *event) {
+void ViewerWidget::hideEvent(QHideEvent *event)
+{
     QWidget::hideEvent(event);
     hideContextMenu();
 }
 
 // block native tab-switching so we can use it in shortcuts
-bool ViewerWidget::focusNextPrevChild(bool mode) {
+bool ViewerWidget::focusNextPrevChild(bool mode)
+{
     return false;
 }
 
-void ViewerWidget::keyPressEvent(QKeyEvent *event) {
+void ViewerWidget::keyPressEvent(QKeyEvent *event)
+{
     event->accept();
-    if(currentWidget == VIDEOPLAYER && event->key() == Qt::Key_Space) {
+    if (currentWidget == CurrentWidget::VIDEO_PLAYER && event->key() == Qt::Key_Space) {
         videoPlayer->pauseResume();
         return;
     }
-    if(currentWidget == IMAGEVIEWER && imageViewer->isDisplaying()) {
+    if (currentWidget == CurrentWidget::IMAGE_VIEWER && imageViewer->isDisplaying()) {
         // switch to fitWidth via up arrow
-        if(ShortcutBuilder::fromEvent(event) == "Up" && !actionManager->actionForShortcut("Up").isEmpty()) {
-            if(imageViewer->fitMode() == FIT_WINDOW && imageViewer->scaledImageFits()) {
+        if (ShortcutBuilder::fromEvent(event) == QSV("Up") && !actionManager->actionForShortcut(QS("Up")).isEmpty())
+        {
+            if (imageViewer->fitMode() == ImageFitMode::WINDOW && imageViewer->scaledImageFits()) {
                 imageViewer->setFitWidth();
                 return;
             }
@@ -504,7 +548,8 @@ void ViewerWidget::keyPressEvent(QKeyEvent *event) {
     actionManager->processEvent(event);
 }
 
-void ViewerWidget::leaveEvent(QEvent *event) {
+void ViewerWidget::leaveEvent(QEvent *event)
+{
     QWidget::leaveEvent(event);
     videoControls->hide();
 }

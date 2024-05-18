@@ -8,36 +8,36 @@ namespace Ui {
 class VideoControls;
 }
 
-enum PlaybackMode {
-    PLAYBACK_ANIMATION,
-    PLAYBACK_VIDEO
+enum class PlaybackMode : uint8_t {
+    ANIMATION,
+    VIDEO,
 };
 
 class VideoControls : public OverlayWidget
 {
     Q_OBJECT
 
-public:
+  public:
     explicit VideoControls(FloatingWidgetContainer *parent = nullptr);
-    ~VideoControls();
+    ~VideoControls() override;
 
-public slots:
+  public slots:
     void setPlaybackDuration(int);
     void setPlaybackPosition(int);
     void onPlaybackPaused(bool);
     void onVideoMuted(bool);
     void setMode(PlaybackMode _mode);
 
-signals:
+  signals:
     void seek(int pos);
     void seekForward();
     void seekBackward();
 
-private slots:
+  private slots:
     void readSettings();
 
-private:
+  private:
     Ui::VideoControls *ui;
-    int lastPosition;
-    PlaybackMode mode;
+    int                lastPosition;
+    PlaybackMode       mode;
 };

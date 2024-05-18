@@ -5,43 +5,51 @@
 #include "gui/customwidgets/overlaywidget.h"
 #include "settings.h"
 
+#ifdef ERROR
+# undef ERROR
+#endif
+
 namespace Ui {
 class FloatingMessage;
 }
 
-enum FloatingMessageIcon {
-    NO_ICON,
-    ICON_DIRECTORY,
-    ICON_LEFT_EDGE,
-    ICON_RIGHT_EDGE,
-    ICON_SUCCESS,
-    ICON_WARNING,
-    ICON_ERROR
+enum class FloatingMessageIcon : uint8_t {
+    NONE,
+    DIRECTORY,
+    LEFT_EDGE,
+    RIGHT_EDGE,
+    SUCCESS,
+    WARNING,
+    ERROR,
 };
 
-class FloatingMessage : public OverlayWidget {
-    Q_OBJECT 
-public:
-    FloatingMessage(FloatingWidgetContainer *parent);
-    ~FloatingMessage();
-    void showMessage(QString text, FloatingMessageIcon icon, int fadeDuration);
-    void showMessage(QString text, FloatingWidgetPosition position, FloatingMessageIcon icon, int duration);
+class FloatingMessage Q_DECL_FINAL : public OverlayWidget
+{
+    Q_OBJECT
 
-public slots:
+  public:
+    explicit FloatingMessage(FloatingWidgetContainer *parent);
+    ~FloatingMessage() override;
+
+    void showMessage(QString const &text, FloatingMessageIcon icon, int fadeDuration);
+    void showMessage(QString const &text, FloatingWidgetPosition Position, FloatingMessageIcon icon, int duration);
+
+  public slots:
     void show();
     void setText(QString text);
 
-private:
-    QTimer visibilityTimer;
-    int hideDelay;
+  private:
+    QTimer                 visibilityTimer;
+    Ui::FloatingMessage   *ui;
+    int                    hideDelay;
     FloatingWidgetPosition preferredPosition;
-    Ui::FloatingMessage *ui;
-    void doShowMessage(QString text, FloatingMessageIcon icon, int duration);
+
+    void doShowMessage(QString const &text, FloatingMessageIcon icon, int duration);
     void setIcon(FloatingMessageIcon icon);
 
-protected:
-    void mousePressEvent(QMouseEvent *event);
+  protected:
+    void mousePressEvent(QMouseEvent *event) override;
 
-private slots:
+  private slots:
     void readSettings();
 };

@@ -11,12 +11,12 @@ FloatingMessageProxy::~FloatingMessageProxy() {
         overlay->deleteLater();
 }
 
-void FloatingMessageProxy::showMessage(QString text, FloatingMessageIcon icon, int duration) {
+void FloatingMessageProxy::showMessage(QString const &text, FloatingMessageIcon icon, int duration) {
     init();
     overlay->showMessage(text, icon, duration);
 }
 
-void FloatingMessageProxy::showMessage(QString text, FloatingWidgetPosition position, FloatingMessageIcon icon, int duration) {
+void FloatingMessageProxy::showMessage(QString const &text, FloatingWidgetPosition position, FloatingMessageIcon icon, int duration) {
     init();
     overlay->showMessage(text, position, icon, duration);
 }

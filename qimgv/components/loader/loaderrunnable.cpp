@@ -2,7 +2,7 @@
 
 #include <QElapsedTimer>
 
-LoaderRunnable::LoaderRunnable(QString _path) : path(_path) {
+LoaderRunnable::LoaderRunnable(QString const &_path) : path(_path) {
 }
 
 void LoaderRunnable::run() {

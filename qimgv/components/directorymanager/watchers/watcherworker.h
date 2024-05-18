@@ -10,13 +10,13 @@ public:
     virtual void run() = 0;
 
 public Q_SLOTS:
-    void setRunning(bool running);
+    bool setRunning(bool running);
 
 Q_SIGNALS:
-    void error(const QString& errorMessage);
+    void error(QString const &errorMessage);
     void started();
     void finished();
 
 protected:
-    QAtomicInt isRunning;
+    std::atomic_bool isRunning = false;
 };

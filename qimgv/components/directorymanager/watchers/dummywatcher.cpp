@@ -2,14 +2,15 @@
 #include "directorywatcher_p.h"
 #include <QDebug>
 
-#define TAG         "[DummyWatcher]"
-#define MESSAGE     "Directory watcher isn't yet implemented for your operating system"
+static constexpr QStringView tag     = QSV("[DummyWatcher]");
+static constexpr QStringView message = QSV("Directory watcher isn't yet implemented for your operating system");
 
 class DummyWatcherWorker : public WatcherWorker {
   public:
     DummyWatcherWorker() {}
-    virtual void run() override {
-        qDebug() << TAG << MESSAGE;
+
+    void run() override {
+        qDebug() << tag << message;
     }
 };
 
@@ -20,5 +21,5 @@ class DummyWatcherPrivate : public DirectoryWatcherPrivate {
 
 DummyWatcher::DummyWatcher() : DirectoryWatcher(new DummyWatcherPrivate(this))
 {
-    qDebug() << TAG << MESSAGE;
+    qDebug() << tag << message;
 }

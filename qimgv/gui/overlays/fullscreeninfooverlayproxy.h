@@ -17,7 +17,7 @@ public:
     void show();
     void showWhenReady();
     void hide();
-    void setInfo(QString position, QString fileName, QString info);
+    void setInfo(QString const &position, QString const &fileName, QString const &info);
 
 private:
     FloatingWidgetContainer *container;

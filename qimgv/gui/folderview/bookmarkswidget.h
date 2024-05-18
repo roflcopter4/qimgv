@@ -13,13 +13,13 @@ class BookmarksWidget : public QWidget {
 
 public:
     explicit BookmarksWidget(QWidget *parent = nullptr);
-    ~BookmarksWidget();
+    ~BookmarksWidget() override;
 
 public slots:
-    void addBookmark(QString directoryPath);
+    void addBookmark(QString const &directoryPath);
 
-    void removeBookmark(QString dirPath);
-    void onPathChanged(QString path);
+    void removeBookmark(QString const &dirPath);
+    void onPathChanged(QString const &path);
 private slots:
     void readSettings();
 
@@ -29,8 +29,8 @@ signals:
     void droppedIn(QList<QString> paths, QString dirPath);
 
 protected:
-    void dropEvent(QDropEvent *event);
-    void dragEnterEvent(QDragEnterEvent *event);
+    void dropEvent(QDropEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
 private:
     QVBoxLayout layout;
     QStringList paths;

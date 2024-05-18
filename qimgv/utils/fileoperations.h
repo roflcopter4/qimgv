@@ -13,7 +13,7 @@
 #include "windows.h"
 #endif
 
-enum FileOpResult {
+enum class FileOpResult {
     SUCCESS,
     DESTINATION_FILE_EXISTS,
     DESTINATION_DIR_EXISTS,

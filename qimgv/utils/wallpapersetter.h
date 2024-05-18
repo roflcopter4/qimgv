@@ -1,11 +1,11 @@
 #pragma once
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
 #include <QString>
 #include <QProcess>
 #include <QDebug>
+#ifdef Q_OS_WIN32
+# include <Windows.h>
+#endif
 #include "utils/stuff.h"
 
 class WallpaperSetter
@@ -13,5 +13,5 @@ class WallpaperSetter
 public:
     WallpaperSetter();
 
-    static void setWallpaper(QString path);
+    static void setWallpaper(QString const &path);
 };

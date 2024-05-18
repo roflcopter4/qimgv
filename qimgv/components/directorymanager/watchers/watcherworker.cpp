@@ -1,10 +1,9 @@
 #include "watcherworker.h"
 #include <QDebug>
 
-WatcherWorker::WatcherWorker()
-{
-}
+WatcherWorker::WatcherWorker() = default;
 
-void WatcherWorker::setRunning(bool running) {
-    isRunning.fetchAndStoreRelaxed(running);
+bool WatcherWorker::setRunning(bool running)
+{
+    return isRunning.exchange(running, std::memory_order::seq_cst);
 }

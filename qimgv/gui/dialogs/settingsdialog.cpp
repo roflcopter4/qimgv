@@ -1,44 +1,59 @@
+// ReSharper disable CppClangTidyReadabilityStaticAccessedThroughInstance
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 
-SettingsDialog::SettingsDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::SettingsDialog)
+SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::SettingsDialog)
 {
     ui->setupUi(this);
     this->setWindowTitle(tr("Preferences — ") + qApp->applicationName());
 
-    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);   
+    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->aboutAppTextBrowser->viewport()->setAutoFillBackground(false);
-    ui->versionLabel->setText("" + QApplication::applicationVersion());
+    ui->versionLabel->setText(QS("") + QApplication::applicationVersion());
     ui->qtVersionLabel->setText(qVersion());
-    ui->appIconLabel->setPixmap(QIcon(":/res/icons/common/logo/app/22.png").pixmap(22,22));
-    ui->qtIconLabel->setPixmap(QIcon(":/res/icons/common/logo/3rdparty/qt22.png").pixmap(22,16));
+    ui->appIconLabel->setPixmap(QIcon(QS(":/res/icons/common/logo/app/22.png")).pixmap(22, 22));
+    ui->qtIconLabel->setPixmap(QIcon(QS(":/res/icons/common/logo/3rdparty/qt22.png")).pixmap(22, 16));
 
     // fake combobox that acts as a menu button
     // less code than using pushbutton with menu
     // will be replaced with something custom later
-    connect(ui->themeSelectorComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
-        ui->themeSelectorComboBox->blockSignals(true);
-        ui->themeSelectorComboBox->setCurrentIndex(index);
-        ui->themeSelectorComboBox->blockSignals(false);
-        switch(index) {
-            case 0: setColorScheme(ThemeStore::colorScheme(COLORS_BLACK));    settings->setColorTid(COLORS_BLACK);    break;
-            case 1: setColorScheme(ThemeStore::colorScheme(COLORS_DARK));     settings->setColorTid(COLORS_DARK);     break;
-            case 2: setColorScheme(ThemeStore::colorScheme(COLORS_DARKBLUE)); settings->setColorTid(COLORS_DARKBLUE); break;
-            case 3: setColorScheme(ThemeStore::colorScheme(COLORS_LIGHT));    settings->setColorTid(COLORS_LIGHT);    break;
+    connect(
+        ui->themeSelectorComboBox,
+        qOverload<int>(&QComboBox::currentIndexChanged),
+        [this](int index) {
+            ui->themeSelectorComboBox->blockSignals(true);
+            ui->themeSelectorComboBox->setCurrentIndex(index);
+            ui->themeSelectorComboBox->blockSignals(false);
+            switch (index) {
+            case 0:
+                setColorScheme(ThemeStore::colorScheme(ColorSchemes::BLACK));
+                settings->setColorTid(ColorSchemes::BLACK);
+                break;
+            case 1:
+                setColorScheme(ThemeStore::colorScheme(ColorSchemes::DARK));
+                settings->setColorTid(ColorSchemes::DARK);
+                break;
+            case 2:
+                setColorScheme(ThemeStore::colorScheme(ColorSchemes::DARKBLUE));
+                settings->setColorTid(ColorSchemes::DARKBLUE);
+                break;
+            case 3:
+                setColorScheme(ThemeStore::colorScheme(ColorSchemes::LIGHT));
+                settings->setColorTid(ColorSchemes::LIGHT);
+                break;
+            default:;
+            }
         }
-    });
+    );
 
     connect(ui->useSystemColorsCheckBox, &QCheckBox::toggled, [this](bool useSystemTheme) {
-        if(useSystemTheme) {
+        if (useSystemTheme) {
             ui->themeSelectorComboBox->setCurrentIndex(-1);
-            setColorScheme(ThemeStore::colorScheme(COLORS_SYSTEM));
-            settings->setColorTid(COLORS_SYSTEM);
-        }
-        else {
+            setColorScheme(ThemeStore::colorScheme(ColorSchemes::SYSTEM));
+            settings->setColorTid(ColorSchemes::SYSTEM);
+        } else {
             readColorScheme();
-            settings->setColorTid(COLORS_CUSTOMIZED);
+            settings->setColorTid(ColorSchemes::CUSTOMIZED);
         }
         ui->themeSelectorComboBox->setEnabled(!useSystemTheme);
         ui->colorConfigSubgroup->setEnabled(!useSystemTheme);
@@ -47,8 +62,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     connect(ui->modifySystemSchemeLabel, &ClickableLabel::clicked, [this]() {
         ui->useSystemColorsCheckBox->setChecked(false);
-        setColorScheme(ThemeStore::colorScheme(COLORS_CUSTOMIZED));
-        settings->setColorTid(COLORS_CUSTOMIZED);
+        setColorScheme(ThemeStore::colorScheme(ColorSchemes::CUSTOMIZED));
+        settings->setColorTid(ColorSchemes::CUSTOMIZED);
     });
 
     ui->colorSelectorAccent->setDescription(tr("Accent color"));
@@ -69,15 +84,15 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
 #ifndef USE_MPV
     ui->videoPlaybackGroup->setEnabled(false);
-    //ui->novideoInfoLabel->setHidden(false);
+    // ui->novideoInfoLabel->setHidden(false);
 #else
-    //ui->novideoInfoLabel->setHidden(true);
+    // ui->novideoInfoLabel->setHidden(true);
 #endif
 
 #ifdef USE_OPENCV
-    ui->scalingQualityComboBox->addItem("Bilinear+sharpen (OpenCV)");
-    ui->scalingQualityComboBox->addItem("Bicubic (OpenCV)");
-    ui->scalingQualityComboBox->addItem("Bicubic+sharpen (OpenCV)");
+    ui->scalingQualityComboBox->addItem(QS("Bilinear+sharpen (OpenCV)"));
+    ui->scalingQualityComboBox->addItem(QS("Bicubic (OpenCV)"));
+    ui->scalingQualityComboBox->addItem(QS("Bicubic+sharpen (OpenCV)"));
 #endif
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -85,7 +100,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->memoryLimitLabel->setEnabled(false);
 #endif
 
-    if(!settings->supportedFormats().contains("jxl"))
+    if (!settings->supportedFormats().contains(QS("jxl")))
         ui->animatedJxlCheckBox->hide();
 
     setupSidebar();
@@ -102,14 +117,14 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     zoomIndGrp.addButton(ui->zoomIndicatorOn);
 
     // readable language names
-    langs.insert("en_US", "English");
-    langs.insert("uk_UA", "Українська");
-    langs.insert("zh_CN", "简体中文");
+    langs.insert(QS("en_US"), QS("English"));
+    langs.insert(QS("uk_UA"), QS("Українська"));
+    langs.insert(QS("zh_CN"), QS("简体中文"));
     // fill langs combobox, sorted by locale
     ui->langComboBox->addItems(langs.values());
     // insert system language entry manually at the beginning
-    langs.insert("system", "System language");
-    ui->langComboBox->insertItem(0, "System language");
+    langs.insert(QS("system"), QS("System language"));
+    ui->langComboBox->insertItem(0, QS("System language"));
 
     connect(this, &SettingsDialog::settingsChanged, settings, &Settings::sendChangeNotification);
     readSettings();
@@ -117,12 +132,14 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     adjustSizeToContents();
 }
 //------------------------------------------------------------------------------
-SettingsDialog::~SettingsDialog() {
+SettingsDialog::~SettingsDialog()
+{
     delete ui;
 }
 //------------------------------------------------------------------------------
 // an attempt to force minimum width to fit contents
-void SettingsDialog::adjustSizeToContents() {
+void SettingsDialog::adjustSizeToContents()
+{
     // general tab
     ui->gridLayout->activate();
     ui->horizontalLayout_28->activate();
@@ -142,27 +159,30 @@ void SettingsDialog::adjustSizeToContents() {
     ui->scrollAreaWidgetContents_3->layout()->activate();
     ui->scrollArea_3->setMinimumWidth(ui->scrollAreaWidgetContents_3->minimumSizeHint().width());
     // container
-    //ui->stackedWidget->layout()->activate();
+    // ui->stackedWidget->layout()->activate();
     this->setMinimumWidth(sizeHint().width() + 22);
 
-    //qDebug() << "window:" << this->sizeHint() << this->minimumSizeHint() << this->size();
-    //qDebug() << "stackedwidget:" << ui->stackedWidget->sizeHint() << ui->stackedWidget->minimumSizeHint() << ui->stackedWidget->size();
-    //qDebug() << "scrollarea:" << ui->scrollArea->sizeHint() << ui->scrollArea->minimumSizeHint() << ui->scrollArea->size();
-    //qDebug() << "scrollareawidget:" << ui->scrollAreaWidgetContents->sizeHint() << ui->scrollAreaWidgetContents->minimumSizeHint() << ui->scrollAreaWidgetContents->size();
-    //qDebug() << "grid" << ui->gridLayout_15->sizeHint();
-    //qDebug() << "wtf" << ui->startInFolderViewCheckBox->sizeHint() << ui->startInFolderViewCheckBox->minimumSizeHint();
+    // qDebug() << "window:" << this->sizeHint() << this->minimumSizeHint() << this->size();
+    // qDebug() << "stackedwidget:" << ui->stackedWidget->sizeHint() << ui->stackedWidget->minimumSizeHint() <<
+    // ui->stackedWidget->size(); qDebug() << "scrollarea:" << ui->scrollArea->sizeHint() << ui->scrollArea->minimumSizeHint() <<
+    // ui->scrollArea->size(); qDebug() << "scrollareawidget:" << ui->scrollAreaWidgetContents->sizeHint() <<
+    // ui->scrollAreaWidgetContents->minimumSizeHint() << ui->scrollAreaWidgetContents->size(); qDebug() << "grid" <<
+    // ui->gridLayout_15->sizeHint(); qDebug() << "wtf" << ui->startInFolderViewCheckBox->sizeHint() <<
+    // ui->startInFolderViewCheckBox->minimumSizeHint();
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::resetToDesktopTheme() {
-    settings->setColorScheme(ThemeStore::colorScheme(ColorSchemes::COLORS_SYSTEM));
+void SettingsDialog::resetToDesktopTheme()
+{
+    settings->setColorScheme(ThemeStore::colorScheme(ColorSchemes::SYSTEM));
     this->readColorScheme();
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::setupSidebar() {
-
+void SettingsDialog::setupSidebar()
+{
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::readSettings() {
+void SettingsDialog::readSettings()
+{
     ui->loopSlideshowCheckBox->setChecked(settings->loopSlideshow());
     ui->videoPlaybackCheckBox->setChecked(settings->videoPlayback());
     ui->videoPlaybackGroupContents->setEnabled(settings->videoPlayback());
@@ -181,16 +201,16 @@ void SettingsDialog::readSettings() {
     ui->smoothAnimatedImagesCheckBox->setChecked(settings->smoothAnimatedImages());
     ui->bgOpacitySlider->setValue(static_cast<int>(settings->backgroundOpacity() * 100));
     ui->blurBackgroundCheckBox->setChecked(settings->blurBackground());
-    ui->sortingComboBox->setCurrentIndex(settings->sortingMode());
+    ui->sortingComboBox->setCurrentIndex(static_cast<int>(settings->sortingMode()));
     ui->confirmDeleteCheckBox->setChecked(settings->confirmDelete());
     ui->confirmTrashCheckBox->setChecked(settings->confirmTrash());
     ui->unlockMinZoomCheckBox->setChecked(settings->unlockMinZoom());
     ui->sortFoldersCheckBox->setChecked(settings->sortFolders());
     ui->trackpadDetectionCheckBox->setChecked(settings->trackpadDetection());
 
-    if(settings->zoomIndicatorMode() == INDICATOR_ENABLED)
+    if (settings->zoomIndicatorMode() == ZoomIndicatorMode::ENABLED)
         ui->zoomIndicatorOn->setChecked(true);
-    else if(settings->zoomIndicatorMode() == INDICATOR_AUTO)
+    else if (settings->zoomIndicatorMode() == ZoomIndicatorMode::AUTO)
         ui->zoomIndicatorAuto->setChecked(true);
     else
         ui->zoomIndicatorOff->setChecked(true);
@@ -199,17 +219,17 @@ void SettingsDialog::readSettings() {
     ui->showExtendedInfoTitle->setChecked(settings->windowTitleExtendedInfo());
     ui->cursorAutohideCheckBox->setChecked(settings->cursorAutohide());
     ui->keepFitModeCheckBox->setChecked(settings->keepFitMode());
-    if(settings->focusPointIn1to1Mode() == FOCUS_TOP)
+    if (settings->focusPointIn1to1Mode() == ImageFocusPoint::TOP)
         ui->focus1to1Top->setChecked(true);
-    else if(settings->focusPointIn1to1Mode() == FOCUS_CENTER)
+    else if (settings->focusPointIn1to1Mode() == ImageFocusPoint::CENTER)
         ui->focus1to1Center->setChecked(true);
     else
         ui->focus1to1Cursor->setChecked(true);
     ui->slideshowIntervalSpinBox->setValue(settings->slideshowInterval());
-    ui->imageScrollingComboBox->setCurrentIndex(settings->imageScrolling());
+    ui->imageScrollingComboBox->setCurrentIndex(static_cast<int>(settings->imageScrolling()));
     ui->saveOverlayCheckBox->setChecked(settings->showSaveOverlay());
     ui->unloadThumbsCheckBox->setChecked(settings->unloadThumbs());
-    if(settings->thumbPanelStyle() == TH_PANEL_SIMPLE)
+    if (settings->thumbPanelStyle() == ThumbPanelStyle::SIMPLE)
         ui->thumbStyleSimple->setChecked(true);
     else
         ui->thumbStyleExtended->setChecked(true);
@@ -219,14 +239,14 @@ void SettingsDialog::readSettings() {
     ui->useFixedZoomLevelsCheckBox->setChecked(settings->useFixedZoomLevels());
     ui->zoomLevels->setText(settings->zoomLevels());
 
-    if(settings->defaultViewMode() == MODE_FOLDERVIEW)
+    if (settings->defaultViewMode() == ViewMode::FOLDERVIEW)
         ui->startInFolderViewCheckBox->setChecked(true);
     else
         ui->startInFolderViewCheckBox->setChecked(false);
 
-    if(settings->folderEndAction() == FOLDER_END_NO_ACTION)
+    if (settings->folderEndAction() == FolderEndAction::NOTHING)
         ui->folderEndNoAction->setChecked(true);
-    else if(settings->folderEndAction() == FOLDER_END_LOOP)
+    else if (settings->folderEndAction() == FolderEndAction::LOOP)
         ui->folderEndLoop->setChecked(true);
     else
         ui->folderEndSwitchFolder->setChecked(true);
@@ -253,24 +273,24 @@ void SettingsDialog::readSettings() {
 
     // language
     QString langName = langs.value(settings->language());
-    if(langName.isEmpty() || ui->langComboBox->findText(langName) == -1)
+    if (langName.isEmpty() || ui->langComboBox->findText(langName) == -1)
         ui->langComboBox->setCurrentText("en_US");
     else
         ui->langComboBox->setCurrentText(langName);
 
     // ##### fit mode #####
-    if(settings->imageFitMode() == FIT_WINDOW)
+    if (settings->imageFitMode() == ImageFitMode::WINDOW)
         ui->fitModeWindow->setChecked(true);
-    else if(settings->imageFitMode() == FIT_WIDTH)
+    else if (settings->imageFitMode() == ImageFitMode::WIDTH)
         ui->fitModeWidth->setChecked(true);
     else
         ui->fitMode1to1->setChecked(true);
 
     // ##### UI #####
-    ui->scalingQualityComboBox->setCurrentIndex(settings->scalingFilter());
+    ui->scalingQualityComboBox->setCurrentIndex(static_cast<int>(settings->scalingFilter()));
     ui->fullscreenCheckBox->setChecked(settings->fullscreenMode());
     ui->pinPanelCheckBox->setChecked(settings->panelPinned());
-    ui->panelPositionComboBox->setCurrentIndex(settings->panelPosition());
+    ui->panelPositionComboBox->setCurrentIndex(static_cast<int>(settings->panelPosition()));
 
     // reduce by 10x to have nice granular control in qslider
     ui->panelSizeSlider->setValue(settings->panelPreviewsSize() / 10);
@@ -279,26 +299,26 @@ void SettingsDialog::readSettings() {
     ui->modifySystemSchemeLabel->setVisible(settings->useSystemColorScheme());
     ui->themeSelectorComboBox->setEnabled(!settings->useSystemColorScheme());
     ui->colorConfigSubgroup->setEnabled(!settings->useSystemColorScheme());
-    
+
     readColorScheme();
     readShortcuts();
     readScripts();
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::saveSettings() {
+void SettingsDialog::saveSettings()
+{
     // wait for all background stuff to finish
-    if(QThreadPool::globalInstance()->activeThreadCount()) {
+    if (QThreadPool::globalInstance()->activeThreadCount())
         QThreadPool::globalInstance()->waitForDone();
-    }
 
     settings->setLoopSlideshow(ui->loopSlideshowCheckBox->isChecked());
     settings->setFullscreenMode(ui->fullscreenCheckBox->isChecked());
-    if(ui->fitModeWindow->isChecked())
-        settings->setImageFitMode(FIT_WINDOW);
-    else if(ui->fitModeWidth->isChecked())
-        settings->setImageFitMode(FIT_WIDTH);
+    if (ui->fitModeWindow->isChecked())
+        settings->setImageFitMode(ImageFitMode::WINDOW);
+    else if (ui->fitModeWidth->isChecked())
+        settings->setImageFitMode(ImageFitMode::WIDTH);
     else
-        settings->setImageFitMode(FIT_ORIGINAL);
+        settings->setImageFitMode(ImageFitMode::ORIGINAL);
 
     settings->setLanguage(langs.key(ui->langComboBox->currentText()));
 
@@ -324,47 +344,47 @@ void SettingsDialog::saveSettings() {
     settings->setSortFolders(ui->sortFoldersCheckBox->isChecked());
     settings->setTrackpadDetection(ui->trackpadDetectionCheckBox->isChecked());
 
-    if(ui->zoomIndicatorOn->isChecked())
-        settings->setZoomIndicatorMode(INDICATOR_ENABLED);
-    else if(ui->zoomIndicatorAuto->isChecked())
-        settings->setZoomIndicatorMode(INDICATOR_AUTO);
+    if (ui->zoomIndicatorOn->isChecked())
+        settings->setZoomIndicatorMode(ZoomIndicatorMode::ENABLED);
+    else if (ui->zoomIndicatorAuto->isChecked())
+        settings->setZoomIndicatorMode(ZoomIndicatorMode::AUTO);
     else
-        settings->setZoomIndicatorMode(INDICATOR_DISABLED);
+        settings->setZoomIndicatorMode(ZoomIndicatorMode::DISABLED);
     settings->setInfoBarFullscreen(ui->showInfoBarFullscreen->isChecked());
     settings->setInfoBarWindowed(ui->showInfoBarWindowed->isChecked());
     settings->setWindowTitleExtendedInfo(ui->showExtendedInfoTitle->isChecked());
     settings->setCursorAutohide(ui->cursorAutohideCheckBox->isChecked());
     settings->setKeepFitMode(ui->keepFitModeCheckBox->isChecked());
-    if(ui->focus1to1Top->isChecked())
-        settings->setFocusPointIn1to1Mode(FOCUS_TOP);
-    else if(ui->focus1to1Center->isChecked())
-        settings->setFocusPointIn1to1Mode(FOCUS_CENTER);
+    if (ui->focus1to1Top->isChecked())
+        settings->setFocusPointIn1to1Mode(ImageFocusPoint::TOP);
+    else if (ui->focus1to1Center->isChecked())
+        settings->setFocusPointIn1to1Mode(ImageFocusPoint::CENTER);
     else
-        settings->setFocusPointIn1to1Mode(FOCUS_CURSOR);
+        settings->setFocusPointIn1to1Mode(ImageFocusPoint::CURSOR);
 
     settings->setSlideshowInterval(ui->slideshowIntervalSpinBox->value());
 
-    if(ui->startInFolderViewCheckBox->isChecked())
-        settings->setDefaultViewMode(MODE_FOLDERVIEW);
+    if (ui->startInFolderViewCheckBox->isChecked())
+        settings->setDefaultViewMode(ViewMode::FOLDERVIEW);
     else
-        settings->setDefaultViewMode(MODE_DOCUMENT);
+        settings->setDefaultViewMode(ViewMode::DOCUMENT);
 
-    if(ui->folderEndNoAction->isChecked())
-        settings->setFolderEndAction(FOLDER_END_NO_ACTION);
-    else if(ui->folderEndLoop->isChecked())
-        settings->setFolderEndAction(FOLDER_END_LOOP);
+    if (ui->folderEndNoAction->isChecked())
+        settings->setFolderEndAction(FolderEndAction::NOTHING);
+    else if (ui->folderEndLoop->isChecked())
+        settings->setFolderEndAction(FolderEndAction::LOOP);
     else
-        settings->setFolderEndAction(FOLDER_END_GOTO_ADJACENT);
+        settings->setFolderEndAction(FolderEndAction::GOTO_ADJACENT);
 
     settings->setMpvBinary(ui->mpvLineEdit->text());
     settings->setScalingFilter(static_cast<ScalingFilter>(ui->scalingQualityComboBox->currentIndex()));
     settings->setImageScrolling(static_cast<ImageScrolling>(ui->imageScrollingComboBox->currentIndex()));
     settings->setShowSaveOverlay(ui->saveOverlayCheckBox->isChecked());
     settings->setUnloadThumbs(ui->unloadThumbsCheckBox->isChecked());
-    if(ui->thumbStyleSimple->isChecked())
-        settings->setThumbPanelStyle(TH_PANEL_SIMPLE);
+    if (ui->thumbStyleSimple->isChecked())
+        settings->setThumbPanelStyle(ThumbPanelStyle::SIMPLE);
     else
-        settings->setThumbPanelStyle(TH_PANEL_EXTENDED);
+        settings->setThumbPanelStyle(ThumbPanelStyle::EXTENDED);
     settings->setJxlAnimation(ui->animatedJxlCheckBox->isChecked());
     settings->setAutoResizeWindow(ui->autoResizeWindowCheckBox->isChecked());
     settings->setPanelCenterSelection(ui->panelCenterSelectionCheckBox->isChecked());
@@ -394,23 +414,36 @@ void SettingsDialog::saveSettings() {
     emit settingsChanged();
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::saveSettingsAndClose() {
+void SettingsDialog::saveSettingsAndClose()
+{
     saveSettings();
     this->close();
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::readColorScheme() {
+void SettingsDialog::readColorScheme()
+{
     auto colors = settings->colorScheme();
     setColorScheme(colors);
 }
 
-void SettingsDialog::setColorScheme(ColorScheme colors) {
-    switch (colors.tid) {
-        case COLORS_LIGHT: ui->themeSelectorComboBox->setCurrentIndex(3);   break;
-        case COLORS_BLACK: ui->themeSelectorComboBox->setCurrentIndex(0);   break;
-        case COLORS_DARK: ui->themeSelectorComboBox->setCurrentIndex(1);    break;
-        case COLORS_DARKBLUE: ui->themeSelectorComboBox->setCurrentIndex(2);break;
-        default: ui->themeSelectorComboBox->setCurrentIndex(-1);            break;
+void SettingsDialog::setColorScheme(ColorScheme colors) const
+{
+    switch (static_cast<ColorSchemes>(colors.tid)) {
+    case ColorSchemes::LIGHT:
+        ui->themeSelectorComboBox->setCurrentIndex(3);
+        break;
+    case ColorSchemes::BLACK:
+        ui->themeSelectorComboBox->setCurrentIndex(0);
+        break;
+    case ColorSchemes::DARK:
+        ui->themeSelectorComboBox->setCurrentIndex(1);
+        break;
+    case ColorSchemes::DARKBLUE:
+        ui->themeSelectorComboBox->setCurrentIndex(2);
+        break;
+    default:
+        ui->themeSelectorComboBox->setCurrentIndex(-1);
+        break;
     }
     ui->colorSelectorAccent->setColor(colors.accent);
     ui->colorSelectorBackground->setColor(colors.background);
@@ -427,233 +460,256 @@ void SettingsDialog::setColorScheme(ColorScheme colors) {
 }
 
 //------------------------------------------------------------------------------
-void SettingsDialog::saveColorScheme() {
+void SettingsDialog::saveColorScheme() const
+{
     BaseColorScheme base;
-    base.accent = ui->colorSelectorAccent->color();
-    base.background = ui->colorSelectorBackground->color();
+    base.accent                = ui->colorSelectorAccent->color();
+    base.background            = ui->colorSelectorBackground->color();
     base.background_fullscreen = ui->colorSelectorFullscreen->color();
-    base.folderview = ui->colorSelectorFolderview->color();
-    base.folderview_topbar = ui->colorSelectorFolderviewPanel->color();
-    base.text = ui->colorSelectorText->color();
-    base.icons = ui->colorSelectorIcons->color();
-    base.widget = ui->colorSelectorWidget->color();
-    base.widget_border = ui->colorSelectorWidgetBorder->color();
-    base.overlay = ui->colorSelectorOverlay->color();
-    base.overlay_text = ui->colorSelectorOverlayText->color();
-    base.scrollbar = ui->colorSelectorScrollbar->color();
-    base.tid = settings->colorScheme().tid;
+    base.folderview            = ui->colorSelectorFolderview->color();
+    base.folderview_topbar     = ui->colorSelectorFolderviewPanel->color();
+    base.text                  = ui->colorSelectorText->color();
+    base.icons                 = ui->colorSelectorIcons->color();
+    base.widget                = ui->colorSelectorWidget->color();
+    base.widget_border         = ui->colorSelectorWidgetBorder->color();
+    base.overlay               = ui->colorSelectorOverlay->color();
+    base.overlay_text          = ui->colorSelectorOverlayText->color();
+    base.scrollbar             = ui->colorSelectorScrollbar->color();
+    base.tid                   = settings->colorScheme().tid;
     settings->setColorScheme(ColorScheme(base));
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::readShortcuts() {
+void SettingsDialog::readShortcuts() const
+{
     ui->shortcutsTableWidget->clearContents();
     ui->shortcutsTableWidget->setRowCount(0);
-    const QMap<QString, QString> shortcuts = actionManager->allShortcuts();
+    QMap<QString, QString> const   shortcuts = actionManager->allShortcuts();
     QMapIterator<QString, QString> i(shortcuts);
-    while(i.hasNext()) {
+    while (i.hasNext()) {
         i.next();
         addShortcutToTable(i.value(), i.key());
     }
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::readScripts() {
+void SettingsDialog::readScripts() const
+{
     ui->scriptsListWidget->clear();
-    const QMap<QString, Script> scripts = scriptManager->allScripts();
+    QMap<QString, Script> const   scripts = scriptManager->allScripts();
     QMapIterator<QString, Script> i(scripts);
-    while(i.hasNext()) {
+    while (i.hasNext()) {
         i.next();
         addScriptToList(i.key());
     }
 }
 //------------------------------------------------------------------------------
 // does not check if the shortcut already there
-void SettingsDialog::addScriptToList(const QString &name) {
-    if(name.isEmpty())
+void SettingsDialog::addScriptToList(QString const &name) const
+{
+    if (name.isEmpty())
         return;
 
-    QListWidget *list = ui->scriptsListWidget;
+    QListWidget     *list     = ui->scriptsListWidget;
     QListWidgetItem *nameItem = new QListWidgetItem(name);
     nameItem->setTextAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     list->insertItem(ui->scriptsListWidget->count(), nameItem);
     list->sortItems(Qt::AscendingOrder);
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::addScript() {
+void SettingsDialog::addScript()
+{
     ScriptEditorDialog w;
-    if(w.exec()) {
-        if(w.scriptName().isEmpty())
+    if (w.exec()) {
+        if (w.scriptName().isEmpty())
             return;
         scriptManager->addScript(w.scriptName(), w.script());
         readScripts();
     }
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::editScript() {
+void SettingsDialog::editScript()
+{
     int row = ui->scriptsListWidget->currentRow();
-    if(row >= 0) {
+    if (row >= 0) {
         QString name = ui->scriptsListWidget->currentItem()->text();
         editScript(name);
     }
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::editScript(QListWidgetItem* item) {
-    if(item) {
+void SettingsDialog::editScript(QListWidgetItem *item)
+{
+    if (item)
         editScript(item->text());
-    }
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::editScript(QString name) {
+void SettingsDialog::editScript(QString const &name)
+{
     ScriptEditorDialog w(name, scriptManager->getScript(name));
-    if(w.exec()) {
-        if(w.scriptName().isEmpty())
+    if (w.exec()) {
+        if (w.scriptName().isEmpty())
             return;
         scriptManager->addScript(w.scriptName(), w.script());
         readScripts();
     }
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::removeScript() {
+void SettingsDialog::removeScript()
+{
     int row = ui->scriptsListWidget->currentRow();
-    if(row >= 0) {
+    if (row >= 0) {
         QString scriptName = ui->scriptsListWidget->currentItem()->text();
         delete ui->scriptsListWidget->takeItem(row);
         saveShortcuts();
-        actionManager->removeAllShortcuts("s:"+scriptName);
+        actionManager->removeAllShortcuts(QS("s:") + scriptName);
         readShortcuts();
         scriptManager->removeScript(scriptName);
     }
 }
 //------------------------------------------------------------------------------
 // does not check if the shortcut already there
-void SettingsDialog::addShortcutToTable(const QString &action, const QString &shortcut) {
-    if(action.isEmpty() || shortcut.isEmpty())
+void SettingsDialog::addShortcutToTable(QString const &action, QString const &shortcut) const
+{
+    if (action.isEmpty() || shortcut.isEmpty())
         return;
 
     ui->shortcutsTableWidget->setRowCount(ui->shortcutsTableWidget->rowCount() + 1);
-    QTableWidgetItem *actionItem = new QTableWidgetItem(action);
+    auto *actionItem = new QTableWidgetItem(action);
     actionItem->setTextAlignment(Qt::AlignCenter);
     ui->shortcutsTableWidget->setItem(ui->shortcutsTableWidget->rowCount() - 1, 0, actionItem);
-    QTableWidgetItem *shortcutItem = new QTableWidgetItem(shortcut);
+    auto *shortcutItem = new QTableWidgetItem(shortcut);
     shortcutItem->setTextAlignment(Qt::AlignCenter);
     ui->shortcutsTableWidget->setItem(ui->shortcutsTableWidget->rowCount() - 1, 1, shortcutItem);
     // EFFICIENCY
     ui->shortcutsTableWidget->sortByColumn(0, Qt::AscendingOrder);
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::addShortcut() {
+void SettingsDialog::addShortcut()
+{
     ShortcutCreatorDialog w;
-    if(!w.exec())
+    if (!w.exec())
         return;
-    for(int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++) {
-        if(ui->shortcutsTableWidget->item(i, 1)->text() == w.selectedShortcut())
+    for (int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++)
+        if (ui->shortcutsTableWidget->item(i, 1)->text() == w.selectedShortcut())
             removeShortcutAt(i);
-    }
     addShortcutToTable(w.selectedAction(), w.selectedShortcut());
     // select
     auto items = ui->shortcutsTableWidget->findItems(w.selectedShortcut(), Qt::MatchExactly);
-    if(items.count()) {
+    if (items.count()) {
         int newRow = ui->shortcutsTableWidget->row(items.at(0));
         ui->shortcutsTableWidget->selectRow(newRow);
     }
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::removeShortcutAt(int row) {
-    if(row > 0 && row >= ui->shortcutsTableWidget->rowCount())
+void SettingsDialog::removeShortcutAt(int row) const
+{
+    if (row > 0 && row >= ui->shortcutsTableWidget->rowCount())
         return;
     ui->shortcutsTableWidget->removeRow(row);
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::editShortcut(int row) {
-    if(row >= 0) {
+void SettingsDialog::editShortcut(int row) const
+{
+    using namespace util;
+    util::QStringToStdPath(QString());
+
+    if (row >= 0) {
         ShortcutCreatorDialog w;
         w.setWindowTitle(tr("Edit shortcut"));
         w.setAction(ui->shortcutsTableWidget->item(row, 0)->text());
         w.setShortcut(ui->shortcutsTableWidget->item(row, 1)->text());
-        if(!w.exec())
+        if (!w.exec())
             return;
         // remove itself
         removeShortcutAt(row);
         // remove anything we are replacing
-        for(int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++) {
-            if(ui->shortcutsTableWidget->item(i, 1)->text() == w.selectedShortcut())
+        for (int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++)
+            if (ui->shortcutsTableWidget->item(i, 1)->text() == w.selectedShortcut())
                 removeShortcutAt(i);
-        }
         // re-add
         addShortcutToTable(w.selectedAction(), w.selectedShortcut());
         // re-select
         auto items = ui->shortcutsTableWidget->findItems(w.selectedShortcut(), Qt::MatchExactly);
-        if(items.count()) {
+        if (items.count()) {
             int newRow = ui->shortcutsTableWidget->row(items.at(0));
             ui->shortcutsTableWidget->selectRow(newRow);
         }
     }
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::editShortcut() {
+void SettingsDialog::editShortcut()
+{
     editShortcut(ui->shortcutsTableWidget->currentRow());
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::removeShortcut() {
+void SettingsDialog::removeShortcut() const
+{
     removeShortcutAt(ui->shortcutsTableWidget->currentRow());
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::saveShortcuts() {
+void SettingsDialog::saveShortcuts() const
+{
     actionManager->removeAllShortcuts();
-    for(int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++) {
-        actionManager->addShortcut(ui->shortcutsTableWidget->item(i, 1)->text(),
-                                   ui->shortcutsTableWidget->item(i, 0)->text());
-    }
+    for (int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++)
+        actionManager->addShortcut(ui->shortcutsTableWidget->item(i, 1)->text(), ui->shortcutsTableWidget->item(i, 0)->text());
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::resetShortcuts() {
+void SettingsDialog::resetShortcuts() const
+{
     actionManager->resetDefaults();
     readShortcuts();
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::resetZoomLevels() {
+void SettingsDialog::resetZoomLevels() const
+{
     ui->zoomLevels->setText(settings->defaultZoomLevels());
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::selectMpvPath() {
+void SettingsDialog::selectMpvPath()
+{
     QFileDialog dialog;
-    QString file;
-    file = dialog.getOpenFileName(this, tr("Navigate to mpv binary"), "", "mpv*");
-    if(!file.isEmpty()) {
+    QString     file = dialog.getOpenFileName(this, tr("Navigate to mpv binary"), "", "mpv*");
+    if (!file.isEmpty())
         ui->mpvLineEdit->setText(file);
-    }
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::onExpandLimitSliderChanged(int value) {
-    if(value == 0)
+void SettingsDialog::onExpandLimitSliderChanged(int value) const
+{
+    if (value == 0)
         ui->expandLimitLabel->setText("-");
     else
         ui->expandLimitLabel->setText(QString::number(value) + "x");
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::onJPEGQualitySliderChanged(int value) {
+void SettingsDialog::onJPEGQualitySliderChanged(int value) const
+{
     ui->JPEGQualityLabel->setText(QString::number(value) + "%");
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::onZoomStepSliderChanged(int value) {
+void SettingsDialog::onZoomStepSliderChanged(int value) const
+{
     ui->zoomStepLabel->setText(QString::number(value / 100.f, 'f', 2) + "x");
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::onThumbnailerThreadsSliderChanged(int value) {
+void SettingsDialog::onThumbnailerThreadsSliderChanged(int value) const
+{
     ui->thumbnailerThreadsLabel->setText(QString::number(value));
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::onBgOpacitySliderChanged(int value) {
+void SettingsDialog::onBgOpacitySliderChanged(int value) const
+{
     ui->bgOpacityPercentLabel->setText(QString::number(value) + "%");
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::onAutoResizeLimitSliderChanged(int value) {
+void SettingsDialog::onAutoResizeLimitSliderChanged(int value) const
+{
     ui->autoResizeLimit->setText(QString::number(value * 5.f, 'f', 0) + "%");
 }
 //------------------------------------------------------------------------------
-int SettingsDialog::exec() {
+int SettingsDialog::exec()
+{
     return QDialog::exec();
 }
 
-void SettingsDialog::switchToPage(int number) {
+void SettingsDialog::switchToPage(int number) const
+{
     ui->sideBar2->selectEntry(number);
 }

@@ -1,45 +1,51 @@
 #include "centralwidget.h"
 
-CentralWidget::CentralWidget(std::shared_ptr<DocumentWidget> _docWidget, std::shared_ptr<FolderViewProxy> _folderView, QWidget *parent)
+CentralWidget::CentralWidget(std::shared_ptr<DocumentWidget> const  &aDocWidget,
+                             std::shared_ptr<FolderViewProxy> const &aFolderView,
+                             QWidget                                *parent)
     : QStackedWidget(parent),
-      documentView(_docWidget),
-      folderView(_folderView)
+      documentView(aDocWidget),
+      folderView(aFolderView)
 {
     setMouseTracking(true);
-    if(!documentView || !folderView)
-        qDebug() << "[CentralWidget] Error: child widget is null. We will crash now.  Bye.";
+    if (!documentView || !folderView)
+        qFatal() << QSV("[CentralWidget] Error: Child widget is null. We will crash now. Bye.");
 
     // docWidget - 0, folderView - 1
     addWidget(documentView.get());
-    if(folderView)
+    if (folderView)
         addWidget(folderView.get());
     showDocumentView();
 }
 
-void CentralWidget::showDocumentView() {
-    if(mode == MODE_DOCUMENT)
+void CentralWidget::showDocumentView()
+{
+    if (mode == ViewMode::DOCUMENT)
         return;
-    mode = MODE_DOCUMENT;
+    mode = ViewMode::DOCUMENT;
     setCurrentIndex(0);
     widget(0)->setFocus();
     documentView->viewWidget()->startPlayback();
 }
 
-void CentralWidget::showFolderView() {
-    if(mode == MODE_FOLDERVIEW)
+void CentralWidget::showFolderView()
+{
+    if (mode == ViewMode::FOLDERVIEW)
         return;
 
-    mode = MODE_FOLDERVIEW;
+    mode = ViewMode::FOLDERVIEW;
     setCurrentIndex(1);
     widget(1)->show();
     widget(1)->setFocus();
     documentView->viewWidget()->stopPlayback();
 }
 
-void CentralWidget::toggleViewMode() {
-    (mode == MODE_DOCUMENT) ? showFolderView() : showDocumentView();
+void CentralWidget::toggleViewMode()
+{
+    (mode == ViewMode::DOCUMENT) ? showFolderView() : showDocumentView();
 }
 
-ViewMode CentralWidget::currentViewMode() {
+ViewMode CentralWidget::currentViewMode() const
+{
     return mode;
 }

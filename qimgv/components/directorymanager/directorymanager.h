@@ -1,129 +1,132 @@
 #pragma once
 
-#include <QObject>
 #include <QCollator>
-#include <QElapsedTimer>
-#include <QString>
-#include <QSize>
-#include <QDebug>
 #include <QDateTime>
+#include <QDebug>
+#include <QElapsedTimer>
+#include <QObject>
 #include <QRegularExpression>
+#include <QSize>
+#include <QString>
 
-#include <vector>
-#include <string>
-#include <iostream>
-#include <filesystem>
 #include <algorithm>
+#include <filesystem>
+#include <iostream>
+#include <string>
+#include <vector>
 
 #include "settings.h"
-#include "watchers/directorywatcher.h"
-#include "utils/stuff.h"
 #include "sourcecontainers/fsentry.h"
+#include "utils/stuff.h"
+#include "watchers/directorywatcher.h"
 
-enum FileListSource { // rename? wip
-    SOURCE_DIRECTORY,
-    SOURCE_DIRECTORY_RECURSIVE,
-    SOURCE_LIST
+#include "Common.h"
+
+enum class FileListSource { // rename? wip
+    DIRECTORY,
+    DIRECTORY_RECURSIVE,
+    LIST
 };
 
-class DirectoryManager;
+// TODO: rename? EntrySomething?
 
-typedef bool (DirectoryManager::*CompareFunction)(const FSEntry &e1, const FSEntry &e2) const;
-
-//TODO: rename? EntrySomething?
-
-class DirectoryManager : public QObject {
+class DirectoryManager : public QObject
+{
     Q_OBJECT
-public:
+
+    using CompareFunction = bool (DirectoryManager::*)(FSEntry const &e1, FSEntry const &e2) const;
+
+  public:
     DirectoryManager();
     // ignored if the same dir is already opened
-    bool setDirectory(QString);
-    bool setDirectoryRecursive(QString);
-    QString directoryPath() const;
-    int indexOfFile(QString filePath) const;
-    int indexOfDir(QString dirPath) const;
-    QString filePathAt(int index) const;
-    unsigned long fileCount() const;
-    unsigned long dirCount() const;
-    inline bool isSupportedFile(QString filePath) const;
-    bool isEmpty() const;
-    bool containsFile(QString filePath) const;
-    QString fileNameAt(int index) const;
-    QString prevOfFile(QString filePath) const;
-    QString nextOfFile(QString filePath) const;
-    QString prevOfDir(QString filePath) const;
-    QString nextOfDir(QString filePath) const;
+    bool setDirectory(QString const &);
+    bool setDirectoryRecursive(QString const &);
     void sortEntryLists();
-    QDateTime lastModified(QString filePath) const;
-
-    QString firstFile() const;
-    QString lastFile() const;
     void setSortingMode(SortingMode mode);
-    SortingMode sortingMode() const;
-    bool isFile(QString path) const;
-    bool isDir(QString path) const;
 
-    unsigned long totalCount() const;
-    bool containsDir(QString dirPath) const;
-    const FSEntry &fileEntryAt(int index) const;
-    QString dirPathAt(int index) const;
-    QString dirNameAt(int index) const;
-    bool fileWatcherActive();
+    ND QDateTime lastModified(QString const &filePath) const;
+    ND QString   dirNameAt(int index) const;
+    ND QString   dirPathAt(int index) const;
+    ND QString   directoryPath() const;
+    ND QString   fileNameAt(int index) const;
+    ND QString   filePathAt(int index) const;
+    ND QString   firstFile() const;
+    ND QString   lastFile() const;
+    ND QString   nextOfDir(QString const &dirPath) const;
+    ND QString   nextOfFile(QString const &filePath) const;
+    ND QString   prevOfDir(QString const &dirPath) const;
+    ND QString   prevOfFile(QString const &filePath) const;
+    ND int    indexOfDir(QString const &dirPath) const;
+    ND int    indexOfFile(QString const &filePath) const;
+    ND bool      containsDir(QString const &dirPath) const;
+    ND bool      containsFile(QString const &filePath) const;
+    ND bool      fileWatcherActive() const;
+    ND bool      isEmpty() const;
+    ND bool      isSupportedFile(QString const &filePath) const;
+    ND int    dirCount() const;
+    ND int    fileCount() const;
+    ND int    totalCount() const;
 
-    bool insertFileEntry(const QString &filePath);
-    bool forceInsertFileEntry(const QString &filePath);
-    void removeFileEntry(const QString &filePath);
-    void updateFileEntry(const QString &filePath);
-    void renameFileEntry(const QString &oldFilePath, const QString &newName);
+    ND static bool    isDir(QString const &filePath);
+    ND static bool    isFile(QString const &filePath);
+    ND SortingMode    sortingMode() const;
+    ND FSEntry const &fileEntryAt(int index) const;
 
-    bool insertDirEntry(const QString &dirPath);
-    //bool forceInsertDirEntry(const QString &dirPath);
-    void removeDirEntry(const QString &dirPath);
-    //void updateDirEntry(const QString &dirPath);
-    void renameDirEntry(const QString &oldDirPath, const QString &newName);
+    bool insertFileEntry(QString const &filePath);
+    bool forceInsertFileEntry(QString const &filePath);
+    void removeFileEntry(QString const &filePath);
+    void updateFileEntry(QString const &filePath);
+    void renameFileEntry(QString const &oldFilePath, QString const &newFileName);
 
-    FileListSource source() const;
+    bool insertDirEntry(QString const &dirPath);
+    void removeDirEntry(QString const &dirPath);
+    void renameDirEntry(QString const &oldDirPath, QString const &newDirName);
+    // bool forceInsertDirEntry(const QString &dirPath);
+    // void updateDirEntry(const QString &dirPath);
 
-    QStringList fileList() const;
+    ND FileListSource source() const;
+    ND QStringList    fileList() const;
 
-private:
-    QRegularExpression regex;
-    QCollator collator;
-    std::vector<FSEntry> fileEntryVec, dirEntryVec;
-    const FSEntry defaultEntry;
-    QString mDirectoryPath;
+  private:
+    QRegularExpression   regex;
+    QCollator            collator;
+    std::vector<FSEntry> fileEntryVec;
+    std::vector<FSEntry> dirEntryVec;
+    FSEntry const        defaultEntry;
+    QString              mDirectoryPath;
+    DirectoryWatcher    *watcher;
+    SortingMode          mSortingMode;
+    FileListSource       mListSource;
 
-    DirectoryWatcher* watcher;
     void readSettings();
-    SortingMode mSortingMode;
-    FileListSource mListSource;
-    void loadEntryList(QString directoryPath, bool recursive);
+    void loadEntryList(QString const &directoryPath, bool recursive);
 
-    bool path_entry_compare(const FSEntry &e1, const FSEntry &e2) const;
-    bool path_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
-    bool name_entry_compare(const FSEntry &e1, const FSEntry &e2) const;
-    bool name_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
-    bool date_entry_compare(const FSEntry &e1, const FSEntry &e2) const;
-    bool date_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
+    ND bool path_entry_compare(FSEntry const &e1, FSEntry const &e2) const;
+    ND bool path_entry_compare_reverse(FSEntry const &e1, FSEntry const &e2) const;
+    ND bool name_entry_compare(FSEntry const &e1, FSEntry const &e2) const;
+    ND bool name_entry_compare_reverse(FSEntry const &e1, FSEntry const &e2) const;
+    ND bool date_entry_compare(FSEntry const &e1, FSEntry const &e2) const;
+    ND bool date_entry_compare_reverse(FSEntry const &e1, FSEntry const &e2) const;
+    ND bool size_entry_compare(FSEntry const &e1, FSEntry const &e2) const;
+    ND bool size_entry_compare_reverse(FSEntry const &e1, FSEntry const &e2) const;
+
+    void    startFileWatcher(QString const &directoryPath);
+    void    stopFileWatcher();
+    void    addEntriesFromDirectory(std::vector<FSEntry> &entryVec, QString const &directoryPath);
+    void    addEntriesFromDirectoryRecursive(std::vector<FSEntry> &entryVec, QString const &directoryPath) const;
+    ND bool checkFileRange(int index) const;
+    ND bool checkDirRange(int index) const;
+
     CompareFunction compareFunction();
-    bool size_entry_compare(const FSEntry &e1, const FSEntry &e2) const;
-    bool size_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
-    void startFileWatcher(QString directoryPath);
-    void stopFileWatcher();
 
-    void addEntriesFromDirectory(std::vector<FSEntry> &entryVec, QString directoryPath);
-    void addEntriesFromDirectoryRecursive(std::vector<FSEntry> &entryVec, QString directoryPath);
-    bool checkFileRange(int index) const;
-    bool checkDirRange(int index) const;
+  private slots:
+    void onFileAddedExternal(QString const &fileName);
+    void onFileRemovedExternal(QString const &fileName);
+    void onFileModifiedExternal(QString const &fileName);
+    void onFileRenamedExternal(QString const &oldFileName, QString const &newFileName);
 
-private slots:
-    void onFileAddedExternal(QString fileName);
-    void onFileRemovedExternal(QString fileName);
-    void onFileModifiedExternal(QString fileName);
-    void onFileRenamedExternal(QString oldFileName, QString newFileName);
-
-signals:
-    void loaded(const QString &path);
+  signals:
+    void loaded(QString const &path);
     void sortingChanged();
     void fileRemoved(QString filePath, int);
     void fileModified(QString filePath);

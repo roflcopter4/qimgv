@@ -1,27 +1,27 @@
 #include "spinboxinputfix.h"
 
 SpinBoxInputFix::SpinBoxInputFix(QWidget *parent) : QSpinBox(parent) {
-    allowedKeys << "1"
-                << "2"
-                << "3"
-                << "4"
-                << "5"
-                << "6"
-                << "7"
-                << "8"
-                << "9"
-                << "0"
-                << "Up"
-                << "Down"
-                << "Left"
-                << "Right"
-                << "PgUp"
-                << "PgDown"
-                << "Enter"
-                << "Home"
-                << "End"
-                << "Del"
-                << "Backspace";
+    allowedKeys << QS("1")
+                << QS("2")
+                << QS("3")
+                << QS("4")
+                << QS("5")
+                << QS("6")
+                << QS("7")
+                << QS("8")
+                << QS("9")
+                << QS("0")
+                << QS("Up")
+                << QS("Down")
+                << QS("Left")
+                << QS("Right")
+                << QS("PgUp")
+                << QS("PgDown")
+                << QS("Enter")
+                << QS("Home")
+                << QS("End")
+                << QS("Del")
+                << QS("Backspace");
 }
 
 void SpinBoxInputFix::keyPressEvent(QKeyEvent *event) {

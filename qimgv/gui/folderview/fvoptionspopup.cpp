@@ -33,36 +33,36 @@ FVOptionsPopup::~FVOptionsPopup() {
 }
 
 void FVOptionsPopup::setSimpleView() {
-    ui->viewSimpleButton->setIconPath(":res/icons/common/buttons/panel-small/add-new12.png");
-    ui->viewExtendedButton->setIconPath("");
-    ui->viewFoldersButton->setIconPath("");
+    ui->viewSimpleButton->setIconPath(QS(":res/icons/common/buttons/panel-small/add-new12.png"));
+    ui->viewExtendedButton->setIconPath(QS(""));
+    ui->viewFoldersButton->setIconPath(QS(""));
 }
 
 void FVOptionsPopup::setExtendedView() {
-    ui->viewSimpleButton->setIconPath("");
-    ui->viewExtendedButton->setIconPath(":res/icons/common/buttons/panel-small/add-new12.png");
-    ui->viewFoldersButton->setIconPath("");
+    ui->viewSimpleButton->setIconPath(QS(""));
+    ui->viewExtendedButton->setIconPath(QS(":res/icons/common/buttons/panel-small/add-new12.png"));
+    ui->viewFoldersButton->setIconPath(QS(""));
 }
 
 void FVOptionsPopup::setFoldersView() {
-    ui->viewSimpleButton->setIconPath("");
-    ui->viewExtendedButton->setIconPath("");
-    ui->viewFoldersButton->setIconPath(":res/icons/common/buttons/panel-small/add-new12.png");
+    ui->viewSimpleButton->setIconPath(QS(""));
+    ui->viewExtendedButton->setIconPath(QS(""));
+    ui->viewFoldersButton->setIconPath(QS(":res/icons/common/buttons/panel-small/add-new12.png"));
 }
 
 void FVOptionsPopup::selectSimpleView() {
     setSimpleView();
-    emit viewModeSelected(FV_SIMPLE);
+    emit viewModeSelected(FolderViewMode::SIMPLE);
 }
 
 void FVOptionsPopup::selectExtendedView() {
     setExtendedView();
-    emit viewModeSelected(FV_EXTENDED);
+    emit viewModeSelected(FolderViewMode::EXTENDED);
 }
 
 void FVOptionsPopup::selectFoldersView() {
     setFoldersView();
-    emit viewModeSelected(FV_EXT_FOLDERS);
+    emit viewModeSelected(FolderViewMode::EXT_FOLDERS);
 }
 
 void FVOptionsPopup::paintEvent(QPaintEvent *event) {
@@ -81,9 +81,9 @@ void FVOptionsPopup::keyPressEvent(QKeyEvent *event) {
 }
 
 void FVOptionsPopup::setViewMode(FolderViewMode mode) {
-    if(mode == FV_SIMPLE)
+    if(mode == FolderViewMode::SIMPLE)
         setSimpleView();
-    else if(mode == FV_EXTENDED)
+    else if(mode == FolderViewMode::EXTENDED)
         setExtendedView();
     else
         setFoldersView();

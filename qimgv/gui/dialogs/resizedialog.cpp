@@ -1,3 +1,4 @@
+#include "Common.h"
 #include "resizedialog.h"
 #include "ui_resizedialog.h"
 
@@ -16,9 +17,9 @@ ResizeDialog::ResizeDialog(QSize originalSize,  QWidget *parent) :
     ui->width->setValue(originalSize.width());
     ui->height->setValue(originalSize.height());
 
-    ui->resetButton->setText(tr("Reset:") + " " +
+    ui->resetButton->setText(tr("Reset:") + QS(" ") +
                              QString::number(originalSize.width()) +
-                             " x " +
+                             QS(" x ") +
                              QString::number(originalSize.height()));
 
     desktopSize = qApp->primaryScreen()->size();

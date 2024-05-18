@@ -9,21 +9,26 @@
 #include <QDebug>
 #include <QString>
 
-class Randomizer {
-public:
-    Randomizer();
-    Randomizer(int _count);
+#include "Common.h"
 
-    void setCount(int _count);
-    int next();
-    int prev();
+class Randomizer
+{
+  public:
+    Randomizer();
+    explicit Randomizer(qsizetype count);
+
+    void     setCount(qsizetype count);
+    uint32_t next();
+    uint32_t prev();
 
     void shuffle();
-    void print();
-    void setCurrent(int _current);
-private:
-    int currentIndex;
-    std::vector<int> vec;
-    void fill();
-    int indexOf(int n);
+    void print() const;
+    void setCurrent(qsizetype current);
+
+  private:
+    qsizetype currentIndex;
+    std::vector<uint32_t> vec;
+
+    void         fill();
+    ND qsizetype indexOf(qsizetype item) const;
 };

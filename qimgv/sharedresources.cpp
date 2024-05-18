@@ -4,9 +4,7 @@
 
 SharedResources *shrRes = nullptr;
 
-SharedResources::SharedResources()
-{
-}
+SharedResources::SharedResources() = default;
 
 SharedResources::~SharedResources() {
     delete shrRes;
@@ -15,29 +13,25 @@ SharedResources::~SharedResources() {
 QPixmap *SharedResources::getPixmap(ShrIcon icon, qreal dpr) {
     QPixmap *pixmap;
     QString path;
-    if(icon == ShrIcon::SHR_ICON_ERROR) {
-        path = ":/res/icons/common/other/loading-error72.png";
+    if(icon == ShrIcon::Error) {
+        path = QS(":/res/icons/common/other/loading-error72.png");
         pixmap = mLoadingErrorIcon72;
     } else {
-        path = ":/res/icons/common/other/loading72.png";
+        path = QS(":/res/icons/common/other/loading72.png");
         pixmap = mLoadingIcon72;
     }
     if(pixmap)
         return pixmap;
 
-    qreal pixmapDrawScale;
     if(dpr >= (1.0 + 0.001)) {
-        path.replace(".", "@2x.");
+        path.replace(QS("."), QS("@2x."));
         pixmap = new QPixmap(path);
-        if(dpr >= (2.0 - 0.001))
-            pixmapDrawScale = dpr;
-        else
-            pixmapDrawScale = 2.0;
+        qreal pixmapDrawScale = dpr >= 2.0 - 0.001 ? dpr : 2.0;
         pixmap->setDevicePixelRatio(pixmapDrawScale);
     } else {
         pixmap = new QPixmap(path);
     }
-    if(icon == ShrIcon::SHR_ICON_ERROR)
+    if(icon == ShrIcon::Error)
         mLoadingErrorIcon72 = pixmap;
     else
         mLoadingIcon72 = pixmap;

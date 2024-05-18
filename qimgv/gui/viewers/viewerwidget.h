@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Common.h"
+
 #include "gui/customwidgets/floatingwidgetcontainer.h"
 #include <QVBoxLayout>
 #include "gui/viewers/imageviewerv2.h"
@@ -8,60 +10,62 @@
 #include "gui/overlays/zoomindicatoroverlayproxy.h"
 #include "gui/contextmenu.h"
 
-enum CurrentWidget {
-    IMAGEVIEWER,
-    VIDEOPLAYER,
-    UNSET
-};
-
-class ViewerWidget : public FloatingWidgetContainer
+class ViewerWidget Q_DECL_FINAL : public FloatingWidgetContainer
 {
     Q_OBJECT
-public:
+
+  protected:
+    enum class CurrentWidget : uint8_t {
+        UNSET,
+        IMAGE_VIEWER,
+        VIDEO_PLAYER,
+    };
+
+  public:
     explicit ViewerWidget(QWidget *parent = nullptr);
-    QRect imageRect();
-    float currentScale();
-    QSize sourceSize();
 
-    void setInteractionEnabled(bool mode);
-    bool interactionEnabled();
+    ND QRect imageRect() const;
+    ND qreal currentScale() const;
+    ND QSize sourceSize() const;
+       void  setInteractionEnabled(bool mode);
+    ND bool  interactionEnabled() const;
+       bool  showImage(std::unique_ptr<QPixmap> pixmap);
+       bool  showAnimation(std::shared_ptr<QMovie> const &movie);
+       void  onScalingFinished(std::unique_ptr<QPixmap> scaled);
+    ND bool  isDisplaying() const;
+    ND bool  lockZoomEnabled() const;
+    ND bool  lockViewEnabled() const;
+    ND auto  scalingFilter() const -> ScalingFilter;
 
-    bool showImage(std::unique_ptr<QPixmap> pixmap);
-    bool showAnimation(std::shared_ptr<QMovie> movie);
-    void onScalingFinished(std::unique_ptr<QPixmap> scaled);
-    bool isDisplaying();
-    bool lockZoomEnabled();
-    bool lockViewEnabled();
-    ScalingFilter scalingFilter();
+  private:
+    static constexpr int CURSOR_HIDE_TIMEOUT_MS = 1000;
 
-private:
-    QVBoxLayout layout;
-    std::unique_ptr<ImageViewerV2> imageViewer;
+    QVBoxLayout                           layout;
+    std::unique_ptr<ImageViewerV2>        imageViewer;
     std::unique_ptr<VideoPlayerInitProxy> videoPlayer;
-    std::unique_ptr<ContextMenu> contextMenu;
-    VideoControlsProxyWrapper *videoControls;
-    ZoomIndicatorOverlayProxy *zoomIndicator;
-
-    void enableImageViewer();
-    void enableVideoPlayer();
+    std::unique_ptr<ContextMenu>          contextMenu;
+    VideoControlsProxyWrapper            *videoControls;
+    ZoomIndicatorOverlayProxy            *zoomIndicator;
+    QTimer                                cursorTimer;
 
     CurrentWidget currentWidget;
-    bool mInteractionEnabled, mWaylandCursorWorkaround;
-    QTimer cursorTimer;
-    const int CURSOR_HIDE_TIMEOUT_MS = 1000;
-    bool mIsFullscreen;
+    bool          mInteractionEnabled;
+    bool          mWaylandCursorWorkaround;
+    bool          mIsFullscreen;
 
-    void disableImageViewer();
-    void disableVideoPlayer();
+    void  enableImageViewer();
+    void  enableVideoPlayer();
+    void  disableImageViewer();
+    void  disableVideoPlayer();
 
-    QRect videoControlsArea();
+    ND QRect videoControlsArea() const;
 
-private slots:
+  private slots:
     void onScaleChanged(qreal);
     void onVideoPlaybackFinished();
     void onAnimationPlaybackFinished();
 
-signals:
+  signals:
     void scalingRequested(QSize, ScalingFilter);
     void zoomIn();
     void zoomOut();
@@ -84,15 +88,16 @@ signals:
     void toggleLockView();
     void showScriptSettings();
 
-public slots:
-    bool showVideo(QString file);
+  public slots:
+    bool showVideo(QString const &file);
     void stopPlayback();
     void setFitMode(ImageFitMode mode);
-    ImageFitMode fitMode();
     void closeImage();
     void hideCursor();
     void showCursor();
     void hideCursorTimed(bool restartTimer);
+
+    ND ImageFitMode fitMode() const;
 
     // video control
     void pauseResumePlayback();
@@ -114,13 +119,13 @@ public slots:
     void readSettings();
     void setLoopPlayback(bool mode);
 
-protected:
-    void mouseMoveEvent(QMouseEvent *event);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void hideEvent(QHideEvent *event);
+  protected:
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
 
-    void keyPressEvent(QKeyEvent *event);
-    void leaveEvent(QEvent *event);
-    bool focusNextPrevChild(bool mode);
+    void keyPressEvent(QKeyEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+    bool focusNextPrevChild(bool mode) override;
 };

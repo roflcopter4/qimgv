@@ -8,8 +8,8 @@ class LoaderRunnable: public QObject, public QRunnable
 {
     Q_OBJECT
 public:
-    LoaderRunnable(QString _path);
-    void run();
+    LoaderRunnable(QString const &_path);
+    void run() override;
 private:
     QString path;
 signals:

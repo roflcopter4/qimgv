@@ -4,7 +4,7 @@ CacheItem::CacheItem() {
     sem = new QSemaphore(1);
 }
 
-CacheItem::CacheItem(std::shared_ptr<Image> _contents) {
+CacheItem::CacheItem(std::shared_ptr<Image> const &_contents) {
     contents = _contents;
     sem = new QSemaphore(1);
 }

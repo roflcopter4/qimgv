@@ -11,7 +11,8 @@ ADD_DEFINITIONS(-DQIMGV_PLAYER_MPV_LIBRARY)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets)
 
-if(NOT WIN32)
+if(WIN32)
+else ()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(Mpv REQUIRED IMPORTED_TARGET mpv)
 endif()
@@ -46,7 +47,7 @@ target_include_directories(player_mpv PRIVATE src)
 
 if(WIN32)
     target_include_directories(player_mpv PRIVATE
-        ${MPV_DIR}/include)
+        "${MPV_DIR}/include")
     target_link_directories(player_mpv PRIVATE
         ${MPV_DIR}/lib/$<IF:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>,x86_64,i686>)
 endif()

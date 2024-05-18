@@ -1,62 +1,65 @@
 #pragma once
 
-#include <QWidget>
-#include <QStyledItemDelegate>
 #include <QAbstractItemView>
-#include <QFileSystemModel>
-#include <QFileDialog>
 #include <QElapsedTimer>
-#include "gui/customwidgets/floatingwidgetcontainer.h"
-#include "gui/idirectoryview.h"
-#include "gui/folderview/foldergridview.h"
-#include "gui/folderview/filesystemmodelcustom.h"
-#include "gui/folderview/bookmarkswidget.h"
+#include <QFileDialog>
+#include <QFileSystemModel>
+#include <QStyledItemDelegate>
+#include <QWidget>
 #include "gui/customwidgets/actionbutton.h"
+#include "gui/customwidgets/floatingwidgetcontainer.h"
 #include "gui/customwidgets/styledcombobox.h"
+#include "gui/folderview/bookmarkswidget.h"
+#include "gui/folderview/FileSystemModelCustom.h"
+#include "gui/folderview/foldergridview.h"
 #include "gui/folderview/fvoptionspopup.h"
+#include "gui/idirectoryview.h"
 
 namespace Ui {
-    class FolderView;
+class FolderView;
 }
 
-class FolderView : public FloatingWidgetContainer, public IDirectoryView {
+class FolderView : public FloatingWidgetContainer, public IDirectoryView
+{
     Q_OBJECT
     Q_INTERFACES(IDirectoryView)
-public:
+  public:
     explicit FolderView(QWidget *parent = nullptr);
-    ~FolderView();
+    ~FolderView() override;
 
-public slots:
+  public slots:
     void show();
     void hide();
-    virtual void populate(int) override;
-    virtual void setThumbnail(int pos, std::shared_ptr<Thumbnail> thumb) override;
-    virtual void select(QList<int>) override;
-    virtual void select(int) override;
-    virtual QList<int> selection() override;
-    virtual void focusOn(int) override;
-    virtual void focusOnSelection() override;
-    virtual void setDirectoryPath(QString path) override;
-    virtual void insertItem(int index) override;
-    virtual void removeItem(int index) override;
-    virtual void reloadItem(int index) override;
-    virtual void setDragHover(int) override;
-    void addItem();
-    void onFullscreenModeChanged(bool mode);
-    void onSortingChanged(SortingMode mode);
 
+    void populate(int) override;
+    void setThumbnail(int pos, std::shared_ptr<Thumbnail> thumb) override;
+    void select(QList<int>) override;
+    void select(int index) override;
+    void focusOn(int index) override;
+    void focusOnSelection() override;
+    void setDirectoryPath(QString path) override;
+    void insertItem(int index) override;
+    void removeItem(int index) override;
+    void reloadItem(int index) override;
+    void setDragHover(int) override;
+    void addItem() const;
+    void onFullscreenModeChanged(bool mode) const;
+    void onSortingChanged(SortingMode mode) const;
 
-protected:
+    QList<int> &      selection() override;
+    QList<int> const &selection() const override;
+
+  protected:
     void wheelEvent(QWheelEvent *event) override;
     void focusInEvent(QFocusEvent *event) override;
     void paintEvent(QPaintEvent *) override;
     void resizeEvent(QResizeEvent *event) override;
 
-protected slots:
-    void onThumbnailSizeChanged(int newSize);
-    void onZoomSliderValueChanged(int value);
+  protected slots:
+    void onThumbnailSizeChanged(int newSize) const;
+    void onZoomSliderValueChanged(int value) const;
 
-signals:
+  signals:
     void itemActivated(int) override;
     void thumbnailsRequested(QList<int>, int, bool, bool) override;
     void draggedOut() override;
@@ -66,35 +69,35 @@ signals:
     void showFoldersChanged(bool mode);
     void copyUrlsRequested(QList<QString>, QString path);
     void moveUrlsRequested(QList<QString>, QString path);
-    void droppedInto(const QMimeData*, QObject*, int) override;
+    void droppedInto(const QMimeData *, QObject *, int) override;
     void draggedOver(int) override;
 
-private slots:
+  private slots:
     void onSortingSelected(int);
-    void readSettings();
+    void readSettings() const;
 
-    void onTreeViewClicked(QModelIndex index);
-    void onDroppedInByIndex(QList<QString>, QModelIndex index);
-    void toggleBookmarks();
-    void toggleFilesystemView();
-    void setPlacesPanel(bool mode);
-    void onPlacesPanelButtonChecked(bool mode);
-    void onBookmarkClicked(QString dirPath);
+    void onTreeViewClicked(QModelIndex const &index);
+    void onDroppedInByIndex(QList<QString> const &, QModelIndex const &index);
+    void toggleBookmarks() const;
+    void toggleFilesystemView() const;
+    void setPlacesPanel(bool mode) const;
+    void onPlacesPanelButtonChecked(bool mode) const;
+    void onBookmarkClicked(QString const &dirPath);
     void newBookmark();
-    void fsTreeScrollToCurrent();
+    void fsTreeScrollToCurrent() const;
 
-    void onOptionsPopupButtonToggled(bool mode);
+    void onOptionsPopupButtonToggled(bool mode) const;
     void onOptionsPopupDismissed();
     void onViewModeSelected(FolderViewMode mode);
 
-    void onSplitterMoved();
+    void onSplitterMoved() const;
     void onHomeBtn();
     void onRootBtn();
-    void onTreeViewTabOut();
+    void onTreeViewTabOut() const;
 
-private:
-    Ui::FolderView *ui;
+  private:
+    Ui::FolderView        *ui;
     FileSystemModelCustom *dirModel;
-    FVOptionsPopup *optionsPopup;
-    QElapsedTimer popupTimerClutch;
+    FVOptionsPopup        *optionsPopup;
+    QElapsedTimer          popupTimerClutch;
 };

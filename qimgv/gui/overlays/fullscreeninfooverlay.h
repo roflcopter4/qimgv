@@ -12,8 +12,8 @@ class FullscreenInfoOverlay : public OverlayWidget {
 
 public:
     explicit FullscreenInfoOverlay(FloatingWidgetContainer *parent = nullptr);
-    ~FullscreenInfoOverlay();
-    void setInfo(QString pos, QString fileName, QString info);
+    ~FullscreenInfoOverlay() override;
+    void setInfo(QString const &pos, QString const &fileName, QString const &info);
 
 private:
     Ui::FullscreenInfoOverlay *ui;

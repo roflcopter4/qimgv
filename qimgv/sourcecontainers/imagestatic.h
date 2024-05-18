@@ -9,32 +9,35 @@
 #include <settings.h>
 #include <QIcon>
 
-class ImageStatic : public Image {
-public:
-    ImageStatic(QString _path);
-    ImageStatic(std::unique_ptr<DocumentInfo> _info);
-    ~ImageStatic();
+class ImageStatic : public Image
+{
+  public:
+    ImageStatic(QString const &path);
+    ImageStatic(std::unique_ptr<DocumentInfo> info);
+    ~ImageStatic() override;
 
-    std::unique_ptr<QPixmap> getPixmap();
-    std::shared_ptr<const QImage> getSourceImage();
-    std::shared_ptr<const QImage> getImage();
+    std::unique_ptr<QPixmap>      getPixmap() override;
+    std::shared_ptr<QImage const> getSourceImage();
+    std::shared_ptr<QImage const> getImage() override;
 
-    int height();
-    int width();
-    QSize size();
+    int   height() override;
+    int   width() override;
+    QSize size() override;
 
-    bool setEditedImage(std::unique_ptr<const QImage> imageEditedNew);
+    bool setEditedImage(std::unique_ptr<QImage const> imageEditedNew);
     bool discardEditedImage();
 
-public slots:
+  public Q_SLOTS:
     void crop(QRect newRect);
-    bool save();
-    bool save(QString destPath);
+    bool save() override;
+    bool save(QString destPath) override;
 
-private:
-    void load();
-    std::shared_ptr<const QImage> image, imageEdited;
+  private:
+    std::shared_ptr<QImage const> image;
+    std::shared_ptr<QImage const> imageEdited;
+
+    void load() override;
     void loadGeneric();
     void loadICO();
-    QString generateHash(QString str);
+    static QString generateHash(QString const &str);
 };

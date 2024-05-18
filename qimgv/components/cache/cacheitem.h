@@ -6,7 +6,7 @@
 class CacheItem {
 public:
     CacheItem();
-    CacheItem(std::shared_ptr<Image> _contents);
+    CacheItem(std::shared_ptr<Image> const &_contents);
     ~CacheItem();
 
     std::shared_ptr<Image> getContents();

@@ -18,30 +18,33 @@
 class FloatingWidget : public QWidget
 {
     Q_OBJECT
-public:
-    explicit FloatingWidget(FloatingWidgetContainer *parent);
-    QSize containerSize();
-    bool acceptKeyboardFocus() const;
-    void setAcceptKeyboardFocus(bool mode);
 
-public slots:
+  public:
+    explicit FloatingWidget(FloatingWidgetContainer *parent);
+
+    ND QSize containerSize() const;
+    ND bool  acceptKeyboardFocus() const;
+    void     setAcceptKeyboardFocus(bool mode);
+
+  public Q_SLOTS:
     void hide();
 
-protected:
+  protected:
     // called whenever container rectangle changes
     // this does nothing, reimplement to use
     virtual void recalculateGeometry();
-    void paintEvent(QPaintEvent *event);
-    void setContainerSize(QSize container);
 
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void wheelEvent(QWheelEvent *event);
-private:
+    void paintEvent(QPaintEvent *event) override;
+    void setContainerSize(QSize container);
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
+
+  private:
     // size of whatever widget we are overlayed on
     QSize container;
-    bool mAcceptKeyboardFocus;
+    bool  mAcceptKeyboardFocus;
 
-private slots:
-    void onContainerResized(QSize container);
+  private Q_SLOTS:
+    void onContainerResized(QSize size);
 };

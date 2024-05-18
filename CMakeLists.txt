@@ -7,6 +7,8 @@ project(qimgv
 
 message(STATUS "Build configuration: " ${CMAKE_BUILD_TYPE})
 
+set (MPV_DIR "" CACHE STRING "Directory in which the MPV library is located")
+
 # check for gcc
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND
         CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
@@ -34,8 +36,8 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # FIND PACKAGES
-find_package(Qt5 COMPONENTS Widgets QUIET)
-if(Qt5_FOUND)
+#find_package(Qt5 COMPONENTS Widgets QUIET)
+if(Qt5_FOUND AND FALSE)
     find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core Widgets Svg PrintSupport)
 else()
     find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Widgets Svg PrintSupport OpenGLWidgets)
@@ -49,8 +51,13 @@ else()
 endif()
 
 if(EXIV2)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(Exiv2 REQUIRED IMPORTED_TARGET exiv2)
+    if (MSVC)
+        find_package(exiv2 REQUIRED)
+        add_library(PkgConfig::Exiv2 ALIAS Exiv2::exiv2lib)
+    else()
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(Exiv2 REQUIRED IMPORTED_TARGET exiv2)
+    endif()
 endif()
 
 if(KDE_SUPPORT)

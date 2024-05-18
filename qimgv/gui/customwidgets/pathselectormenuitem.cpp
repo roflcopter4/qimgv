@@ -2,16 +2,16 @@
 
 PathSelectorMenuItem::PathSelectorMenuItem(QWidget *parent)
     : MenuItem(parent),
-      mDirectory(""),
-      mPath("")
+      mDirectory(QS("")),
+      mPath(QS(""))
 {
     setFocusPolicy(Qt::NoFocus);
-    setIconPath(":/res/icons/common/menuitem/folder16.png");
+    setIconPath(QS(":/res/icons/common/menuitem/folder16.png"));
     mIconWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
     connect(&mIconWidget, &IconButton::clicked, [this]() {
         QFileDialog dialog;
         dialog.setDirectory(mDirectory);
-        dialog.setWindowTitle("Select directory");
+        dialog.setWindowTitle(QS("Select directory"));
         dialog.setWindowModality(Qt::ApplicationModal);
         dialog.setFileMode(QFileDialog::Directory);
         dialog.setOption(QFileDialog::ShowDirsOnly);
@@ -29,14 +29,14 @@ QString PathSelectorMenuItem::path() {
     return mPath;
 }
 
-void PathSelectorMenuItem::setDirectory(QString path) {
+void PathSelectorMenuItem::setDirectory(QString const &path) {
     mDirectory = path;
     mPath = path;
     QString stripped;
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    stripped = mDirectory.split("/").last();
+    stripped = mDirectory.split(QS("/")).last();
 #else
-    stripped = mDirectory.split("/", Qt::SkipEmptyParts).last();
+    stripped = mDirectory.split(QS("/"), Qt::SkipEmptyParts).last();
 #endif
     this->mTextLabel.setText(stripped);
 }

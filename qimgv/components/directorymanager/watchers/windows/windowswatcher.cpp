@@ -1,101 +1,108 @@
+#include "Common.h"
 #include "windowswatcher_p.h"
 #include "windowsworker.h"
+#include "utils/stuff.h"
 
-QString lastError() {
-    char buffer[1024];
-    DWORD lastError = GetLastError();
-    int res = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM,
-                             nullptr,
-                             lastError,
-                             LANG_SYSTEM_DEFAULT,
-                             buffer,
-                             sizeof(buffer),
-                             nullptr);
+static QString win32ErrorString(DWORD error)
+{
+    wchar_t buffer[1024];
 
-    QString line = QString(__FILE__) + "::" + QString::number(__LINE__) + ": ";
-    return res == 0 ? QString::number(GetLastError()) : line + buffer;
+    DWORD res = ::FormatMessageW(
+        FORMAT_MESSAGE_FROM_SYSTEM,
+        nullptr,
+        error,
+        LANG_SYSTEM_DEFAULT,
+        buffer,
+        std::size(buffer),
+        nullptr
+    );
+
+    return res == 0 ? QString::number(error)
+                    : QS(__FILE__ "::" QT_STRINGIFY(__LINE__) ": ") +
+                      QString::fromWCharArray(buffer, res);
 }
 
 WindowsWatcherPrivate::WindowsWatcherPrivate(WindowsWatcher* qq)
     : DirectoryWatcherPrivate(qq, new WindowsWorker())
 {
-    auto windowsWorker = static_cast<WindowsWorker*>(worker.data());
+    auto *windowsWorker = reinterpret_cast<WindowsWorker*>(worker.data());
     qRegisterMetaType<PFILE_NOTIFY_INFORMATION>("PFILE_NOTIFY_INFORMATION");
 
     connect(windowsWorker, SIGNAL(notifyEvent(PFILE_NOTIFY_INFORMATION)),
             this, SLOT(dispatchNotify(PFILE_NOTIFY_INFORMATION)));
 }
 
-HANDLE WindowsWatcherPrivate::requestDirectoryHandle(const QString& path)
+HANDLE WindowsWatcherPrivate::requestDirectoryHandle(QString const &path)
 {
     HANDLE hDirectory;
+    auto wpath = LR"(\\?\)" + absolute(util::QStringToStdPath(path)).wstring();
 
     do {
-        hDirectory = CreateFileW(
-                    path.toStdWString().c_str(),
-                    FILE_LIST_DIRECTORY,
-                    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-                    nullptr,
-                    OPEN_EXISTING,
-                    FILE_FLAG_BACKUP_SEMANTICS,
-                    nullptr);
+        hDirectory = ::CreateFileW(
+            wpath.c_str(),
+            FILE_LIST_DIRECTORY,
+            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+            nullptr,
+            OPEN_EXISTING,
+            FILE_FLAG_BACKUP_SEMANTICS,
+            nullptr
+        );
 
-        if (hDirectory == INVALID_HANDLE_VALUE)
-        {
-            if (GetLastError() == ERROR_SHARING_VIOLATION)
-            {
-                qDebug() << "ERROR_SHARING_VIOLATION waiting for 1 sec";
+        if (hDirectory == INVALID_HANDLE_VALUE) {
+            DWORD err = ::GetLastError();
+            if (err == ERROR_SHARING_VIOLATION) {
+                qDebug() << QSV("ERROR_SHARING_VIOLATION waiting for 1 sec");
                 QThread::sleep(1);
-            }
-            else
-            {
-                qDebug() << lastError();
+            } else {
+                qDebug() << win32ErrorString(err);
                 return INVALID_HANDLE_VALUE;
             }
         }
     } while (hDirectory == INVALID_HANDLE_VALUE);
+
     return hDirectory;
 }
 
-void WindowsWatcherPrivate::dispatchNotify(PFILE_NOTIFY_INFORMATION notify) {
+void WindowsWatcherPrivate::dispatchNotify(PFILE_NOTIFY_INFORMATION notify)
+{
     Q_Q(WindowsWatcher);
 
-    int len = notify->FileNameLength / sizeof(WCHAR);
-    QString name = QString::fromWCharArray(static_cast<wchar_t*>(notify->FileName), len);
+    DWORD   len  = notify->FileNameLength / sizeof(WCHAR);
+    QString name = QString::fromWCharArray(notify->FileName, len);
 
-    switch (notify->Action)
-    {
-        case FILE_ACTION_ADDED:
-            emit q->fileCreated(name);
-            break;
+    switch (notify->Action) {
+    case FILE_ACTION_ADDED:
+        emit q->fileCreated(name);
+        break;
 
-        case FILE_ACTION_MODIFIED:
-            emit q->fileModified(name);
-            // ??
-            /*WatcherEvent* event;
-            if (findEventIndexByName(name) != -1)
-                return;
+    case FILE_ACTION_MODIFIED:
+        emit q->fileModified(name);
+#if 0
+        // ??
+        WatcherEvent* event;
+        if (findEventIndexByName(name) != -1)
+            return;
+        event = new WatcherEvent(name, WatcherEvent::MODIFIED);
+        event->mTimerId = startTimer(500);
+        directoryEvents.push_back(event);
+#endif
+        break;
 
-            event = new WatcherEvent(name, WatcherEvent::MODIFIED);
-            event->mTimerId = startTimer(500);
-            directoryEvents.push_back(event);
-            */
-            break;
+    case FILE_ACTION_REMOVED:
+        emit q->fileDeleted(name);
+        break;
 
-        case FILE_ACTION_REMOVED:
-            emit q->fileDeleted(name);
-            break;
+    case FILE_ACTION_RENAMED_NEW_NAME:
+        emit q->fileRenamed(oldFileName, name);
+        break;
 
-        case FILE_ACTION_RENAMED_NEW_NAME:
-            emit q->fileRenamed(oldFileName, name);
-            break;
+    case FILE_ACTION_RENAMED_OLD_NAME:
+        oldFileName = name;
+        break;
 
-        case FILE_ACTION_RENAMED_OLD_NAME:
-            oldFileName = name;
-            break;
-
-        default:
-            qDebug() << "Some error, notify->Action" << notify->Action;
+    default:
+        qDebug() << QSV("Some error, notify->Action") << notify->Action;
+        break;
     }
 }
 
@@ -103,34 +110,37 @@ WindowsWatcher::WindowsWatcher()
     : DirectoryWatcher(new WindowsWatcherPrivate(this))
 {
     Q_D(WindowsWatcher);
-    connect(d->workerThread.data(), &QThread::started, d->worker.data(), &WatcherWorker::run);
-    d->worker.data()->moveToThread(d->workerThread.data());
 
-    auto windowsWorker = static_cast<WindowsWorker*>(d->worker.data());
+    QThread *wkThrd = d->workerThread.data();
 
-    connect(windowsWorker, &WindowsWorker::finished, d->workerThread.data(), &QThread::quit);
+    connect(wkThrd, &QThread::started, d->worker.data(), &WatcherWorker::run);
+    d->worker.data()->moveToThread(wkThrd);
 
-    connect(windowsWorker, &WindowsWorker::started, this, &WindowsWatcher::observingStarted);
-    connect(windowsWorker, &WindowsWorker::finished, this, &WindowsWatcher::observingStopped);
+    auto *windowsWorker = reinterpret_cast<WindowsWorker *>(d->worker.data());
+
+    connect(windowsWorker, &WindowsWorker::finished, wkThrd, &QThread::quit);
+    connect(windowsWorker, &WindowsWorker::started,  this,   &WindowsWatcher::observingStarted);
+    connect(windowsWorker, &WindowsWorker::finished, this,   &WindowsWatcher::observingStopped);
 }
 
-WindowsWatcher::WindowsWatcher(const QString& path)
+WindowsWatcher::WindowsWatcher(QString const & path)
     : DirectoryWatcher(new WindowsWatcherPrivate(this))
 {
     Q_D(WindowsWatcher);
     setWatchPath(path);
 }
 
-void WindowsWatcher::setWatchPath(const QString &path) {
+void WindowsWatcher::setWatchPath(QString const &path)
+{
     Q_D(WindowsWatcher);
+
     DirectoryWatcher::setWatchPath(path);
     HANDLE hDirectory = d->requestDirectoryHandle(path);
-    if (hDirectory == INVALID_HANDLE_VALUE)
-    {
-        qDebug() << "requestDirectoryHandle: INVALID_HANDLE_VALUE";
+    if (hDirectory == INVALID_HANDLE_VALUE) {
+        qDebug() << QSV("requestDirectoryHandle: INVALID_HANDLE_VALUE");
         return;
     }
 
-    auto windowsWorker = static_cast<WindowsWorker*>(d->worker.data());
+    auto *windowsWorker = reinterpret_cast<WindowsWorker *>(d->worker.data());
     windowsWorker->setDirectoryHandle(hDirectory);
 }

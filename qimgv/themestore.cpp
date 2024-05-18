@@ -1,82 +1,82 @@
 #include "themestore.h"
 
 ColorScheme ThemeStore::colorScheme(ColorSchemes name) {
-    BaseColorScheme base = {-1};
+    BaseColorScheme base               = {-1};
     QPalette p;
     switch(name) {
-        case COLORS_SYSTEM:
-        case COLORS_CUSTOMIZED:    
+        case ColorSchemes::SYSTEM:
+        case ColorSchemes::CUSTOMIZED:    
             base.folderview_topbar = p.window().color();
-            base.widget = p.window().color();
-            base.widget_border = p.window().color();
-            base.folderview = p.base().color();
-            base.text = p.text().color();
-            base.icons = p.text().color();
-            base.accent = p.highlight().color();
+            base.widget            = p.window().color();
+            base.widget_border     = p.window().color();
+            base.folderview        = p.base().color();
+            base.text              = p.text().color();
+            base.icons             = p.text().color();
+            base.accent            = p.highlight().color();
             base.scrollbar.setHsv(p.highlight().color().hue(),
                                   qBound(0, p.highlight().color().saturation() - 20, 240),
                                   qBound(0, p.highlight().color().value() - 35, 240));
             base.tid = static_cast<int>(name);
             break;
-        case COLORS_LIGHT: // v2, works with w10 titlebars
-            base.accent = "#719ccd";
-            base.background = "#1a1a1a";
-            base.background_fullscreen = "#1a1a1a";
-            base.folderview = "#f2f2f2";
-            base.folderview_topbar = "#ffffff";
-            base.icons = "#656768";
-            base.overlay = "#1a1a1a";
-            base.overlay_text = "#d2d2d2";
-            base.text = "#353535";
-            base.scrollbar = "#aaaaaa";
-            base.widget = "#ffffff";
-            base.widget_border = "#c3c3c3";
-            base.tid = static_cast<int>(name);
+        case ColorSchemes::LIGHT: // v2, works with w10 titlebars
+            base.accent                = QColor(QSV("#719ccd"));
+            base.background            = QColor(QSV("#1a1a1a"));
+            base.background_fullscreen = QColor(QSV("#1a1a1a"));
+            base.folderview            = QColor(QSV("#f2f2f2"));
+            base.folderview_topbar     = QColor(QSV("#ffffff"));
+            base.icons                 = QColor(QSV("#656768"));
+            base.overlay               = QColor(QSV("#1a1a1a"));
+            base.overlay_text          = QColor(QSV("#d2d2d2"));
+            base.text                  = QColor(QSV("#353535"));
+            base.scrollbar             = QColor(QSV("#aaaaaa"));
+            base.widget                = QColor(QSV("#ffffff"));
+            base.widget_border         = QColor(QSV("#c3c3c3"));
+            base.tid                   = static_cast<int>(name);
             break;
-        case COLORS_DARKBLUE:
-            base.background = "#18191a";
-            base.background_fullscreen = "#18191a";
-            base.text = "#cdd2d7";
-            base.icons = "#babec3";
-            base.widget = "#232629";
-            base.widget_border = "#26292d";
-            base.accent = "#336ca5";
-            base.folderview = "#232629";
-            base.folderview_topbar = "#31363b";
-            base.scrollbar = "#4f565c";
-            base.overlay_text = "#d2d2d2";
-            base.overlay = "#1a1a1a";
-            base.tid = static_cast<int>(name);
+        case ColorSchemes::DARKBLUE:
+            base.background            = QColor(QSV("#18191a"));
+            base.background_fullscreen = QColor(QSV("#18191a"));
+            base.text                  = QColor(QSV("#cdd2d7"));
+            base.icons                 = QColor(QSV("#babec3"));
+            base.widget                = QColor(QSV("#232629"));
+            base.widget_border         = QColor(QSV("#26292d"));
+            base.accent                = QColor(QSV("#336ca5"));
+            base.folderview            = QColor(QSV("#232629"));
+            base.folderview_topbar     = QColor(QSV("#31363b"));
+            base.scrollbar             = QColor(QSV("#4f565c"));
+            base.overlay_text          = QColor(QSV("#d2d2d2"));
+            base.overlay               = QColor(QSV("#1a1a1a"));
+            base.tid                   = static_cast<int>(name);
             break;
-        case COLORS_BLACK:
-            base.background = "#000000";
-            base.background_fullscreen = "#000000";
-            base.text = "#b0b0b0";
-            base.icons = "#999999";
-            base.widget = "#080808";
-            base.widget_border = "#181818";
-            base.accent = "#5a5a5a";
-            base.folderview = "#111111";
-            base.folderview_topbar = "#111111";
-            base.scrollbar = "#343434";
-            base.overlay_text = "#999999";
-            base.overlay = "#000000";
-            base.tid = static_cast<int>(name);
+        case ColorSchemes::BLACK:
+            base.background            = QColor(QSV("#000000"));
+            base.background_fullscreen = QColor(QSV("#000000"));
+            base.text                  = QColor(QSV("#b0b0b0"));
+            base.icons                 = QColor(QSV("#999999"));
+            base.widget                = QColor(QSV("#080808"));
+            base.widget_border         = QColor(QSV("#181818"));
+            base.accent                = QColor(QSV("#5a5a5a"));
+            base.folderview            = QColor(QSV("#111111"));
+            base.folderview_topbar     = QColor(QSV("#111111"));
+            base.scrollbar             = QColor(QSV("#343434"));
+            base.overlay_text          = QColor(QSV("#999999"));
+            base.overlay               = QColor(QSV("#000000"));
+            base.tid                   = static_cast<int>(name);
             break;
-        case COLORS_DARK:
-            base.background = "#1a1a1a";
-            base.background_fullscreen = "#1a1a1a";
-            base.text = "#b6b6b6";
-            base.icons = "#a4a4a4";
-            base.widget = "#252525";
-            base.widget_border = "#2c2c2c";
-            base.accent = "#8c9b81";
-            base.folderview = "#242424";
-            base.folderview_topbar = "#383838";
-            base.scrollbar = "#5a5a5a";
-            base.overlay_text = "#d2d2d2";
-            base.overlay = "#1a1a1a";
-            base.tid = static_cast<int>(name);
+        case ColorSchemes::DARK:
+            base.background            = QColor(QSV("#1a1a1a"));
+            base.background_fullscreen = QColor(QSV("#1a1a1a"));
+            base.text                  = QColor(QSV("#b6b6b6"));
+            base.icons                 = QColor(QSV("#a4a4a4"));
+            base.widget                = QColor(QSV("#252525"));
+            base.widget_border         = QColor(QSV("#2c2c2c"));
+            base.accent                = QColor(QSV("#8c9b81"));
+            base.folderview            = QColor(QSV("#242424"));
+            base.folderview_topbar     = QColor(QSV("#383838"));
+            base.scrollbar             = QColor(QSV("#5a5a5a"));
+            base.overlay_text          = QColor(QSV("#d2d2d2"));
+            base.overlay               = QColor(QSV("#1a1a1a"));
+            base.tid                   = static_cast<int>(name);
             break;
     }
     return ColorScheme(base);
@@ -88,11 +88,11 @@ ColorScheme::ColorScheme() {
     tid = -1;
 }
 
-ColorScheme::ColorScheme(BaseColorScheme base) {
+ColorScheme::ColorScheme(BaseColorScheme const &base) {
     setBaseColors(base);
 }
 
-void ColorScheme::setBaseColors(BaseColorScheme base) {
+void ColorScheme::setBaseColors(BaseColorScheme const &base) {
     background            = base.background;
     background_fullscreen = base.background_fullscreen;
     text                  = base.text;

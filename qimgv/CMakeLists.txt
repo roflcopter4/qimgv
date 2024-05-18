@@ -105,10 +105,11 @@ if(WIN32) # Check if we are on Windows
     elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
         set(CMAKE_CXX_FLAGS "$ENV{CMAKE_CXX_FLAGS} -Wno-shift-negative-value")
         set(CMAKE_EXE_LINKER_FLAGS "$ENV{CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
-        target_link_options(qimgv PRIVATE "-mwindows")
+        #target_link_options(qimgv PRIVATE "-mwindows")
     else()
         message(SEND_ERROR "You are using an unsupported Windows compiler! (Not MSVC or GCC)")
     endif(MSVC)
+	target_link_libraries(qimgv PRIVATE "dbghelp.lib")
 elseif(APPLE)
     set_target_properties(qimgv PROPERTIES
         MACOSX_BUNDLE YES
@@ -121,6 +122,12 @@ elseif(APPLE)
     set_source_files_properties(${APPLE_ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 elseif(NOT UNIX)
     message(SEND_ERROR "You are on an unsupported platform! (Not Win32, Mac OS X or Unix)")
+endif()
+
+if (MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FI Common.h")
+else ()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include Common.h")
 endif()
 
 ## INSTALLATION

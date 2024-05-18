@@ -15,12 +15,15 @@ class ContextMenu : public QWidget {
     Q_OBJECT
 public:
     explicit ContextMenu(QWidget *parent = nullptr);
-    ~ContextMenu();
+    ~ContextMenu() override;
     void setImageEntriesEnabled(bool mode);
 
 public slots:
     void showAt(QPoint pos);
     void setGeometry(QRect geom);
+
+    void show();
+    void hide();
 
 private:
     Ui::ContextMenu *ui;
@@ -32,9 +35,9 @@ signals:
     void showScriptSettings();
 
 protected:
-    void mousePressEvent(QMouseEvent*);
-    void paintEvent(QPaintEvent *);
-    void keyPressEvent(QKeyEvent *event);
+    void mousePressEvent(QMouseEvent*) override;
+    void paintEvent(QPaintEvent *) override;
+    void keyPressEvent(QKeyEvent *event) override;
 private slots:
     void switchToMainPage();
     void switchToScriptsPage();

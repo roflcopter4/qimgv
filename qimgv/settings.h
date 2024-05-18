@@ -19,302 +19,301 @@
 #include "utils/script.h"
 #include "themestore.h"
 
-enum SortingMode {
-    SORT_NAME,
-    SORT_NAME_DESC,
-    SORT_SIZE,
-    SORT_SIZE_DESC,
-    SORT_TIME,
-    SORT_TIME_DESC
+#include "Common.h"
+
+enum class SortingMode : uint8_t {
+    NAME,
+    NAME_DESC,
+    SIZE,
+    SIZE_DESC,
+    TIME,
+    TIME_DESC,
 };
 
-enum ImageFitMode {
-    FIT_WINDOW,
-    FIT_WIDTH,
-    FIT_ORIGINAL,
-    FIT_FREE
+enum class ImageFitMode : uint8_t {
+    WINDOW,
+    WIDTH,
+    ORIGINAL,
+    FREE,
 };
 
-enum PanelPosition {
-    PANEL_TOP,
-    PANEL_BOTTOM,
-    PANEL_LEFT,
-    PANEL_RIGHT
+enum class PanelPosition : uint8_t {
+    TOP,
+    BOTTOM,
+    LEFT,
+    RIGHT,
 };
 
-enum ScalingFilter {
-    QI_FILTER_NEAREST,
-    QI_FILTER_BILINEAR,
-    QI_FILTER_CV_BILINEAR_SHARPEN,
-    QI_FILTER_CV_CUBIC,
-    QI_FILTER_CV_CUBIC_SHARPEN
+enum class ScalingFilter : uint8_t {
+    NEAREST,
+    BILINEAR,
+    CV_BILINEAR_SHARPEN,
+    CV_CUBIC,
+    CV_CUBIC_SHARPEN,
 };
 
-enum ZoomIndicatorMode {
-    INDICATOR_DISABLED,
-    INDICATOR_ENABLED,
-    INDICATOR_AUTO
+enum class ZoomIndicatorMode : uint8_t {
+    DISABLED,
+    ENABLED,
+    AUTO,
 };
 
-enum DefaultCropAction {
-    ACTION_CROP,
-    ACTION_CROP_SAVE
+enum class DefaultCropAction : uint8_t {
+    CROP,
+    CROP_SAVE,
 };
 
-enum ImageFocusPoint {
-    FOCUS_TOP,
-    FOCUS_CENTER,
-    FOCUS_CURSOR
+enum class ImageFocusPoint : uint8_t {
+    TOP,
+    CENTER,
+    CURSOR,
 };
 
-enum ImageScrolling {
-    SCROLL_NONE,
-    SCROLL_BY_TRACKPAD,
-    SCROLL_BY_TRACKPAD_AND_WHEEL
+enum class ImageScrolling : uint8_t {
+    NONE,
+    BY_TRACKPAD,
+    BY_TRACKPAD_AND_WHEEL,
 };
 
-enum ViewMode {
-    MODE_DOCUMENT,
-    MODE_FOLDERVIEW
+enum class ViewMode : uint8_t {
+    DOCUMENT,
+    FOLDERVIEW,
 };
 
-enum FolderEndAction {
-    FOLDER_END_NO_ACTION,
-    FOLDER_END_LOOP,
-    FOLDER_END_GOTO_ADJACENT
+enum class FolderEndAction : uint8_t {
+    NOTHING,
+    LOOP,
+    GOTO_ADJACENT,
 };
 
-enum FolderViewMode {
-    FV_SIMPLE,
-    FV_EXTENDED,
-    FV_EXT_FOLDERS
+enum class FolderViewMode : uint8_t {
+    SIMPLE,
+    EXTENDED,
+    EXT_FOLDERS,
 };
 
-enum ThumbPanelStyle {
-    TH_PANEL_SIMPLE,
-    TH_PANEL_EXTENDED
+enum class ThumbPanelStyle : uint8_t {
+    SIMPLE,
+    EXTENDED,
 };
 
-class Settings : public QObject
+
+class Settings final : public QObject
 {
     Q_OBJECT
-public:
-    static Settings* getInstance();
-    ~Settings();
-    QStringList supportedMimeTypes();
-    QList<QByteArray> supportedFormats();
-    QString supportedFormatsFilter();
-    QString supportedFormatsRegex();
-    int panelPreviewsSize();
-    void setPanelPreviewsSize(int size);
-    bool usePreloader();
-    void setUsePreloader(bool mode);
-    bool fullscreenMode();
-    void setFullscreenMode(bool mode);
-    ImageFitMode imageFitMode();
-    void setImageFitMode(ImageFitMode mode);
-    QRect windowGeometry();
-    void setWindowGeometry(QRect geometry);
-    bool playVideoSounds();
-    void setPlayVideoSounds(bool mode);
-    void setVolume(int vol);
-    int volume();
-    QString thumbnailCacheDir();
-    QString mpvBinary();
-    void setMpvBinary(QString path);
-    PanelPosition panelPosition();
-    void setPanelPosition(PanelPosition);
-    bool loopSlideshow();
-    void setLoopSlideshow(bool mode);
-    void readShortcuts(QMap<QString, QString> &shortcuts);
-    void saveShortcuts(const QMap<QString, QString> &shortcuts);
-    bool panelEnabled();
-    void setPanelEnabled(bool mode);
-    int lastDisplay();
-    void setLastDisplay(int display);
-    bool squareThumbnails();
-    void setSquareThumbnails(bool mode);
-    bool transparencyGrid();
-    void setTransparencyGrid(bool mode);
-    bool enableSmoothScroll();
-    void setEnableSmoothScroll(bool mode);
-    bool useThumbnailCache();
-    void setUseThumbnailCache(bool mode);
-    QStringList savedPaths();
-    void setSavedPaths(QStringList paths);
-    QString tmpDir();
-    int thumbnailerThreadCount();
-    void setThumbnailerThreadCount(int count);
-    bool smoothUpscaling();
-    void setSmoothUpscaling(bool mode);
-    void setExpandImage(bool mode);
-    bool expandImage();
-    ScalingFilter scalingFilter();
-    void setScalingFilter(ScalingFilter mode);
-    bool smoothAnimatedImages();
-    void setSmoothAnimatedImages(bool mode);
-    bool panelFullscreenOnly();
-    void setPanelFullscreenOnly(bool mode);
-    QVersionNumber lastVersion();
-    void setLastVersion(QVersionNumber &ver);
-    void setShowChangelogs(bool mode);
-    bool showChangelogs();
-    qreal backgroundOpacity();
-    void setBackgroundOpacity(qreal value);
-    bool blurBackground();
-    void setBlurBackground(bool mode);
-    void setSortingMode(SortingMode mode);
-    SortingMode sortingMode();    
-    void readScripts(QMap<QString, Script> &scripts);
-    void saveScripts(const QMap<QString, Script> &scripts);
-    int folderViewIconSize();
-    void setFolderViewIconSize(int value);
 
-    bool firstRun();
-    void setFirstRun(bool mode);
+  public:
+    static Settings *getInstance();
+    ~Settings() override;
 
-    void sync();
-    bool cursorAutohide();
-    void setCursorAutohide(bool mode);
+    Settings(Settings const &)                = delete;
+    Settings(Settings &&) noexcept            = delete;
+    Settings &operator=(Settings const &)     = delete;
+    Settings &operator=(Settings &&) noexcept = delete;
 
-    bool infoBarFullscreen();
-    void setInfoBarFullscreen(bool mode);
-    bool infoBarWindowed();
-    void setInfoBarWindowed(bool mode);
+    ND auto supportedMimeTypes() const -> QStringList;
+    ND auto supportedFormats() const -> QList<QByteArray>;
+    ND auto supportedFormatsFilter() const -> QString;
+    ND auto supportedFormatsRegex() const -> QString;
+    ND auto tmpDir() const -> QString;
+    ND auto thumbnailCacheDir() const -> QString;
+    ND auto videoFormats() const -> QMultiMap<QByteArray, QByteArray> const &;
 
-    bool windowTitleExtendedInfo();
-    void setWindowTitleExtendedInfo(bool mode);
-
-    bool maximizedWindow();
-    void setMaximizedWindow(bool mode);
-
-    bool keepFitMode();
-    void setKeepFitMode(bool mode);
-
-    int expandLimit();
-    void setExpandLimit(int value);
-
-    float zoomStep();
-    void setZoomStep(float value);
-    int JPEGSaveQuality();
-    void setJPEGSaveQuality(int value);
-    void setZoomIndicatorMode(ZoomIndicatorMode mode);
-    ZoomIndicatorMode zoomIndicatorMode();
-    void setFocusPointIn1to1Mode(ImageFocusPoint mode);
-    ImageFocusPoint focusPointIn1to1Mode();
-    void setDefaultCropAction(DefaultCropAction mode);
-    DefaultCropAction defaultCropAction();
-    bool placesPanel();
-    void setPlacesPanel(bool mode);
-
-    QStringList bookmarks();
-    void setBookmarks(QStringList paths);
-    bool placesPanelBookmarksExpanded();
-    void setPlacesPanelBookmarksExpanded(bool mode);
-    bool placesPanelTreeExpanded();
-    void setPlacesPanelTreeExpanded(bool mode);
-
-    void setSlideshowInterval(int ms);
-    int slideshowInterval();
-
-    ImageScrolling imageScrolling();
-    void setImageScrolling(ImageScrolling mode);
-
-    int placesPanelWidth();
-    void setPlacesPanelWidth(int width);
-
-    ViewMode defaultViewMode();
-    void setDefaultViewMode(ViewMode mode);
-
-    FolderEndAction folderEndAction();
-    void setFolderEndAction(FolderEndAction mode);
-
-    const ColorScheme& colorScheme();
-    void setColorScheme(ColorScheme scheme);
-    void setColorTid(int tid);
-
-    bool videoPlayback();
-    void setVideoPlayback(bool mode);
-
-    bool useSystemColorScheme();
-    void setUseSystemColorScheme(bool mode);
+    ND bool printLandscape() const;
+       void setPrintLandscape(bool mode);
+    ND bool printPdfDefault() const;
+       void setPrintPdfDefault(bool mode);
+    ND bool printColor() const;
+       void setPrintColor(bool mode);
+    ND bool printFitToPage() const;
+       void setPrintFitToPage(bool mode);
+    ND auto lastPrinter() const -> QString;
+       void setLastPrinter(QString const &name);
+    ND auto language() const -> QString;
+       void setLanguage(QString const &lang);
+    ND auto zoomLevels() const -> QString;
+       void setZoomLevels(QString const &levels);
+    ND auto colorScheme() const -> ColorScheme const &;
+       void setColorScheme(ColorScheme const &scheme);
+       void setColorTid(int tid);
+       void setColorTid(ColorSchemes tid);
 
     void loadStylesheet();
+    void readShortcuts(QMap<QString, QString> &shortcuts);
+    void saveShortcuts(QMap<QString, QString> const &shortcuts);
+    void readScripts(QMap<QString, Script> &scripts);
+    void saveScripts(QMap<QString, Script> const &scripts);
+    void sync();
+    ND bool unlockMinZoom() const;
 
-    bool showSaveOverlay();
-    void setShowSaveOverlay(bool mode);
-    bool confirmDelete();
-    void setConfirmDelete(bool mode);
-    bool confirmTrash();
-    void setConfirmTrash(bool mode);
+    ND auto mpvBinary() const -> QString;
+       void setMpvBinary(QString const &path);
+    ND int  panelPreviewsSize() const;
+       void setPanelPreviewsSize(int size);
+    ND bool usePreloader() const;
+       void setUsePreloader(bool mode);
+    ND bool fullscreenMode() const;
+       void setFullscreenMode(bool mode);
+    ND auto imageFitMode() const -> ImageFitMode;
+       void setImageFitMode(ImageFitMode mode);
+    ND auto windowGeometry() const -> QRect;
+       void setWindowGeometry(QRect geometry);
+    ND bool playVideoSounds() const;
+       void setPlayVideoSounds(bool mode);
+    ND int  volume() const;
+       void setVolume(int vol);
+    ND auto panelPosition() const -> PanelPosition;
+       void setPanelPosition(PanelPosition);
+    ND bool loopSlideshow() const;
+       void setLoopSlideshow(bool mode);
+    ND bool panelEnabled() const;
+       void setPanelEnabled(bool mode);
+    ND int  lastDisplay() const;
+       void setLastDisplay(int display);
+    ND bool squareThumbnails() const;
+       void setSquareThumbnails(bool mode);
+    ND bool transparencyGrid() const;
+       void setTransparencyGrid(bool mode);
+    ND bool enableSmoothScroll() const;
+       void setEnableSmoothScroll(bool mode);
+    ND bool useThumbnailCache() const;
+       void setUseThumbnailCache(bool mode);
+    ND auto savedPaths() const -> QStringList;
+       void setSavedPaths(QStringList const &paths);
+    ND int  thumbnailerThreadCount() const;
+       void setThumbnailerThreadCount(int count);
+    ND bool smoothUpscaling() const;
+       void setSmoothUpscaling(bool mode);
+    ND bool expandImage() const;
+       void setExpandImage(bool mode);
+    ND auto scalingFilter() const -> ScalingFilter;
+       void setScalingFilter(ScalingFilter mode);
+    ND bool smoothAnimatedImages() const;
+       void setSmoothAnimatedImages(bool mode);
+    ND bool panelFullscreenOnly() const;
+       void setPanelFullscreenOnly(bool mode);
+    ND auto lastVersion() const -> QVersionNumber;
+       void setLastVersion(QVersionNumber const &ver);
+    ND bool showChangelogs() const;
+       void setShowChangelogs(bool mode);
+    ND auto backgroundOpacity() const -> qreal;
+       void setBackgroundOpacity(qreal value);
+    ND bool blurBackground() const;
+       void setBlurBackground(bool mode);
+    ND auto sortingMode() const -> SortingMode;
+       void setSortingMode(SortingMode mode);
+    ND int  folderViewIconSize() const;
+       void setFolderViewIconSize(int value);
+    ND bool firstRun() const;
+       void setFirstRun(bool mode);
+    ND bool cursorAutohide() const;
+       void setCursorAutohide(bool mode);
+    ND bool infoBarFullscreen() const;
+       void setInfoBarFullscreen(bool mode);
+    ND bool infoBarWindowed() const;
+       void setInfoBarWindowed(bool mode);
+    ND bool windowTitleExtendedInfo() const;
+       void setWindowTitleExtendedInfo(bool mode);
+    ND bool maximizedWindow() const;
+       void setMaximizedWindow(bool mode);
+    ND bool keepFitMode() const;
+       void setKeepFitMode(bool mode);
+    ND int  expandLimit() const;
+       void setExpandLimit(int value);
+    ND auto zoomStep() const -> float;
+       void setZoomStep(float value);
+    ND int  JPEGSaveQuality() const;
+       void setJPEGSaveQuality(int value);
+    ND bool placesPanel() const;
+       void setPlacesPanel(bool mode);
+    ND bool placesPanelBookmarksExpanded() const;
+       void setPlacesPanelBookmarksExpanded(bool mode);
+    ND bool placesPanelTreeExpanded() const;
+       void setPlacesPanelTreeExpanded(bool mode);
+    ND int  slideshowInterval() const;
+       void setSlideshowInterval(int ms);
+    ND int  placesPanelWidth() const;
+       void setPlacesPanelWidth(int width);
+    ND auto bookmarks() const -> QStringList;
+       void setBookmarks(QStringList const &paths);
+    ND auto zoomIndicatorMode() const -> ZoomIndicatorMode;
+       void setZoomIndicatorMode(ZoomIndicatorMode mode);
+    ND auto focusPointIn1to1Mode() const -> ImageFocusPoint;
+       void setFocusPointIn1to1Mode(ImageFocusPoint mode);
+    ND auto defaultCropAction() const -> DefaultCropAction;
+       void setDefaultCropAction(DefaultCropAction mode);
+    ND auto imageScrolling() const -> ImageScrolling;
+       void setImageScrolling(ImageScrolling mode);
+    ND auto defaultViewMode() const -> ViewMode;
+       void setDefaultViewMode(ViewMode mode);
+    ND auto folderEndAction() const -> FolderEndAction;
+       void setFolderEndAction(FolderEndAction mode);
+    ND bool videoPlayback() const;
+       void setVideoPlayback(bool mode);
+    ND bool showSaveOverlay() const;
+       void setShowSaveOverlay(bool mode);
+    ND bool confirmDelete() const;
+       void setConfirmDelete(bool mode);
+    ND bool confirmTrash() const;
+       void setConfirmTrash(bool mode);
+    ND auto folderViewMode() const -> FolderViewMode;
+       void setFolderViewMode(FolderViewMode mode);
+    ND bool unloadThumbs() const;
+       void setUnloadThumbs(bool mode);
+    ND auto thumbPanelStyle() const -> ThumbPanelStyle;
+       void setThumbPanelStyle(ThumbPanelStyle mode);
+    ND bool jxlAnimation() const;
+       void setJxlAnimation(bool mode);
+    ND bool absoluteZoomStep();
+       void setAbsoluteZoomStep(bool mode);
+    ND bool autoResizeWindow() const;
+       void setAutoResizeWindow(bool mode);
+    ND int  autoResizeLimit() const;
+       void setAutoResizeLimit(int percent);
+    ND bool panelPinned() const;
+       void setPanelPinned(bool mode);
+    ND int  memoryAllocationLimit() const;
+       void setMemoryAllocationLimit(int limitMB);
+    ND bool panelCenterSelection() const;
+       void setPanelCenterSelection(bool mode);
+       void setUseFixedZoomLevels(bool mode);
+    ND bool useFixedZoomLevels() const;
+       void setUnlockMinZoom(bool mode);
+    ND bool sortFolders() const;
+       void setSortFolders(bool mode);
+    ND bool trackpadDetection() const;
+       void setTrackpadDetection(bool mode);
+    ND bool useSystemColorScheme() const;
+       void setUseSystemColorScheme(bool mode);
 
-    FolderViewMode folderViewMode();
-    void setFolderViewMode(FolderViewMode mode);
+    ND static auto defaultZoomLevels() -> QString;
 
-    const QMultiMap<QByteArray, QByteArray> videoFormats() const;
-
-    bool printLandscape();
-    void setPrintLandscape(bool mode);
-    bool printPdfDefault();
-    void setPrintPdfDefault(bool mode);
-    bool printColor();
-    void setPrintColor(bool mode);
-    bool printFitToPage();
-    void setPrintFitToPage(bool mode);
-    QString lastPrinter();
-    void setLastPrinter(QString name);
-    bool unloadThumbs();
-    void setUnloadThumbs(bool mode);
-    ThumbPanelStyle thumbPanelStyle();
-    void setThumbPanelStyle(ThumbPanelStyle mode);
-
-    bool jxlAnimation();
-    void setJxlAnimation(bool mode);
-    bool absoluteZoomStep();
-    void setAbsoluteZoomStep(bool mode);
-    bool autoResizeWindow();
-    void setAutoResizeWindow(bool mode);
-    int autoResizeLimit();
-    void setAutoResizeLimit(int percent);
-
-    bool panelPinned();
-    void setPanelPinned(bool mode);
-    int memoryAllocationLimit();
-    void setMemoryAllocationLimit(int limitMB);
-    bool panelCenterSelection();
-    void setPanelCenterSelection(bool mode);
-    QString language();
-    void setLanguage(QString lang);
-
-    QString defaultZoomLevels();
-    QString zoomLevels();
-    void setZoomLevels(QString levels);
-    bool useFixedZoomLevels();
-    void setUseFixedZoomLevels(bool mode);
-    bool unlockMinZoom();
-    void setUnlockMinZoom(bool mode);
-    bool sortFolders();
-    void setSortFolders(bool mode);
-    bool trackpadDetection();
-    void setTrackpadDetection(bool mode);
-
-private:
+  private:
     explicit Settings(QObject *parent = nullptr);
-    QSettings *settingsConf, *stateConf, *themeConf;
-    QDir *mTmpDir, *mThumbCacheDir, *mConfDir;
+
+#ifndef Q_OS_LINUX
+    QDir mConfDir;
+#endif
+    QDir mTmpDir;
+    QDir mThumbCacheDir;
+
     ColorScheme mColorScheme;
+    QSettings   settingsConf;
+    QSettings   stateConf;
+    QSettings   themeConf;
+
     QMultiMap<QByteArray, QByteArray> mVideoFormatsMap; // [mimetype, format]
+
     void loadTheme();
     void saveTheme();
     void createColorVariants();
-
     void setupCache();
     void fillVideoFormats();
 
-signals:
+  signals:
     void settingsChanged();
 
-public slots:
+  public slots:
     void sendChangeNotification();
 
 };

@@ -1,34 +1,38 @@
 #include "changelogwindow.h"
 #include "ui_changelogwindow.h"
 
-ChangelogWindow::ChangelogWindow(FloatingWidgetContainer *parent) :
-    OverlayWidget(parent),
-    ui(new Ui::ChangelogWindow)
+ChangelogWindow::ChangelogWindow(FloatingWidgetContainer *parent)
+    : OverlayWidget(parent),
+      ui(new Ui::ChangelogWindow)
 {
     ui->setupUi(this);
     hide();
     setPosition(FloatingWidgetPosition::CENTER);
-    connect(ui->closeButton, &QPushButton::pressed,  this, &ChangelogWindow::hide);
+    connect(ui->closeButton, &QPushButton::pressed, this, &ChangelogWindow::hide);
     connect(ui->shutUpButton, &QPushButton::pressed, this, &ChangelogWindow::hideAndShutUp);
 
-    if(parent)
+    if (parent)
         setContainerSize(parent->size());
 }
 
-void ChangelogWindow::hideAndShutUp() {
+void ChangelogWindow::hideAndShutUp()
+{
     settings->setShowChangelogs(false);
     hide();
 }
 
-ChangelogWindow::~ChangelogWindow() {
+ChangelogWindow::~ChangelogWindow()
+{
     delete ui;
 }
 
-void ChangelogWindow::setText(QString text) {
+void ChangelogWindow::setText(QString const &text)
+{
     ui->textBrowser->setText(text);
 }
 
-void ChangelogWindow::paintEvent(QPaintEvent *) {
+void ChangelogWindow::paintEvent(QPaintEvent *)
+{
     QStyleOption opt;
     opt.initFrom(this);
     QPainter p(this);
@@ -36,25 +40,29 @@ void ChangelogWindow::paintEvent(QPaintEvent *) {
 }
 
 // move to base class?
-void ChangelogWindow::wheelEvent(QWheelEvent *event) {
+void ChangelogWindow::wheelEvent(QWheelEvent *event)
+{
     event->accept();
 }
 
-void ChangelogWindow::keyPressEvent(QKeyEvent *event) {
+void ChangelogWindow::keyPressEvent(QKeyEvent *event)
+{
     quint32 nativeScanCode = event->nativeScanCode();
-    QString key = actionManager->keyForNativeScancode(nativeScanCode);
-    if(key == "Esc") {
+    QString key            = actionManager->keyForNativeScancode(nativeScanCode);
+    if (key == QSV("Esc")) {
         event->accept();
         hide();
     }
 }
 
-void ChangelogWindow::show() {
+void ChangelogWindow::show()
+{
     OverlayWidget::show();
     ui->closeButton->setFocus();
 }
 
-void ChangelogWindow::hide() {
+void ChangelogWindow::hide()
+{
     ui->closeButton->clearFocus();
     ui->shutUpButton->clearFocus();
     OverlayWidget::hide();

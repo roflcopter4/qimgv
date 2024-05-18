@@ -41,75 +41,82 @@
 #include <KWindowEffects>
 #endif
 
+#include "Common.h"
+
 struct CurrentInfo {
-    int index;
-    int fileCount;
+    int     index;
+    int     fileCount;
     QString fileName;
     QString filePath;
     QString directoryName;
     QString directoryPath;
-    QSize imageSize;
-    qint64 fileSize;
-    bool slideshow;
-    bool shuffle;
-    bool edited;
+    QSize   imageSize;
+    qint64  fileSize;
+    bool    slideshow;
+    bool    shuffle;
+    bool    edited;
 };
 
-enum ActiveSidePanel {
-    SIDEPANEL_CROP,
-    SIDEPANEL_NONE
+enum class ActiveSidePanel : uint8_t {
+    NONE,
+    CROP,
 };
 
-class MW : public FloatingWidgetContainer
+class MW Q_DECL_FINAL : public FloatingWidgetContainer
 {
     Q_OBJECT
-public:
+
+  public:
     explicit MW(QWidget *parent = nullptr);
-    bool isCropPanelActive();
-    void onScalingFinished(std::unique_ptr<QPixmap>scaled);
+
+    bool isCropPanelActive() const;
+    void onScalingFinished(std::unique_ptr<QPixmap> scaled);
     void showImage(std::unique_ptr<QPixmap> pixmap);
-    void showAnimation(std::shared_ptr<QMovie> movie);
-    void showVideo(QString file);
+    void showAnimation(std::shared_ptr<QMovie> const &movie);
+    void showVideo(QString const &file);
 
-    void setCurrentInfo(int fileIndex, int fileCount, QString filePath, QString fileName, QSize imageSize, qint64 fileSize, bool slideshow, bool shuffle, bool edited);
-    void setExifInfo(QMap<QString, QString>);
-    std::shared_ptr<FolderViewProxy> getFolderView();
-    std::shared_ptr<ThumbnailStripProxy> getThumbnailPanel();
+    void setCurrentInfo(int fileIndex, int fileCount, QString const &filePath, QString const &fileName, QSize imageSize, qint64 fileSize, bool slideshow, bool shuffle, bool edited);
+    void setExifInfo(QMap<QString, QString> const &);
 
-    ViewMode currentViewMode();
+    std::shared_ptr<FolderViewProxy>     getFolderView();
+    std::shared_ptr<ThumbnailStripProxy> getThumbnailPanel() const;
 
-    bool showConfirmation(QString title, QString msg);
-    DialogResult fileReplaceDialog(QString source, QString target, FileReplaceMode mode, bool multiple);
+    ND ViewMode currentViewMode() const;
 
-private:
-    std::shared_ptr<ViewerWidget> viewerWidget;
-    QHBoxLayout layout;
-    QTimer windowGeometryChangeTimer;
-    int currentDisplay;
+    bool showConfirmation(QString const &title, QString const &msg);
 
-    bool cropPanelActive, showInfoBarFullscreen, showInfoBarWindowed, maximized;
-    std::shared_ptr<DocumentWidget> docWidget;
-    std::shared_ptr<FolderViewProxy> folderView;
-    std::shared_ptr<CentralWidget> centralWidget;
+    DialogResult fileReplaceDialog(QString const &source, QString const &dest, FileReplaceMode mode, bool multiple);
+
+  private:
+    int  currentDisplay;
+    bool cropPanelActive;
+    bool showInfoBarFullscreen;
+    bool showInfoBarWindowed;
+    bool maximized;
+
+    PanelPosition   panelPosition;
     ActiveSidePanel activeSidePanel;
-    SidePanel *sidePanel;
-    CropPanel *cropPanel;
-    CropOverlay *cropOverlay;
-    SaveConfirmOverlay *saveOverlay;
-    ChangelogWindow *changelogWindow;
+    QHBoxLayout     layout;
+    QTimer          windowGeometryChangeTimer;
 
-    CopyOverlay *copyOverlay;
+    std::shared_ptr<ViewerWidget>    viewerWidget;
+    std::shared_ptr<DocumentWidget>  docWidget;
+    std::shared_ptr<FolderViewProxy> folderView;
+    std::shared_ptr<CentralWidget>   centralWidget;
+    std::shared_ptr<InfoBarProxy>    infoBarWindowed;
 
-    RenameOverlay *renameOverlay;
-
-    ImageInfoOverlayProxy *imageInfoOverlay;
-
-    ControlsOverlay *controlsOverlay;
+    SidePanel                  *sidePanel;
+    CropPanel                  *cropPanel;
+    CropOverlay                *cropOverlay;
+    SaveConfirmOverlay         *saveOverlay;
+    ChangelogWindow            *changelogWindow;
+    CopyOverlay                *copyOverlay;
+    RenameOverlay              *renameOverlay;
+    ImageInfoOverlayProxy      *imageInfoOverlay;
+    ControlsOverlay            *controlsOverlay;
     FullscreenInfoOverlayProxy *infoBarFullscreen;
-    std::shared_ptr<InfoBarProxy> infoBarWindowed;
-    FloatingMessageProxy *floatingMessage;
+    FloatingMessageProxy       *floatingMessage;
 
-    PanelPosition panelPosition;
     CurrentInfo info;
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     QDesktopWidget desktopWidget;
@@ -122,7 +129,7 @@ private:
 
     void applyWindowedBackground();
     void applyFullscreenBackground();
-    void mouseDoubleClickEvent(QMouseEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
 
     void setupCropPanel();
     void setupCopyOverlay();
@@ -131,7 +138,7 @@ private:
     void preShowResize(QSize sz);
     void setInteractionEnabled(bool mode);
 
-private slots:
+  private slots:
     void updateCurrentDisplay();
     void readSettings();
     void adaptToWindowState();
@@ -139,23 +146,23 @@ private slots:
     void onInfoUpdated();
     void showScriptSettings();
 
-protected:
-    void mouseMoveEvent(QMouseEvent *event);
-    bool event(QEvent *event);
-    void paintEvent(QPaintEvent *event);
-    void closeEvent(QCloseEvent *event);
-    void dragEnterEvent(QDragEnterEvent *e);
-    void dropEvent(QDropEvent *event);
-    void resizeEvent(QResizeEvent *event);
+  protected:
+    void mouseMoveEvent(QMouseEvent *event) override;
+    bool event(QEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *e) override;
+    void dropEvent(QDropEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
-    void mousePressEvent(QMouseEvent *event);
-    void keyPressEvent(QKeyEvent *event);
-    void wheelEvent(QWheelEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void leaveEvent(QEvent *event);
+    void mousePressEvent(QMouseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void leaveEvent(QEvent *event) override;
 
-   // bool focusNextPrevChild(bool);
-signals:
+    // bool focusNextPrevChild(bool);
+  signals:
     void opened(QString);
     void fullscreenStateChanged(bool);
     void copyRequested(QString);
@@ -193,12 +200,12 @@ signals:
     void volumeUp();
     void volumeDown();
     void toggleTransparencyGrid();
-    void droppedIn(const QMimeData*, QObject*);
+    void droppedIn(const QMimeData *, QObject *);
     void draggedOut();
     void setLoopPlayback(bool);
     void playbackFinished();
 
-public slots:
+  public slots:
     void setupFullUi();
     void showDefault();
     void showCropPanel();
@@ -206,13 +213,13 @@ public slots:
     void toggleFolderView();
     void enableFolderView();
     void enableDocumentView();
-    void showOpenDialog(QString path);
-    void showSaveDialog(QString filePath);
-    QString getSaveFileName(QString fileName);
+    void showOpenDialog(QString const &path);
+    void showSaveDialog(QString const &filePath);
+    auto getSaveFileName(QString const &fileName) -> QString;
     void showResizeDialog(QSize initialSize);
     void showSettings();
     void triggerFullScreen();
-    void showMessageDirectory(QString dirName);
+    void showMessageDirectory(QString const &dirName);
     void showMessageDirectoryEnd();
     void showMessageDirectoryStart();
     void showMessageFitWindow();
@@ -221,11 +228,11 @@ public slots:
     void showFullScreen();
     void showWindowed();
     void triggerCopyOverlay();
-    void showMessage(QString text);
-    void showMessage(QString text, int duration);
-    void showMessageSuccess(QString text);
-    void showWarning(QString text);
-    void showError(QString text);
+    void showMessage(QString const &text);
+    void showMessage(QString const &text, int duration);
+    void showMessageSuccess(QString const &text);
+    void showWarning(QString const &text);
+    void showError(QString const &text);
     void triggerMoveOverlay();
     void closeFullScreenOrExit();
     void close();
@@ -234,7 +241,7 @@ public slots:
     void showSaveOverlay();
     void hideSaveOverlay();
     void showChangelogWindow();
-    void showChangelogWindow(QString text);
+    void showChangelogWindow(QString const &text);
     void fitWindow();
     void fitWidth();
     void fitOriginal();
@@ -243,12 +250,12 @@ public slots:
     void showContextMenu();
     void onSortingChanged(SortingMode);
     void toggleImageInfoOverlay();
-    void toggleRenameOverlay(QString currentName);
+    void toggleRenameOverlay(QString const &currentName);
     void setFilterNearest();
     void setFilterBilinear();
     void setFilter(ScalingFilter filter);
     void toggleScalingFilter();
-    void setDirectoryPath(QString path);
+    void setDirectoryPath(QString const &path);
     void toggleLockZoom();
     void toggleLockView();
     void toggleFullscreenInfoBar();

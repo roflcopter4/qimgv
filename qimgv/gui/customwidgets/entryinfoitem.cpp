@@ -16,7 +16,7 @@ EntryInfoItem::EntryInfoItem(QWidget *parent) : QWidget(parent) {
     valueLabel.setCursor(Qt::IBeamCursor);
 }
 
-void EntryInfoItem::setInfo(QString _name, QString _value) {
+void EntryInfoItem::setInfo(QString const &_name, QString const &_value) {
     name = _name;
     value = _value;
     nameLabel.setText(name);

@@ -1,19 +1,21 @@
+#include "Common.h"
 #include "infobar.h"
 #include "ui_infobar.h"
+
 
 InfoBar::InfoBar(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::InfoBar)
 {
     ui->setupUi(this);
-    ui->path->setText("No file opened.");
+    ui->path->setText(QS("No file opened."));
 }
 
 InfoBar::~InfoBar() {
     delete ui;
 }
 
-void InfoBar::setInfo(QString position, QString fileName, QString info) {
+void InfoBar::setInfo(QString const &position, QString const &fileName, QString const &info) {
     ui->index->setText(position);
     ui->path->setText(fileName);
     ui->info->setText(info);

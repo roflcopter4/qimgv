@@ -11,21 +11,21 @@ QString ShortcutBuilder::fromEvent(QInputEvent *event) {
     } else if(mouseEvent) {
         return processMouseEvent(mouseEvent);
     }
-    return "";
+    return QS("");
 }
 //------------------------------------------------------------------------------
 QString ShortcutBuilder::processWheelEvent(QWheelEvent *event) {
     QString sequence;
     if(event->angleDelta() == QPoint(0,0))
-        return "";
+        return QS("");
     if(event->angleDelta().ry() < 0)
-        sequence = "WheelDown";
+        sequence = QS("WheelDown");
     else if(event->angleDelta().ry() > 0)
-        sequence = "WheelUp";
+        sequence = QS("WheelUp");
     if(event->angleDelta().rx() < 0) // fallback to horizontal
-        sequence = "WheelDown";
+        sequence = QS("WheelDown");
     else if(event->angleDelta().rx() > 0)
-        sequence = "WheelUp";
+        sequence = QS("WheelUp");
     sequence.prepend(modifierKeys(event));
     return sequence;
 }
@@ -36,20 +36,20 @@ QString ShortcutBuilder::processWheelEvent(QWheelEvent *event) {
 QString ShortcutBuilder::processMouseEvent(QMouseEvent *event) {
     QString sequence;
     if(event->button() == Qt::LeftButton)
-        sequence = "LMB";
+        sequence = QS("LMB");
     else if(event->button() == Qt::RightButton)
-        sequence = "RMB";
+        sequence = QS("RMB");
     else if(event->button() == Qt::MiddleButton)
-        sequence = "MiddleButton";
+        sequence = QS("MiddleButton");
     else if(event->button() == Qt::XButton1)
-        sequence = "XButton1";
+        sequence = QS("XButton1");
     else if(event->button() == Qt::XButton2)
-        sequence = "XButton2";
+        sequence = QS("XButton2");
 
     sequence.prepend(modifierKeys(event));
 
     if(event->type() == QEvent::MouseButtonDblClick) {
-        sequence.append("_DoubleClick");
+        sequence.append(QS("_DoubleClick"));
         return sequence;
     }
     if((event->type() == QEvent::MouseButtonPress   && event->button() != Qt::RightButton) ||
@@ -58,13 +58,13 @@ QString ShortcutBuilder::processMouseEvent(QMouseEvent *event) {
         return sequence;
     }
 
-    return "";
+    return QS("");
 }
 //------------------------------------------------------------------------------
 QString ShortcutBuilder::processKeyEvent(QKeyEvent *event) {
     if(event->type() != QEvent::KeyPress || isModifier(Qt::Key(event->key())))
-        return "";
-#if defined(__linux__) || defined(_WIN32)
+        return QS("");
+#if defined(__linux__) || defined(Q_OS_WIN32)
     return fromEventNativeScanCode(event);
 #else
     return fromEventText(event);
@@ -77,7 +77,7 @@ QString ShortcutBuilder::modifierKeys(QInputEvent *event){
     while(i.hasNext()) {
         i.next();
         if(event->modifiers().testFlag(i.value()))
-            mods.append(i.key() + "+");
+            mods.append(i.key() + QS("+"));
     }
     return mods;
 }
@@ -120,7 +120,7 @@ QString ShortcutBuilder::fromEventNativeScanCode(QKeyEvent *event) {
         sequence.prepend(modifierKeys(event));
     }
 
-    //qDebug() << "RESULT:" << sequence;
+    //qDebug() << QS("RESULT:") << sequence;
     return sequence;
 }
 //------------------------------------------------------------------------------
@@ -131,14 +131,14 @@ QString ShortcutBuilder::fromEventText(QKeyEvent *event) {
     // Keybinds will work only on the same layout they were added (except non-printables).
     QString sequence = QVariant::fromValue(Qt::Key(event->key())).toString();
     if(!sequence.isEmpty()) {
-        // remove "Key_" at the beginning
+        // remove QS("Key_") at the beginning
         sequence.remove(0,4);
         // rename some keys to match the ones from inputmap
         // just a bandaid
-        if(sequence == "Return")
-            sequence = "Enter";
-        else if(sequence == "Escape")
-            sequence = "Esc";
+        if(sequence == QSV("Return"))
+            sequence = QS("Enter");
+        else if(sequence == QSV("Escape"))
+            sequence = QS("Esc");
     } else {
         // got an unknown key (usually something from non-eng layout)
         // use it's text value instead

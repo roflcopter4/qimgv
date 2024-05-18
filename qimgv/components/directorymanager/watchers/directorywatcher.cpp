@@ -1,21 +1,21 @@
 #include "directorywatcher_p.h"
 
-#ifdef __linux__
-#include "linux/linuxwatcher.h"
-#elif _WIN32
-#include "windows/windowswatcher.h"
-#elif __unix__
-// TODO: implement this
-#include "dummywatcher.h"
-#elif __APPLE__
-// TODO: implement this
-#include "dummywatcher.h"
-#else
-// TODO: implement this
-#include "dummywatcher.h"
-#endif
+#include <utils/stuff.h>
 
-#define TAG         "[DirectoryWatcher]"
+#if defined __linux__
+# include "linux/linuxwatcher.h"
+#elif defined Q_OS_WIN32
+# include "windows/windowswatcher.h"
+#elif defined Q_OS_APPLE
+  // TODO: implement this
+# include "dummywatcher.h"
+#elif defined Q_OS_UNIX
+  // TODO: implement this
+# include "dummywatcher.h"
+#else
+  // TODO: implement this
+# include "dummywatcher.h"
+#endif
 
 DirectoryWatcherPrivate::DirectoryWatcherPrivate(DirectoryWatcher* qq, WatcherWorker* w) :
     q_ptr(qq),
@@ -34,13 +34,13 @@ DirectoryWatcher *DirectoryWatcher::newInstance()
 {
     DirectoryWatcher* watcher;
 
-#ifdef __linux__
+#if defined Q_OS_LINUX
         watcher = new LinuxWatcher();
-#elif _WIN32
+#elif defined Q_OS_WIN32
         watcher = new WindowsWatcher();
-#elif __unix__
+#elif defined Q_OS_APPLE
         watcher = new DummyWatcher();
-#elif __APPLE__
+#elif defined Q_OS_UNIX
         watcher = new DummyWatcher();
 #else
         watcher = new DummyWatcher();

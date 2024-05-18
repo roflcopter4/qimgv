@@ -1,10 +1,10 @@
 #pragma once
 
-#include <QWidget>
 #include <QDebug>
-#include <QStyleOption>
 #include <QPainter>
+#include <QStyleOption>
 #include <QVBoxLayout>
+#include <QWidget>
 #include "gui/customwidgets/sidepanelwidget.h"
 
 namespace Ui {
@@ -15,20 +15,21 @@ class SidePanel : public QWidget
 {
     Q_OBJECT
 
-public:
+  public:
     explicit SidePanel(QWidget *parent = nullptr);
-    ~SidePanel();
+    ~SidePanel() override;
 
     void setWidget(SidePanelWidget *w);
-    SidePanelWidget* widget();
+    SidePanelWidget *widget() const;
 
-public slots:
+  public slots:
     void show();
     void hide();
 
-protected:
-    void paintEvent(QPaintEvent *);
-private:
-    Ui::SidePanel *ui;
+  protected:
+    void paintEvent(QPaintEvent *) override;
+
+  private:
+    Ui::SidePanel   *ui;
     SidePanelWidget *mWidget;
 };

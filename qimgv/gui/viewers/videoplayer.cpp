@@ -1,13 +1,17 @@
 #include "videoplayer.h"
 
-VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
+VideoPlayer::VideoPlayer(QWidget *parent)
+    : QWidget(parent)
+{
     setFocusPolicy(Qt::NoFocus);
 }
 
-void VideoPlayer::show() {
+void VideoPlayer::show()
+{
     QWidget::show();
 }
 
-void VideoPlayer::hide() {
+void VideoPlayer::hide()
+{
     QWidget::hide();
 }

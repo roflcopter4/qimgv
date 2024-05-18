@@ -34,11 +34,11 @@ class FileReplaceDialog : public QDialog {
 
 public:
     explicit FileReplaceDialog(QWidget *parent = nullptr);
-    ~FileReplaceDialog();
+    ~FileReplaceDialog() override;
 
     void setMode(FileReplaceMode mode);
     void setMulti(bool);
-    DialogResult getResult();
+    DialogResult getResult() const;
 
     void setSource(QString src);
     void setDestination(QString dst);

@@ -1,23 +1,24 @@
 #pragma once
 
-#include <QPixmap>
 #include <QDebug>
+#include <QPixmap>
 
-enum ShrIcon {
-    SHR_ICON_ERROR,
-    SHR_ICON_LOADING
+enum class ShrIcon {
+    Error,
+    Loading,
 };
 
 class SharedResources
 {
-public:
+  public:
     SharedResources();
-    static SharedResources* getInstance();
     ~SharedResources();
+    static SharedResources *getInstance();
 
     QPixmap *getPixmap(ShrIcon icon, qreal dpr);
-private:
-    QPixmap *mLoadingIcon72 = nullptr;
+
+  private:
+    QPixmap *mLoadingIcon72      = nullptr;
     QPixmap *mLoadingErrorIcon72 = nullptr;
 };
 

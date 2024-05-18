@@ -3,16 +3,16 @@
 ControlsOverlay::ControlsOverlay(FloatingWidgetContainer *parent) :
     FloatingWidget(parent)
 {
-    folderViewButton = new ActionButton("folderView", ":/res/icons/common/buttons/panel/folderview20.png", 30);
-    folderViewButton->setAccessibleName("ButtonSmall");
-    settingsButton = new ActionButton("openSettings", ":/res/icons/common/buttons/panel/settings20.png", 30);
-    settingsButton->setAccessibleName("ButtonSmall");
-    closeButton = new ActionButton("exit", ":/res/icons/common/buttons/panel/close16.png", 30);
-    closeButton->setAccessibleName("ButtonSmall");
+    folderViewButton = new ActionButton(QS("folderView"), QS(":/res/icons/common/buttons/panel/folderview20.png"), 30);
+    folderViewButton->setAccessibleName(QS("ButtonSmall"));
+    settingsButton = new ActionButton(QS("openSettings"), QS(":/res/icons/common/buttons/panel/settings20.png"), 30);
+    settingsButton->setAccessibleName(QS("ButtonSmall"));
+    closeButton = new ActionButton(QS("exit"), QS(":/res/icons/common/buttons/panel/close16.png"), 30);
+    closeButton->setAccessibleName(QS("ButtonSmall"));
 
     QWidget *horizontalLineWidget = new QWidget;
     horizontalLineWidget->setFixedSize(5, 22);
-    horizontalLineWidget->setStyleSheet(QString("background-color: #707070; margin-left: 2px; margin-right: 2px"));
+    horizontalLineWidget->setStyleSheet(QString(QS("background-color: #707070; margin-left: 2px; margin-right: 2px")));
 
     layout.setContentsMargins(0,0,0,0);
     this->setContentsMargins(0,0,0,0);

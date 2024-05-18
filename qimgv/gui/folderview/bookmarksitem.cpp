@@ -1,6 +1,6 @@
 #include "bookmarksitem.h"
 
-BookmarksItem::BookmarksItem(QString _dirName, QString _dirPath, QWidget *parent)
+BookmarksItem::BookmarksItem(QString const &_dirName, QString const &_dirPath, QWidget *parent)
     : QWidget(parent), dirName(_dirName), dirPath(_dirPath), mHighlighted(false)
 {
     this->setContentsMargins(0,0,0,0);
@@ -11,15 +11,15 @@ BookmarksItem::BookmarksItem(QString _dirName, QString _dirPath, QWidget *parent
     spacer = new QSpacerItem(16, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 
     folderIconWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    folderIconWidget.setIconPath(":/res/icons/common/menuitem/folder16.png");
+    folderIconWidget.setIconPath(QS(":/res/icons/common/menuitem/folder16.png"));
     folderIconWidget.setMinimumSize(16, 16);
     folderIconWidget.installEventFilter(this);
 
-    removeItemButton.setIconPath(":/res/icons/common/buttons/panel-small/remove12.png");
+    removeItemButton.setIconPath(QS(":/res/icons/common/buttons/panel-small/remove12.png"));
     removeItemButton.setMinimumSize(16, 16);
     removeItemButton.installEventFilter(this);
 
-    removeItemButton.setAccessibleName("BookmarksItemRemoveLabel");
+    removeItemButton.setAccessibleName(QS("BookmarksItemRemoveLabel"));
 
     connect(&removeItemButton, &IconButton::clicked, this, &BookmarksItem::onRemoveClicked);
 

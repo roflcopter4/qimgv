@@ -1,7 +1,8 @@
+#include "Common.h"
 #include "infobarproxy.h"
 
 InfoBarProxy::InfoBarProxy(QWidget *parent) : QWidget(parent), infoBar(nullptr) {
-    setAccessibleName("InfoBarProxy");
+    setAccessibleName(QS("InfoBarProxy"));
     this->setMinimumHeight(23);
     this->setMaximumHeight(23);
     layout.setContentsMargins(0,0,0,0);
@@ -13,7 +14,7 @@ InfoBarProxy::~InfoBarProxy() {
         infoBar->deleteLater();
 }
 
-void InfoBarProxy::setInfo(QString position, QString fileName, QString info) {
+void InfoBarProxy::setInfo(QString const &position, QString const &fileName, QString const &info) {
     if(infoBar) {
         infoBar->setInfo(position, fileName, info);
     } else {

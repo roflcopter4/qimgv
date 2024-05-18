@@ -2,93 +2,97 @@
 
 Actions *appActions = nullptr;
 
-Actions::Actions() {
+Actions::Actions()
+{
     init();
 }
 
-Actions *Actions::getInstance() {
-    if(!appActions)
-        appActions  = new Actions();
+Actions *Actions::getInstance()
+{
+    if (!appActions)
+        appActions = new Actions();
     return appActions;
 }
 
-const QMap<QString, QVersionNumber> &Actions::getMap() {
+QMap<QString, QVersionNumber> const &Actions::getMap() const &
+{
     return mActions;
 }
 
-QList<QString> Actions::getList() {
+QList<QString> Actions::getList() const
+{
     return mActions.keys();
 }
 
-void Actions::init() {
-    mActions.insert("nextImage", QVersionNumber(0,6,2));
-    mActions.insert("prevImage", QVersionNumber(0,6,2));
-    mActions.insert("toggleFullscreen", QVersionNumber(0,6,2));
-    mActions.insert("fitWindow", QVersionNumber(0,6,2));
-    mActions.insert("fitWidth", QVersionNumber(0,6,2));
-    mActions.insert("fitNormal", QVersionNumber(0,6,2));
-    mActions.insert("toggleFitMode", QVersionNumber(0,6,2));
-    mActions.insert("resize", QVersionNumber(0,6,2));
-    mActions.insert("rotateRight", QVersionNumber(0,6,2));
-    mActions.insert("rotateLeft", QVersionNumber(0,6,2));
-    mActions.insert("scrollUp", QVersionNumber(0,6,2));
-    mActions.insert("scrollDown", QVersionNumber(0,6,2));
-    mActions.insert("scrollLeft", QVersionNumber(0,6,2));
-    mActions.insert("scrollRight", QVersionNumber(0,6,2));
-    mActions.insert("zoomIn", QVersionNumber(0,6,2));
-    mActions.insert("zoomOut", QVersionNumber(0,6,2));
-    mActions.insert("zoomInCursor", QVersionNumber(0,6,2));
-    mActions.insert("zoomOutCursor", QVersionNumber(0,6,2));
-    mActions.insert("open", QVersionNumber(0,6,2));
-    mActions.insert("save", QVersionNumber(0,6,2));
-    mActions.insert("saveAs", QVersionNumber(0,6,2));
-    mActions.insert("setWallpaper", QVersionNumber(0,9,3));
-    mActions.insert("crop", QVersionNumber(0,6,2));
-    mActions.insert("removeFile", QVersionNumber(0,6,2));
-    mActions.insert("copyFile", QVersionNumber(0,6,2));
-    mActions.insert("moveFile", QVersionNumber(0,6,2));
-    mActions.insert("jumpToFirst", QVersionNumber(0,6,2));
-    mActions.insert("jumpToLast", QVersionNumber(0,6,2));
-    mActions.insert("openSettings", QVersionNumber(0,6,2));
-    mActions.insert("closeFullScreenOrExit", QVersionNumber(0,6,2));
-    mActions.insert("exit", QVersionNumber(0,6,2));
-    mActions.insert("flipH", QVersionNumber(0,6,3));
-    mActions.insert("flipV", QVersionNumber(0,6,3));
-    mActions.insert("folderView", QVersionNumber(0,6,85));
-    mActions.insert("pauseVideo", QVersionNumber(0,6,85));
-    mActions.insert("frameStep", QVersionNumber(0,6,85));
-    mActions.insert("frameStepBack", QVersionNumber(0,6,85));
-    mActions.insert("folderView", QVersionNumber(0,6,85));
-    mActions.insert("documentView", QVersionNumber(0,6,88));
-    mActions.insert("toggleFolderView", QVersionNumber(0,6,88));
-    mActions.insert("moveToTrash", QVersionNumber(0,6,89));
-    mActions.insert("reloadImage", QVersionNumber(0,7,80));
-    mActions.insert("copyFileClipboard", QVersionNumber(0,7,80));
-    mActions.insert("copyPathClipboard", QVersionNumber(0,7,80));
-    mActions.insert("renameFile", QVersionNumber(0,7,80));
-    mActions.insert("contextMenu", QVersionNumber(0,7,81));
-    mActions.insert("toggleTransparencyGrid", QVersionNumber(0,7,82));
-    mActions.insert("sortByName", QVersionNumber(0,7,83));
-    mActions.insert("sortByTime", QVersionNumber(0,7,83));
-    mActions.insert("sortBySize", QVersionNumber(0,7,83));
-    mActions.insert("toggleImageInfo", QVersionNumber(0,7,84));
-    mActions.insert("toggleShuffle", QVersionNumber(0,8,3));
-    mActions.insert("toggleScalingFilter", QVersionNumber(0,8,3));
-    mActions.insert("toggleMute", QVersionNumber(0,8,7));
-    mActions.insert("volumeUp", QVersionNumber(0,8,7));
-    mActions.insert("volumeDown", QVersionNumber(0,8,7));
-    mActions.insert("toggleSlideshow", QVersionNumber(0,8,81));
-    mActions.insert("showInDirectory", QVersionNumber(0,8,82));
-    mActions.insert("goUp", QVersionNumber(0,9,2));
-    mActions.insert("discardEdits", QVersionNumber(0,9,2));
-    mActions.insert("nextDirectory", QVersionNumber(0,9,2));
-    mActions.insert("prevDirectory", QVersionNumber(0,9,2));
-    mActions.insert("seekVideoForward", QVersionNumber(0,9,2));
-    mActions.insert("seekVideoBackward", QVersionNumber(0,9,2));
-    mActions.insert("lockZoom", QVersionNumber(0,9,2));
-    mActions.insert("lockView", QVersionNumber(0,9,2));
-    mActions.insert("print", QVersionNumber(1,0,0));
-    mActions.insert("toggleFullscreenInfoBar", QVersionNumber(1,0,0));
-    mActions.insert("pasteFile", QVersionNumber(1,0,3));
+void Actions::init()
+{
+    mActions.insert(QS("nextImage"),               QVersionNumber(0, 6,  2));
+    mActions.insert(QS("prevImage"),               QVersionNumber(0, 6,  2));
+    mActions.insert(QS("toggleFullscreen"),        QVersionNumber(0, 6,  2));
+    mActions.insert(QS("fitWindow"),               QVersionNumber(0, 6,  2));
+    mActions.insert(QS("fitWidth"),                QVersionNumber(0, 6,  2));
+    mActions.insert(QS("fitNormal"),               QVersionNumber(0, 6,  2));
+    mActions.insert(QS("toggleFitMode"),           QVersionNumber(0, 6,  2));
+    mActions.insert(QS("resize"),                  QVersionNumber(0, 6,  2));
+    mActions.insert(QS("rotateRight"),             QVersionNumber(0, 6,  2));
+    mActions.insert(QS("rotateLeft"),              QVersionNumber(0, 6,  2));
+    mActions.insert(QS("scrollUp"),                QVersionNumber(0, 6,  2));
+    mActions.insert(QS("scrollDown"),              QVersionNumber(0, 6,  2));
+    mActions.insert(QS("scrollLeft"),              QVersionNumber(0, 6,  2));
+    mActions.insert(QS("scrollRight"),             QVersionNumber(0, 6,  2));
+    mActions.insert(QS("zoomIn"),                  QVersionNumber(0, 6,  2));
+    mActions.insert(QS("zoomOut"),                 QVersionNumber(0, 6,  2));
+    mActions.insert(QS("zoomInCursor"),            QVersionNumber(0, 6,  2));
+    mActions.insert(QS("zoomOutCursor"),           QVersionNumber(0, 6,  2));
+    mActions.insert(QS("open"),                    QVersionNumber(0, 6,  2));
+    mActions.insert(QS("save"),                    QVersionNumber(0, 6,  2));
+    mActions.insert(QS("saveAs"),                  QVersionNumber(0, 6,  2));
+    mActions.insert(QS("setWallpaper"),            QVersionNumber(0, 9,  3));
+    mActions.insert(QS("crop"),                    QVersionNumber(0, 6,  2));
+    mActions.insert(QS("removeFile"),              QVersionNumber(0, 6,  2));
+    mActions.insert(QS("copyFile"),                QVersionNumber(0, 6,  2));
+    mActions.insert(QS("moveFile"),                QVersionNumber(0, 6,  2));
+    mActions.insert(QS("jumpToFirst"),             QVersionNumber(0, 6,  2));
+    mActions.insert(QS("jumpToLast"),              QVersionNumber(0, 6,  2));
+    mActions.insert(QS("openSettings"),            QVersionNumber(0, 6,  2));
+    mActions.insert(QS("closeFullScreenOrExit"),   QVersionNumber(0, 6,  2));
+    mActions.insert(QS("exit"),                    QVersionNumber(0, 6,  2));
+    mActions.insert(QS("flipH"),                   QVersionNumber(0, 6,  3));
+    mActions.insert(QS("flipV"),                   QVersionNumber(0, 6,  3));
+    mActions.insert(QS("folderView"),              QVersionNumber(0, 6, 85));
+    mActions.insert(QS("pauseVideo"),              QVersionNumber(0, 6, 85));
+    mActions.insert(QS("frameStep"),               QVersionNumber(0, 6, 85));
+    mActions.insert(QS("frameStepBack"),           QVersionNumber(0, 6, 85));
+    mActions.insert(QS("folderView"),              QVersionNumber(0, 6, 85));
+    mActions.insert(QS("documentView"),            QVersionNumber(0, 6, 88));
+    mActions.insert(QS("toggleFolderView"),        QVersionNumber(0, 6, 88));
+    mActions.insert(QS("moveToTrash"),             QVersionNumber(0, 6, 89));
+    mActions.insert(QS("reloadImage"),             QVersionNumber(0, 7, 80));
+    mActions.insert(QS("copyFileClipboard"),       QVersionNumber(0, 7, 80));
+    mActions.insert(QS("copyPathClipboard"),       QVersionNumber(0, 7, 80));
+    mActions.insert(QS("renameFile"),              QVersionNumber(0, 7, 80));
+    mActions.insert(QS("contextMenu"),             QVersionNumber(0, 7, 81));
+    mActions.insert(QS("toggleTransparencyGrid"),  QVersionNumber(0, 7, 82));
+    mActions.insert(QS("sortByName"),              QVersionNumber(0, 7, 83));
+    mActions.insert(QS("sortByTime"),              QVersionNumber(0, 7, 83));
+    mActions.insert(QS("sortBySize"),              QVersionNumber(0, 7, 83));
+    mActions.insert(QS("toggleImageInfo"),         QVersionNumber(0, 7, 84));
+    mActions.insert(QS("toggleShuffle"),           QVersionNumber(0, 8,  3));
+    mActions.insert(QS("toggleScalingFilter"),     QVersionNumber(0, 8,  3));
+    mActions.insert(QS("toggleMute"),              QVersionNumber(0, 8,  7));
+    mActions.insert(QS("volumeUp"),                QVersionNumber(0, 8,  7));
+    mActions.insert(QS("volumeDown"),              QVersionNumber(0, 8,  7));
+    mActions.insert(QS("toggleSlideshow"),         QVersionNumber(0, 8, 81));
+    mActions.insert(QS("showInDirectory"),         QVersionNumber(0, 8, 82));
+    mActions.insert(QS("goUp"),                    QVersionNumber(0, 9,  2));
+    mActions.insert(QS("discardEdits"),            QVersionNumber(0, 9,  2));
+    mActions.insert(QS("nextDirectory"),           QVersionNumber(0, 9,  2));
+    mActions.insert(QS("prevDirectory"),           QVersionNumber(0, 9,  2));
+    mActions.insert(QS("seekVideoForward"),        QVersionNumber(0, 9,  2));
+    mActions.insert(QS("seekVideoBackward"),       QVersionNumber(0, 9,  2));
+    mActions.insert(QS("lockZoom"),                QVersionNumber(0, 9,  2));
+    mActions.insert(QS("lockView"),                QVersionNumber(0, 9,  2));
+    mActions.insert(QS("print"),                   QVersionNumber(1, 0,  0));
+    mActions.insert(QS("toggleFullscreenInfoBar"), QVersionNumber(1, 0,  0));
+    mActions.insert(QS("pasteFile"),               QVersionNumber(1, 0,  3));
 }
-

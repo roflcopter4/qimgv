@@ -7,24 +7,24 @@
 class Loader : public QObject {
     Q_OBJECT
 public:
-    explicit Loader();
-    std::shared_ptr<Image> load(QString path);
-    void loadAsyncPriority(QString path);
-    void loadAsync(QString path);
+    explicit                      Loader();
+    static std::shared_ptr<Image> load(QString const &path);
+    void                          loadAsyncPriority(QString const &path);
+    void                          loadAsync(QString const &path);
 
     void clearTasks();
     bool isBusy() const;
-    bool isLoading(QString path);
+    bool isLoading(QString const &path) const;
 private:
     QHash<QString, LoaderRunnable*> tasks;
-    QThreadPool *pool;    
-    void clearPool();
-    void doLoadAsync(QString path, int priority);
+    QThreadPool *                   pool;    
+    void                            clearPool();
+    void                            doLoadAsync(QString const &path, int priority);
 
 signals:
     void loadFinished(std::shared_ptr<Image>, const QString &path);
     void loadFailed(const QString &path);
 
 private slots:
-    void onLoadFinished(std::shared_ptr<Image>, const QString&);
+    void onLoadFinished(std::shared_ptr<Image> const &, const QString&);
 };
