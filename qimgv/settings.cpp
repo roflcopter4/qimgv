@@ -300,12 +300,12 @@ void Settings::setColorTid(ColorSchemes tid)
 }
 
 //------------------------------------------------------------------------------
-void Settings::fillVideoFormats()
-{
-    mVideoFormatsMap.insert("video/webm", "webm");
-    mVideoFormatsMap.insert("video/mp4", "mp4");
-    mVideoFormatsMap.insert("video/mpeg", "mpg");
-    mVideoFormatsMap.insert("video/mpeg", "mpeg");
+void Settings::fillVideoFormats() {
+    mVideoFormatsMap.insert("video/webm",       "webm");
+    mVideoFormatsMap.insert("video/mp4",        "mp4");
+    mVideoFormatsMap.insert("video/mp4",        "m4v");
+    mVideoFormatsMap.insert("video/mpeg",       "mpg");
+    mVideoFormatsMap.insert("video/mpeg",       "mpeg");
     mVideoFormatsMap.insert("video/x-matroska", "mkv");
     mVideoFormatsMap.insert("video/x-ms-wmv", "wmv");
     mVideoFormatsMap.insert("video/x-msvideo", "avi");
@@ -1281,7 +1281,7 @@ void Settings::setPanelCenterSelection(bool mode)
 //------------------------------------------------------------------------------
 QString Settings::language() const
 {
-    return settingsConf.value(QSV("language"), QS("")).toString();
+    return settingsConf.value(QSV("language"), QS("en_US")).toString();
 }
 
 void Settings::setLanguage(QString const &lang)

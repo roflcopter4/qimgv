@@ -71,13 +71,67 @@ void ScriptManager::runCommandDetached(QString const &cmd)
     QProcess::startDetached(cmdSplit.takeAt(0), cmdSplit);
 }
 
+// TODO: what if filename contains one of the tags?
 void ScriptManager::processArguments(QStringList &cmd, std::shared_ptr<Image> const &img)
 {
-    static constexpr auto file = QSV("%file%");
-    for (auto &i : cmd)
-        if (i == file)
-            i = img->filePath();
+    QString field = QS("%file%");
+    for (auto &i : cmd) {
+        if(i.contains(field))
+            i.replace(field, img->filePath());
+#ifdef _WIN32
+        // force "\" as a directory separator
+        i.replace("/", "\\");
+        i.replace("\\\\", "\\");
+#endif
+    }
 }
+
+// thanks stackoverflow
+QStringList ScriptManager::splitCommandLine(QString const &cmdLine)
+{
+    QStringList list;
+    QString arg;
+    bool escape = false;
+    enum { Idle, Arg, QuotedArg } state = Idle;
+    foreach (QChar const c, cmdLine) {
+        //if(!escape && c == '\\') {
+        //    escape = true;
+        //    continue;
+        //}
+        switch (state) {
+        case Idle:
+            if(!escape && c == '"')
+                state = QuotedArg;
+            else if (escape || !c.isSpace()) {
+                arg += c;
+                state = Arg;
+            }
+            break;
+        case Arg:
+            if(!escape && c == '"')
+                state = QuotedArg;
+            else if(escape || !c.isSpace())
+                arg += c;
+            else {
+                list << arg;
+                arg.clear();
+                state = Idle;
+            }
+            break;
+        case QuotedArg:
+            if(!escape && c == '"')
+                state = arg.isEmpty() ? Idle : Arg;
+            else
+                arg += c;
+            break;
+        }
+        escape = false;
+    }
+    if(!arg.isEmpty())
+        list << arg;
+    return list;
+}
+
 
 bool ScriptManager::scriptExists(QString const &scriptName) const
 {

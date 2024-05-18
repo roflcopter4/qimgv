@@ -287,9 +287,21 @@ void DocumentInfo::loadExifTags()
             }
         }
     }
-    // No exception was caught, which may cause QT crash
-    catch (Exiv2::Error &e) {
-        qDebug() << QSV("Caught Exiv2 exception:") << e.what();
+
+// this should work with both 0.28 and <0.28
+# if not EXIV2_TEST_VERSION(0, 28, 0)
+#  ifdef _WIN32
+    catch (Exiv2::BasicError<wchar_t>& e) {
+        qDebug() << QSV("Caught Exiv2::BasicError exception:\n") << e.what();
+    }
+#  else
+    catch (Exiv2::BasicError<char>& e) {
+        qDebug() << QSV("Caught Exiv2::BasicError exception:\n") << e.what();
+    }
+#  endif
+# endif
+    catch (Exiv2::Error& e) {
+        qDebug() << QSV("Caught Exiv2 exception:\n") << e.what();
     }
 #endif
 }

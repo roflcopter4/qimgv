@@ -17,6 +17,9 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS LinguistTools)
 set(TS_FILES
     "zh_CN.ts"
     "uk_UA.ts"
+    "es_ES.ts"
+    "de_DE.ts"
+    "fr_FR.ts"
 )
 list(TRANSFORM TS_FILES PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/res/translations/)
 set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION ${PROJECT_BINARY_DIR}/qimgv/translations)

@@ -117,7 +117,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
     zoomIndGrp.addButton(ui->zoomIndicatorOn);
 
     // readable language names
+    langs.insert(QS("de_DE"), QS("Deutsch"));
     langs.insert(QS("en_US"), QS("English"));
+    langs.insert(QS("es_ES"), QS("Español"));
+    langs.insert(QS("fr_FR"), QS("Français"));
     langs.insert(QS("uk_UA"), QS("Українська"));
     langs.insert(QS("zh_CN"), QS("简体中文"));
     // fill langs combobox, sorted by locale
