@@ -804,14 +804,14 @@ QTreeView::branch:!has-children:!hover:adjoins-item:!selected {
     background: transparent;
 }
 
-QTreeView::branch:has-children:!has-siblings:closed,
-QTreeView::branch:closed:has-children:has-siblings {
+
+QTreeView::branch:closed:has-children {
         border-image: none;
         image: url(:/res/icons/%icontheme%/other/collapsed.png)
 }
 
-QTreeView::branch:open:has-children:!has-siblings,
-QTreeView::branch:open:has-children:has-siblings {
+
+QTreeView::branch:open:has-children {
         border-image: none;
         image: url(:/res/icons/%icontheme%/other/expanded.png)
 }

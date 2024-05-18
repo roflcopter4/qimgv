@@ -19,3 +19,8 @@ release/
 *.user
 ui_settingsdialog.h
 Makefile
+/MSVC/
+/MSVC_2/
+/deb/
+.vs/
+bak/
