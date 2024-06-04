@@ -10,23 +10,27 @@
 class ControlsOverlay : public FloatingWidget
 {
     Q_OBJECT
-public:
+
+  public:
     explicit ControlsOverlay(FloatingWidgetContainer *parent);
 
-public slots:
+  public slots:
     void show();
 
-private:
-    QHBoxLayout layout;
-    ActionButton *closeButton, *settingsButton, *folderViewButton;
+  private:
+    QHBoxLayout             layout;
+    ActionButton           *closeButton;
+    ActionButton           *settingsButton;
+    ActionButton           *folderViewButton;
     QGraphicsOpacityEffect *fadeEffect;
-    QPropertyAnimation *fadeAnimation;
-    QSize contentsSize();
-    void fitToContents();
+    QPropertyAnimation     *fadeAnimation;
 
-protected:
+    QSize contentsSize() const;
+    void  fitToContents();
+
+  protected:
     void recalculateGeometry() override;
-#if QT_VERSION > QT_VERSION_CHECK(6,0,0)
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
     void enterEvent(QEnterEvent *event) override;
 #else
     void enterEvent(QEvent *event);

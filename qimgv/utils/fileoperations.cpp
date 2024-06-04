@@ -3,7 +3,7 @@
 
 QString FileOperations::generateHash(QString const &str)
 {
-    return QString(QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Md5).toHex());
+    return QString::fromLatin1(QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Md5).toHex());
 }
 
 void FileOperations::removeFile(QString const &filePath, FileOpResult &result)
@@ -58,10 +58,10 @@ QString FileOperations::decodeResult(FileOpResult const &result)
         return QObject::tr("Directory is not empty.");
     case FileOpResult::NOTHING_TO_DO:
         return QObject::tr("Nothing to do.");
+    default:
     case FileOpResult::OTHER_ERROR:
         return QObject::tr("Other error.");
     }
-    return nullptr;
 }
 
 void FileOperations::copyFileTo(QString const &srcFilePath, QString const &destDirPath, bool force, FileOpResult &result)
@@ -104,7 +104,7 @@ void FileOperations::copyFileTo(QString const &srcFilePath, QString const &destD
             return;
         }
         // remove just in case it exists
-        tmpPath = destFile.absoluteFilePath() + QChar('_') + generateHash(destFile.absoluteFilePath());
+        tmpPath = destFile.absoluteFilePath() + u'_' + generateHash(destFile.absoluteFilePath());
         QFile::remove(tmpPath);
         // move backup
         QFile::rename(destFile.absoluteFilePath(), tmpPath);
@@ -178,7 +178,7 @@ void FileOperations::moveFileTo(QString const &srcFilePath, QString const &destD
             result = FileOpResult::DESTINATION_FILE_EXISTS;
             return;
         }
-        tmpPath = destFile.absoluteFilePath() + QChar('_') + generateHash(destFile.absoluteFilePath());
+        tmpPath = destFile.absoluteFilePath() + u'_' + generateHash(destFile.absoluteFilePath());
         QFile::remove(tmpPath);
         // move backup
         QFile::rename(destFile.absoluteFilePath(), tmpPath);
@@ -252,7 +252,7 @@ void FileOperations::rename(QString const &srcFilePath, QString const &newName, 
             result = FileOpResult::DESTINATION_FILE_EXISTS;
             return;
         }
-        tmpPath = newFilePath + QChar('_') + generateHash(newFilePath);
+        tmpPath = newFilePath + u'_' + generateHash(newFilePath);
         QFile::remove(tmpPath);
         // move dest file
         QFile::rename(newFilePath, tmpPath);

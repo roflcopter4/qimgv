@@ -44,7 +44,8 @@ void ControlsOverlay::show() {
     FloatingWidget::show();
 }
 
-QSize ControlsOverlay::contentsSize() {
+QSize ControlsOverlay::contentsSize() const
+{
     QSize newSize(0, 0);
     for(int i=0; i<layout.count(); i++) {
         newSize.setWidth(newSize.width() + layout.itemAt(i)->widget()->width());

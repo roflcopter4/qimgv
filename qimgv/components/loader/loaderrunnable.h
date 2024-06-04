@@ -1,18 +1,22 @@
 #pragma once
 
+#include "utils/imagefactory.h"
 #include <QObject>
 #include <QRunnable>
-#include "utils/imagefactory.h"
 
-class LoaderRunnable: public QObject, public QRunnable
+class LoaderRunnable : public QObject, public QRunnable
 {
     Q_OBJECT
-public:
-    LoaderRunnable(QString const &_path);
+
+  public:
+    explicit LoaderRunnable(QString path);
+
     void run() override;
-private:
-    QString path;
-signals:
+
+  private:
+    QString path_;
+
+  signals:
     void finished(std::shared_ptr<Image>, QString);
     void failed(QString);
 };

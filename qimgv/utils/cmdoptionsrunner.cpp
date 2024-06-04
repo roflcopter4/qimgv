@@ -1,38 +1,57 @@
 #include "cmdoptionsrunner.h"
 
-void CmdOptionsRunner::generateThumbs(QString const &dirPath, int size) {
-    if(size <= 50 || size > 400) {
-        qDebug() << QSV("Error: Invalid thumbnail size.");
-        qDebug() << QSV("Please specify a value between [50, 400].");
-        qDebug() << QSV("Example:  qimgv --gen-thumbs=/home/user/Pictures/ --gen-thumbs-size=120");
+#ifdef Q_OS_WIN32
+# define Win32OpenConsole() util::OpenConsoleWindow()
+# define Win32WaitForKey()  util::WaitForAnyKey()
+#else
+# define Win32OpenConsole() ((void)0)
+# define Win32WaitForKey()  ((void)0)
+#endif
+
+void CmdOptionsRunner::generateThumbs(QString const &dirPath, int size)
+{
+    Win32OpenConsole();
+
+    if (size <= 50 || size > 400) {
+        std::cout << reinterpret_cast<char const *>(
+            u8"Error: Invalid thumbnail size.\n"
+            u8"Please specify a value between [50, 400].\n"
+            u8"Example: qimgv --gen-thumbs=/home/user/Pictures/ --gen-thumbs-size=120\n");
+        Win32WaitForKey();
         QCoreApplication::exit(1);
         return;
     }
 
-    Thumbnailer th;
     DirectoryManager dm;
-    if(!dm.setDirectoryRecursive(dirPath)) {
-        qDebug() << QSV("Error: Invalid path.");
+    if (!dm.setDirectoryRecursive(dirPath)) {
+        QString out = QSV("Error: Invalid path \"") + dirPath + QSV("\".\n");
+        std::cout << out.toStdString();
+        Win32WaitForKey();
         QCoreApplication::exit(1);
         return;
     }
 
     auto list = dm.fileList();
+    QString out = QSV("Directory: ") + dirPath +
+                  QSV("\nFile count: ") + QString::number(list.size()) +
+                  QSV("\nSize limit:") + QString::number(size) + u'x' + QString::number(size) + QSV("px")+
+                  QSV("\nGenerating thumbnails...\n");
+    std::cout << out.toStdString();
 
-    qDebug() << QSV("\nDirectory:") << dirPath;
-    qDebug() << QSV("File count:") << list.size();
-    qDebug() << QSV("Size limit:") << size << QSV("x") << size << QSV("px");
-    qDebug() << QSV("Generating thumbnails...");
-
-    for(auto path : list)
+    Thumbnailer th;
+    for (auto const &path : list)
         th.getThumbnailAsync(path, size, false, false);
 
     th.waitForDone();
-    qDebug() << QSV("\nDone.");
+    std::cout << reinterpret_cast<char const *>(u8"Done\n");
+    Win32WaitForKey();
     QCoreApplication::quit();
 }
 
-void CmdOptionsRunner::showBuildOptions() {
+void CmdOptionsRunner::showBuildOptions()
+{
+    Win32OpenConsole();
+
     QStringList features;
 #ifdef USE_MPV
     features << QS("USE_MPV");
@@ -46,10 +65,17 @@ void CmdOptionsRunner::showBuildOptions() {
 #ifdef USE_OPENCV
     features << QS("USE_OPENCV");
 #endif
-    qDebug() << QSV("\nEnabled build options:");
-    if(!features.count())
-        qDebug() << QSV("   --");
-    for(int i = 0; i < features.count(); i++)
-        qDebug() << QSV("   ") << features.at(i);
+
+    QString out;
+    out += QSV(u"Enabled build options:");
+    if (!features.isEmpty()) {
+        for (auto const &s : features)
+            out += QSV("   ") + s;
+    } else {
+        out += QSV("   --");
+    }
+    std::cout << out.toStdString() << '\n';
+
+    Win32WaitForKey();
     QCoreApplication::quit();
 }

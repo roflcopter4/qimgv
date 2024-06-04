@@ -1,6 +1,6 @@
 #include "bookmarkswidget.h"
 
-BookmarksWidget::BookmarksWidget(QWidget *parent) : QWidget(parent), highlightedPath("") {
+BookmarksWidget::BookmarksWidget(QWidget *parent) : QWidget(parent), highlightedPath() {
     setAcceptDrops(true);
     setContentsMargins(0,0,0,0);
     layout.setContentsMargins(0,0,0,0);
@@ -42,7 +42,7 @@ void BookmarksWidget::removeBookmark(QString const &dirPath) {
         auto w = dynamic_cast<BookmarksItem*>(layout.itemAt(i)->widget());
         if(w && w->path() == dirPath) {
             if(highlightedPath == dirPath)
-                highlightedPath = "";
+                highlightedPath = QString();
             layout.removeWidget(w);
             disconnect(w, &BookmarksItem::clicked, this, &BookmarksWidget::bookmarkClicked);
             disconnect(w, &BookmarksItem::removeClicked, this, &BookmarksWidget::removeBookmark);
@@ -62,7 +62,7 @@ void BookmarksWidget::onPathChanged(QString const &path) {
         int currentIndex = paths.indexOf(highlightedPath);
         auto w = dynamic_cast<BookmarksItem*>(layout.itemAt(currentIndex)->widget());
         w->setHighlighted(false);
-        highlightedPath = "";
+        highlightedPath = QString();
     }
     if(paths.contains(path)) {
         int newIndex = paths.indexOf(path);

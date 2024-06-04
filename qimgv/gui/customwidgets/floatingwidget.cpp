@@ -2,7 +2,7 @@
 
 FloatingWidget::FloatingWidget(FloatingWidgetContainer *parent) : QWidget(parent), mAcceptKeyboardFocus(false)
 {
-    this->setAccessibleName(QS("OverlayWidget"));
+    setAccessibleName(QS("OverlayWidget"));
     connect(parent, &FloatingWidgetContainer::resized, this, &FloatingWidget::onContainerResized);
     hide();
 }
@@ -12,9 +12,9 @@ QSize FloatingWidget::containerSize() const
     return container;
 }
 
-void FloatingWidget::setContainerSize(QSize container)
+void FloatingWidget::setContainerSize(QSize newContainer)
 {
-    this->container = container;
+    container = newContainer;
     recalculateGeometry();
 }
 

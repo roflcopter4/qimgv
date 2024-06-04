@@ -26,7 +26,7 @@ class WindowsWorker : public WatcherWorker
     void notifyEvent(PFILE_NOTIFY_INFORMATION);
 
   private:
-    static constexpr DWORD POLL_RATE_MS = 1000;
+    static constexpr DWORD POLL_RATE_MS = 100;
 
     HANDLE hDir          = INVALID_HANDLE_VALUE;
     DWORD  bytesReturned = 0;

@@ -14,7 +14,7 @@ class WindowsWatcher final : public DirectoryWatcher
     explicit WindowsWatcher(QString const &path);
     ~WindowsWatcher() override = default;
 
-    void setWatchPath(QString const &path) override;
+    void setWatchPath(QString path) override;
 
   private:
     Q_DECLARE_PRIVATE(WindowsWatcher)

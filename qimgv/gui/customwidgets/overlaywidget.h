@@ -31,10 +31,11 @@ class OverlayWidget : public FloatingWidget
     explicit OverlayWidget(FloatingWidgetContainer *parent);
     ~OverlayWidget() override;
 
+    ND int horizontalMargin() const;
+    ND int verticalMargin() const;
+
     void setHorizontalMargin(int);
     void setVerticalMargin(int);
-    int  horizontalMargin();
-    int  verticalMargin();
     void setPosition(FloatingWidgetPosition pos);
     void setFadeDuration(int duration);
     void setFadeEnabled(bool mode);
@@ -53,8 +54,8 @@ class OverlayWidget : public FloatingWidget
     bool fadeEnabled;
 
   private slots:
-    void  setOpacity(qreal opacity);
-    qreal opacity() const;
+    void setOpacity(qreal opacity);
+    ND qreal opacity() const;
 
   protected:
     void recalculateGeometry() override;

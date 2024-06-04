@@ -2,7 +2,7 @@
 
 ContextMenuItem::ContextMenuItem(QWidget *parent)
     : MenuItem(parent),
-      mAction("")
+      mAction()
 {
 }
 

@@ -3,20 +3,22 @@
 #include <QSemaphore>
 #include "sourcecontainers/image.h"
 
-class CacheItem {
-public:
+class CacheItem
+{
+  public:
     CacheItem();
-    CacheItem(std::shared_ptr<Image> const &_contents);
+    explicit CacheItem(std::shared_ptr<Image> const &contents);
     ~CacheItem();
 
     std::shared_ptr<Image> getContents();
 
     void lock();
     void unlock();
+    ND int lockStatus() const;
 
-    int lockStatus();
-private:
+    DELETE_COPY_MOVE_CONSTRUCTORS(CacheItem);
+
+  private:
     std::shared_ptr<Image> contents;
-    QSemaphore *sem;
+    QSemaphore             *sem{};
 };
-

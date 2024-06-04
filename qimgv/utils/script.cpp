@@ -1,8 +1,8 @@
 #include "script.h"
 
 
-Script::Script(QString _path, bool _blocking)
-    : command(std::move(_path)),
-      blocking(_blocking)
+Script::Script(QString path, bool blocking)
+    : command(std::move(path)),
+      blocking(blocking)
 {}
 

@@ -1,39 +1,41 @@
 #pragma once
 
+#include <qmetatype.h>
 #include <QObject>
 
 class DirectoryWatcherPrivate;
 
-class DirectoryWatcher : public QObject {
+class DirectoryWatcher : public QObject
+{
     Q_OBJECT
-public:
-    static DirectoryWatcher* newInstance();
 
+  public:
+    static DirectoryWatcher *newInstance();
     ~DirectoryWatcher() override;
 
-    virtual void setWatchPath(const QString& watchPath);
-    virtual QString watchPath() const;
-    bool isObserving();
+    virtual void    setWatchPath(QString path);
+    ND virtual auto watchPath() const -> QString;
+    ND bool         isObserving() const;
 
-public Q_SLOTS:
+    DELETE_COPY_MOVE_CONSTRUCTORS(DirectoryWatcher);
+
+  public Q_SLOTS:
     void observe();
     void stopObserving();
 
-Q_SIGNALS:
-    void fileCreated(const QString& filePath);
-    void fileDeleted(const QString& filePath);
-    void fileRenamed(const QString& old, const QString& now);
-    void fileModified(const QString& filePath);
+  Q_SIGNALS:
+    void fileCreated(QString const &filePath);
+    void fileDeleted(QString const &filePath);
+    void fileRenamed(QString const &old, QString const &now);
+    void fileModified(QString const &filePath);
 
     void observingStarted();
     void observingStopped();
 
-protected:
+  protected:
     DirectoryWatcher(DirectoryWatcherPrivate *ptr);
-    DirectoryWatcherPrivate* d_ptr;
+    DirectoryWatcherPrivate *d_ptr;
 
-private:
+  private:
     Q_DECLARE_PRIVATE(DirectoryWatcher)
-
-
 };

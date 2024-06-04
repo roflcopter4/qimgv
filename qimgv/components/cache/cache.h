@@ -8,21 +8,22 @@
 #include "components/cache/cacheitem.h"
 #include "utils/imagefactory.h"
 
-class Cache {
-public:
-    explicit Cache();
-    bool     contains(QString const &path) const;
-    void     remove(QString const &path);
-    void     clear();
+class Cache
+{
+  public:
+    explicit Cache() = default;
 
+    void remove(QString const &path);
     bool insert(std::shared_ptr<Image> const &img);
     void trimTo(QStringList const &list);
+    bool release(QString const &path);
+    bool reserve(QString const &path);
+    void clear();
 
-    std::shared_ptr<Image> get(QString const &path);
-    bool                   release(QString const &path);
-    bool                   reserve(QString const &path);
-    const QList<QString>   keys() const;
+    ND auto get(QString const &path) const -> std::shared_ptr<Image>;
+    ND auto keys() const -> QList<QString>;
+    ND bool contains(QString const &path) const;
 
-private:
-    QMap<QString, CacheItem*> items;
+  private:
+    QMap<QString, CacheItem *> items;
 };

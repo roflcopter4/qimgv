@@ -1,65 +1,59 @@
 /****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the examples of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:BSD$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** BSD License Usage
-** Alternatively, you may use this file under the terms of the BSD license
-** as follows:
-**
-** "Redistribution and use in source and binary forms, with or without
-** modification, are permitted provided that the following conditions are
-** met:
-**   * Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer.
-**   * Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**   * Neither the name of The Qt Company Ltd nor the names of its
-**     contributors may be used to endorse or promote products derived
-**     from this software without specific prior written permission.
-**
-**
-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+ **
+ ** Copyright (C) 2016 The Qt Company Ltd.
+ ** Contact: https://www.qt.io/licensing/
+ **
+ ** This file is part of the examples of the Qt Toolkit.
+ **
+ ** $QT_BEGIN_LICENSE:BSD$
+ ** Commercial License Usage
+ ** Licensees holding valid commercial Qt licenses may use this file in
+ ** accordance with the commercial license agreement provided with the
+ ** Software or, alternatively, in accordance with the terms contained in
+ ** a written agreement between you and The Qt Company. For licensing terms
+ ** and conditions see https://www.qt.io/terms-conditions. For further
+ ** information use the contact form at https://www.qt.io/contact-us.
+ **
+ ** BSD License Usage
+ ** Alternatively, you may use this file under the terms of the BSD license
+ ** as follows:
+ **
+ ** "Redistribution and use in source and binary forms, with or without
+ ** modification, are permitted provided that the following conditions are
+ ** met:
+ **   * Redistributions of source code must retain the above copyright
+ **     notice, this list of conditions and the following disclaimer.
+ **   * Redistributions in binary form must reproduce the above copyright
+ **     notice, this list of conditions and the following disclaimer in
+ **     the documentation and/or other materials provided with the
+ **     distribution.
+ **   * Neither the name of The Qt Company Ltd nor the names of its
+ **     contributors may be used to endorse or promote products derived
+ **     from this software without specific prior written permission.
+ **
+ **
+ ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ ** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+ **
+ ** $QT_END_LICENSE$
+ **
+ ****************************************************************************/
 
 #include "flowlayout.h"
-
 #include <qmath.h>
-
 #include <QWidget>
 
 FlowLayout::FlowLayout()
 {
-    m_spacing[0]   = 0;
-    m_spacing[1]   = 0;
-    m_rows         = 0;
-    m_columns      = 0;
     QSizePolicy sp = sizePolicy();
     sp.setHeightForWidth(true);
     setSizePolicy(sp);
@@ -71,10 +65,7 @@ qsizetype FlowLayout::itemAbove(qsizetype index) const
         return -1;
 
     qsizetype indexAbove = index - m_columns;
-    if (indexAbove >= 0)
-        return indexAbove;
-    else
-        return index;
+    return indexAbove >= 0 ? indexAbove : index;
 }
 
 qsizetype FlowLayout::itemBelow(qsizetype index) const
@@ -168,7 +159,7 @@ void FlowLayout::setGeometry(QRectF const &geom)
 }
 
 // this assumes every item is of the same size
-GridInfo FlowLayout::doLayout(QRectF const &geom, bool applyNewGeometry) const
+FlowLayout::GridInfo FlowLayout::doLayout(QRectF const &geom, bool applyNewGeometry) const
 {
     QElapsedTimer t;
     t.start();
@@ -195,7 +186,7 @@ GridInfo FlowLayout::doLayout(QRectF const &geom, bool applyNewGeometry) const
         auto const  maxCols   = static_cast<qsizetype>(maxRowWidth / itemWidth);
 
         if (m_items.count() >= maxCols)
-            centerOffset = static_cast<int>(fmod(maxRowWidth, itemWidth) / 2);
+            centerOffset = static_cast<qsizetype>(fmod(maxRowWidth, itemWidth) / 2);
         QGraphicsLayoutItem *item = m_items[0];
         itemSize                  = item->effectiveSizeHint(Qt::PreferredSize);
     }
@@ -215,7 +206,7 @@ GridInfo FlowLayout::doLayout(QRectF const &geom, bool applyNewGeometry) const
             y += itemSize.height() + spacing(Qt::Vertical);
         }
         if (applyNewGeometry)
-            m_items.at(i)->setGeometry(QRectF(QPointF(leftMargin + x + centerOffset, topMargin + y), itemSize));
+            m_items.at(i)->setGeometry(QRectF(QPointF(leftMargin + x + static_cast<qreal>(centerOffset), topMargin + y), itemSize));
         x = next_x + spacing(Qt::Horizontal);
     }
 
@@ -237,7 +228,7 @@ QSizeF FlowLayout::minSize(QSizeF const &constraint) const
         QGraphicsLayoutItem *item;
         Q_FOREACH (item, m_items)
             size = size.expandedTo(item->effectiveSizeHint(Qt::MinimumSize));
-        size += QSize(left + right, top + bottom);
+        size += QSize(static_cast<int>(left + right), static_cast<int>(top + bottom));
     }
     return size;
 }
@@ -245,13 +236,13 @@ QSizeF FlowLayout::minSize(QSizeF const &constraint) const
 QSizeF FlowLayout::prefSize() const
 {
     qreal left, right;
-    getContentsMargins(&left, 0, &right, 0);
+    getContentsMargins(&left, nullptr, &right, nullptr);
 
     QGraphicsLayoutItem *item;
     qreal maxh       = 0;
     qreal totalWidth = 0;
 
-    foreach (item, m_items) {
+    Q_FOREACH (item, m_items) {
         if (totalWidth > 0)
             totalWidth += spacing(Qt::Horizontal);
         QSizeF pref = item->effectiveSizeHint(Qt::PreferredSize);
@@ -272,7 +263,7 @@ QSizeF FlowLayout::maxSize() const
     qreal totalWidth  = 0;
     qreal totalHeight = 0;
 
-    foreach (item, m_items) {
+    Q_FOREACH (item, m_items) {
         if (totalWidth > 0)
             totalWidth += spacing(Qt::Horizontal);
         if (totalHeight > 0)
@@ -290,19 +281,12 @@ QSizeF FlowLayout::maxSize() const
 
 QSizeF FlowLayout::sizeHint(Qt::SizeHint which, QSizeF const &constraint) const
 {
-    QSizeF sh = constraint;
+    QSizeF sh;
     switch (which) {
-    case Qt::PreferredSize:
-        sh = prefSize();
-        break;
-    case Qt::MinimumSize:
-        sh = minSize(constraint);
-        break;
-    case Qt::MaximumSize:
-        sh = maxSize();
-        break;
-    default:
-        break;
+    case Qt::PreferredSize: sh = prefSize();          break;
+    case Qt::MinimumSize:   sh = minSize(constraint); break;
+    case Qt::MaximumSize:   sh = maxSize();           break;
+    default:                sh = constraint;          break;
     }
     return sh;
 }

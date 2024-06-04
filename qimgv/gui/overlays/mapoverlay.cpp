@@ -15,7 +15,7 @@ class MapOverlay::MapOverlayPrivate final : public QObject
 
     friend class MapOverlay;
 
-    DELETE_ALL_CONSTRUCTORS(MapOverlayPrivate);
+    DELETE_COPY_MOVE_CONSTRUCTORS(MapOverlayPrivate);
 
   private:
     MapOverlay *q;
@@ -111,7 +111,7 @@ MapOverlay::MapOverlay(QWidget *parent)
     d->transitionAnimation->setDuration(200);
     d->transitionAnimation->setEasingCurve(QEasingCurve::OutExpo);
 
-    setVisible(true);
+    QWidget::setVisible(true);
 }
 
 MapOverlay::~MapOverlay()
@@ -129,7 +129,7 @@ QSizeF MapOverlay::outer() const
     return d->outerRect.size();
 }
 
-float MapOverlay::opacity() const
+qreal MapOverlay::opacity() const
 {
     return d->opacity;
 }
@@ -139,7 +139,7 @@ void MapOverlay::enableVisibility(bool mode)
     visibilityEnabled = mode;
 }
 
-void MapOverlay::setOpacity(float opacity)
+void MapOverlay::setOpacity(qreal opacity)
 {
     d->opacity = opacity;
     update();

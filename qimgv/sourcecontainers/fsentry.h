@@ -31,7 +31,7 @@ struct FSEntry
 
     FSEntry(QString   path,
             QString   name,
-            uintmax_t size = 0, 
+            size_t    size = 0, 
             std::filesystem::file_time_type modifyTime  = std::filesystem::file_time_type::min(), 
             bool      isDirectory = false);
 
@@ -39,7 +39,7 @@ struct FSEntry
 
     QString   path;
     QString   name;
-    uintmax_t size = 0;
+    size_t    size        = 0;
     std::filesystem::file_time_type modifyTime = std::filesystem::file_time_type::min();
     bool      isDirectory = false;
 };

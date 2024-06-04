@@ -15,15 +15,19 @@ void ThumbnailStrip::updateScrollbarIndicator()
 {
     if (!thumbnails.count() || lastSelected() == -1)
         return;
-    qreal itemCenter = (qreal)(lastSelected() + 0.5) / itemCount();
+
+    qreal itemCenter = (qreal(lastSelected()) + 0.5) / qreal(itemCount());
+
     if (scrollBar->orientation() == Qt::Horizontal)
-        indicator = QRect(scrollBar->width() * itemCenter - indicatorSize, 2, indicatorSize, scrollBar->height() - 4);
+        indicator = QRect(int(scrollBar->width() * itemCenter - indicatorSize), 2,
+                          int(indicatorSize), scrollBar->height() - 4);
     else
-        indicator = QRect(2, scrollBar->height() * itemCenter - indicatorSize, scrollBar->width() - 4, indicatorSize);
+        indicator = QRect(2, int(scrollBar->height() * itemCenter - indicatorSize),
+                          scrollBar->width() - 4, int(indicatorSize));
 }
 
-//  no layout; manual item positioning
-//  graphical issues otherwise
+// No layout; Manual item positioning.
+// Graphical issues otherwise.
 void ThumbnailStrip::setupLayout()
 {
     this->setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -39,16 +43,16 @@ ThumbnailWidget *ThumbnailStrip::createThumbnailWidget()
     return widget;
 }
 
-void ThumbnailStrip::addItemToLayout(ThumbnailWidget *widget, int pos)
+void ThumbnailStrip::addItemToLayout(ThumbnailWidget *widget, qsizetype pos)
 {
     scene.addItem(widget);
     updateThumbnailPositions(pos, thumbnails.count() - 1);
 }
 
-void ThumbnailStrip::removeItemFromLayout(int pos)
+void ThumbnailStrip::removeItemFromLayout(qsizetype pos)
 {
     if (checkRange(pos)) {
-        ThumbnailWidget *thumb = thumbnails.at(pos);
+        ThumbnailWidget *thumb = thumbnails[pos];
         scene.removeItem(thumb);
         // move items
         if (orientation() == Qt::Horizontal) {
@@ -78,32 +82,32 @@ void ThumbnailStrip::updateThumbnailPositions(qsizetype start, qsizetype end)
         return;
     // assume all thumbnails are the same size
     if (orientation() == Qt::Horizontal) {
-        int thumbWidth = static_cast<int>(thumbnails.at(start)->boundingRect().width());
-        for (qsizetype i = start; i <= end; i++)
-            thumbnails[i]->setPos(i * thumbWidth, 0);
+        auto thumbWidth = thumbnails[start]->boundingRect().width();
+        for (qsizetype i = start; i <= end; ++i)
+            thumbnails[i]->setPos(static_cast<qreal>(i) * thumbWidth, 0);
     } else {
-        int thumbHeight = static_cast<int>(thumbnails.at(start)->boundingRect().height());
-        for (qsizetype i = start; i <= end; i++)
-            thumbnails[i]->setPos(0, i * thumbHeight);
+        auto thumbHeight = thumbnails[start]->boundingRect().height();
+        for (qsizetype i = start; i <= end; ++i)
+            thumbnails[i]->setPos(0, static_cast<qreal>(i) * thumbHeight);
     }
 }
 
-void ThumbnailStrip::focusOn(int index)
+void ThumbnailStrip::focusOn(qsizetype index)
 {
     if (!checkRange(index))
         return;
-    auto const *th = thumbnails.at(index);
+    auto const *th = thumbnails[index];
     if (settings->panelCenterSelection()) {
         QGraphicsView::centerOn(th->sceneBoundingRect().center());
     } else {
         // partially show the next thumb if possible
         if (orientation() == Qt::Vertical) {
             if (height() > th->height() * 2)
-                ensureVisible(th, 0, th->height() / 2);
+                ensureVisible(th, 0, static_cast<int>(th->height() / 2));
             else
                 ensureVisible(th, 0, 0);
-        } else if (width() > th->width() * 2) {
-            ensureVisible(th, th->width() / 2, 0);
+        } else if (width() > th->width() * 2.0) {
+            ensureVisible(th, static_cast<int>(th->width() / 2.0), 0);
         } else {
             ensureVisible(th, 0, 0);
         }
@@ -130,11 +134,11 @@ void ThumbnailStrip::readSettings()
     if (settings->panelPosition() == PanelPosition::TOP ||
         settings->panelPosition() == PanelPosition::BOTTOM)
     {
-        ThumbnailView::setOrientation(Qt::Horizontal);
+        setOrientation(Qt::Horizontal);
         thumbMarginX = 2;
         thumbMarginY = 4;
     } else {
-        ThumbnailView::setOrientation(Qt::Vertical);
+        setOrientation(Qt::Vertical);
         thumbMarginX = 12;
         thumbMarginY = 2;
     }
@@ -162,7 +166,7 @@ QSize ThumbnailStrip::itemSize()
         w.setThumbnailSize(mThumbnailSize);
         return w.boundingRect().size().toSize();
     } else {
-        return thumbnails.at(0)->boundingRect().size().toSize();
+        return thumbnails[0]->boundingRect().size().toSize();
     }
 }
 

@@ -19,9 +19,9 @@ VideoPlayerInitProxy::VideoPlayerInitProxy(QWidget *parent)
     layout.setContentsMargins(0, 0, 0, 0);
     setLayout(&layout);
     connect(settings, &Settings::settingsChanged, this, &VideoPlayerInitProxy::onSettingsChanged);
-    libFile = QIMGV_PLAYER_PLUGIN;
+    libFile = QStringLiteral(QIMGV_PLAYER_PLUGIN);
 #ifdef Q_OS_WIN32
-    libDirs << QApplication::applicationDirPath() + QS("/plugins");
+    libDirs << QApplication::applicationDirPath() + QSV("/plugins");
 #else
     QDir libPath(QApplication::applicationDirPath() + QS("/../lib/qimgv"));
     libDirs << (libPath.makeAbsolute() ? libPath.path() : QS(".")) << QS("/usr/lib/qimgv")
@@ -60,14 +60,14 @@ inline bool VideoPlayerInitProxy::initPlayer()
 
     QFileInfo pluginFile;
     for (auto const &dir : libDirs) {
-        pluginFile.setFile(dir + QS("/") + libFile);
+        pluginFile.setFile(dir + u'/' + libFile);
         if (pluginFile.isFile() && pluginFile.isReadable()) {
             playerLib.setFileName(pluginFile.absoluteFilePath());
             break;
         }
     }
     if (playerLib.fileName().isEmpty()) {
-        qDebug() << QSV("Could not find") << libFile << QSV("in the following directories:") << libDirs;
+        qDebug() << u"Could not find" << libFile << u"in the following directories:" << libDirs;
         return false;
     }
 
@@ -81,7 +81,7 @@ inline bool VideoPlayerInitProxy::initPlayer()
         player.reset(pl);
     }
     if (!player) {
-        qDebug() << QSV("Could not load:") << playerLib.fileName() << QSV(". Wrong plugin version?");
+        qDebug() << u"Could not load:" << playerLib.fileName() << u". Wrong plugin version?";
         return false;
     }
 
@@ -225,9 +225,9 @@ void VideoPlayerInitProxy::show()
         errorLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
         errorLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
         // errorLabel->setAlignment(Qt::AlignVCenter);
-        QString errString = QS("Could not load ") + libFile + QS(" from:");
+        QString errString = QSV("Could not load ") + libFile + QSV(" from:");
         for (auto const &path : libDirs)
-            errString.append(QS("\n") + path + QS("/"));
+            errString.append(u'\n' + path + u'/');
         errorLabel->setText(errString);
         layout.addWidget(errorLabel);
     }

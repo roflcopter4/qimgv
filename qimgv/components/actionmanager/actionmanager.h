@@ -28,12 +28,13 @@ class ActionManager final : public QObject
     static ActionManager *getInstance();
     ~ActionManager() override;
 
-    DELETE_ALL_CONSTRUCTORS(ActionManager);
+    DELETE_COPY_MOVE_CONSTRUCTORS(ActionManager);
+
+    static auto actionList() -> QStringList;
+    static auto keyForNativeScancode(quint32 scanCode) -> QString;
 
     auto actionForShortcut(QString const &keys) -> QString;
-    auto actionList() -> QStringList;
     auto allShortcuts() -> QMap<QString, QString> const &;
-    auto keyForNativeScancode(quint32 scanCode) -> QString;
     auto shortcutForAction(QString const &action) const -> QString;
     auto shortcutsForAction(QString const &action) const -> QStringList;
     bool processEvent(QInputEvent *);
@@ -59,11 +60,12 @@ class ActionManager final : public QObject
     void initActions();
     void initShortcuts();
 
-    QString    modifierKeys(QEvent *event);
-    bool       invokeActionForShortcut(QString const &shortcut);
-    void       validateShortcuts();
-    void       readShortcuts();
-    ActionType validateAction(QString const &actionName);
+    QString modifierKeys(QEvent *event);
+    bool    invokeActionForShortcut(QString const &shortcut);
+    void    validateShortcuts();
+    void    readShortcuts();
+
+    static ActionType validateAction(QString const &actionName);
 
   signals:
     void open();

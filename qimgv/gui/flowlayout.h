@@ -54,48 +54,36 @@
 #include <QDebug>
 #include <QElapsedTimer>
 
-#include "Common.h"
-
-struct GridInfo {
-    GridInfo(qsizetype _columns, qsizetype _rows, qreal _height)
-    {
-        columns = _columns;
-        rows    = _rows;
-        height  = _height;
-    }
-
-    qsizetype columns;
-    qsizetype rows;
-    qreal     height;
-};
-
-class FlowLayout : public QGraphicsLayout
+class FlowLayout final : public QGraphicsLayout
 {
+    struct GridInfo {
+        qsizetype columns;
+        qsizetype rows;
+        qreal     height;
+    };
+
   public:
     FlowLayout();
 
     void insertItem(qsizetype index, QGraphicsLayoutItem *item);
-    void setSpacing(Qt::Orientations o, qreal spacing);
+    void clear();
 
-    ND qreal spacing(Qt::Orientation o) const;
-
-    // inherited functions
-    void setGeometry(QRectF const &geom) override;
-
+    // It's very annoying but there's no way around using `int` for these.
     ND int  count() const override;
     ND auto itemAt(int index) const -> QGraphicsLayoutItem * override;
-    void    removeAt(int index) override;
+       void removeAt(int index) override;
+       void setGeometry(QRectF const &geom) override;
 
     // returns the index of item above / below
     ND qsizetype itemAbove(qsizetype index) const;
     ND qsizetype itemBelow(qsizetype index) const;
     ND qsizetype rows() const;
     ND qsizetype columns() const;
-
-    void clear();
-
     ND qsizetype columnOf(qsizetype index) const;
     ND bool      sameRow(qsizetype one, qsizetype two) const;
+
+    ND qreal spacing(Qt::Orientation o) const;
+       void  setSpacing(Qt::Orientations o, qreal spacing);
 
   protected:
     ND QSizeF sizeHint(Qt::SizeHint which, QSizeF const &constraint = QSizeF()) const override;
@@ -108,7 +96,7 @@ class FlowLayout : public QGraphicsLayout
 
     QList<QGraphicsLayoutItem *> m_items;
 
-    qreal     m_spacing[2];
-    qsizetype m_rows;
-    qsizetype m_columns;
+    qreal     m_spacing[2] = {0.0, 0.0};
+    qsizetype m_rows       = 0;
+    qsizetype m_columns    = 0;
 };

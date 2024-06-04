@@ -13,27 +13,33 @@ FileReplaceDialog::~FileReplaceDialog() {
     delete ui;
 }
 
-void FileReplaceDialog::setSource(QString src) {
+void FileReplaceDialog::setSource(QString const &src) {
     ui->srcLabel->setText(src);
 }
 
-void FileReplaceDialog::setDestination(QString dst) {
+void FileReplaceDialog::setDestination(QString const &dst) {
     ui->dstLabel->setText(dst);
 }
 
-void FileReplaceDialog::setMode(FileReplaceMode mode) {
-    if(mode == FILE_TO_FILE) {
+void FileReplaceDialog::setMode(FileReplaceMode mode)
+{
+    switch (mode) {
+    case FileReplaceMode::FILE_TO_FILE:
         setWindowTitle(QS("File already exists"));
         ui->titleLabel->setText(QS("Replace destination file?"));
-    } else if(mode == DIR_TO_DIR) {
+        break;
+    case FileReplaceMode::DIR_TO_DIR:
         setWindowTitle(QS("Directory already exists"));
         ui->titleLabel->setText(QS("Merge directories?"));
-    } else if(mode == DIR_TO_FILE) {
+        break;
+    case FileReplaceMode::DIR_TO_FILE:
         setWindowTitle(QS("Destination already exists"));
         ui->titleLabel->setText(QS("There is a file with that name. Replace?"));
-    } else { // FILE_TO_DIR
+        break;
+    case FileReplaceMode::FILE_TO_DIR:
         setWindowTitle(QS("Destination already exists"));
         ui->titleLabel->setText(QS("There is a folder with that name. Replace?"));
+        break;
     }
 }
 

@@ -21,16 +21,16 @@ void FolderViewProxy::init()
     this->setFocusProxy(folderView.get());
     this->setLayout(&layout);
 
-    connect(folderView.get(), &FolderView::itemActivated, this, &FolderViewProxy::itemActivated);
+    connect(folderView.get(), &FolderView::itemActivated,       this, &FolderViewProxy::itemActivated);
     connect(folderView.get(), &FolderView::thumbnailsRequested, this, &FolderViewProxy::thumbnailsRequested);
-    connect(folderView.get(), &FolderView::sortingSelected, this, &FolderViewProxy::sortingSelected);
-    connect(folderView.get(), &FolderView::showFoldersChanged, this, &FolderViewProxy::showFoldersChanged);
-    connect(folderView.get(), &FolderView::directorySelected, this, &FolderViewProxy::directorySelected);
-    connect(folderView.get(), &FolderView::draggedOut, this, &FolderViewProxy::draggedOut);
-    connect(folderView.get(), &FolderView::copyUrlsRequested, this, &FolderViewProxy::copyUrlsRequested);
-    connect(folderView.get(), &FolderView::moveUrlsRequested, this, &FolderViewProxy::moveUrlsRequested);
-    connect(folderView.get(), &FolderView::droppedInto, this, &FolderViewProxy::droppedInto);
-    connect(folderView.get(), &FolderView::draggedOver, this, &FolderViewProxy::draggedOver);
+    connect(folderView.get(), &FolderView::sortingSelected,     this, &FolderViewProxy::sortingSelected);
+    connect(folderView.get(), &FolderView::showFoldersChanged,  this, &FolderViewProxy::showFoldersChanged);
+    connect(folderView.get(), &FolderView::directorySelected,   this, &FolderViewProxy::directorySelected);
+    connect(folderView.get(), &FolderView::draggedOut,          this, &FolderViewProxy::draggedOut);
+    connect(folderView.get(), &FolderView::copyUrlsRequested,   this, &FolderViewProxy::copyUrlsRequested);
+    connect(folderView.get(), &FolderView::moveUrlsRequested,   this, &FolderViewProxy::moveUrlsRequested);
+    connect(folderView.get(), &FolderView::droppedInto,         this, &FolderViewProxy::droppedInto);
+    connect(folderView.get(), &FolderView::draggedOver,         this, &FolderViewProxy::draggedOver);
 
     folderView->show();
 
@@ -47,7 +47,7 @@ void FolderViewProxy::init()
     folderView->onSortingChanged(stateBuf.sortingMode);
 }
 
-void FolderViewProxy::populate(int count)
+void FolderViewProxy::populate(qsizetype count)
 {
     QMutexLocker ml(&m);
     stateBuf.itemCount = count;
@@ -59,13 +59,13 @@ void FolderViewProxy::populate(int count)
     }
 }
 
-void FolderViewProxy::setThumbnail(int pos, std::shared_ptr<Thumbnail> thumb)
+void FolderViewProxy::setThumbnail(qsizetype pos, std::shared_ptr<Thumbnail> thumb)
 {
     if (folderView)
-        folderView->setThumbnail(pos, thumb);
+        folderView->setThumbnail(pos, std::move(thumb));
 }
 
-void FolderViewProxy::select(QList<int> indices)
+void FolderViewProxy::select(SelectionList indices)
 {
     if (folderView)
         folderView->select(indices);
@@ -73,7 +73,7 @@ void FolderViewProxy::select(QList<int> indices)
         stateBuf.selection = indices;
 }
 
-void FolderViewProxy::select(int index)
+void FolderViewProxy::select(qsizetype index)
 {
     if (folderView) {
         folderView->select(index);
@@ -83,21 +83,19 @@ void FolderViewProxy::select(int index)
     }
 }
 
-QList<int> &
-FolderViewProxy::selection()
+FolderViewProxy::SelectionList &FolderViewProxy::selection()
 {
     return folderView ? folderView->selection()
                       : stateBuf.selection;
 }
 
-QList<int> const &
-FolderViewProxy::selection() const
+FolderViewProxy::SelectionList const &FolderViewProxy::selection() const
 {
     return folderView ? folderView->selection()
                       : stateBuf.selection;
 }
 
-void FolderViewProxy::focusOn(int index)
+void FolderViewProxy::focusOn(qsizetype index)
 {
     if (folderView)
         folderView->focusOn(index);
@@ -117,7 +115,7 @@ void FolderViewProxy::setDirectoryPath(QString path)
         stateBuf.directory = path;
 }
 
-void FolderViewProxy::insertItem(int index)
+void FolderViewProxy::insertItem(qsizetype index)
 {
     if (folderView)
         folderView->insertItem(index);
@@ -125,7 +123,7 @@ void FolderViewProxy::insertItem(int index)
         stateBuf.itemCount++;
 }
 
-void FolderViewProxy::removeItem(int index)
+void FolderViewProxy::removeItem(qsizetype index)
 {
     if (folderView) {
         folderView->removeItem(index);
@@ -140,13 +138,13 @@ void FolderViewProxy::removeItem(int index)
     }
 }
 
-void FolderViewProxy::reloadItem(int index)
+void FolderViewProxy::reloadItem(qsizetype index)
 {
     if (folderView)
         folderView->reloadItem(index);
 }
 
-void FolderViewProxy::setDragHover(int index)
+void FolderViewProxy::setDragHover(qsizetype index)
 {
     if (folderView)
         folderView->setDragHover(index);

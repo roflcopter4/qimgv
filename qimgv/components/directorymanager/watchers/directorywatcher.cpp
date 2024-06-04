@@ -1,7 +1,5 @@
 #include "directorywatcher_p.h"
 
-#include <utils/stuff.h>
-
 #if defined __linux__
 # include "linux/linuxwatcher.h"
 #elif defined Q_OS_WIN32
@@ -17,14 +15,15 @@
 # include "dummywatcher.h"
 #endif
 
-DirectoryWatcherPrivate::DirectoryWatcherPrivate(DirectoryWatcher* qq, WatcherWorker* w) :
-    q_ptr(qq),
-    worker(w),
-    workerThread(new QThread())
+DirectoryWatcherPrivate::DirectoryWatcherPrivate(DirectoryWatcher *qq, WatcherWorker *w)
+    : q_ptr(qq),
+      worker(w),
+      workerThread(new QThread())
 {
 }
 
-DirectoryWatcher::~DirectoryWatcher() {
+DirectoryWatcher::~DirectoryWatcher()
+{
     delete d_ptr;
     d_ptr = nullptr;
 }
@@ -32,29 +31,31 @@ DirectoryWatcher::~DirectoryWatcher() {
 // Move this function to some creational class
 DirectoryWatcher *DirectoryWatcher::newInstance()
 {
-    DirectoryWatcher* watcher;
+    DirectoryWatcher *watcher;
 
 #if defined Q_OS_LINUX
-        watcher = new LinuxWatcher();
+    watcher = new LinuxWatcher();
 #elif defined Q_OS_WIN32
-        watcher = new WindowsWatcher();
+    watcher = new WindowsWatcher();
 #elif defined Q_OS_APPLE
-        watcher = new DummyWatcher();
+      watcher = new DummyWatcher();
 #elif defined Q_OS_UNIX
-        watcher = new DummyWatcher();
+      watcher = new DummyWatcher();
 #else
-        watcher = new DummyWatcher();
+      watcher = new DummyWatcher();
 #endif
 
     return watcher;
 }
 
-void DirectoryWatcher::setWatchPath(const QString& path) {
+void DirectoryWatcher::setWatchPath(QString path)
+{
     Q_D(DirectoryWatcher);
-    d->currentDirectory = path;
+    d->currentDirectory = std::move(path);
 }
 
-QString DirectoryWatcher::watchPath() const {
+QString DirectoryWatcher::watchPath() const
+{
     Q_D(const DirectoryWatcher);
     return d->currentDirectory;
 }
@@ -62,7 +63,7 @@ QString DirectoryWatcher::watchPath() const {
 void DirectoryWatcher::observe()
 {
     Q_D(DirectoryWatcher);
-    if(!isObserving()) {
+    if (!isObserving()) {
         // Reuse worker instance
         d->worker->setRunning(true);
         d->workerThread->start();
@@ -76,12 +77,13 @@ void DirectoryWatcher::stopObserving()
     d->worker->setRunning(false);
 }
 
-bool DirectoryWatcher::isObserving()
+bool DirectoryWatcher::isObserving() const
 {
-    Q_D(DirectoryWatcher);
+    Q_D(const DirectoryWatcher);
     return d->workerThread->isRunning();
 }
 
-DirectoryWatcher::DirectoryWatcher(DirectoryWatcherPrivate* ptr) {
+DirectoryWatcher::DirectoryWatcher(DirectoryWatcherPrivate *ptr)
+{
     d_ptr = ptr;
 }

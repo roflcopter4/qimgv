@@ -8,26 +8,30 @@
 class Thumbnailer : public QObject
 {
     Q_OBJECT
-public:
+
+  public:
     explicit Thumbnailer();
     ~Thumbnailer() override;
-    static std::shared_ptr<Thumbnail> getThumbnail(QString const &filePath, int size);
-    void                              clearTasks();
-    void                              waitForDone();
 
-public slots:
+    void clearTasks();
+    void waitForDone();
+
+    static std::shared_ptr<Thumbnail> getThumbnail(QString const &filePath, int size);
+
+  public Q_SLOTS:
     void getThumbnailAsync(QString const &path, int size, bool crop, bool force);
 
-private:
-    ThumbnailCache *        cache;
-    QThreadPool *           pool;
-    void                    startThumbnailerThread(QString const &filePath, int size, bool crop, bool force);
+  private:
+    ThumbnailCache         *cache;
+    QThreadPool            *pool;
     QMultiMap<QString, int> runningTasks;
 
-private slots:
+    void startThumbnailerThread(QString const &filePath, int size, bool crop, bool force);
+
+  private Q_SLOTS:
     void onTaskStart(QString const &filePath, int size);
     void onTaskEnd(std::shared_ptr<Thumbnail> const &thumbnail, QString const &filePath);
 
-signals:
+  Q_SIGNALS:
     void thumbnailReady(std::shared_ptr<Thumbnail> thumbnail, QString filePath);
 };

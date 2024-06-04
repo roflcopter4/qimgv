@@ -66,7 +66,7 @@ endif()
 
 # C++ STANDARD
 target_compile_features(qimgv PRIVATE cxx_std_17)
-set_target_properties(qimgv PROPERTIES CXX_EXTENSIONS OFF)
+#set_target_properties(qimgv PROPERTIES CXX_EXTENSIONS OFF)
 
 # LINK STUFF
 target_link_libraries(qimgv PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::PrintSupport)
@@ -86,16 +86,24 @@ endif()
 if(VIDEO_SUPPORT)
     target_compile_definitions(qimgv PRIVATE USE_MPV)
     if(WIN32)
-        ADD_DEFINITIONS(-D_QIMGV_PLUGIN_DIR="plugins")
-        ADD_DEFINITIONS(-D_QIMGV_PLAYER_PLUGIN="player_mpv.dll")
+        add_definitions(-D_QIMGV_PLUGIN_DIR="plugins")
+        add_definitions(-D_QIMGV_PLAYER_PLUGIN="player_mpv.dll")
     else()
-        ADD_DEFINITIONS(-D_QIMGV_PLUGIN_DIR="${QIMGV_PLUGIN_DIR}")
-        ADD_DEFINITIONS(-D_QIMGV_PLAYER_PLUGIN="player_mpv.so")
+        add_definitions(-D_QIMGV_PLUGIN_DIR="${QIMGV_PLUGIN_DIR}")
+        add_definitions(-D_QIMGV_PLAYER_PLUGIN="player_mpv.so")
     endif()
 endif()
 if(OPENCV_SUPPORT)
     target_link_libraries(qimgv PRIVATE ${OpenCV_LIBS})
     target_compile_definitions(qimgv PRIVATE USE_OPENCV)
+endif()
+
+add_definitions(
+    -DQT_NO_CAST_FROM_ASCII
+    -DQT_USE_QSTRINGBUILDER
+    -DQT_USE_FAST_OPERATOR_PLUS)
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
+    add_definitions(-DDEBUG -D_DEBUG)
 endif()
 
 # generate proper GUI program on specified platform
@@ -128,7 +136,9 @@ elseif(NOT UNIX)
 endif()
 
 if (MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FI Common.h")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FI Common.h")
+    target_compile_options(qimgv PRIVATE
+          $<$<COMPILE_LANGUAGE:CXX>:/FI Common.h>)
 else ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include Common.h")
 endif()

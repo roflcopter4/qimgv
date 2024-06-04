@@ -2,14 +2,17 @@
  * This is the main controller of the application.
  * It creates and initializes all components, then sets up the GUI and actions.
  * Most of the communication between components goes through here.
- *
  */
 
 #include "core.h"
 
+#ifdef Q_OS_WINDOWS
+# include <Shlwapi.h>
+# include <shlobj.h>
+#endif
+
 Core::Core()
-    : QObject(),
-      loopSlideshow(false),
+    : loopSlideshow(false),
       slideshow(false),
       shuffle(false),
       folderEndAction(FolderEndAction::NOTHING),
@@ -206,7 +209,7 @@ void Core::loadTranslation()
 {
     if (!translator)
         translator = new QTranslator;
-    QString trPathFallback = QCoreApplication::applicationDirPath() + QS("/translations");
+    QString trPathFallback = QCoreApplication::applicationDirPath() + QSV("/translations");
 #ifdef TRANSLATIONS_PATH
     QString trPath = QString(TRANSLATIONS_PATH);
 #else
@@ -219,12 +222,12 @@ void Core::loadTranslation()
         QApplication::removeTranslator(translator);
         return;
     }
-    QString trFile         = trPath + QS("/") + localeName;
-    QString trFileFallback = trPathFallback + QS("/") + localeName;
+    QString trFile         = trPath + u'/' + localeName;
+    QString trFileFallback = trPathFallback + u'/' + localeName;
     if (!translator->load(trFile)) {
-        qDebug() << QSV("Could not load translation file: ") << trFile;
+        qDebug() << u"Could not load translation file: " << trFile;
         if (!translator->load(trFileFallback)) {
-            qDebug() << QSV("Could not load translation file: ") << trFileFallback;
+            qDebug() << u"Could not load translation file: " << trFileFallback;
             return;
         }
     }
@@ -247,18 +250,18 @@ void Core::onUpdate()
 
     actionManager->adjustFromVersion(lastVer);
 
-    qDebug() << QSV("Updated: ") << settings->lastVersion().toString() << QSV(">") << appVersion.toString();
+    qDebug() << u"Updated: " << settings->lastVersion().toString() << u'>' << appVersion.toString();
     // TODO: finish changelogs
     // if(settings->showChangelogs())
     //    mw->showChangelogWindow();
-    mw->showMessage(tr("Updated: ") + settings->lastVersion().toString() + " > " + appVersion.toString(), 4000);
+    mw->showMessage(tr("Updated: ") + settings->lastVersion().toString() + QSV(" > ") + appVersion.toString(), 4000);
     settings->setLastVersion(appVersion);
 }
 
 void Core::onFirstRun()
 {
     // mw->showSomeSortOfWelcomeScreen();
-    mw->showMessage(tr("Welcome to ") + qApp->applicationName() + tr(" version ") + appVersion.toString() + "!", 4000);
+    mw->showMessage(tr("Welcome to ") + qApp->applicationName() + tr(" version ") + appVersion.toString() + u'!', 4000);
     settings->setFirstRun(false);
     settings->setLastVersion(appVersion);
 }
@@ -496,20 +499,20 @@ void Core::openFromClipboard()
     auto mimeData = cb->mimeData();
     if (!mimeData)
         return;
-    qDebug() << QSV("=====================================");
-    qDebug() << QSV("hasUrls:") << mimeData->hasUrls();
-    qDebug() << QSV("hasImage:") << mimeData->hasImage();
-    qDebug() << QSV("hasText:") << mimeData->hasText();
+    qDebug() << u"=====================================";
+    qDebug() << u"hasUrls:" << mimeData->hasUrls();
+    qDebug() << u"hasImage:" << mimeData->hasImage();
+    qDebug() << u"hasText:" << mimeData->hasText();
 
-    qDebug() << "TEXT:" << cb->text();
+    qDebug() << u"TEXT:" << cb->text();
 
     // try opening url
     if (mimeData->hasUrls()) {
         auto    url  = mimeData->urls().first();
         QString path = url.toLocalFile();
         if (path.isEmpty()) {
-            qDebug() << QSV("Could not load url:") << url;
-            qDebug() << QSV("Currently only local files are supported.");
+            qDebug() << u"Could not load url:" << url;
+            qDebug() << u"Currently only local files are supported.";
         } else if (loadPath(path)) {
             return;
         }
@@ -521,9 +524,9 @@ void Core::openFromClipboard()
             return;
         QString destPath;
         if (!model->isEmpty())
-            destPath = model->directoryPath() + QS("/");
+            destPath = model->directoryPath() + u'/';
         else
-            destPath = QDir::homePath() + QS("/");
+            destPath = QDir::homePath() + u'/';
         destPath.append(u"clipboard.png");
         destPath = mw->getSaveFileName(destPath);
         if (destPath.isEmpty())
@@ -532,9 +535,7 @@ void Core::openFromClipboard()
 
         // ------- temporarily copypasted from ImageStatic (needs refactoring)
 
-        QString tmpPath =
-            destPath + "_" +
-            QString(QCryptographicHash::hash(destPath.toUtf8(), QCryptographicHash::Md5).toHex());
+        QString tmpPath = destPath + u'_' + QString::fromLatin1(QCryptographicHash::hash(destPath.toUtf8(), QCryptographicHash::Md5).toHex());
         QFileInfo fi(destPath);
         QString   ext     = fi.suffix();
         int       quality = 95;
@@ -553,7 +554,7 @@ void Core::openFromClipboard()
         if (originalExists) {
             QFile::remove(tmpPath);
             if (!QFile::copy(destPath, tmpPath)) {
-                qDebug() << QSV("Could not create file backup.");
+                qDebug() << u"Could not create file backup.";
                 return;
             }
             backupExists = true;
@@ -579,20 +580,84 @@ void Core::openFromClipboard()
     }
 }
 
+#ifdef Q_OS_WINDOWS
+static QString evilWindowsMimeDataHack(QMimeData const *mimeData)
+{
+    QByteArray shIdList = mimeData->data(QS("application/x-qt-windows-mime;value=\"Shell IDList Array\""));
+
+    BYTE const *data = reinterpret_cast<BYTE const *>(shIdList.constData());
+    BYTE const *end  = data + shIdList.size();
+    BYTE const *last = data + *reinterpret_cast<uint32_t const *>(data + 8);
+    data += 35;
+
+    // The drive letter is an ASCII string only.
+    QString str = QSV(R"(\\?\)") + QString::fromLatin1(data);
+    // We blindly add path separators later so ensure there isn't one.
+    if (str.endsWith(u'\\'))
+        str.chop(1);
+    data += str.size() + 1;
+    // The data always appears to be aligned to an odd offset. So we make sure.
+    if ((reinterpret_cast<uintptr_t>(data) & 1) == 0)
+        ++data;
+    data += 32; // Skip 32 bytes of data.
+
+    while (data + 2 < end) {
+        // ASCII short name (null-terminated)
+        data += strnlen(reinterpret_cast<char const *>(data), end - data) + 1;
+        if (data + 1 >= end)
+            break;
+        if ((reinterpret_cast<uintptr_t>(data) & 1) == 0)
+            ++data;
+        data += 46; // Skip 46 bytes of unknown data
+
+        // UTF-16 path segment (null-terminated). Qt won't accept an unaligned string,
+        // so we must copy it ourselves.
+        size_t len = wcslen(reinterpret_cast<wchar_t const *>(data));
+        auto   tmp = std::make_unique<wchar_t[]>(len + 1);
+        memcpy(tmp.get(), data, (len + 1) * sizeof(wchar_t));
+        str.append(u'\\');
+        str.append(QStringView(tmp.get(), qsizetype(len)));
+
+        // Skip UTF-16 data and null terminator
+        data += (len + 1) * sizeof(wchar_t);
+        // Skip 16 bytes for each entry but the last, in which case we must skip 18.
+        // The `last` offset is 4 bytes forward of where we are.
+        data += data + 4 == last ? 18 : 16;
+    }
+
+    return str;
+}
+#endif
+
 void Core::onDropIn(QMimeData const *mimeData, QObject const *source)
 {
-    // ignore self
+    // Ignore self.
     if (source == this)
         return;
-    // check for our needed mime type, here a file or a list of files
+    // Check for our needed mime type, here a file or a list of files.
     if (mimeData->hasUrls()) {
-        QStringList pathList;
         QList<QUrl> urlList = mimeData->urls();
-        // extract the local paths of the files
-        for (auto const &i : urlList)
-            pathList.append(i.toLocalFile());
-        // try to open first file in the list
-        loadPath(pathList.first());
+        if (urlList.isEmpty()) {
+            static constexpr char16_t commonWarning[] = u"mimeData->urls() returned an empty list despite mimeData->hasUrls() returning true.";
+#ifdef Q_OS_WINDOWS
+            QString path = evilWindowsMimeDataHack(mimeData);
+            if (path.isEmpty()) {
+                qWarning() << commonWarning << u"The backup hack failed to return any path. Ignoring event.";
+            } else {
+                qDebug() << commonWarning << u"Path" << path << u"found via backup hack.";
+                loadPath(std::move(path));
+            }
+#else
+            qWarning() << commonWarning << u"Ignoring event.";
+#endif
+        } else {
+            QStringList pathList;
+            // Extract the local paths of the files.
+            for (auto const &i : urlList)
+                pathList.append(i.toLocalFile());
+            // Try to open first file in the list.
+            loadPath(pathList.first());
+        }
     }
 }
 
@@ -636,7 +701,7 @@ QMimeData *Core::getMimeDataForImage(std::shared_ptr<Image> const &img, MimeData
             // TODO: cleanup temp files
             // meanwhile use generic name
             // path = settings->cacheDir() + img->baseName() + ".png";
-            path = settings->tmpDir() + "image.png";
+            path = settings->tmpDir() + QSV("image.png");
             // use faster compression for drag'n'drop
             int pngQuality = (target == MimeDataTarget::TARGET_DROP) ? 80 : 30;
             std::ignore    = img->getImage()->save(path, nullptr, pngQuality);
@@ -685,7 +750,7 @@ FileOpResult Core::removeFile(QString const &filePath, bool trash)
     if (model->isEmpty())
         return FileOpResult::NOTHING_TO_DO;
 
-    bool                   reopen = false;
+    bool reopen = false;
     std::shared_ptr<Image> img;
     if (state.currentFilePath == filePath) {
         img = model->getImage(filePath);
@@ -707,7 +772,7 @@ void Core::onFileRemoved(QString const &filePath, int index)
     if (model->isEmpty()) {
         mw->closeImage();
         state.hasActiveImage  = false;
-        state.currentFilePath = "";
+        state.currentFilePath = QString();
     }
     // image mode && removed current file
     if (state.currentFilePath == filePath) {
@@ -716,13 +781,13 @@ void Core::onFileRemoved(QString const &filePath, int index)
                 loadFileIndex(--index, true, settings->usePreloader());
         } else {
             state.hasActiveImage  = false;
-            state.currentFilePath = "";
+            state.currentFilePath = QString();
         }
     }
     updateInfoString();
 }
 
-void Core::onFileRenamed(QString const &fromPath, int /*indexFrom*/, QString /*toPath*/, int indexTo)
+void Core::onFileRenamed(QString const &fromPath, int /*indexFrom*/, QString const &/*toPath*/, int indexTo)
 {
     if (state.currentFilePath == fromPath)
         loadFileIndex(indexTo, true, settings->usePreloader());
@@ -733,7 +798,7 @@ void Core::onFileAdded(QString const &filePath)
     Q_UNUSED(filePath)
     // update file count
     updateInfoString();
-    if (model->fileCount() == 1 && state.currentFilePath == "")
+    if (model->fileCount() == 1 && state.currentFilePath.isEmpty())
         loadFileIndex(0, false, settings->usePreloader());
 }
 
@@ -775,8 +840,8 @@ void Core::showInDirectory()
         QDesktopServices::openUrl(QUrl::fromLocalFile(model->directoryPath()));
 #elif defined Q_OS_WIN32
     QStringList    args;
-    args << "/select," << QDir::toNativeSeparators(selectedPath());
-    QProcess::startDetached("explorer", args);
+    args << QS("/select,") << QDir::toNativeSeparators(selectedPath());
+    QProcess::startDetached(QS("explorer"), args);
 #elif defined Q_OS_APPLE
     QStringList args;
     args << "-e";
@@ -815,7 +880,7 @@ void Core::doInteractiveCopy(QString const &path, QString const &destDirectory, 
             if (overwriteFiles.all) // skipping all
                 return;
             overwriteFiles = mw->fileReplaceDialog(
-                srcFi.absoluteFilePath(), destDirectory + "/" + srcFi.fileName(), FILE_TO_FILE, true);
+                srcFi.absoluteFilePath(), destDirectory + u'/' + srcFi.fileName(), FileReplaceMode::FILE_TO_FILE, true);
             if (!overwriteFiles || overwriteFiles.cancel)
                 return;
             FileOperations::copyFileTo(path, destDirectory, true, result);
@@ -831,12 +896,12 @@ void Core::doInteractiveCopy(QString const &path, QString const &destDirectory, 
     }
     // DIR COPY (RECURSIVE) =======================================================================
     QDir      srcDir(srcFi.absoluteFilePath());
-    QFileInfo dstFi(destDirectory + "/" + srcFi.baseName());
+    QFileInfo dstFi(destDirectory + u'/' + srcFi.baseName());
     QDir      dstDir(dstFi.absoluteFilePath());
     if (dstFi.exists() && !dstFi.isDir()) { // overwriting file with a folder
         if (!overwriteFiles && !overwriteFiles.all) {
             overwriteFiles = mw->fileReplaceDialog(srcFi.absoluteFilePath(), dstFi.absoluteFilePath(),
-                                                   DIR_TO_FILE, true);
+                                                   FileReplaceMode::DIR_TO_FILE, true);
             if (!overwriteFiles || overwriteFiles.cancel)
                 return;
             if (!overwriteFiles.all) // reset temp flag right away
@@ -850,9 +915,9 @@ void Core::doInteractiveCopy(QString const &path, QString const &destDirectory, 
             qDebug() << FileOperations::decodeResult(result);
             return;
         }
-    } else if (!dstDir.mkpath(".")) {
+    } else if (!dstDir.mkpath(QS("."))) {
         mw->showError(tr("Could not create directory ") + dstDir.absolutePath());
-        qDebug() << QSV("Could not create directory ") << dstDir.absolutePath();
+        qDebug() << u"Could not create directory " << dstDir.absolutePath();
         return;
     }
     // copy all contents
@@ -860,7 +925,7 @@ void Core::doInteractiveCopy(QString const &path, QString const &destDirectory, 
     QStringList entryList = srcDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden |
                                              QDir::System);
     for (auto const &entry : entryList) {
-        doInteractiveCopy(srcDir.absolutePath() + "/" + entry, dstDir.absolutePath(), overwriteFiles);
+        doInteractiveCopy(srcDir.absolutePath() + u'/' + entry, dstDir.absolutePath(), overwriteFiles);
         if (overwriteFiles.cancel)
             return;
     }
@@ -889,7 +954,7 @@ void Core::doInteractiveMove(QString const &path, QString const &destDirectory, 
             if (overwriteFiles.all) // skipping all
                 return;
             overwriteFiles = mw->fileReplaceDialog(
-                srcFi.absoluteFilePath(), destDirectory + "/" + srcFi.fileName(), FILE_TO_FILE, true);
+                srcFi.absoluteFilePath(), destDirectory + u'/' + srcFi.fileName(), FileReplaceMode::FILE_TO_FILE, true);
             if (!overwriteFiles || overwriteFiles.cancel)
                 return;
             model->moveFileTo(path, destDirectory, true, result);
@@ -905,12 +970,12 @@ void Core::doInteractiveMove(QString const &path, QString const &destDirectory, 
     }
     // DIR MOVE (RECURSIVE) =======================================================================
     QDir      srcDir(srcFi.absoluteFilePath());
-    QFileInfo dstFi(destDirectory + "/" + srcFi.baseName());
+    QFileInfo dstFi(destDirectory + u'/' + srcFi.baseName());
     QDir      dstDir(dstFi.absoluteFilePath());
     if (dstFi.exists() && !dstFi.isDir()) { // overwriting file with a folder
         if (!overwriteFiles && !overwriteFiles.all) {
             overwriteFiles = mw->fileReplaceDialog(srcFi.absoluteFilePath(), dstFi.absoluteFilePath(),
-                                                   DIR_TO_FILE, true);
+                                                   FileReplaceMode::DIR_TO_FILE, true);
             if (!overwriteFiles || overwriteFiles.cancel)
                 return;
             if (!overwriteFiles.all) // reset temp flag right away
@@ -924,17 +989,16 @@ void Core::doInteractiveMove(QString const &path, QString const &destDirectory, 
             qDebug() << FileOperations::decodeResult(result);
             return;
         }
-    } else if (!dstDir.mkpath(".")) {
+    } else if (!dstDir.mkpath(QS("."))) {
         mw->showError(tr("Could not create directory ") + dstDir.absolutePath());
-        qDebug() << "Could not create directory " << dstDir.absolutePath();
+        qDebug() << u"Could not create directory " << dstDir.absolutePath();
         return;
     }
     // move all contents
     // TODO: skip symlinks? test
-    QStringList entryList = srcDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden |
-                                             QDir::System);
+    QStringList entryList = srcDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
     for (auto const &entry : entryList) {
-        doInteractiveMove(srcDir.absolutePath() + "/" + entry, dstDir.absolutePath(), overwriteFiles);
+        doInteractiveMove(srcDir.absolutePath() + u'/' + entry, dstDir.absolutePath(), overwriteFiles);
         if (overwriteFiles.cancel)
             return;
     }
@@ -1042,7 +1106,7 @@ void Core::edit_template(
 {
     if (model->isEmpty())
         return;
-    if (save && !mw->showConfirmation(actionName, tr("Perform action \"") + actionName + "\"? \n\n" +
+    if (save && !mw->showConfirmation(actionName, tr("Perform action \"") + actionName + QSV("\"? \n\n") +
                                                   tr("Changes will be saved immediately.")))
         return;
     for (auto const &path : currentSelection()) {
@@ -1153,7 +1217,7 @@ void Core::discardEdits()
 QString Core::selectedPath()
 {
     if (!model)
-        return "";
+        return {};
     if (mw->currentViewMode() == ViewMode::FOLDERVIEW)
         return folderViewPresenter.selectedPaths().last();
     return state.currentFilePath;
@@ -1219,16 +1283,15 @@ void Core::setWallpaper()
         return;
     }
 #ifdef Q_OS_WIN32
-    // set fit mode (registry)
+    // Set fit mode (registry).
     HKEY hKey;
     LONG status = RegOpenKeyExW(HKEY_CURRENT_USER, L"Control Panel\\Desktop", 0, KEY_WRITE, &hKey);
     if (status == ERROR_SUCCESS && hKey != nullptr) {
-        constexpr auto value = L"WallpaperStyle";
-        constexpr auto data  = L"10";
-        status = RegSetValueExW(hKey, value, 0, REG_SZ, reinterpret_cast<BYTE const *>(data), wcslen(data) + 1);
+        static constexpr wchar_t data[]  = L"10";
+        status = RegSetValueExW(hKey, L"WallpaperStyle", 0, REG_SZ, reinterpret_cast<BYTE const *>(data), sizeof data);
         RegCloseKey(hKey);
     }
-    // set wallpaper path
+    // Set wallpaper path.
     SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0,
                           const_cast<void *>(static_cast<void const *>(selectedPath().toStdWString().c_str())),
                           SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE);
@@ -1257,7 +1320,7 @@ void Core::print()
         mw->showError(tr("Can only print static images"));
         return;
     }
-    QString pdfPath = model->directoryPath() + QS("/") + img->baseName() + QS(".pdf");
+    QString pdfPath = model->directoryPath() + u'/' + img->baseName() + QSV(".pdf");
     p.setImage(img->getImage());
     p.setOutputPath(pdfPath);
     p.exec();
@@ -1286,8 +1349,8 @@ void Core::onScalingFinished(QPixmap *scaled, ScalerRequest const &req)
 void Core::reset()
 {
     state.hasActiveImage  = false;
-    state.currentFilePath = "";
-    model->setDirectory("");
+    state.currentFilePath = QString{};
+    model->setDirectory(QString{});
 }
 
 bool Core::loadPath(QString path)
@@ -1299,6 +1362,7 @@ bool Core::loadPath(QString path)
 
     stopSlideshow();
     state.delayModel = false;
+
     QFileInfo fileInfo(path);
     if (fileInfo.isDir()) {
         state.directoryPath = QDir(path).absolutePath();
@@ -1308,9 +1372,10 @@ bool Core::loadPath(QString path)
             state.delayModel = true;
     } else {
         mw->showError(tr("Could not open path: ") + path);
-        qDebug() << QSV("Could not open path: ") << path;
+        qDebug() << u"Could not open path: " << path;
         return false;
     }
+
     if (!state.delayModel && !setDirectory(state.directoryPath))
         return false;
 
@@ -1629,6 +1694,9 @@ void Core::updateInfoString()
         edited    = img->isEdited();
     }
     int index = model->indexOfFile(state.currentFilePath);
-    mw->setCurrentInfo(index, model->fileCount(), model->filePathAt(index), model->fileNameAt(index),
+    mw->setCurrentInfo(index,
+                       model->fileCount(),
+                       model->filePathAt(index),
+                       model->fileNameAt(index),
                        imageSize, fileSize, slideshow, shuffle, edited);
 }

@@ -10,43 +10,48 @@
 
 class SSideBarItem;
 
-class SSideBar : public QWidget {
+class SSideBar : public QWidget
+{
     Q_OBJECT
-public:
-    explicit SSideBar(QWidget *parent = nullptr);
-    void     addEntry(QString const &icon, QString const &name);
-    void     selectEntry(int idx);
 
-private:
-    QBoxLayout *layout;
+  public:
+    explicit SSideBar(QWidget *parent = nullptr);
+    void addEntry(QString const &icon, QString const &name);
+    void selectEntry(qsizetype idx);
+
+  private:
+    QBoxLayout           *layout;
     QList<SSideBarItem *> entries;
-    Qt::Orientation orientation = Qt::Vertical;
+    Qt::Orientation       orientation = Qt::Vertical;
+
     void selectEntryAt(QPoint pos);
 
-signals:
+  signals:
     void entrySelected(int);
 
-protected:
+  protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
     void paintEvent(QPaintEvent *event) override;
 };
 
-class SSideBarItem : public QWidget {
+class SSideBarItem : public QWidget
+{
     Q_OBJECT
-public:
-    explicit SSideBarItem(QString icon, QString name, QWidget *parent = nullptr);
-    void setHighlighted(bool mode);
-    bool highlighted();
 
-private:
+  public:
+    explicit SSideBarItem(QString const &icon, QString const &name, QWidget *parent = nullptr);
+    void     setHighlighted(bool mode);
+    ND bool  highlighted() const;
+
+  private:
     QBoxLayout *layout;
-    IconWidget iconWidget;
-    QLabel textLabel;
-    bool mHighlighted = false;
+    IconWidget  iconWidget;
+    QLabel      textLabel;
+    bool        mHighlighted = false;
 
-protected:
+  protected:
     void paintEvent(QPaintEvent *event) override;
 };
 

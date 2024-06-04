@@ -20,35 +20,53 @@ void DirectoryPresenter::unsetModel()
     // also empty view?
 }
 
-void DirectoryPresenter::setView(std::shared_ptr<IDirectoryView> const &_view)
+struct StaticAssertHack {
+    template <typename Ty>
+    static constexpr bool always_false = false;
+
+    template <typename Ty = int>
+    static void InvalidQSizeType()
+    {
+        static_assert(always_false<Ty>, "Your definition of qsizetype is unexpected and unknown.");
+    }
+};
+
+void DirectoryPresenter::setView(std::shared_ptr<IDirectoryView> newView)
 {
     if (view)
         return;
-    view = _view;
+    view = std::move(newView);
     if (model) {
-        int n = static_cast<int>(mShowDirs ? model->totalCount() : model->fileCount());
+        auto n = mShowDirs ? model->totalCount() : model->fileCount();
         view->populate(n);
     }
 
-    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(itemActivated(int)),
-            this, SLOT(onItemActivated(int)));
-    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(thumbnailsRequested(QList<int>, int, bool, bool)),
-            this, SLOT(generateThumbnails(QList<int>, int, bool, bool)));
-    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(draggedOut()),
-            this, SLOT(onDraggedOut()));
-    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(draggedOver(int)),
-            this, SLOT(onDraggedOver(int)));
-    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(droppedInto(const QMimeData*, QObject*, int)),
-            this, SLOT(onDroppedInto(const QMimeData*, QObject*, int)));
+    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(itemActivated(qsizetype)), this, SLOT(onItemActivated(qsizetype)));
+    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(draggedOut()), this, SLOT(onDraggedOut()));
+    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(draggedOver(qsizetype)), this, SLOT(onDraggedOver(qsizetype)));
+    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(droppedInto(const QMimeData*, QObject*, qsizetype)), this, SLOT(onDroppedInto(const QMimeData*, QObject*, qsizetype)));
+
+#if 0
+    connect(view.get(), &IDirectoryView::thumbnailsRequested, this, &DirectoryPresenter::generateThumbnails);
+#else
+    if constexpr (std::is_same_v<qsizetype, long long>)
+        connect(dynamic_cast<QObject *>(view.get()), SIGNAL(thumbnailsRequested(QList<long long>, int, bool, bool)), this, SLOT(generateThumbnails(QList<long long>, int, bool, bool)));
+    else if constexpr (std::is_same_v<qsizetype, long>)
+        connect(dynamic_cast<QObject *>(view.get()), SIGNAL(thumbnailsRequested(QList<long>, int, bool, bool)), this, SLOT(generateThumbnails(QList<long>, int, bool, bool)));
+    else if constexpr (std::is_same_v<qsizetype, int>)
+        connect(dynamic_cast<QObject *>(view.get()), SIGNAL(thumbnailsRequested(QList<int>, int, bool, bool)), this, SLOT(generateThumbnails(QList<int>, int, bool, bool)));
+    else
+        StaticAssertHack::InvalidQSizeType();
+#endif
 }
 
-void DirectoryPresenter::setModel(std::shared_ptr<DirectoryModel> const &newModel)
+void DirectoryPresenter::setModel(std::shared_ptr<DirectoryModel> newModel)
 {
     if (model)
         unsetModel();
     if (!newModel)
         return;
-    model = newModel;
+    model = std::move(newModel);
     populateView();
 
     // filesystem changes
@@ -61,7 +79,8 @@ void DirectoryPresenter::setModel(std::shared_ptr<DirectoryModel> const &newMode
     connect(model.get(), &DirectoryModel::dirRenamed,   this, &DirectoryPresenter::onDirRenamed);
 }
 
-void DirectoryPresenter::reloadModel() {
+void DirectoryPresenter::reloadModel()
+{
     populateView();
 }
 
@@ -81,7 +100,7 @@ void DirectoryPresenter::disconnectView()
 
 //------------------------------------------------------------------------------
 
-void DirectoryPresenter::onFileRemoved(QString const &filePath, int index) const
+void DirectoryPresenter::onFileRemoved(QString const &filePath, qsizetype index) const
 {
     Q_UNUSED(filePath)
     if (!view)
@@ -89,7 +108,7 @@ void DirectoryPresenter::onFileRemoved(QString const &filePath, int index) const
     view->removeItem(mShowDirs ? index + model->dirCount() : index);
 }
 
-void DirectoryPresenter::onFileRenamed(QString const &fromPath, int indexFrom, QString const &toPath, int indexTo) const
+void DirectoryPresenter::onFileRenamed(QString const &fromPath, qsizetype indexFrom, QString const &toPath, qsizetype indexTo) const
 {
     Q_UNUSED(fromPath)
     Q_UNUSED(toPath)
@@ -118,7 +137,7 @@ void DirectoryPresenter::onFileAdded(QString const &filePath) const
 {
     if (!view)
         return;
-    int index = model->indexOfFile(filePath);
+    auto index = model->indexOfFile(filePath);
     view->insertItem(mShowDirs ? model->dirCount() + index : index);
 }
 
@@ -126,11 +145,11 @@ void DirectoryPresenter::onFileModified(QString const &filePath) const
 {
     if (!view)
         return;
-    int index = model->indexOfFile(filePath);
+    auto index = model->indexOfFile(filePath);
     view->reloadItem(mShowDirs ? model->dirCount() + index : index);
 }
 
-void DirectoryPresenter::onDirRemoved(QString const &dirPath, int index) const
+void DirectoryPresenter::onDirRemoved(QString const &dirPath, qsizetype index) const
 {
     Q_UNUSED(dirPath)
     if (!view || !mShowDirs)
@@ -138,7 +157,7 @@ void DirectoryPresenter::onDirRemoved(QString const &dirPath, int index) const
     view->removeItem(index);
 }
 
-void DirectoryPresenter::onDirRenamed(QString const &fromPath, int indexFrom, QString const &toPath, int indexTo) const
+void DirectoryPresenter::onDirRenamed(QString const &fromPath, qsizetype indexFrom, QString const &toPath, qsizetype indexTo) const
 {
     Q_UNUSED(fromPath)
     Q_UNUSED(toPath)
@@ -162,7 +181,7 @@ void DirectoryPresenter::onDirAdded(QString const &dirPath) const
 {
     if (!view || !mShowDirs)
         return;
-    int index = model->indexOfDir(dirPath);
+    auto index = model->indexOfDir(dirPath);
     view->insertItem(index);
 }
 
@@ -197,7 +216,7 @@ QList<QString> DirectoryPresenter::selectedPaths() const
     return paths;
 }
 
-void DirectoryPresenter::generateThumbnails(QList<int> const &indexes, int size, bool crop, bool force)
+void DirectoryPresenter::generateThumbnails(IDirectoryView::SelectionList const &indexes, int size, bool crop, bool force)
 {
     if (!view || !model)
         return;
@@ -215,8 +234,7 @@ void DirectoryPresenter::generateThumbnails(QList<int> const &indexes, int size,
             // the mini-thumbs on top (similar to dolphin)
             QSvgRenderer svgRenderer;
             svgRenderer.load(QS(":/res/icons/common/other/folder32-scalable.svg"));
-            int factor =
-                static_cast<int>(static_cast<float>(size) * 0.90f / static_cast<float>(svgRenderer.defaultSize().width()));
+            qreal factor = size * 0.90 / svgRenderer.defaultSize().width();
             auto *pixmap = new QPixmap(svgRenderer.defaultSize() * factor);
             pixmap->fill(Qt::transparent);
             QPainter pixPainter(pixmap);
@@ -239,14 +257,14 @@ void DirectoryPresenter::onThumbnailReady(std::shared_ptr<Thumbnail> const &thum
 {
     if (!view || !model)
         return;
-    int index = model->indexOfFile(filePath);
+    auto index = model->indexOfFile(filePath);
     if (index == -1)
         return;
-    int pos = mShowDirs ? model->dirCount() + index : index;
+    auto pos = mShowDirs ? model->dirCount() + index : index;
     view->setThumbnail(pos, thumb);
 }
 
-void DirectoryPresenter::onItemActivated(int absoluteIndex)
+void DirectoryPresenter::onItemActivated(qsizetype absoluteIndex)
 {
     if (!model)
         return;
@@ -265,7 +283,7 @@ void DirectoryPresenter::onDraggedOut()
     emit draggedOut(selectedPaths());
 }
 
-void DirectoryPresenter::onDraggedOver(int index) const
+void DirectoryPresenter::onDraggedOver(qsizetype index) const
 {
     if (!model || view->selection().contains(index))
         return;
@@ -273,7 +291,7 @@ void DirectoryPresenter::onDraggedOver(int index) const
         view->setDragHover(index);
 }
 
-void DirectoryPresenter::onDroppedInto(QMimeData const *data, QObject *source, int targetIndex)
+void DirectoryPresenter::onDroppedInto(QMimeData const *data, QObject *source, qsizetype targetIndex)
 {
     if (!data->hasUrls() || model->source() != FileListSource::DIRECTORY)
         return;
@@ -309,17 +327,17 @@ void DirectoryPresenter::selectAndFocus(QString const &path) const
     if (!model || !view || path.isEmpty())
         return;
     if (model->containsDir(path) && showDirs()) {
-        int dirIndex = model->indexOfDir(path);
+        auto dirIndex = model->indexOfDir(path);
         view->select(dirIndex);
         view->focusOn(dirIndex);
     } else if (model->containsFile(path)) {
-        int fileIndex = showDirs() ? model->indexOfFile(path) + model->dirCount() : model->indexOfFile(path);
+        auto fileIndex = showDirs() ? model->indexOfFile(path) + model->dirCount() : model->indexOfFile(path);
         view->select(fileIndex);
         view->focusOn(fileIndex);
     }
 }
 
-void DirectoryPresenter::selectAndFocus(int index) const
+void DirectoryPresenter::selectAndFocus(qsizetype index) const
 {
     if (!model || !view)
         return;

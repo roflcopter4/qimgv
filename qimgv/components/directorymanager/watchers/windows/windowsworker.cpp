@@ -23,19 +23,14 @@ void WindowsWorker::freeHandle()
 
 void WindowsWorker::run()
 {
-    using namespace std::literals;
-
-    //if (isRunning.exchange(true, std::memory_order::seq_cst))
-    //    return;
-
     DWORD      dwBytes = 0;
     OVERLAPPED ovl = {.hEvent = ::CreateEventW(nullptr, TRUE, FALSE, nullptr)};
 
     if (!ovl.hEvent || ovl.hEvent == INVALID_HANDLE_VALUE) {
-        qDebug() << QSV(u"[WindowsWorker] CreateEvent failed?");
+        qDebug() << u"[WindowsWorker] CreateEvent failed?";
         QMessageBox::warning(
             nullptr, QS("Error"),
-            QS("CreateEvent failed in " __FILE__ ". \n"
+            QS("CreateEvent failed in " PRETTY_FUNCTION_SIG ". \n"
                "This probably means everything will break catastrophically. Fairly warned, be thee, says I.")
         );
     }
@@ -59,7 +54,7 @@ void WindowsWorker::run()
         if (!bPending) {
             DWORD error = GetLastError();
             if (error == ERROR_IO_INCOMPLETE)
-                qDebug() << QSV(u"ERROR_IO_INCOMPLETE");
+                qDebug() << u"ERROR_IO_INCOMPLETE";
         }
         else if (::GetOverlappedResult(hDir, &ovl, &dwBytes, false)) {
             if(dwBytes != 0) {

@@ -9,7 +9,7 @@ PrintDialog::PrintDialog(QWidget *parent)
     ui->previewLabel->setContentsMargins(0,0,0,0);
     pdfPrinter.setOutputFormat(QPrinter::PdfFormat);
     pdfPrinter.setPageSize(QPageSize(QPageSize::A4));
-    pdfPrinter.setOutputFileName(" ");
+    pdfPrinter.setOutputFileName(QS(" "));
     QStringList printerList = QPrinterInfo::availablePrinterNames();
     if(printerList.isEmpty()) {
         ui->printerListComboBox->hide();
@@ -63,7 +63,7 @@ void PrintDialog::setImage(std::shared_ptr<const QImage> const &_img) {
 
 void PrintDialog::setOutputPath(QString path) {
     if(path.isEmpty())
-        path = " ";
+        path = QS(" ");
     pdfPrinter.setOutputFileName(path);
 }
 

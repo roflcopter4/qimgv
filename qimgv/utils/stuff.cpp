@@ -1,7 +1,10 @@
 #include "stuff.h"
 #include <QDebug>
+#include <QFileInfo>
 #include <QString>
+#include <qcoreapplication.h>
 #include <atomic>
+#include <iostream>
 #include <mutex>
 
 #ifdef Q_OS_WIN32
@@ -9,8 +12,8 @@
 #  define WIN32_LEAN_AND_MEAN
 # endif
 # include <Windows.h>
-# include <dbghelp.h>
-#elif __has_include(<execinfo.h>)
+# include <DbgHelp.h>
+#elif defined __has_include && __has_include(<execinfo.h>)
 # include <execinfo.h>
 #endif
 #if defined __GNUG__ || defined _LIBCPP_VERSION
@@ -65,6 +68,23 @@ QString StdPathToQString(std::filesystem::path const &str)
     return StdStringToQString(str.native());
 }
 
+std::filesystem::path
+QStringToStdPath(QString const &filePath)
+{
+#ifdef Q_OS_WIN32
+    if (filePath.startsWith(QSV(R"(\\?\)")))
+        return {std::basic_string_view{filePath.data_ptr().data(),
+                                       static_cast<size_t>(filePath.size())}};
+    auto tmp = QFileInfo(filePath).absoluteFilePath();
+    tmp.replace(u'/', u'\\');
+    tmp.prepend(QSV(R"(\\?\)"));
+    return {std::basic_string_view{tmp.data_ptr().data(),
+                                   static_cast<size_t>(tmp.size())}};
+#else
+    return absolute({filePath.toStdString()});
+#endif
+}
+
 /****************************************************************************************/
 
 
@@ -83,7 +103,7 @@ static void demangle_setup()
     if (::BOOL ret = ::SymInitialize(::GetCurrentProcess(), nullptr, true); !ret) {
         ::DWORD e = ::GetLastError();
         qCritical() << std::error_code(static_cast<int>(e), std::system_category()).message();
-        qFatal() << QSV("SymInitialize()");
+        qFatal() << u"SymInitialize()";
     }
 #endif
 }
@@ -95,7 +115,7 @@ static void demangle_setup()
 
 #if defined _MSC_VER
     char buf[4096];
-    ::UnDecorateSymbolName(raw_name, buf, std::size(buf), UNDNAME_COMPLETE);
+    ::UnDecorateSymbolName(raw_name, buf, static_cast<DWORD>(std::size(buf)), UNDNAME_COMPLETE);
     name = buf;
 #elif defined __GNUG__ || defined _LIBCPP_VERSION
     int  status;
@@ -127,7 +147,7 @@ static void demangle_setup()
 
 #if defined _MSC_VER || defined __clang__
     wchar_t buf[4096];
-    ::UnDecorateSymbolNameW(raw_name, buf, std::size(buf), UNDNAME_COMPLETE);
+    ::UnDecorateSymbolNameW(raw_name, buf, static_cast<DWORD>(std::size(buf)), UNDNAME_COMPLETE);
     name = buf;
 #else
     name = raw_name;
@@ -189,8 +209,8 @@ QString get_backtrace()
             char *end = ::strchr(ptr, '+');
             if (end) {
                 *end = '\0';
-                buf += std::format("\n{:3}: {}\033[0;36m{}\033[0m + ", i, std::string_view(symbols[i], len),
-                                   std::string_view(ptr, end - ptr));
+                buf += std::format("\n{:3}: {}\033[0;36m{}\033[0m + ",
+                                   i, std::string_view(symbols[i], len), std::string_view(ptr, end - ptr));
                 ptr = end + 1;
             }
             buf += ptr;
@@ -219,7 +239,7 @@ QString get_backtrace()
 #define SymFromAddr SymFromAddr
 # endif
 
-    void * stack[256];
+    void    *stack[256];
     ::HANDLE heap    = ::GetProcessHeap();
     ::HANDLE process = ::GetCurrentProcess();
     ::SymInitializeW(process, nullptr, true);
@@ -233,7 +253,7 @@ QString get_backtrace()
     symbol->SizeOfStruct = sizeof(symbol_type);
     QString ret          = QS("\n\n\033[1mBACKTRACE:\033[0m");
 
-    for (unsigned i = 0; i < frames && i < std::size(stack); i++) {
+    for (unsigned i = 0; i < frames && i < std::size(stack); ++i) {
         ::SymFromAddr(process, reinterpret_cast<::DWORD64>(stack[i]), nullptr, symbol);
 # if defined _MSC_VER
         ret += std::format(format, frames-i-1, demangle(symbol->Name), symbol->Address);
@@ -269,19 +289,21 @@ static void do_OpenConsoleWindow()
                      L"If this happens your computer is probably on fire.",
                      err);
         ::MessageBoxW(nullptr, buf, L"Fatal Error", MB_OK | MB_ICONERROR);
+#ifdef QT_VERSION
+        ::QCoreApplication::exit(1);
+#else
         ::exit(1);
+#endif
     }
 
-    ::FILE *conout = nullptr;
-    ::_wfreopen_s(&conout, L"CONOUT$", L"w", stdout);
-    conout = nullptr;
-    ::_wfreopen_s(&conout, L"CONOUT$", L"w", stderr);
-
-    // Ensure we set both streams to be byte-oriented.
-    ::fputs("Opened standard output on newly created console.\n", stdout);
-    ::fflush(stdout);
-    ::fputs("Opened standard error on newly created console.\n", stderr);
-    ::fflush(stderr);
+    int ret;
+    ::FILE *conout;
+    ret = ::_wfreopen_s(&conout, L"CONOUT$", L"wt", stdout);
+    assert(ret == 0);
+    ret = ::_wfreopen_s(&conout, L"CONOUT$", L"wt", stderr);
+    assert(ret == 0);
+    ret = ::_wfreopen_s(&conout, L"CONIN$", L"rt", stdin);
+    assert(ret == 0);
 }
 
 
@@ -297,6 +319,15 @@ void CloseConsoleWindow()
     std::lock_guard lock(console_mutex);
     if (console_opened.exchange(false, std::memory_order::relaxed))
         ::FreeConsole();
+}
+
+void WaitForAnyKey()
+{
+    std::cout.flush();
+    std::wcout << L"\nPress any key...";
+    std::wcout.flush();
+    std::wstring in;
+    std::getline(std::wcin, in);
 }
 
 #endif

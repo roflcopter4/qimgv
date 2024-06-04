@@ -2,13 +2,13 @@
 
 ScriptManager *scriptManager = nullptr;
 
-ScriptManager::ScriptManager(QObject *parent) : QObject(parent)
+ScriptManager::ScriptManager(QObject *parent)
+    : QObject(parent)
 {}
 
 ScriptManager::~ScriptManager()
 {
-    scriptManager->saveScripts();
-    delete scriptManager;
+    saveScripts();
 }
 
 ScriptManager *ScriptManager::getInstance()
@@ -33,11 +33,11 @@ void ScriptManager::runScript(QString const &scriptName, std::shared_ptr<Image> 
         processArguments(arguments, img);
         QString program = arguments.takeAt(0);
 
-        qDebug() << QSV("Running program") << program << QSV("with arguments") << arguments;
+        qDebug() << u"Running program" << program << u"with arguments" << arguments;
         if(script.blocking) {
             exec.start(program, arguments);
             if(!exec.waitForStarted())
-                qDebug() << QSV("Unable not run application/script \"") << program << QSV("\". Make sure it is an executable.");
+                qDebug() << u"Unable not run application/script \"" << program << u"\". Make sure it is an executable.";
             exec.waitForFinished(10000);
         } else {
             if(!QProcess::startDetached(program, arguments)) {
@@ -52,7 +52,7 @@ void ScriptManager::runScript(QString const &scriptName, std::shared_ptr<Image> 
             }
         }
     } else {
-        qDebug() << QSV("[ScriptManager] File ") << scriptName << QSV(" does not exist.");
+        qDebug() << u"[ScriptManager] File " << scriptName << u" does not exist.";
     }
 }
 
@@ -62,7 +62,7 @@ QString ScriptManager::runCommand(QString const &cmd)
     QStringList cmdSplit = QProcess::splitCommand(cmd);
     exec.start(cmdSplit.takeAt(0), cmdSplit);
     exec.waitForFinished(2000);
-    return exec.readAllStandardOutput();
+    return QString::fromUtf8(exec.readAllStandardOutput());
 }
 
 void ScriptManager::runCommandDetached(QString const &cmd)
@@ -78,7 +78,7 @@ void ScriptManager::processArguments(QStringList &cmd, std::shared_ptr<Image> co
     for (auto &i : cmd) {
         if(i.contains(field))
             i.replace(field, img->filePath());
-#ifdef _WIN32
+#if defined _WIN32 && false
         // force "\" as a directory separator
         i.replace("/", "\\");
         i.replace("\\\\", "\\");
@@ -100,7 +100,7 @@ QStringList ScriptManager::splitCommandLine(QString const &cmdLine)
         //}
         switch (state) {
         case Idle:
-            if(!escape && c == '"')
+            if(!escape && c == u'"')
                 state = QuotedArg;
             else if (escape || !c.isSpace()) {
                 arg += c;
@@ -108,7 +108,7 @@ QStringList ScriptManager::splitCommandLine(QString const &cmdLine)
             }
             break;
         case Arg:
-            if(!escape && c == '"')
+            if(!escape && c == u'"')
                 state = QuotedArg;
             else if(escape || !c.isSpace())
                 arg += c;
@@ -119,7 +119,7 @@ QStringList ScriptManager::splitCommandLine(QString const &cmdLine)
             }
             break;
         case QuotedArg:
-            if(!escape && c == '"')
+            if(!escape && c == u'"')
                 state = arg.isEmpty() ? Idle : Arg;
             else
                 arg += c;
@@ -152,7 +152,7 @@ void ScriptManager::saveScripts() const
 void ScriptManager::addScript(QString const &scriptName, Script const &script)
 {
     if (scripts.contains(scriptName)) {
-        qDebug() << QSV("[ScriptManager] Replacing script") << scriptName;
+        qDebug() << u"[ScriptManager] Replacing script" << scriptName;
         scripts.remove(scriptName);
     }
     scripts.insert(scriptName, script);

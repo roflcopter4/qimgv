@@ -38,7 +38,7 @@ bool ThumbnailStripProxy::isInitialized() const
     return thumbnailStrip != nullptr;
 }
 
-void ThumbnailStripProxy::populate(int count)
+void ThumbnailStripProxy::populate(qsizetype count)
 {
     QMutexLocker ml(&m);
     stateBuf.itemCount = count;
@@ -50,13 +50,13 @@ void ThumbnailStripProxy::populate(int count)
     }
 }
 
-void ThumbnailStripProxy::setThumbnail(int pos, std::shared_ptr<Thumbnail> thumb)
+void ThumbnailStripProxy::setThumbnail(qsizetype pos, std::shared_ptr<Thumbnail> thumb)
 {
     if (thumbnailStrip)
         thumbnailStrip->setThumbnail(pos, thumb);
 }
 
-void ThumbnailStripProxy::select(QList<int> indices)
+void ThumbnailStripProxy::select(SelectionList indices)
 {
     if (thumbnailStrip)
         thumbnailStrip->select(indices);
@@ -64,7 +64,7 @@ void ThumbnailStripProxy::select(QList<int> indices)
         stateBuf.selection = indices;
 }
 
-void ThumbnailStripProxy::select(int index)
+void ThumbnailStripProxy::select(qsizetype index)
 {
     if (thumbnailStrip) {
         thumbnailStrip->select(index);
@@ -74,19 +74,17 @@ void ThumbnailStripProxy::select(int index)
     }
 }
 
-QList<int> &
-ThumbnailStripProxy::selection()
+IDirectoryView::SelectionList &ThumbnailStripProxy::selection()
 {
     return thumbnailStrip ? thumbnailStrip->selection() : stateBuf.selection;
 }
 
-QList<int> const &
-ThumbnailStripProxy::selection() const
+IDirectoryView::SelectionList const &ThumbnailStripProxy::selection() const
 {
     return thumbnailStrip ? thumbnailStrip->selection() : stateBuf.selection;
 }
 
-void ThumbnailStripProxy::focusOn(int index)
+void ThumbnailStripProxy::focusOn(qsizetype index)
 {
     if (thumbnailStrip)
         thumbnailStrip->focusOn(index);
@@ -98,7 +96,7 @@ void ThumbnailStripProxy::focusOnSelection()
         thumbnailStrip->focusOnSelection();
 }
 
-void ThumbnailStripProxy::insertItem(int index)
+void ThumbnailStripProxy::insertItem(qsizetype index)
 {
     if (thumbnailStrip)
         thumbnailStrip->insertItem(index);
@@ -106,7 +104,7 @@ void ThumbnailStripProxy::insertItem(int index)
         stateBuf.itemCount++;
 }
 
-void ThumbnailStripProxy::removeItem(int index)
+void ThumbnailStripProxy::removeItem(qsizetype index)
 {
     if (thumbnailStrip) {
         thumbnailStrip->removeItem(index);
@@ -121,13 +119,13 @@ void ThumbnailStripProxy::removeItem(int index)
     }
 }
 
-void ThumbnailStripProxy::reloadItem(int index)
+void ThumbnailStripProxy::reloadItem(qsizetype index)
 {
     if (thumbnailStrip)
         thumbnailStrip->reloadItem(index);
 }
 
-void ThumbnailStripProxy::setDragHover(int index)
+void ThumbnailStripProxy::setDragHover(qsizetype index)
 {
     if (thumbnailStrip)
         thumbnailStrip->setDragHover(index);

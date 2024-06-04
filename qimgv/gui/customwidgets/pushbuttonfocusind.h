@@ -1,25 +1,27 @@
 #pragma once
-#include <QPushButton>
+#include "settings.h"
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
-#include "settings.h"
+#include <QPushButton>
 
-class PushButtonFocusInd : public QPushButton {
+class PushButtonFocusInd : public QPushButton
+{
     Q_OBJECT
-public:
+
+  public:
     PushButtonFocusInd(QWidget *parent = nullptr);
     void setHighlighted(bool);
-    bool isHighlighted();
+    bool isHighlighted() const;
 
-signals:
+  signals:
     void rightPressed();
     void rightClicked();
 
-protected:
-    void mousePressEvent(QMouseEvent *event) override;
+  protected:
     bool mIsHighlighted;
+
+    void mousePressEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 };
-

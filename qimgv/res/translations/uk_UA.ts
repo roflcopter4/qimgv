@@ -94,228 +94,228 @@
 <context>
     <name>Core</name>
     <message>
-        <location filename="../../core.cpp" line="254"/>
+        <location filename="../../core.cpp" line="259"/>
         <source>Updated: </source>
         <translation>Оновлено: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="261"/>
+        <location filename="../../core.cpp" line="266"/>
         <source>Welcome to </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="261"/>
+        <location filename="../../core.cpp" line="266"/>
         <source> version </source>
         <translation> версія </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="269"/>
+        <location filename="../../core.cpp" line="274"/>
         <source>Shuffle mode: OFF</source>
         <translation>Режим перемішування: Вимкнено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="272"/>
+        <location filename="../../core.cpp" line="277"/>
         <source>Shuffle mode: ON</source>
         <translation>Режим перемішування: Увімкнено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="282"/>
+        <location filename="../../core.cpp" line="287"/>
         <source>Slideshow: OFF</source>
         <translation>Слайд-шоу: Вимкнено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="286"/>
+        <location filename="../../core.cpp" line="291"/>
         <source>Slideshow: ON</source>
         <translation>Слайд-шоу: Увімкнено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="366"/>
+        <location filename="../../core.cpp" line="371"/>
         <source>Delete </source>
         <translation>Видалити </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="366"/>
+        <location filename="../../core.cpp" line="371"/>
         <source> items permanently?</source>
         <translation> елементів остаточно?</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="368"/>
+        <location filename="../../core.cpp" line="373"/>
         <source>Delete item permanently?</source>
         <translation>Видалити елемент остаточно?</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="369"/>
+        <location filename="../../core.cpp" line="374"/>
         <source>Delete permanently</source>
         <translation>Видалити остаточно</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="385"/>
+        <location filename="../../core.cpp" line="390"/>
         <source>File removed</source>
         <translation>Файл видалено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="389"/>
+        <location filename="../../core.cpp" line="394"/>
         <source>Removed: </source>
         <translation>Видалено: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="389"/>
-        <location filename="../../core.cpp" line="420"/>
+        <location filename="../../core.cpp" line="394"/>
+        <location filename="../../core.cpp" line="425"/>
         <source> files</source>
         <translation> файлів</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="400"/>
+        <location filename="../../core.cpp" line="405"/>
         <source>Move </source>
         <translation>Помістити </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="400"/>
+        <location filename="../../core.cpp" line="405"/>
         <source> items to trash?</source>
         <translation> елементів до кошику?</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="402"/>
+        <location filename="../../core.cpp" line="407"/>
         <source>Move item to trash?</source>
         <translation>Помістити елемент до кошику?</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="403"/>
+        <location filename="../../core.cpp" line="408"/>
         <source>Move to trash</source>
         <translation>Помістити в кошик</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="416"/>
+        <location filename="../../core.cpp" line="421"/>
         <source>Moved to trash</source>
         <translation>Переміщено в кошик</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="420"/>
+        <location filename="../../core.cpp" line="425"/>
         <source>Moved to trash: </source>
         <translation>Переміщено в кошик: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="480"/>
+        <location filename="../../core.cpp" line="485"/>
         <source>File copied</source>
         <translation>Файл скопійовано</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="488"/>
+        <location filename="../../core.cpp" line="493"/>
         <source>Path copied</source>
         <translation>Шлях скопійовано</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="673"/>
-        <location filename="../../core.cpp" line="970"/>
-        <location filename="../../core.cpp" line="992"/>
+        <location filename="../../core.cpp" line="745"/>
+        <location filename="../../core.cpp" line="1041"/>
+        <location filename="../../core.cpp" line="1063"/>
         <source>File exists</source>
         <translation>Файл існує</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="673"/>
+        <location filename="../../core.cpp" line="745"/>
         <source>Overwrite file?</source>
         <translation>Перезаписати файл?</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="854"/>
-        <location filename="../../core.cpp" line="928"/>
+        <location filename="../../core.cpp" line="926"/>
+        <location filename="../../core.cpp" line="1000"/>
         <source>Could not create directory </source>
         <translation>Не вдалося створити директорію </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="968"/>
+        <location filename="../../core.cpp" line="1039"/>
         <source>File moved.</source>
         <translation>Файл переміщено.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="970"/>
-        <location filename="../../core.cpp" line="992"/>
+        <location filename="../../core.cpp" line="1041"/>
+        <location filename="../../core.cpp" line="1063"/>
         <source>Destination file exists. Overwrite?</source>
         <translation>Файл існує. Перезаписати?</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="990"/>
+        <location filename="../../core.cpp" line="1061"/>
         <source>File copied.</source>
         <translation>Файл скопійовано.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1045"/>
+        <location filename="../../core.cpp" line="1116"/>
         <source>Perform action &quot;</source>
         <translation>Виконати дію &quot;</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1046"/>
+        <location filename="../../core.cpp" line="1117"/>
         <source>Changes will be saved immediately.</source>
         <translation>Зміни будуть збережені негайно.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1066"/>
+        <location filename="../../core.cpp" line="1137"/>
         <source>Flip horizontal</source>
         <translation>Перевернути горизонтально</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1071"/>
+        <location filename="../../core.cpp" line="1142"/>
         <source>Flip vertical</source>
         <translation>Перевернути вертикально</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1076"/>
+        <location filename="../../core.cpp" line="1147"/>
         <source>Rotate</source>
         <translation>Повернути</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1081"/>
+        <location filename="../../core.cpp" line="1152"/>
         <source>Resize</source>
         <translation>Змінити розмір</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1088"/>
-        <location filename="../../core.cpp" line="1095"/>
+        <location filename="../../core.cpp" line="1159"/>
+        <location filename="../../core.cpp" line="1166"/>
         <source>Crop</source>
         <translation>Обрізати</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1131"/>
+        <location filename="../../core.cpp" line="1202"/>
         <source>File saved</source>
         <translation>Файл збережено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1134"/>
+        <location filename="../../core.cpp" line="1205"/>
         <source>Could not save file</source>
         <translation>Не вдалос зберегти файл</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1253"/>
+        <location filename="../../core.cpp" line="1324"/>
         <source>Could not open image</source>
         <translation>Не вдалося відкрити зображення</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1257"/>
+        <location filename="../../core.cpp" line="1328"/>
         <source>Can only print static images</source>
         <translation>Можливий друк лише статичних зображень</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1310"/>
+        <location filename="../../core.cpp" line="1381"/>
         <source>Could not open path: </source>
         <translation>Не вдалося відкрити шлях: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1344"/>
+        <location filename="../../core.cpp" line="1415"/>
         <source>Could not load folder: </source>
         <translation>Не вдалося завантажити теку: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1507"/>
+        <location filename="../../core.cpp" line="1578"/>
         <source>End of directory.</source>
         <translation>Кінець директорії.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1550"/>
+        <location filename="../../core.cpp" line="1621"/>
         <source>Load failed: </source>
         <translation>Завантаження не вдалося: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1599"/>
+        <location filename="../../core.cpp" line="1670"/>
         <source>Error: could not load image.</source>
         <translation>Помилка: не вдалося завантажити зображення.</translation>
     </message>
@@ -1946,12 +1946,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Колір тексту</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="616"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="619"/>
         <source>Edit shortcut</source>
         <translation>Редагувати комбінацію клавіш</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="669"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="672"/>
         <source>Navigate to mpv binary</source>
         <translation>Перейдіть до бінарного файлу mpv</translation>
     </message>

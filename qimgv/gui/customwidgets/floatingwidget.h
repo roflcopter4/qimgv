@@ -35,7 +35,7 @@ class FloatingWidget : public QWidget
     virtual void recalculateGeometry();
 
     void paintEvent(QPaintEvent *event) override;
-    void setContainerSize(QSize container);
+    void setContainerSize(QSize newContainer);
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;

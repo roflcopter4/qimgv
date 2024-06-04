@@ -5,8 +5,7 @@
 #include <QLayout>
 #include <QFileDialog>
 
-#define QS(s)  QStringLiteral(s)
-#define QSV(s) QStringView(u"" s)
+#define QS(s) QStringLiteral(s)
 
 // TODO: window flashes white when opening a video (straight from file manager)
 VideoPlayerMpv::VideoPlayerMpv(QWidget *parent)

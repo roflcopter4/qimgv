@@ -93,7 +93,7 @@ void SlidePanel::show()
         QWidget::show();
         QWidget::raise();
     } else {
-        qDebug() << QSV("Warning: Trying to show panel containing no widget!");
+        qDebug() << u"Warning: Trying to show panel containing no widget!";
     }
 }
 

@@ -29,7 +29,7 @@ target_compile_features(player_mpv PRIVATE cxx_std_11)
 
 if(WIN32)
     target_link_libraries(player_mpv PRIVATE
-        Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Mpv)
+        Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets "${CMAKE_SOURCE_DIR}/external/mpv-x64/lib/x86_64/libmpv.dll.a")
 else()
     target_link_libraries(player_mpv PRIVATE
         Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets PkgConfig::Mpv)

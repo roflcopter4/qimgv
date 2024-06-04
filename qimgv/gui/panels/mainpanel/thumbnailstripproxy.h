@@ -4,15 +4,15 @@
 #include <QMutexLocker>
 #include "Common.h"
 
-struct ThumbnailStripStateBuffer {
-    QList<int> selection;
-    qsizetype  itemCount = 0;
-};
-
 class ThumbnailStripProxy : public QWidget, public IDirectoryView
 {
     Q_OBJECT
     Q_INTERFACES(IDirectoryView)
+
+    struct ThumbnailStripStateBuffer {
+        SelectionList selection;
+        qsizetype     itemCount = 0;
+    };
 
   public:
     explicit ThumbnailStripProxy(QWidget *parent = nullptr);
@@ -24,32 +24,32 @@ class ThumbnailStripProxy : public QWidget, public IDirectoryView
     ND QSize itemSize() const;
 
   public Q_SLOTS:
-    void populate(int) override;
-    void setThumbnail(int pos, std::shared_ptr<Thumbnail> thumb) override;
-    void select(QList<int>) override;
-    void select(int index) override;
-    void focusOn(int index) override;
+    void populate(qsizetype) override;
+    void setThumbnail(qsizetype pos, std::shared_ptr<Thumbnail> thumb) override;
+    void select(SelectionList) override;
+    void select(qsizetype index) override;
+    void focusOn(qsizetype index) override;
     void focusOnSelection() override;
-    void insertItem(int index) override;
-    void removeItem(int index) override;
-    void reloadItem(int index) override;
-    void setDragHover(int index) override;
+    void insertItem(qsizetype index) override;
+    void removeItem(qsizetype index) override;
+    void reloadItem(qsizetype index) override;
+    void setDragHover(qsizetype index) override;
     void setDirectoryPath(QString path) override;
     void addItem();
 
-    QList<int> &      selection() override;
-    QList<int> const &selection() const override;
+    ND SelectionList       &selection() final;
+    ND SelectionList const &selection() const final;
 
   protected:
     void showEvent(QShowEvent *event) override;
 
   Q_SIGNALS:
-    void itemActivated(int) override;
-    void thumbnailsRequested(QList<int>, int, bool, bool) override;
+    void itemActivated(qsizetype) override;
+    void thumbnailsRequested(SelectionList, int, bool, bool) override;
     void draggedOut() override;
-    void draggedToBookmarks(QList<int>) override;
-    void droppedInto(QMimeData const *, QObject *, int) override;
-    void draggedOver(int) override;
+    void draggedToBookmarks(SelectionList) override;
+    void droppedInto(QMimeData const *, QObject *, qsizetype) override;
+    void draggedOver(qsizetype) override;
 
   private:
     std::shared_ptr<ThumbnailStrip> thumbnailStrip = nullptr;

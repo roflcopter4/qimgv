@@ -18,7 +18,7 @@ struct DialogResult {
     }
 };
 
-enum FileReplaceMode {
+enum class FileReplaceMode {
     FILE_TO_FILE,
     DIR_TO_DIR,
     FILE_TO_DIR,
@@ -40,8 +40,8 @@ public:
     void setMulti(bool);
     DialogResult getResult() const;
 
-    void setSource(QString src);
-    void setDestination(QString dst);
+    void setSource(QString const &src);
+    void setDestination(QString const &dst);
 private slots:
     void onYesClicked();
     void onNoClicked();

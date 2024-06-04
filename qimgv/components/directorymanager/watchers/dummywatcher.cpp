@@ -2,8 +2,8 @@
 #include "directorywatcher_p.h"
 #include <QDebug>
 
-static constexpr QStringView tag     = QSV("[DummyWatcher]");
-static constexpr QStringView message = QSV("Directory watcher isn't yet implemented for your operating system");
+static constexpr char16_t tag[]     = u"[DummyWatcher]";
+static constexpr char16_t message[] = u"Directory watcher isn't yet implemented for your operating system";
 
 class DummyWatcherWorker : public WatcherWorker {
   public:

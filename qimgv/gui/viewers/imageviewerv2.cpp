@@ -27,12 +27,12 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
       fitWindowScale(0.125)
 {
     setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
-    this->viewport()->setAttribute(Qt::WA_OpaquePaintEvent, true);
+    viewport()->setAttribute(Qt::WA_OpaquePaintEvent, true);
     setFocusPolicy(Qt::FocusPolicy::NoFocus);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setAcceptDrops(false);
 
-    dpr = this->devicePixelRatioF();
+    dpr = devicePixelRatioF();
     hs  = horizontalScrollBar();
     vs  = verticalScrollBar();
 
@@ -44,6 +44,7 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
     scrollTimeLineX->setEasingCurve(QEasingCurve::Type::OutSine);
     scrollTimeLineX->setDuration(ANIMATION_SPEED);
     scrollTimeLineX->setUpdateInterval(SCROLL_UPDATE_RATE);
+
     connect(scrollTimeLineX, &QTimeLine::finished, this, &ImageViewerV2::onScrollTimelineFinished);
     connect(scrollTimeLineY, &QTimeLine::finished, this, &ImageViewerV2::onScrollTimelineFinished);
 
@@ -68,8 +69,8 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
     pixmapItemScaled.setOffset(10000.0, 10000.0);
     pixmapItemScaled.setTransformOriginPoint(10000.0, 10000.0);
 
-    this->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
-    this->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
 
     scene = new QGraphicsScene();
     scene->setSceneRect(0.0, 0.0, 200000.0, 200000.0);
@@ -78,8 +79,8 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
     scene->addItem(&pixmapItemScaled);
     pixmapItemScaled.hide();
 
-    this->setFrameShape(QFrame::Shape::NoFrame);
-    this->setScene(scene);
+    setFrameShape(QFrame::Shape::NoFrame);
+    setScene(scene);
 
     connect(scrollTimeLineX, &QTimeLine::frameChanged, this, &ImageViewerV2::scrollToX);
     connect(scrollTimeLineY, &QTimeLine::frameChanged, this, &ImageViewerV2::scrollToY);
@@ -646,8 +647,7 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event)
             qDebug() << QSV("trackpad");
         } else if (isWheel && settings->imageScrolling() == ImageScrolling::BY_TRACKPAD_AND_WHEEL) {
             // scroll by interval
-            bool  scrollable = false;
-            QRect imgRect    = scaledRectR();
+            QRect imgRect = scaledRectR();
             // shift by 2px in case of img edge misalignment
             // todo: maybe even increase it to skip small distance scrolls?
             if ((event->angleDelta().y() < 0 && imgRect.bottom() > height() + 2) ||

@@ -8,34 +8,37 @@
 #include "settings.h"
 #include "utils/imagelib.h"
 
-enum IconColorMode {
-    ICON_COLOR_CUSTOM,
-    ICON_COLOR_THEME,
-    ICON_COLOR_SOURCE
-};
+class IconWidget : public QWidget
+{
+    enum class IconColorMode {
+        CUSTOM,
+        THEME,
+        SOURCE,
+    };
 
-class IconWidget : public QWidget {
-public:
+  public:
     explicit IconWidget(QWidget *parent = nullptr);
     ~IconWidget() override;
+
     void  setIconPath(QString const &path);
     void  setIconOffset(int x, int y);
     void  setColorMode(IconColorMode _mode);
     void  setColor(QColor const &_color);
-    QSize minimumSizeHint() const override;
 
-protected:
+    ND QSize minimumSizeHint() const override;
+
+  protected:
     void paintEvent(QPaintEvent *event) override;
 
-private:
+  private:
     void loadIcon();
     void applyColor();
 
-    QString iconPath;
-    QColor color;
-    IconColorMode colorMode = ICON_COLOR_THEME;
-    bool hiResPixmap;
-    QPoint iconOffset;
-    QPixmap *pixmap;
-    qreal dpr, pixmapDrawScale;
+    QString       iconPath;
+    QColor        color;
+    IconColorMode colorMode = IconColorMode::THEME;
+    bool          hiResPixmap;
+    QPoint        iconOffset;
+    QPixmap      *pixmap;
+    qreal         dpr, pixmapDrawScale;
 };

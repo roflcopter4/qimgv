@@ -1,15 +1,15 @@
 #include "image.h"
 
-Image::Image(QString const &_path)
-    : mDocInfo(new DocumentInfo(_path)),
+Image::Image(QString const &path)
+    : mDocInfo(new DocumentInfo(path)),
       mLoaded(false),
       mEdited(false),
-      mPath(_path)
+      mPath(path)
 {
 }
 
-Image::Image(std::unique_ptr<DocumentInfo> _info)
-    : mDocInfo(std::move(_info)),
+Image::Image(std::unique_ptr<DocumentInfo> info)
+    : mDocInfo(std::move(info)),
       mLoaded(false),
       mEdited(false),
       mPath(mDocInfo->filePath())

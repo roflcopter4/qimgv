@@ -29,6 +29,6 @@ class Randomizer
     qsizetype currentIndex;
     std::vector<uint32_t> vec;
 
-    void         fill();
-    ND qsizetype indexOf(qsizetype item) const;
+    void    fill();
+    ND auto indexOf(qsizetype item) const -> qsizetype;
 };

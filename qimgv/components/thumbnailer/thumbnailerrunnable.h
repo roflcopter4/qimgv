@@ -16,7 +16,7 @@
 class ThumbnailerRunnable : public QObject, public QRunnable {
     Q_OBJECT
 public:
-    ThumbnailerRunnable(ThumbnailCache*_cache, QString const &_path, int _size, bool _crop, bool _force);
+    ThumbnailerRunnable(ThumbnailCache*cache, QString path, int size, bool crop, bool force);
     ~ThumbnailerRunnable() override;
     void                              run() override;
     static std::shared_ptr<Thumbnail> generate(ThumbnailCache *cache, QString const &path, int size, bool crop, bool force);

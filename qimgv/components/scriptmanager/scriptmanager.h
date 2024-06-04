@@ -32,7 +32,8 @@ class ScriptManager : public QObject
     static auto runCommand(QString const &cmd) -> QString;
     static void runCommandDetached(QString const &cmd);
     static auto allScripts() -> QMap<QString, Script> const &;
-    static auto scriptNames() -> QList<QString>;
+    static auto scriptNames() -> QStringList;
+    static auto splitCommandLine(QString const &cmdLine) -> QStringList;
 
     ScriptManager(ScriptManager const &)                = delete;
     ScriptManager(ScriptManager &&) noexcept            = delete;

@@ -43,11 +43,13 @@ void OverlayWidget::setVerticalMargin(int margin) {
     recalculateGeometry();
 }
 
-int OverlayWidget::horizontalMargin() {
+int OverlayWidget::horizontalMargin() const
+{
     return mHorizontalMargin;
 }
 
-int OverlayWidget::verticalMargin() {
+int OverlayWidget::verticalMargin() const
+{
     return mVerticalMargin;
 }
 

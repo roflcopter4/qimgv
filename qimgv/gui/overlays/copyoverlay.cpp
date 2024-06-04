@@ -12,7 +12,7 @@ CopyOverlay::CopyOverlay(FloatingWidgetContainer *parent) :
     ui->closeButton->setIconPath(QS(":/res/icons/common/overlay/close-dim16.png"));
     ui->headerIcon->setIconPath(QS(":/res/icons/common/overlay/copy16.png"));
     ui->headerLabel->setText(tr("Copy to..."));
-    mode = OVERLAY_COPY;
+    mode = CopyOverlayMode::COPY;
 
     createShortcuts();
 
@@ -45,7 +45,7 @@ void CopyOverlay::hide() {
 
 void CopyOverlay::setDialogMode(CopyOverlayMode _mode) {
     mode = _mode;
-    if(mode == OVERLAY_COPY) {
+    if(mode == CopyOverlayMode::COPY) {
         ui->headerIcon->setIconPath(QS(":/res/icons/common/overlay/copy16.png"));
         ui->headerLabel->setText(tr("Copy to..."));
     } else {
@@ -54,7 +54,8 @@ void CopyOverlay::setDialogMode(CopyOverlayMode _mode) {
     }
 }
 
-CopyOverlayMode CopyOverlay::operationMode() {
+CopyOverlayMode CopyOverlay::operationMode() const
+{
     return mode;
 }
 
@@ -69,8 +70,8 @@ void CopyOverlay::removePathWidgets() {
 
 void CopyOverlay::createPathWidgets() {
     removePathWidgets();
-    int count = (paths.length() > maxPathCount) ? maxPathCount : paths.length();
-    for(int i = 0; i < count; i++) {
+    qsizetype count = (paths.length() > maxPathCount) ? maxPathCount : paths.length();
+    for(qsizetype i = 0; i < count; i++) {
         PathSelectorMenuItem *item = new PathSelectorMenuItem(this);
         item->setDirectory(paths.at(i));
         item->setShortcutText(shortcuts.key(i));
@@ -81,12 +82,12 @@ void CopyOverlay::createPathWidgets() {
 }
 
 void CopyOverlay::createShortcuts() {
-    for(int i = 0; i < maxPathCount; i++)
+    for(qsizetype i = 0; i < maxPathCount; i++)
         shortcuts.insert(QString::number(i + 1), i);
 }
 
 void CopyOverlay::requestFileOperation(QString const &path) {
-    if(mode == OVERLAY_COPY)
+    if(mode == CopyOverlayMode::COPY)
         emit copyRequested(path);
     else
         emit moveRequested(path);
@@ -121,7 +122,7 @@ void CopyOverlay::saveSettings() {
 
 void CopyOverlay::createDefaultPaths() {
     QString home = QDir::homePath();
-    if (paths.count() < 1 || paths.at(0).isEmpty() || paths.at(0)[0] == '@') {
+    if (paths.count() < 1 || paths.at(0).isEmpty() || paths.at(0)[0] == u'@') {
         paths.clear();
         paths << home;
     }
@@ -138,7 +139,7 @@ void CopyOverlay::createDefaultPaths() {
                 if(mfi.fileName() == QSV(".")  
                 || mfi.fileName() == QSV("..")
                 // hide directory
-                || mfi.fileName()[0] ==  '.' 
+                || mfi.fileName()[0] ==  u'.' 
                 // windows system directory
                 || mfi.fileName() ==  QSV("3D Objects")
                 || mfi.fileName() ==  QSV("Contacts")
@@ -149,7 +150,7 @@ void CopyOverlay::createDefaultPaths() {
                 ) {
                     continue;
                 }
-                QString qpath(home + QChar('/') + mfi.fileName());
+                QString qpath(home + u'/' + mfi.fileName());
                 QFileInfo qinfo(qpath);
                 if (qinfo.permission(QFile::WriteUser | QFile::ReadGroup)) {
                     paths << qpath;
@@ -160,7 +161,7 @@ void CopyOverlay::createDefaultPaths() {
 }
 
 // block native tab-switching so we can use it in shortcuts
-bool CopyOverlay::focusNextPrevChild(bool Mode) {
+bool CopyOverlay::focusNextPrevChild(bool) {
     return false;
 }
 

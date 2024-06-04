@@ -1,7 +1,11 @@
 #include "FileSystemModelCustom.h"
 
-FileSystemModelCustom::FileSystemModelCustom(QObject *parent) : QFileSystemModel(parent)
+FileSystemModelCustom::FileSystemModelCustom(QObject *parent)
+    : QFileSystemModel(parent)
 {
+    setOptions(Option::DontWatchForChanges);
+    setIconProvider(nullptr);
+
     auto dpr      = qApp->devicePixelRatio();
     auto iconPath = QS(":/res/icons/common/menuitem/folder16.png");
 
@@ -29,3 +33,29 @@ Qt::ItemFlags FileSystemModelCustom::flags(QModelIndex const &index) const
     }
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDropEnabled;
 }
+
+
+#if 0
+bool FileSystemModelCustom::event(QEvent *event)
+{
+    qDebug() << event->type();
+    return QFileSystemModel::event(event);
+
+#if 0
+    switch (event->type()) {
+    case QEvent::Type::MetaCall: {
+        std::thread fuck([&](QEvent *ev){QFileSystemModel::event(ev);}, event);
+        fuck.detach();
+        return false;
+        //QThread thr([](){});
+        //thr.
+        //QThread::run();
+        //connect(this, &QObject::finished, wkThrd, &QThread::quit);
+    }
+    default:
+        return QFileSystemModel::event(event);
+        break;
+    }
+#endif
+}
+#endif

@@ -28,7 +28,7 @@ void FolderGridView::dropEvent(QDropEvent *event)
 {
     event->accept();
     auto     *item  = dynamic_cast<ThumbnailWidget *>(itemAt(event->position().toPoint()));
-    int index = -1;
+    qsizetype index = -1;
     if (item) {
         index = thumbnails.indexOf(item);
         item->setDropHovered(false);
@@ -45,7 +45,7 @@ void FolderGridView::dragMoveEvent(QDragMoveEvent *event)
 {
     event->accept();
     auto     *item  = dynamic_cast<ThumbnailWidget *>(itemAt(event->position().toPoint()));
-    int index = -1;
+    qsizetype index = -1;
     if (item)
         index = thumbnails.indexOf(item);
     // unselect previous
@@ -63,7 +63,7 @@ void FolderGridView::dragLeaveEvent(QDragLeaveEvent *event)
     thumbnails.at(lastDragTarget)->setDropHovered(false);
 }
 
-void FolderGridView::setDragHover(int index)
+void FolderGridView::setDragHover(qsizetype index)
 {
     if (!checkRange(index))
         return;
@@ -119,7 +119,7 @@ void FolderGridView::focusOnSelection()
 
 void FolderGridView::selectAll()
 {
-    QList<int> list;
+    SelectionList list;
     for (qsizetype i = 0; i < thumbnails.count(); i++)
         list << i;
     // preserve last selected index by putting it at the end of a new selection
@@ -135,9 +135,9 @@ void FolderGridView::selectAbove()
 {
     if (!thumbnails.count() || lastSelected() == -1 || flowLayout->sameRow(0, lastSelected()))
         return;
-    int newIndex = flowLayout->itemAbove(lastSelected());
+    qsizetype newIndex = flowLayout->itemAbove(lastSelected());
     if (shiftedCol >= 0) {
-        int diff = shiftedCol - flowLayout->columnOf(lastSelected());
+        qsizetype diff = shiftedCol - flowLayout->columnOf(lastSelected());
         newIndex += diff;
         shiftedCol = -1;
     }
@@ -155,7 +155,7 @@ void FolderGridView::selectBelow()
     if (!thumbnails.count() || lastSelected() == -1 || flowLayout->sameRow(lastSelected(), thumbnails.count() - 1))
         return;
     shiftedCol = -1;
-    int newIndex = flowLayout->itemBelow(lastSelected());
+    qsizetype newIndex = flowLayout->itemBelow(lastSelected());
     if (!checkRange(newIndex))
         newIndex = thumbnails.count() - 1;
     if (flowLayout->columnOf(newIndex) != flowLayout->columnOf(lastSelected()))
@@ -175,8 +175,8 @@ void FolderGridView::selectNext()
         select(lastSelected());
         return;
     }
-    shiftedCol   = -1;
-    int newIndex = lastSelected() + 1;
+    shiftedCol = -1;
+    qsizetype newIndex = lastSelected() + 1;
     if (!checkRange(newIndex))
         newIndex = thumbnails.count() - 1;
     if (rangeSelection)
@@ -190,8 +190,8 @@ void FolderGridView::selectPrev()
 {
     if (!thumbnails.count() || lastSelected() == 0)
         return;
-    shiftedCol   = -1;
-    int newIndex = lastSelected() - 1;
+    shiftedCol = -1;
+    qsizetype newIndex = lastSelected() - 1;
     if (!checkRange(newIndex))
         newIndex = 0;
     if (rangeSelection)
@@ -205,16 +205,15 @@ void FolderGridView::pageUp()
 {
     if (!thumbnails.count() || lastSelected() == -1 || flowLayout->sameRow(0, lastSelected()))
         return;
-    int newIndex = lastSelected();
-    int tmp;
+    qsizetype newIndex = lastSelected();
     // 4 rows up
-    for (int i = 0; i < 4; i++) {
-        tmp = flowLayout->itemAbove(newIndex);
+    for (int i = 0; i < 4; ++i) {
+        qsizetype tmp = flowLayout->itemAbove(newIndex);
         if (checkRange(tmp))
             newIndex = tmp;
     }
     if (shiftedCol >= 0) {
-        int diff = shiftedCol - flowLayout->columnOf(newIndex);
+        qsizetype diff = shiftedCol - flowLayout->columnOf(newIndex);
         newIndex += diff;
         shiftedCol = -1;
     }
@@ -230,10 +229,10 @@ void FolderGridView::pageDown()
     if (!thumbnails.count() || lastSelected() == -1 || flowLayout->sameRow(lastSelected(), thumbnails.count() - 1))
         return;
     shiftedCol   = -1;
-    auto newIndex = lastSelected();
+    qsizetype newIndex = lastSelected();
     // 4 rows down
     for (int i = 0; i < 4; i++) {
-        auto tmp = flowLayout->itemBelow(newIndex);
+        qsizetype tmp = flowLayout->itemBelow(newIndex);
         if (checkRange(tmp))
             newIndex = tmp;
     }
@@ -276,7 +275,7 @@ void FolderGridView::scrollToCurrent()
 }
 
 // same as scrollToItem minus the animation
-void FolderGridView::focusOn(int index)
+void FolderGridView::focusOn(qsizetype index)
 {
     if (!checkRange(index))
         return;
@@ -299,7 +298,7 @@ void FolderGridView::setupLayout()
 
 ThumbnailWidget *FolderGridView::createThumbnailWidget()
 {
-    ThumbnailWidget *widget = new ThumbnailWidget();
+    auto *widget = new ThumbnailWidget();
     widget->setPadding(8);
 
     ThumbnailStyle style = settings->folderViewMode() == FolderViewMode::SIMPLE
@@ -311,13 +310,13 @@ ThumbnailWidget *FolderGridView::createThumbnailWidget()
     return widget;
 }
 
-void FolderGridView::addItemToLayout(ThumbnailWidget *widget, int pos)
+void FolderGridView::addItemToLayout(ThumbnailWidget *widget, qsizetype pos)
 {
     scene.addItem(widget);
     flowLayout->insertItem(pos, widget);
 }
 
-void FolderGridView::removeItemFromLayout(int pos)
+void FolderGridView::removeItemFromLayout(qsizetype pos)
 {
     flowLayout->removeAt(pos);
 }

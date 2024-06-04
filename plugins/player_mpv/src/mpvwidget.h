@@ -22,12 +22,12 @@ class MpvWidget Q_DECL_FINAL : public QOpenGLWidget
     explicit MpvWidget(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::Widget);
     ~MpvWidget() override;
 
-    void command(QVariant const &params);
-    void setOption(QString const &name, QVariant const &value);
-    void setProperty(QString const &name, QVariant const &value);
-    void setMuted(bool mode);
-    void setRepeat(bool mode);
-    void setVolume(int vol);
+    void command(QVariant const &params) const;
+    void setOption(QString const &name, QVariant const &value) const;
+    void setProperty(QString const &name, QVariant const &value) const;
+    void setMuted(bool mode) const;
+    void setRepeat(bool mode) const;
+    void setVolume(int vol) const;
 
     [[nodiscard]] auto getProperty(QString const &name) const -> QVariant;
     [[nodiscard]] auto muted() const -> bool;
@@ -62,7 +62,7 @@ class MpvWidget Q_DECL_FINAL : public QOpenGLWidget
     void maybeUpdate();
 
   private:
-    void        handle_mpv_event(mpv_event *event);
+    void        handle_mpv_event(mpv_event const *event);
     static void on_update(void *ctx);
 
     mpv_handle         *mpv;

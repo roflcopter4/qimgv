@@ -52,10 +52,10 @@ void VideoControls::setPlaybackDuration(int duration) {
         _time -= hours * 3600;
         int minutes = _time / 60;
         int seconds = _time - minutes * 60;
-        durationStr = QS("%1").arg(minutes, 2, 10, QChar('0')) + QChar(':') +
-                      QS("%1").arg(seconds, 2, 10, QChar('0'));
+        durationStr = QS("%1").arg(minutes, 2, 10, QChar(u'0')) + u':' +
+                      QS("%1").arg(seconds, 2, 10, QChar(u'0'));
         if(hours)
-            durationStr.prepend(QS("%1").arg(hours, 2, 10, QChar('0')) + QChar(':'));
+            durationStr.prepend(QS("%1").arg(hours, 2, 10, QChar(u'0')) + u':');
     } else {
         durationStr = QString::number(duration);
     }
@@ -76,10 +76,10 @@ void VideoControls::setPlaybackPosition(int Position) {
         _time -= hours * 3600;
         int minutes = _time / 60;
         int seconds = _time - minutes * 60;
-        positionStr = QS("%1").arg(minutes, 2, 10, QChar('0')) + QChar(':') +
-                      QS("%1").arg(seconds, 2, 10, QChar('0'));
+        positionStr = QS("%1").arg(minutes, 2, 10, QChar(u'0')) + u':' +
+                      QS("%1").arg(seconds, 2, 10, QChar(u'0'));
         if(hours)
-            positionStr.prepend(QS("%1").arg(hours, 2, 10, QChar('0')) + QChar(':'));
+            positionStr.prepend(QS("%1").arg(hours, 2, 10, QChar(u'0')) + u':');
     } else {
         positionStr = QString::number(Position + 1);
     }

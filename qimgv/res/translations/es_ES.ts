@@ -94,228 +94,228 @@
 <context>
     <name>Core</name>
     <message>
-        <location filename="../../core.cpp" line="255"/>
+        <location filename="../../core.cpp" line="259"/>
         <source>Updated: </source>
         <translation>Actualizado: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="261"/>
+        <location filename="../../core.cpp" line="266"/>
         <source>Welcome to </source>
         <translation>Bienvenido a </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="261"/>
+        <location filename="../../core.cpp" line="266"/>
         <source> version </source>
         <translation> versión </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="268"/>
+        <location filename="../../core.cpp" line="274"/>
         <source>Shuffle mode: OFF</source>
         <translation>Modo aleatorio: Apagado</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="271"/>
+        <location filename="../../core.cpp" line="277"/>
         <source>Shuffle mode: ON</source>
         <translation>Modo aleatorio: Encendido</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="280"/>
+        <location filename="../../core.cpp" line="287"/>
         <source>Slideshow: OFF</source>
         <translation>Diapositivas: Apagado</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="284"/>
+        <location filename="../../core.cpp" line="291"/>
         <source>Slideshow: ON</source>
         <translation>Diapositivas: Encendido</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="355"/>
+        <location filename="../../core.cpp" line="371"/>
         <source>Delete </source>
         <translation>Eliminar </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="355"/>
+        <location filename="../../core.cpp" line="371"/>
         <source> items permanently?</source>
         <translation> ítems permanentemente?</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="357"/>
+        <location filename="../../core.cpp" line="373"/>
         <source>Delete item permanently?</source>
         <translation>Eliminar permanentemente?</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="358"/>
+        <location filename="../../core.cpp" line="374"/>
         <source>Delete permanently</source>
         <translation>Eliminar permanentemente</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="374"/>
+        <location filename="../../core.cpp" line="390"/>
         <source>File removed</source>
         <translation>Archivo eliminado</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="378"/>
+        <location filename="../../core.cpp" line="394"/>
         <source>Removed: </source>
         <translation>Eliminado: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="378"/>
-        <location filename="../../core.cpp" line="408"/>
+        <location filename="../../core.cpp" line="394"/>
+        <location filename="../../core.cpp" line="425"/>
         <source> files</source>
         <translation> archivos</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="389"/>
+        <location filename="../../core.cpp" line="405"/>
         <source>Move </source>
         <translation>Mover </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="389"/>
+        <location filename="../../core.cpp" line="405"/>
         <source> items to trash?</source>
         <translation> ítems a la papelera?</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="391"/>
+        <location filename="../../core.cpp" line="407"/>
         <source>Move item to trash?</source>
         <translation>Mover ítem a la papelera?</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="392"/>
+        <location filename="../../core.cpp" line="408"/>
         <source>Move to trash</source>
         <translation>Mover a la papelera</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="404"/>
+        <location filename="../../core.cpp" line="421"/>
         <source>Moved to trash</source>
         <translation>Movido a la papelera</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="408"/>
+        <location filename="../../core.cpp" line="425"/>
         <source>Moved to trash: </source>
         <translation>Movido a la papelera: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="463"/>
+        <location filename="../../core.cpp" line="485"/>
         <source>File copied</source>
         <translation>Archivo copiado</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="470"/>
+        <location filename="../../core.cpp" line="493"/>
         <source>Path copied</source>
         <translation>Ruta copiada</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="644"/>
-        <location filename="../../core.cpp" line="918"/>
-        <location filename="../../core.cpp" line="939"/>
+        <location filename="../../core.cpp" line="745"/>
+        <location filename="../../core.cpp" line="1041"/>
+        <location filename="../../core.cpp" line="1063"/>
         <source>File exists</source>
         <translation>Archivo existente</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="644"/>
+        <location filename="../../core.cpp" line="745"/>
         <source>Overwrite file?</source>
         <translation>Sobre escribir archivo?</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="812"/>
-        <location filename="../../core.cpp" line="880"/>
+        <location filename="../../core.cpp" line="926"/>
+        <location filename="../../core.cpp" line="1000"/>
         <source>Could not create directory </source>
         <translation>No se pudo crear la carpeta </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="916"/>
+        <location filename="../../core.cpp" line="1039"/>
         <source>File moved.</source>
         <translation>Archivo movido.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="918"/>
-        <location filename="../../core.cpp" line="939"/>
+        <location filename="../../core.cpp" line="1041"/>
+        <location filename="../../core.cpp" line="1063"/>
         <source>Destination file exists. Overwrite?</source>
         <translation>El archivo de destino existe. Sobre escribe?</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="937"/>
+        <location filename="../../core.cpp" line="1061"/>
         <source>File copied.</source>
         <translation>Archivo copiado.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="984"/>
+        <location filename="../../core.cpp" line="1116"/>
         <source>Perform action &quot;</source>
         <translation>Ejecutar acción &quot;</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="984"/>
+        <location filename="../../core.cpp" line="1117"/>
         <source>Changes will be saved immediately.</source>
         <translation>Los cambios serán guardados inmediatamente.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1002"/>
+        <location filename="../../core.cpp" line="1137"/>
         <source>Flip horizontal</source>
         <translation>Voltear horizontalmente</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1006"/>
+        <location filename="../../core.cpp" line="1142"/>
         <source>Flip vertical</source>
         <translation>Voltear verticalmente</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1010"/>
+        <location filename="../../core.cpp" line="1147"/>
         <source>Rotate</source>
         <translation>Rotar</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1014"/>
+        <location filename="../../core.cpp" line="1152"/>
         <source>Resize</source>
         <translation>Cambiar tamaño</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1020"/>
-        <location filename="../../core.cpp" line="1026"/>
+        <location filename="../../core.cpp" line="1159"/>
+        <location filename="../../core.cpp" line="1166"/>
         <source>Crop</source>
         <translation>Recortar</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1058"/>
+        <location filename="../../core.cpp" line="1202"/>
         <source>File saved</source>
         <translation>Archivo grabado</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1061"/>
+        <location filename="../../core.cpp" line="1205"/>
         <source>Could not save file</source>
         <translation>No se pudo grabar el archivo</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1171"/>
+        <location filename="../../core.cpp" line="1324"/>
         <source>Could not open image</source>
         <translation>No se pudo abrir la imágen</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1175"/>
+        <location filename="../../core.cpp" line="1328"/>
         <source>Can only print static images</source>
         <translation>Solo se pueden imprimir imágenes estáticas</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1226"/>
+        <location filename="../../core.cpp" line="1381"/>
         <source>Could not open path: </source>
         <translation>No se pudo abrir la ruta: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1260"/>
+        <location filename="../../core.cpp" line="1415"/>
         <source>Could not load folder: </source>
         <translation>No se pudo cargar la carpeta: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1413"/>
+        <location filename="../../core.cpp" line="1578"/>
         <source>End of directory.</source>
         <translation>Fin de la carpeta.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1452"/>
+        <location filename="../../core.cpp" line="1621"/>
         <source>Load failed: </source>
         <translation>Carga fallida: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1496"/>
+        <location filename="../../core.cpp" line="1670"/>
         <source>Error: could not load image.</source>
         <translation>Error: no se pudo cargar la imagen.</translation>
     </message>
@@ -584,35 +584,35 @@
 <context>
     <name>MW</name>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="565"/>
+        <location filename="../../gui/mainwindow.cpp" line="623"/>
         <source>Save File as...</source>
         <translation>Guardar como...</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="800"/>
+        <location filename="../../gui/mainwindow.cpp" line="885"/>
         <source>Folder view</source>
         <translation>Vista de carpetas</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="801"/>
-        <location filename="../../gui/mainwindow.cpp" line="802"/>
-        <location filename="../../gui/mainwindow.cpp" line="805"/>
-        <location filename="../../gui/mainwindow.cpp" line="806"/>
+        <location filename="../../gui/mainwindow.cpp" line="886"/>
+        <location filename="../../gui/mainwindow.cpp" line="887"/>
+        <location filename="../../gui/mainwindow.cpp" line="890"/>
+        <location filename="../../gui/mainwindow.cpp" line="891"/>
         <source>No file opened.</source>
         <translation>No se abrió el archivo.</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="867"/>
+        <location filename="../../gui/mainwindow.cpp" line="964"/>
         <source>Fit Window</source>
         <translation>Encajar en la ventana</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="871"/>
+        <location filename="../../gui/mainwindow.cpp" line="969"/>
         <source>Fit Width</source>
         <translation>Encajar ancho</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="875"/>
+        <location filename="../../gui/mainwindow.cpp" line="974"/>
         <source>Fit 1:1</source>
         <translation>Proporción 1:1</translation>
     </message>
@@ -690,7 +690,7 @@
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/printdialog.cpp" line="70"/>
+        <location filename="../../gui/dialogs/printdialog.cpp" line="71"/>
         <source>Choose pdf location</source>
         <translation>Seleccionar ubicacion del PDF</translation>
     </message>
@@ -713,109 +713,113 @@
         <translation>Extendido + Carpetas</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="218"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="232"/>
         <source>Make</source>
         <translation>Capturar</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="222"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="236"/>
         <source>Model</source>
         <translation>Modelo</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="226"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="240"/>
         <source>Date/Time</source>
         <translation>Fecha/Hora</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="233"/>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="236"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="247"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="250"/>
         <source>ExposureTime</source>
         <translation>Tiempo de exposición</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="233"/>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="236"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="247"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="250"/>
         <source> sec</source>
         <translation> seg</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="244"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="258"/>
         <source>F Number</source>
         <translation>Número F</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="249"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="263"/>
         <source>ISO Speed ratings</source>
         <translation>Rangos de velocidad ISO</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="253"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="267"/>
         <source>Flash</source>
         <translation>Flash</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="259"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="273"/>
         <source>Focal Length</source>
         <translation>Longitud focal</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="259"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="273"/>
         <source> mm</source>
         <translation> mm</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="268"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="284"/>
         <source>UserComment</source>
         <translation>Comentarios</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="43"/>
         <source>Operation completed succesfully.</source>
-        <translation>Operación completada satisfactoriamente.</translation>
+        <translation type="vanished">Operación completada satisfactoriamente.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="45"/>
+        <location filename="../../utils/fileoperations.cpp" line="44"/>
+        <source>Operation completed successfully.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="46"/>
         <source>Destination file exists.</source>
         <translation>El archivo de destino existe.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="47"/>
+        <location filename="../../utils/fileoperations.cpp" line="48"/>
         <source>Destination directory exists.</source>
         <translation>La carpeta de destino ya existe.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="49"/>
+        <location filename="../../utils/fileoperations.cpp" line="50"/>
         <source>Source file is not writable.</source>
         <translation>El archivo de origen es de sólo lectura.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="51"/>
+        <location filename="../../utils/fileoperations.cpp" line="52"/>
         <source>Destination is not writable.</source>
         <translation>El archivo de destino es de solo lectura.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="53"/>
+        <location filename="../../utils/fileoperations.cpp" line="54"/>
         <source>Source file does not exist.</source>
         <translation>El archivo de origen no existe.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="55"/>
+        <location filename="../../utils/fileoperations.cpp" line="56"/>
         <source>Destination does not exist.</source>
         <translation>La carpeta de destino no existe.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="57"/>
+        <location filename="../../utils/fileoperations.cpp" line="58"/>
         <source>Directory is not empty.</source>
         <translation>La carpeta no esta vacía.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="59"/>
+        <location filename="../../utils/fileoperations.cpp" line="60"/>
         <source>Nothing to do.</source>
         <translation>Nada por hacer.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="61"/>
+        <location filename="../../utils/fileoperations.cpp" line="62"/>
         <source>Other error.</source>
         <translation>Otro error.</translation>
     </message>
@@ -987,7 +991,7 @@
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="19"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="20"/>
         <source>Reset:</source>
         <translation>Resetear:</translation>
     </message>
@@ -1101,23 +1105,23 @@
         <translation>Editar</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="46"/>
+        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="50"/>
         <source>Enter script name</source>
         <translation>Nombre del script</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="58"/>
-        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="65"/>
+        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="62"/>
+        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="68"/>
         <source>A script with this same name exists</source>
         <translation>Existe un script de igual nombre</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="78"/>
+        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="80"/>
         <source>Select an executable/script</source>
         <translation>Seleccionar script/ejecutable</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="80"/>
+        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="82"/>
         <source>Select a script file</source>
         <translation>Seleccionar archivo del script</translation>
     </message>
@@ -1619,13 +1623,13 @@
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3291"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="62"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="77"/>
         <source>Overlay background</source>
         <translation>Fondo superpuesto</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3329"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="60"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="75"/>
         <source>Widget background</source>
         <translation>Fondo de widgets</translation>
     </message>
@@ -1636,19 +1640,19 @@
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3343"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="61"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="76"/>
         <source>Widget border</source>
         <translation>Borde del widget</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3412"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="63"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="78"/>
         <source>Overlay text</source>
         <translation>Texto superpuesto</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3450"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="64"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="79"/>
         <source>Scrollbars</source>
         <translation>Barras de desplazamiento</translation>
     </message>
@@ -1900,50 +1904,50 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="4864"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Cancelar</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="9"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="8"/>
         <source>Preferences — </source>
         <translation>Preferencias — </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="54"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="69"/>
         <source>Accent color</source>
         <translation>Color de primer plano</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="55"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="70"/>
         <source>Windowed mode background</source>
         <translation>Fondo en modo ventana</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="56"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="71"/>
         <source>Fullscreen mode background</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="57"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="72"/>
         <source>FolderView background</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="58"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="73"/>
         <source>FolderView top panel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="59"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="74"/>
         <source>Text color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="569"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="619"/>
         <source>Edit shortcut</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="620"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="672"/>
         <source>Navigate to mpv binary</source>
         <translation>Ubicar el ejecutable mpv</translation>
     </message>
@@ -1979,32 +1983,32 @@ li.checked::marker { content: &quot;\2612&quot;; }
 <context>
     <name>main</name>
     <message>
-        <location filename="../../main.cpp" line="133"/>
+        <location filename="../../main.cpp" line="146"/>
         <source>File or directory path.</source>
         <translation>Ruta del archivo o carpeta.</translation>
     </message>
     <message>
-        <location filename="../../main.cpp" line="136"/>
+        <location filename="../../main.cpp" line="149"/>
         <source>Generate all thumbnails for directory.</source>
         <translation>Generar todas las miniaturas de la carpeta.</translation>
     </message>
     <message>
-        <location filename="../../main.cpp" line="137"/>
+        <location filename="../../main.cpp" line="150"/>
         <source>directory-path</source>
         <translation>ruta-de-la-carpeta</translation>
     </message>
     <message>
-        <location filename="../../main.cpp" line="139"/>
+        <location filename="../../main.cpp" line="152"/>
         <source>Thumbnail size. Current size is used if not specified.</source>
         <translation>Tamaño de las miniaturas. Si no se especifica se utilizara el tamaño original.</translation>
     </message>
     <message>
-        <location filename="../../main.cpp" line="140"/>
+        <location filename="../../main.cpp" line="153"/>
         <source>thumbnail-size</source>
         <translation>tamaño-de-miniatura</translation>
     </message>
     <message>
-        <location filename="../../main.cpp" line="142"/>
+        <location filename="../../main.cpp" line="155"/>
         <source>Show build options.</source>
         <translation>Opciones de visualización.</translation>
     </message>

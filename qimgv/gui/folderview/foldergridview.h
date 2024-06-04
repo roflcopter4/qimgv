@@ -38,9 +38,9 @@ class FolderGridView : public ThumbnailView
     void zoomOut();
     void setThumbnailSize(int newSize);
     void setShowLabels(bool mode);
-    void focusOn(int index) override;
+    void focusOn(qsizetype index) override;
     void focusOnSelection() override;
-    void setDragHover(int index) override;
+    void setDragHover(qsizetype index) override;
 
   private:
     void scrollToCurrent();
@@ -56,8 +56,8 @@ class FolderGridView : public ThumbnailView
   protected:
     void resizeEvent(QResizeEvent *event) override;
     void updateScrollbarIndicator() override;
-    void addItemToLayout(ThumbnailWidget *widget, int pos) override;
-    void removeItemFromLayout(int pos) override;
+    void addItemToLayout(ThumbnailWidget *widget, qsizetype pos) override;
+    void removeItemFromLayout(qsizetype pos) override;
     void removeAll() override;
     void setupLayout();
     void updateLayout() override;

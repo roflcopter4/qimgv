@@ -31,8 +31,8 @@ class MapOverlay : public QWidget
     void animateVisible(bool visible);
     void enableVisibility(bool);
 
-    void     setOpacity(float opacity);
-    ND float opacity() const;
+    void     setOpacity(qreal opacity);
+    ND qreal opacity() const;
 
     void    setLocation(Location l);
     ND auto location() const -> Location;

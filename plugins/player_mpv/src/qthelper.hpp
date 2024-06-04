@@ -120,7 +120,8 @@ struct node_builder
         free_node(dst);
         return NULL;
     }
-    char *dup_qstring(const QString &s)
+
+    static char *dup_qstring(const QString &s)
     {
         QByteArray b = s.toUtf8();
         char      *r = new char[b.size() + 1];
@@ -128,14 +129,19 @@ struct node_builder
             std::memcpy(r, b.data(), b.size() + 1);
         return r;
     }
-    bool test_type(const QVariant &v, QMetaType::Type t)
+
+    static bool test_type(const QVariant &v, QMetaType::Type t)
     {
+#if 0
         // The Qt docs say: "Although this function is declared as returning
         // "QVariant::Type(obsolete), the return value should be interpreted
         // as QMetaType::Type."
         // So a cast really seems to be needed to avoid warnings (urgh).
         return static_cast<int>(v.type()) == static_cast<int>(t);
+#endif
+        return v.typeId() == t;
     }
+
     void set(mpv_node *dst, const QVariant &src)
     {
         if (test_type(src, QMetaType::QString)) {
@@ -182,7 +188,8 @@ struct node_builder
     fail:
         dst->format = MPV_FORMAT_NONE;
     }
-    void free_node(mpv_node *dst)
+
+    static void free_node(mpv_node *dst)
     {
         switch (dst->format) {
         case MPV_FORMAT_STRING:

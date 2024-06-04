@@ -3,29 +3,32 @@
 ImageInfoOverlayProxy::ImageInfoOverlayProxy(FloatingWidgetContainer *parent)
     : container(parent),
       overlay(nullptr)
-{
-}
+{}
 
-ImageInfoOverlayProxy::~ImageInfoOverlayProxy() {
-    if(overlay)
+ImageInfoOverlayProxy::~ImageInfoOverlayProxy()
+{
+    if (overlay)
         overlay->deleteLater();
 }
 
-void ImageInfoOverlayProxy::show() {
+void ImageInfoOverlayProxy::show()
+{
     init();
     overlay->show();
 }
 
-void ImageInfoOverlayProxy::hide() {
-    if(overlay)
+void ImageInfoOverlayProxy::hide()
+{
+    if (overlay)
         overlay->hide();
 }
 
-void ImageInfoOverlayProxy::init() {
-    if(overlay)
+void ImageInfoOverlayProxy::init()
+{
+    if (overlay)
         return;
     overlay = new ImageInfoOverlay(container);
-    overlay->setExifInfo(stateBuf.info);
+    overlay->setExifInfo(stateBuf);
 }
 
 bool ImageInfoOverlayProxy::isHidden() const
@@ -33,9 +36,10 @@ bool ImageInfoOverlayProxy::isHidden() const
     return overlay ? overlay->isHidden() : true;
 }
 
-void ImageInfoOverlayProxy::setExifInfo(QMap<QString, QString> const &_info) {
-    if(overlay)
-        overlay->setExifInfo(_info);
+void ImageInfoOverlayProxy::setExifInfo(QMap<QString, QString> const &xinfo)
+{
+    if (overlay)
+        overlay->setExifInfo(xinfo);
     else
-        stateBuf.info = _info;
+        stateBuf = xinfo;
 }

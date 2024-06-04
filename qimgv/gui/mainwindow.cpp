@@ -26,7 +26,7 @@ MW::MW(QWidget *parent)
     // via passthrough from child widgets
     setFocusPolicy(Qt::NoFocus);
     this->setLayout(&layout);
-    setWindowTitle(QCoreApplication::applicationName() + QS(" ") + QCoreApplication::applicationVersion());
+    setWindowTitle(QCoreApplication::applicationName() + u' ' + QCoreApplication::applicationVersion());
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
     this->setAccessibleName(QS("mainwindow"));
@@ -217,8 +217,8 @@ void MW::switchFitMode()
 
 void MW::closeImage()
 {
-    info.fileName = "";
-    info.filePath = "";
+    info.fileName = QString();
+    info.filePath = QString();
     viewerWidget->closeImage();
 }
 
@@ -303,7 +303,7 @@ void MW::setDirectoryPath(QString const &path)
 {
     // closeImage();
     info.directoryPath = path;
-    info.directoryName = path.split("/").last();
+    info.directoryName = path.split(u'/').last();
     folderView->setDirectoryPath(path);
     onInfoUpdated();
 }
@@ -396,7 +396,7 @@ void MW::setFilter(ScalingFilter filter)
         filterName = QS("configured ") + QString::number(static_cast<int>(filter));
         break;
     }
-    showMessage("Filter " + filterName, 600);
+    showMessage(QSV("Filter ") + filterName, 600);
     viewerWidget->setScalingFilter(filter);
 }
 
@@ -526,7 +526,7 @@ void MW::closeEvent(QCloseEvent *event)
 {
     // catch the close event when user presses X on the window itself
     event->accept();
-    actionManager->invokeAction("exit");
+    actionManager->invokeAction(QS("exit"));
 }
 
 void MW::dragEnterEvent(QDragEnterEvent *e)
@@ -572,42 +572,44 @@ QString MW::getSaveFileName(QString const &filePath)
     QStringList filters;
     // generate filter for writable images
     // todo: some may need to be blacklisted
-    auto writerFormats = QImageWriter::supportedImageFormats();
-    if (writerFormats.contains(QS("jpg")))
+    QList<QByteArray> writerFormats = QImageWriter::supportedImageFormats();
+    if (writerFormats.contains(QByteArrayView("jpg")))
         filters.append(QS("JPEG (*.jpg *.jpeg *jpe *jfif)"));
-    if (writerFormats.contains(QS("png")))
+    if (writerFormats.contains(QByteArrayView("png")))
         filters.append(QS("PNG (*.png)"));
-    if (writerFormats.contains(QS("webp")))
+    if (writerFormats.contains(QByteArrayView("webp")))
         filters.append(QS("WebP (*.webp)"));
     // may not work..
-    if (writerFormats.contains(QS("jp2")))
+    if (writerFormats.contains(QByteArrayView("jp2")))
         filters.append(QS("JPEG 2000 (*.jp2 *.j2k *.jpf *.jpx *.jpm *.jpgx)"));
-    if (writerFormats.contains(QS("jxl")))
+    if (writerFormats.contains(QByteArrayView("jxl")))
         filters.append(QS("JPEG-XL (*.jxl)"));
-    if (writerFormats.contains(QS("avif")))
+    if (writerFormats.contains(QByteArrayView("avif")))
         filters.append(QS("AVIF (*.avif *.avifs)"));
-    if (writerFormats.contains(QS("tif")))
+    if (writerFormats.contains(QByteArrayView("tif")))
         filters.append(QS("TIFF (*.tif *.tiff)"));
-    if (writerFormats.contains(QS("bmp")))
+    if (writerFormats.contains(QByteArrayView("bmp")))
         filters.append(QS("BMP (*.bmp)"));
 #ifdef Q_OS_WIN32
-    if (writerFormats.contains(QS("ico")))
+    if (writerFormats.contains(QByteArrayView("ico")))
         filters.append(QS("Icon Files (*.ico)"));
 #endif
-    if (writerFormats.contains(QS("ppm")))
+    if (writerFormats.contains(QByteArrayView("ppm")))
         filters.append(QS("PPM (*.ppm)"));
-    if (writerFormats.contains(QS("xbm")))
+    if (writerFormats.contains(QByteArrayView("xbm")))
         filters.append(QS("XBM (*.xbm)"));
-    if (writerFormats.contains(QS("xpm")))
+    if (writerFormats.contains(QByteArrayView("xpm")))
         filters.append(QS("XPM (*.xpm)"));
-    if (writerFormats.contains(QS("dds")))
+    if (writerFormats.contains(QByteArrayView("dds")))
         filters.append(QS("DDS (*.dds)"));
-    if (writerFormats.contains(QS("wbmp")))
+    if (writerFormats.contains(QByteArrayView("wbmp")))
         filters.append(QS("WBMP (*.wbmp)"));
     // add everything else from imagewriter
-    for (auto const &fmt : writerFormats)
-        if (filters.filter(fmt).isEmpty())
-            filters.append(QString::fromUtf8(fmt.toUpper()) + QS(" (*.") + fmt + QS(")"));
+    for (auto const &fmt : writerFormats) {
+        auto qsFmt = QString::fromUtf8(fmt);
+        if (filters.filter(qsFmt).isEmpty())
+            filters.append(qsFmt.toUpper() + QSV(" (*.") + qsFmt + u')');
+    }
     QString filterString = filters.join(QSV(";; "));
 
     // find matching filter for the current image
@@ -807,10 +809,10 @@ void MW::triggerCopyOverlay()
 
     if (centralWidget->currentViewMode() == ViewMode::FOLDERVIEW)
         return;
-    if (copyOverlay->operationMode() == OVERLAY_COPY) {
+    if (copyOverlay->operationMode() == CopyOverlayMode::COPY) {
         copyOverlay->isHidden() ? copyOverlay->show() : copyOverlay->hide();
     } else {
-        copyOverlay->setDialogMode(OVERLAY_COPY);
+        copyOverlay->setDialogMode(CopyOverlayMode::COPY);
         copyOverlay->show();
     }
 }
@@ -824,10 +826,10 @@ void MW::triggerMoveOverlay()
 
     if (centralWidget->currentViewMode() == ViewMode::FOLDERVIEW)
         return;
-    if (copyOverlay->operationMode() == OVERLAY_MOVE) {
+    if (copyOverlay->operationMode() == CopyOverlayMode::MOVE) {
         copyOverlay->isHidden() ? copyOverlay->show() : copyOverlay->hide();
     } else {
-        copyOverlay->setDialogMode(OVERLAY_MOVE);
+        copyOverlay->setDialogMode(CopyOverlayMode::MOVE);
         copyOverlay->show();
     }
 }
@@ -869,10 +871,10 @@ void MW::onInfoUpdated()
 {
     QString posString;
     if (info.fileCount)
-        posString = QS("[ ") + QString::number(info.index + 1) + QS("/") + QString::number(info.fileCount) + QS(" ]");
+        posString = QSV("[ ") + QString::number(info.index + 1) + u"/" + QString::number(info.fileCount) + QSV(" ]");
     QString resString;
     if (info.imageSize.width())
-        resString = QString::number(info.imageSize.width()) + QS(" x ") + QString::number(info.imageSize.height());
+        resString = QString::number(info.imageSize.width()) + QSV(" x ") + QString::number(info.imageSize.height());
     QString sizeString;
     if (info.fileSize)
         sizeString = this->locale().formattedDataSize(info.fileSize, 1);
@@ -883,20 +885,20 @@ void MW::onInfoUpdated()
     QString windowTitle;
     if (centralWidget->currentViewMode() == ViewMode::FOLDERVIEW) {
         windowTitle = tr("Folder view");
-        infoBarFullscreen->setInfo("", tr("No file opened."), "");
-        infoBarWindowed->setInfo("", tr("No file opened."), "");
+        infoBarFullscreen->setInfo(QString(), tr("No file opened."), QString());
+        infoBarWindowed->setInfo(QString(), tr("No file opened."), QString());
     } else if (info.fileName.isEmpty()) {
         windowTitle = qApp->applicationName();
-        infoBarFullscreen->setInfo("", tr("No file opened."), "");
-        infoBarWindowed->setInfo("", tr("No file opened."), "");
+        infoBarFullscreen->setInfo(QString(), tr("No file opened."), QString());
+        infoBarWindowed->setInfo(QString(), tr("No file opened."), QString());
     } else {
         windowTitle = info.fileName;
         if (settings->windowTitleExtendedInfo()) {
             windowTitle.prepend(posString + QS("  "));
             if (!resString.isEmpty())
-                windowTitle.append(QS("  -  ") + resString);
+                windowTitle.append(QSV("  -  ") + resString);
             if (!sizeString.isEmpty())
-                windowTitle.append(QS("  -  ") + sizeString);
+                windowTitle.append(QSV("  -  ") + sizeString);
         }
 
         // toggleable states
@@ -911,17 +913,17 @@ void MW::onInfoUpdated()
             states.append(QSV(" [view lock]"));
 
         if (!settings->infoBarWindowed() && !states.isEmpty())
-            windowTitle.append(QS(" -") + states);
+            windowTitle.append(QSV(" -") + states);
         if (info.edited)
             windowTitle.prepend(QSV("* "));
 
         infoBarFullscreen->setInfo(posString,
-                                   info.fileName + (info.edited ? QS("  *") : QS("")),
-                                   resString + QS("  ") + sizeString);
+                                   info.fileName + (info.edited ? QS("  *") : QString()),
+                                   resString + QSV("  ") + sizeString);
 
         infoBarWindowed->setInfo(posString,
-                                 info.fileName + (info.edited ? QS("  *") : QS("")),
-                                 resString + QS("  ") + sizeString + QS(" ") + states);
+                                 info.fileName + (info.edited ? QS("  *") : QString()),
+                                 resString + QSV("  ") + sizeString + u" " + states);
     }
     setWindowTitle(windowTitle);
 }
@@ -951,12 +953,12 @@ void MW::showMessageDirectory(QString const &dirName)
 
 void MW::showMessageDirectoryEnd()
 {
-    floatingMessage->showMessage("", FloatingWidgetPosition::RIGHT, FloatingMessageIcon::RIGHT_EDGE, 400);
+    floatingMessage->showMessage(QString(), FloatingWidgetPosition::RIGHT, FloatingMessageIcon::RIGHT_EDGE, 400);
 }
 
 void MW::showMessageDirectoryStart()
 {
-    floatingMessage->showMessage("", FloatingWidgetPosition::LEFT, FloatingMessageIcon::LEFT_EDGE, 400);
+    floatingMessage->showMessage(QString(), FloatingWidgetPosition::LEFT, FloatingMessageIcon::LEFT_EDGE, 400);
 }
 
 void MW::showMessageFitWindow()

@@ -1,8 +1,7 @@
 #include "mpvwidget.h"
 #include <stdexcept>
 
-#define QS(s)  QStringLiteral(s)
-#define QSV(s) QStringView(u"" s)
+#define QS(s) QStringLiteral(s)
 
 static void wakeup(void *ctx)
 {
@@ -57,12 +56,12 @@ MpvWidget::~MpvWidget()
     mpv_terminate_destroy(mpv);
 }
 
-void MpvWidget::command(QVariant const &params)
+void MpvWidget::command(QVariant const &params) const
 {
     mpv::qt::command(mpv, params);
 }
 
-void MpvWidget::setProperty(QString const &name, QVariant const &value)
+void MpvWidget::setProperty(QString const &name, QVariant const &value) const
 {
     mpv::qt::set_property(mpv, name, value);
 }
@@ -72,7 +71,7 @@ QVariant MpvWidget::getProperty(QString const &name) const
     return mpv::qt::get_property(mpv, name);
 }
 
-void MpvWidget::setOption(QString const &name, QVariant const &value)
+void MpvWidget::setOption(QString const &name, QVariant const &value) const
 {
     mpv::qt::set_property(mpv, name, value);
 }
@@ -122,7 +121,7 @@ void MpvWidget::on_mpv_events()
     }
 }
 
-void MpvWidget::handle_mpv_event(mpv_event *event)
+void MpvWidget::handle_mpv_event(mpv_event const *event)
 {
     switch (event->event_id) {
     case MPV_EVENT_PROPERTY_CHANGE: {
@@ -176,7 +175,7 @@ void MpvWidget::on_update(void *ctx)
     QMetaObject::invokeMethod(static_cast<MpvWidget *>(ctx), "maybeUpdate");
 }
 
-void MpvWidget::setMuted(bool mode)
+void MpvWidget::setMuted(bool mode) const
 {
     if (mode)
         mpv::qt::set_property(mpv, QS("mute"), QS("yes"));
@@ -194,13 +193,13 @@ int MpvWidget::volume() const
     return mpv::qt::get_property_variant(mpv, QS("volume")).toInt();
 }
 
-void MpvWidget::setVolume(int vol)
+void MpvWidget::setVolume(int vol) const
 {
     qBound(0, vol, 100);
     mpv::qt::set_property_variant(mpv, QS("volume"), vol);
 }
 
-void MpvWidget::setRepeat(bool mode)
+void MpvWidget::setRepeat(bool mode) const
 {
     if (mode)
         mpv::qt::set_property(mpv, QS("loop-file"), QS("inf"));

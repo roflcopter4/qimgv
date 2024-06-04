@@ -8,25 +8,26 @@ ActionButton::ActionButton(QWidget *parent)
     this->setProperty("checked", false);
 }
 
-ActionButton::ActionButton(QString const &_actionName, QString const &_iconPath, QWidget *parent)
-    :  ActionButton(parent)
+ActionButton::ActionButton(QString const &actionName, QString const &iconPath, QWidget *parent) : ActionButton(parent)
 {
-    setIconPath(_iconPath);
-    setAction(_actionName);
+    setIconPath(iconPath);
+    setAction(actionName);
 }
 
-ActionButton::ActionButton(QString const &_actionName, QString const &_iconPath, int _size, QWidget *parent)
-    :  ActionButton(_actionName, _iconPath, parent)
+ActionButton::ActionButton(QString const &actionName, QString const &iconPath, int size, QWidget *parent)
+    : ActionButton(actionName, iconPath, parent)
 {
-    if(_size > 0)
-        setFixedSize(_size, _size);
+    if (size > 0)
+        setFixedSize(size, size);
 }
 
-void ActionButton::setAction(QString const &_actionName) {
-    actionName = _actionName;
+void ActionButton::setAction(QString const &newActionName)
+{
+    this->actionName = newActionName;
 }
 
-void ActionButton::setTriggerMode(TriggerMode mode) {
+void ActionButton::setTriggerMode(TriggerMode mode)
+{
     mTriggerMode = mode;
 }
 
@@ -35,15 +36,16 @@ TriggerMode ActionButton::triggerMode() const
     return mTriggerMode;
 }
 
-void ActionButton::mousePressEvent(QMouseEvent *event) {
+void ActionButton::mousePressEvent(QMouseEvent *event)
+{
     IconButton::mousePressEvent(event);
-    if(mTriggerMode == TriggerMode::Press && event->button() == Qt::LeftButton)
+    if (mTriggerMode == TriggerMode::Press && event->button() == Qt::LeftButton)
         actionManager->invokeAction(actionName);
 }
 
-void ActionButton::mouseReleaseEvent(QMouseEvent *event) {
+void ActionButton::mouseReleaseEvent(QMouseEvent *event)
+{
     IconButton::mouseReleaseEvent(event);
-    if(mTriggerMode == TriggerMode::Click && rect().contains(event->pos()) && event->button() == Qt::LeftButton)
+    if (mTriggerMode == TriggerMode::Click && rect().contains(event->pos()) && event->button() == Qt::LeftButton)
         actionManager->invokeAction(actionName);
-
 }

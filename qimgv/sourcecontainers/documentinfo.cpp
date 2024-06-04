@@ -7,7 +7,7 @@ DocumentInfo::DocumentInfo(QString const &path)
 {
     fileInfo.setFile(path);
     if (!fileInfo.isFile()) {
-        qDebug() << QSV("FileInfo: cannot open: ") << path;
+        qDebug() << u"FileInfo: cannot open: " << path;
         return;
     }
     detectFormat();
@@ -93,7 +93,7 @@ void DocumentInfo::detectFormat()
         mFormat       = QS("jpg");
         mDocumentType = DocumentType::STATIC;
     } else if (mimeName == QSV("image/png")) {
-        if (QImageReader::supportedImageFormats().contains(QS("apng")) && detectAPNG()) {
+        if (QImageReader::supportedImageFormats().contains(QByteArrayView("apng")) && detectAPNG()) {
             mFormat       = QS("apng");
             mDocumentType = DocumentType::ANIMATED;
         } else {
@@ -111,7 +111,7 @@ void DocumentInfo::detectFormat()
         mDocumentType = detectAnimatedJxl() ? DocumentType::ANIMATED : DocumentType::STATIC;
         if (mDocumentType == DocumentType::ANIMATED && !settings->jxlAnimation()) {
             mDocumentType = DocumentType::NONE;
-            qDebug() << QSV("animated jxl is off; skipping file");
+            qDebug() << u"animated jxl is off; skipping file";
         }
     } else if (mimeName == QSV("image/avif")) {
         mFormat       = QS("avif");
@@ -207,7 +207,8 @@ void DocumentInfo::loadExifTags()
 
 #ifdef USE_EXIV2
     try {
-        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
+        auto image = Exiv2::ImageFactory::open(reinterpret_cast<char const *>(util::QStringToStdPath(fileInfo.filePath()).u8string().c_str()));
+        //auto image = Exiv2::ImageFactory::open(fileInfo.absoluteFilePath().toStdString().c_str());
 
         assert(image.get() != nullptr);
         image->readMetadata();
@@ -244,7 +245,7 @@ void DocumentInfo::loadExifTags()
             Exiv2::Rational r = it->toRational();
             if (r.first < r.second) {
                 qreal exp = round(static_cast<qreal>(r.second) / r.first);
-                exifTags.insert(QObject::tr("ExposureTime"), QS("1/") + QString::number(exp) + QObject::tr(" sec"));
+                exifTags.insert(QObject::tr("ExposureTime"), QSV("1/") + QString::number(exp) + QObject::tr(" sec"));
             } else {
                 qreal exp = round(static_cast<qreal>(r.first) / r.second);
                 exifTags.insert(QObject::tr("ExposureTime"), QString::number(exp) + QObject::tr(" sec"));
@@ -255,7 +256,7 @@ void DocumentInfo::loadExifTags()
         if (it != exifData.end()) {
             Exiv2::Rational r  = it->toRational();
             qreal           fn = static_cast<qreal>(r.first) / r.second;
-            exifTags.insert(QObject::tr("F Number"), QS("f/") + QString::number(fn, 'g', 3));
+            exifTags.insert(QObject::tr("F Number"), QSV("f/") + QString::number(fn, 'g', 3));
         }
 
         it = exifData.findKey(isoSpeedRatings);
@@ -278,30 +279,35 @@ void DocumentInfo::loadExifTags()
             // This frequently throws.
             try {
                 // crop out 'charset=ascii' etc"
-                auto comment = QString::fromStdString(it->toString());
-                if (comment.startsWith(QSV("charset=")))
-                    comment.remove(0, comment.indexOf(" ") + 1);
-                exifTags.insert(QObject::tr("UserComment"), comment);
+                if (it->size() > 0) {
+                    auto stdStr = it->toString();
+                    if (!stdStr.empty()) {
+                        auto comment = QString::fromStdString(stdStr);
+                        if (comment.startsWith(QSV("charset=")))
+                            comment.remove(0, comment.indexOf(u' ') + 1);
+                        exifTags.insert(QObject::tr("UserComment"), comment);
+                    }
+                }
             } catch (Exiv2::Error &e) {
-                qDebug() << QSV("Caught Exiv2 exception, attempting to ignore:") << e.what();
+                qDebug() << u"Caught Exiv2 exception, attempting to ignore:" << e.what();
             }
         }
     }
 
 // this should work with both 0.28 and <0.28
-# if not EXIV2_TEST_VERSION(0, 28, 0)
+# if !EXIV2_TEST_VERSION(0, 28, 0)
 #  ifdef _WIN32
     catch (Exiv2::BasicError<wchar_t>& e) {
-        qDebug() << QSV("Caught Exiv2::BasicError exception:\n") << e.what();
+        qDebug() << u"Caught Exiv2::BasicError exception:\n" << e.what();
     }
 #  else
     catch (Exiv2::BasicError<char>& e) {
-        qDebug() << QSV("Caught Exiv2::BasicError exception:\n") << e.what();
+        qDebug() << u"Caught Exiv2::BasicError exception:\n" << e.what();
     }
 #  endif
 # endif
     catch (Exiv2::Error& e) {
-        qDebug() << QSV("Caught Exiv2 exception:\n") << e.what();
+        qDebug() << u"Caught Exiv2 exception:\n" << e.what();
     }
 #endif
 }

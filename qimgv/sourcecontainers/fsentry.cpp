@@ -2,11 +2,11 @@
 
 FSEntry::FSEntry(QString const &filePath)
 {
-    auto    stdEntry = std::filesystem::directory_entry(util::QStringToStdString(filePath));
+    auto    stdEntry = std::filesystem::directory_entry(util::QStringToStdPath(filePath));
     QString fileName = util::StdStringToQString(stdEntry.path().filename().native());
 
     try {
-        name        = fileName;
+        name        = std::move(fileName);
         path        = filePath;
         isDirectory = stdEntry.is_directory();
 
@@ -18,7 +18,7 @@ FSEntry::FSEntry(QString const &filePath)
     }
 }
 
-FSEntry::FSEntry(QString path, QString name, std::uintmax_t size, std::filesystem::file_time_type modifyTime, bool isDirectory)
+FSEntry::FSEntry(QString path, QString name, size_t size, std::filesystem::file_time_type modifyTime, bool isDirectory)
     : path(std::move(path)),
       name(std::move(name)),
       size(size),

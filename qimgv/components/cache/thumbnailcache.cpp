@@ -1,38 +1,41 @@
 #include "thumbnailcache.h"
 
-ThumbnailCache::ThumbnailCache() {
-    cacheDirPath = settings->thumbnailCacheDir();
+ThumbnailCache::ThumbnailCache()
+    : cacheDirPath(settings->thumbnailCacheDir())
+{}
+
+QString ThumbnailCache::thumbnailPath(QString const &id) const
+{
+    return QString(cacheDirPath + id + QSV(".png"));
 }
 
-QString ThumbnailCache::thumbnailPath(QString const &id) {
-    return QString(cacheDirPath + id + QS(".png"));
-}
-
-bool ThumbnailCache::exists(QString const &id) {
-    QString filePath = thumbnailPath(id);
+static bool checkExists(QString const &filePath)
+{
     QFileInfo file(filePath);
     return file.exists() && file.isReadable();
 }
 
-void ThumbnailCache::saveThumbnail(QImage *image, QString const &id) {
-    if(image) {
+bool ThumbnailCache::exists(QString const &id) const
+{
+    return checkExists(thumbnailPath(id));
+}
+
+void ThumbnailCache::saveThumbnail(QImage const *image, QString const &id) const
+{
+    if (image) {
         QString filePath = thumbnailPath(id);
         image->save(filePath, "PNG", 15);
     }
 }
 
-QImage *ThumbnailCache::readThumbnail(QString const &id) {
+QImage *ThumbnailCache::readThumbnail(QString const &id) const
+{
     QString filePath = thumbnailPath(id);
-    QFileInfo file(filePath);
-    if(file.exists() && file.isReadable()) {
-        QImage *thumb = new QImage();
-        if(thumb->load(filePath)) {
+    if (checkExists(filePath)) {
+        auto *thumb = new QImage();
+        if (thumb->load(filePath))
             return thumb;
-        } else {
-            delete thumb;
-            return nullptr;
-        }
-    } else {
-        return nullptr;
+        delete thumb;
     }
+    return nullptr;
 }

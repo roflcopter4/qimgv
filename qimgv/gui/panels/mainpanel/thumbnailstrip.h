@@ -37,14 +37,14 @@ class ThumbnailStrip final : public ThumbnailView
     ThumbnailStyle mCurrentStyle;
 
   public Q_SLOTS:
-    void focusOn(int index) override;
+    void focusOn(qsizetype index) override;
     void focusOnSelection() override;
 
   protected:
     void resizeEvent(QResizeEvent *event) override;
     void updateScrollbarIndicator() override;
-    void addItemToLayout(ThumbnailWidget *widget, int pos) override;
-    void removeItemFromLayout(int pos) override;
+    void addItemToLayout(ThumbnailWidget *widget, qsizetype pos) override;
+    void removeItemFromLayout(qsizetype pos) override;
     void removeAll() override;
 
     ThumbnailWidget *createThumbnailWidget() override;

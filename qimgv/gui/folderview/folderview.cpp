@@ -4,19 +4,17 @@
 
 FolderView::FolderView(QWidget *parent)
     : FloatingWidgetContainer(parent),
-      ui(new Ui::FolderView)
+      ui(new Ui::FolderView),
+      dirModel(new FileSystemModelCustom(this)),
+      optionsPopup(new FVOptionsPopup())
 {
     ui->setupUi(this);
 
     // ------- filesystem view --------
-    QString style = QS("font: %1pt;");
-    style         = style.arg(QApplication::font().pointSize());
+    QString style = QS("font: %1pt;").arg(QApplication::font().pointSize());
     ui->dirTreeView->setStyleSheet(style);
-
-    optionsPopup = new FVOptionsPopup();
     popupTimerClutch.start();
 
-    dirModel = new FileSystemModelCustom(this);
     dirModel->setFilter(QDir::NoDotAndDotDot | QDir::AllDirs);
     ui->dirTreeView->setModel(dirModel);
 
@@ -26,7 +24,7 @@ FolderView::FolderView(QWidget *parent)
     header->hideSection(3); // mod date
 
 #ifdef Q_OS_WIN32
-    dirModel->setRootPath(QS(""));
+    dirModel->setRootPath(QString());
 #else
     dirModel->setRootPath(QDir::homePath());
     QModelIndex idx = dirModel->index(dirModel->rootPath());
@@ -56,12 +54,11 @@ FolderView::FolderView(QWidget *parent)
     ui->homeButton->setIconPath(QS(":res/icons/common/buttons/panel-small/home12.png"));
     ui->rootButton->setIconPath(QS(":res/icons/common/buttons/panel-small/root12.png"));
 
-    constexpr auto min  = FolderGridView::THUMBNAIL_SIZE_MIN;
-    constexpr auto max  = FolderGridView::THUMBNAIL_SIZE_MAX;
-    constexpr auto step = FolderGridView::ZOOM_STEP;
+    static constexpr int minimum = FolderGridView::THUMBNAIL_SIZE_MIN / FolderGridView::ZOOM_STEP;
+    static constexpr int maximum = FolderGridView::THUMBNAIL_SIZE_MAX / FolderGridView::ZOOM_STEP;
 
-    ui->zoomSlider->setMinimum(min / step);
-    ui->zoomSlider->setMaximum(max / step);
+    ui->zoomSlider->setMinimum(minimum);
+    ui->zoomSlider->setMaximum(maximum);
     ui->zoomSlider->setSingleStep(1);
     ui->zoomSlider->setPageStep(1);
 
@@ -256,39 +253,37 @@ void FolderView::focusInEvent(QFocusEvent *event)
     ui->thumbnailGrid->setFocus();
 }
 
-void FolderView::populate(int count)
+void FolderView::populate(qsizetype count)
 {
     ui->thumbnailGrid->populate(count);
 }
 
-void FolderView::setThumbnail(int pos, std::shared_ptr<Thumbnail> thumb)
+void FolderView::setThumbnail(qsizetype pos, std::shared_ptr<Thumbnail> thumb)
 {
-    ui->thumbnailGrid->setThumbnail(pos, thumb);
+    ui->thumbnailGrid->setThumbnail(pos, std::move(thumb));
 }
 
-void FolderView::select(QList<int> indices)
+void FolderView::select(SelectionList indices)
 {
     ui->thumbnailGrid->select(indices);
 }
 
-void FolderView::select(int index)
+void FolderView::select(qsizetype index)
 {
     ui->thumbnailGrid->select(index);
 }
 
-QList<int> &
-FolderView::selection()
+IDirectoryView::SelectionList &FolderView::selection()
 {
     return ui->thumbnailGrid->selection();
 }
 
-QList<int> const &
-FolderView::selection() const
+IDirectoryView::SelectionList const &FolderView::selection() const
 {
     return ui->thumbnailGrid->selection();
 }
 
-void FolderView::focusOn(int index)
+void FolderView::focusOn(qsizetype index)
 {
     ui->thumbnailGrid->focusOn(index);
 }
@@ -310,7 +305,7 @@ void FolderView::onRootBtn()
 
 void FolderView::setDirectoryPath(QString path)
 {
-#ifdef __linux
+#ifdef Q_OS_LINUX
     if (path.startsWith(QDir::homePath())) {
         if (dirModel->rootPath() != QDir::homePath()) {
             dirModel->setRootPath(QDir::homePath());
@@ -341,9 +336,9 @@ void FolderView::setDirectoryPath(QString path)
     if (keepExpand)
         ui->dirTreeView->expand(targetIndex);
 
-    // ok, i'm done with this shit. none of the QS("solutions") work
-    // just do scrollTo after a delay and hope that model is loaded by then
-    // larger than ~150ms becomes too noticeable
+    // OK I'm done with this shit. none of the "solutions" work just do scrollTo
+    // after a delay and hope that model is loaded by then larger than ~150ms
+    // becomes too noticeable.
     QTimer::singleShot(150, this, &FolderView::fsTreeScrollToCurrent);
 }
 
@@ -380,22 +375,22 @@ void FolderView::addItem() const
     ui->thumbnailGrid->addItem();
 }
 
-void FolderView::insertItem(int index)
+void FolderView::insertItem(qsizetype index)
 {
     ui->thumbnailGrid->insertItem(index);
 }
 
-void FolderView::removeItem(int index)
+void FolderView::removeItem(qsizetype index)
 {
     ui->thumbnailGrid->removeItem(index);
 }
 
-void FolderView::reloadItem(int index)
+void FolderView::reloadItem(qsizetype index)
 {
     ui->thumbnailGrid->reloadItem(index);
 }
 
-void FolderView::setDragHover(int index)
+void FolderView::setDragHover(qsizetype index)
 {
     ui->thumbnailGrid->setDragHover(index);
 }

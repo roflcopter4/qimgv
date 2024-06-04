@@ -31,14 +31,14 @@ void FullscreenInfoOverlayProxy::hide()
         infoOverlay->hide();
 }
 
-void FullscreenInfoOverlayProxy::setInfo(QString const &_position, QString const &_fileName, QString const &_info)
+void FullscreenInfoOverlayProxy::setInfo(QString const &position, QString const &fileName, QString const &info)
 {
     if (infoOverlay) {
-        infoOverlay->setInfo(_position, _fileName, _info);
+        infoOverlay->setInfo(position, fileName, info);
     } else {
-        stateBuf.position = _position;
-        stateBuf.fileName = _fileName;
-        stateBuf.info     = _info;
+        stateBuf.position = position;
+        stateBuf.fileName = fileName;
+        stateBuf.info     = info;
     }
 }
 

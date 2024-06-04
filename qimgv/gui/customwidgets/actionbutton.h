@@ -14,10 +14,10 @@ class ActionButton : public IconButton
 {
   public:
     explicit ActionButton(QWidget *parent = nullptr);
-    ActionButton(QString const &_actionName, QString const &_iconPath, QWidget *parent = nullptr);
-    ActionButton(QString const &_actionName, QString const &_iconPath, int _size, QWidget *parent = nullptr);
+    ActionButton(QString const &actionName, QString const &iconPath, QWidget *parent = nullptr);
+    ActionButton(QString const &actionName, QString const &iconPath, int size, QWidget *parent = nullptr);
 
-    void setAction(QString const &_actionName);
+    void setAction(QString const &newActionName);
     void setTriggerMode(TriggerMode mode);
 
     ND TriggerMode triggerMode() const;

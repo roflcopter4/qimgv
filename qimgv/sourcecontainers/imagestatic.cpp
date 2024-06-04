@@ -39,11 +39,11 @@ void ImageStatic::loadGeneric()
      */
     QImageReader r(mPath, mDocInfo->format().toStdString().c_str());
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    r.setAllocationLimit(settings->memoryAllocationLimit());
+    QImageReader::setAllocationLimit(settings->memoryAllocationLimit());
 #endif
     QImage *tmp = new QImage();
     r.read(tmp);
-    std::unique_ptr<const QImage> img(tmp);
+    std::unique_ptr<QImage const> img(tmp);
     img = ImageLib::exifRotated(std::move(img), mDocInfo->exifOrientation());
     // scaling this format via qt results in transparent background
     // it rare enough so lets just convert it to the closest working thing
@@ -68,9 +68,7 @@ void ImageStatic::loadICO()
     for (auto sz : sizes)
         if (maxSize.width() < sz.width())
             maxSize = sz;
-    QPixmap                       iconPix = icon.pixmap(maxSize);
-    std::unique_ptr<const QImage> img(new QImage(iconPix.toImage()));
-    image   = std::move(img);
+    image   = std::make_unique<QImage const>(icon.pixmap(maxSize).toImage());
     mLoaded = true;
 }
 
@@ -82,7 +80,7 @@ QString ImageStatic::generateHash(QString const &str)
 // TODO: move saving to directorymodel
 bool ImageStatic::save(QString destPath)
 {
-    QString   tmpPath = destPath + QChar('_') + generateHash(destPath);
+    QString   tmpPath = destPath + u'_' + generateHash(destPath);
     QFileInfo fi(destPath);
     QString   ext = fi.suffix();
     // png compression note from libpng
@@ -103,7 +101,7 @@ bool ImageStatic::save(QString destPath)
     if (originalExists) {
         QFile::remove(tmpPath);
         if (!QFile::copy(destPath, tmpPath)) {
-            qDebug() << QSV("ImageStatic::save() - Could not create file backup.");
+            qDebug() << u"ImageStatic::save() - Could not create file backup.";
             return false;
         }
         backupExists = true;
@@ -140,17 +138,17 @@ bool ImageStatic::save()
 
 std::unique_ptr<QPixmap> ImageStatic::getPixmap()
 {
-    std::unique_ptr<QPixmap> pix(new QPixmap());
+    auto pix = std::make_unique<QPixmap>();
     isEdited() ? pix->convertFromImage(*imageEdited) : pix->convertFromImage(*image, Qt::NoFormatConversion);
     return pix;
 }
 
-std::shared_ptr<const QImage> ImageStatic::getSourceImage()
+std::shared_ptr<QImage const> ImageStatic::getSourceImage()
 {
     return image;
 }
 
-std::shared_ptr<const QImage> ImageStatic::getImage()
+std::shared_ptr<QImage const> ImageStatic::getImage()
 {
     return isEdited() ? imageEdited : image;
 }

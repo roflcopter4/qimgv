@@ -15,7 +15,6 @@ class Image
   public:
     explicit Image(QString const &);
     explicit Image(std::unique_ptr<DocumentInfo>);
-
     virtual ~Image() = default;
 
     virtual std::unique_ptr<QPixmap>      getPixmap() = 0;

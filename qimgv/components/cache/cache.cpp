@@ -1,15 +1,14 @@
 #include "cache.h"
 
-Cache::Cache() {
-}
-
-bool Cache::contains(QString const &path) const {
+bool Cache::contains(QString const &path) const
+{
     return items.contains(path);
 }
 
-bool Cache::insert(std::shared_ptr<Image> const &img) {
-    if(img) {
-        if(items.contains(img->filePath())) {
+bool Cache::insert(std::shared_ptr<Image> const &img)
+{
+    if (img) {
+        if (items.contains(img->filePath())) {
             return false;
         } else {
             items.insert(img->filePath(), new CacheItem(img));
@@ -20,40 +19,45 @@ bool Cache::insert(std::shared_ptr<Image> const &img) {
     return true;
 }
 
-void Cache::remove(QString const &path) {
-    if(items.contains(path)) {
+void Cache::remove(QString const &path)
+{
+    if (items.contains(path)) {
         items[path]->lock();
         auto *item = items.take(path);
         delete item;
     }
 }
 
-void Cache::clear() {
-    for(auto path : items.keys()) {
+void Cache::clear()
+{
+    for (auto const &path : items.keys()) {
         items[path]->lock();
-        auto item = items.take(path);
+        CacheItem *item = items.take(path);
         delete item;
     }
 }
 
-std::shared_ptr<Image> Cache::get(QString const &path) {
-    if(items.contains(path)) {
+std::shared_ptr<Image> Cache::get(QString const &path) const
+{
+    if (items.contains(path)) {
         CacheItem *item = items.value(path);
         return item->getContents();
     }
     return nullptr;
 }
 
-bool Cache::reserve(QString const &path) {
-    if(items.contains(path)) {
+bool Cache::reserve(QString const &path)
+{
+    if (items.contains(path)) {
         items[path]->lock();
         return true;
     }
     return false;
 }
 
-bool Cache::release(QString const &path) {
-    if(items.contains(path)) {
+bool Cache::release(QString const &path)
+{
+    if (items.contains(path)) {
         items[path]->unlock();
         return true;
     }
@@ -61,16 +65,18 @@ bool Cache::release(QString const &path) {
 }
 
 // removes all items except the ones in list
-void Cache::trimTo(QStringList const &pathList) {
-    for(auto path : items.keys()) {
-        if(!pathList.contains(path)) {
+void Cache::trimTo(QStringList const &list)
+{
+    for (auto const &path : items.keys()) {
+        if (!list.contains(path)) {
             items[path]->lock();
-            auto *item = items.take(path);
+            CacheItem *item = items.take(path);
             delete item;
         }
     }
 }
 
-const QList<QString> Cache::keys() const {
+QList<QString> Cache::keys() const
+{
     return items.keys();
 }

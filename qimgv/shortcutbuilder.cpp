@@ -141,7 +141,7 @@ QString ShortcutBuilder::fromEventText(QKeyEvent *event) {
             sequence = QS("Esc");
     } else {
         // got an unknown key (usually something from non-eng layout)
-        // use it's text value instead
+        // use its text value instead
         sequence = QKeySequence(event->key()).toString();
     }
     if(!sequence.isEmpty())

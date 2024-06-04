@@ -1,22 +1,22 @@
 #pragma once
 
+#include "components/actionmanager/actionmanager.h"
+#include "gui/customwidgets/colorselectorbutton.h"
+#include "gui/dialogs/scripteditordialog.h"
+#include "gui/dialogs/shortcutcreatordialog.h"
+#include "settings.h"
+#include <QApplication>
+#include <QButtonGroup>
+#include <QColorDialog>
+#include <QDebug>
 #include <QDialog>
 #include <QFileDialog>
-#include <QColorDialog>
-#include <QThreadPool>
+#include <QListWidget>
+#include <QMenu>
+#include <QStackedWidget>
 #include <QTableWidget>
 #include <QTextBrowser>
-#include <QListWidget>
-#include <QStackedWidget>
-#include <QButtonGroup>
-#include <QApplication>
-#include <QDebug>
-#include <QMenu>
-#include "gui/customwidgets/colorselectorbutton.h"
-#include "gui/dialogs/shortcutcreatordialog.h"
-#include "gui/dialogs/scripteditordialog.h"
-#include "settings.h"
-#include "components/actionmanager/actionmanager.h"
+#include <QThreadPool>
 
 namespace Ui {
 class SettingsDialog;
@@ -26,15 +26,16 @@ class SettingsDialog : public QDialog
 {
     Q_OBJECT
 
-public:
+  public:
     explicit SettingsDialog(QWidget *parent = nullptr);
     ~SettingsDialog() override;
+
     void switchToPage(int number) const;
 
-public slots:
+  public slots:
     int exec() override;
 
-private:
+  private:
     void readColorScheme();
     void setColorScheme(ColorScheme colors) const;
     void saveColorScheme() const;
@@ -42,21 +43,20 @@ private:
     void readShortcuts() const;
     void readScripts() const;
 
-
     void saveShortcuts() const;
-    void addShortcutToTable(const QString &action, const QString &shortcut) const;
-    void addScriptToList(const QString &name) const;
+    void addShortcutToTable(QString const &action, QString const &shortcut) const;
+    void addScriptToList(QString const &name) const;
     void setupSidebar();
     void removeShortcutAt(int row) const;
     void adjustSizeToContents();
 
-    Ui::SettingsDialog *ui;
+    Ui::SettingsDialog    *ui;
     QMap<QString, QString> langs; // <"en_US", "English">
-    QButtonGroup fitModeGrp;
-    QButtonGroup folderEndGrp;
-    QButtonGroup zoomIndGrp;
+    QButtonGroup           fitModeGrp;
+    QButtonGroup           folderEndGrp;
+    QButtonGroup           zoomIndGrp;
 
-private slots:
+  private slots:
     void saveSettings();
     void saveSettingsAndClose();
 
@@ -77,10 +77,11 @@ private slots:
     void onExpandLimitSliderChanged(int value) const;
     void onZoomStepSliderChanged(int value) const;
     void onJPEGQualitySliderChanged(int value) const;
-    void resetToDesktopTheme();    
+    void resetToDesktopTheme();
     void onAutoResizeLimitSliderChanged(int value) const;
 
     void resetZoomLevels() const;
-signals:
+
+  signals:
     void settingsChanged();
 };

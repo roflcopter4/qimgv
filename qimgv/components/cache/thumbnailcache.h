@@ -10,20 +10,16 @@
 class ThumbnailCache : public QObject
 {
     Q_OBJECT
-public:
+  public:
     explicit ThumbnailCache();
 
-    void    saveThumbnail(QImage *image, QString const &id);
-    QImage* readThumbnail(QString const &id);
-    QString thumbnailPath(QString const &id);
-    bool    exists(QString const &id);
+    void    saveThumbnail(QImage const *image, QString const &id) const;
+    QImage *readThumbnail(QString const &id) const;
+    QString thumbnailPath(QString const &id) const;
+    bool    exists(QString const &id) const;
 
-signals:
-
-public slots:
-
-private:
+  private:
     // we are still bottlenecked by disk access anyway
-    QMutex mutex;
+    QMutex  mutex;
     QString cacheDirPath;
 };

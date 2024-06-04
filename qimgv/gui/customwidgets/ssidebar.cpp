@@ -23,9 +23,9 @@ void SSideBar::addEntry(QString const &icon, QString const &name) {
         selectEntry(0);
 }
 
-void SSideBar::selectEntry(int idx) {
+void SSideBar::selectEntry(qsizetype idx) {
     if(idx >= 0 && idx < entries.count()) {
-        foreach(auto entry, entries)
+        for (auto entry : entries)
             entry->setHighlighted(false);
         entries[idx]->setHighlighted(true);
         emit entrySelected(idx);
@@ -48,8 +48,8 @@ void SSideBar::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void SSideBar::selectEntryAt(QPoint pos) {
-    int newSelection = -1;
-    for(int i = 0; i < entries.count(); i++) {
+    qsizetype newSelection = -1;
+    for(qsizetype i = 0; i < entries.count(); ++i) {
         if(entries[i]->geometry().contains(pos)) {
             if(!entries[i]->highlighted())
                 newSelection = i;
@@ -69,16 +69,17 @@ void SSideBar::paintEvent(QPaintEvent *event) {
 
 // -------------------------------------------------------------------
 
-SSideBarItem::SSideBarItem(QString icon, QString name, QWidget *parent) : QWidget{parent} {
+SSideBarItem::SSideBarItem(QString const &icon, QString const &name, QWidget *parent) : QWidget{parent}
+{
     QPalette p;
-    if(p.base().color().valueF() <= 0.45f)
-        iconWidget.setColor(QColor(184,184,185));
+    if (p.base().color().valueF() <= 0.45f)
+        iconWidget.setColor(QColor(184, 184, 185));
     else
-        iconWidget.setColor(QColor(70,70,70));
+        iconWidget.setColor(QColor(70, 70, 70));
     iconWidget.setIconPath(icon);
     textLabel.setText(name);
     layout = new QBoxLayout(QBoxLayout::LeftToRight);
-    layout->setContentsMargins(6,4,6,4);
+    layout->setContentsMargins(6, 4, 6, 4);
     layout->setSpacing(7);
     layout->addWidget(&iconWidget);
     layout->addWidget(&textLabel);
@@ -94,7 +95,8 @@ void SSideBarItem::setHighlighted(bool mode) {
     style()->polish(this);
 }
 
-bool SSideBarItem::highlighted() {
+bool SSideBarItem::highlighted() const
+{
     return mHighlighted;
 }
 

@@ -2,15 +2,17 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 
-SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::SettingsDialog)
+SettingsDialog::SettingsDialog(QWidget *parent)
+    : QDialog(parent),
+      ui(new Ui::SettingsDialog)
 {
     ui->setupUi(this);
-    this->setWindowTitle(tr("Preferences — ") + qApp->applicationName());
+    setWindowTitle(tr("Preferences — ") + qApp->applicationName());
 
     ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->aboutAppTextBrowser->viewport()->setAutoFillBackground(false);
-    ui->versionLabel->setText(QS("") + QApplication::applicationVersion());
-    ui->qtVersionLabel->setText(qVersion());
+    ui->versionLabel->setText(QApplication::applicationVersion());
+    ui->qtVersionLabel->setText(QString::fromUtf8(qVersion()));
     ui->appIconLabel->setPixmap(QIcon(QS(":/res/icons/common/logo/app/22.png")).pixmap(22, 22));
     ui->qtIconLabel->setPixmap(QIcon(QS(":/res/icons/common/logo/3rdparty/qt22.png")).pixmap(22, 16));
 
@@ -100,7 +102,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
     ui->memoryLimitLabel->setEnabled(false);
 #endif
 
-    if (!settings->supportedFormats().contains(QS("jxl")))
+    if (!settings->supportedFormats().contains("jxl"))
         ui->animatedJxlCheckBox->hide();
 
     setupSidebar();
@@ -259,7 +261,7 @@ void SettingsDialog::readSettings()
     ui->zoomStepSlider->setValue(static_cast<int>(settings->zoomStep() * 100.f));
     onZoomStepSliderChanged(ui->zoomStepSlider->value());
 
-    ui->autoResizeLimitSlider->setValue(static_cast<int>(settings->autoResizeLimit() / 5.f));
+    ui->autoResizeLimitSlider->setValue(static_cast<int>(settings->autoResizeLimit() / 5.0));
     onAutoResizeLimitSliderChanged(ui->autoResizeLimitSlider->value());
 
     ui->JPEGQualitySlider->setValue(settings->JPEGSaveQuality());
@@ -277,7 +279,7 @@ void SettingsDialog::readSettings()
     // language
     QString langName = langs.value(settings->language());
     if (langName.isEmpty() || ui->langComboBox->findText(langName) == -1)
-        ui->langComboBox->setCurrentText("en_US");
+        ui->langComboBox->setCurrentText(QS("en_US"));
     else
         ui->langComboBox->setCurrentText(langName);
 
@@ -338,7 +340,7 @@ void SettingsDialog::saveSettings()
     settings->setExpandImage(ui->expandImageCheckBox->isChecked());
     settings->setSmoothAnimatedImages(ui->smoothAnimatedImagesCheckBox->isChecked());
 
-    settings->setBackgroundOpacity(static_cast<qreal>(ui->bgOpacitySlider->value()) / 100.f);
+    settings->setBackgroundOpacity(ui->bgOpacitySlider->value() / 100.0);
     settings->setBlurBackground(ui->blurBackgroundCheckBox->isChecked());
     settings->setSortingMode(static_cast<SortingMode>(ui->sortingComboBox->currentIndex()));
     settings->setConfirmDelete(ui->confirmDeleteCheckBox->isChecked());
@@ -401,7 +403,7 @@ void SettingsDialog::saveSettings()
     settings->setPanelPreviewsSize(ui->panelSizeSlider->value() * 10);
 
     settings->setJPEGSaveQuality(ui->JPEGQualitySlider->value());
-    settings->setZoomStep(static_cast<qreal>(ui->zoomStepSlider->value() / 100.f));
+    settings->setZoomStep(ui->zoomStepSlider->value() / 100.0);
     settings->setAutoResizeLimit(ui->autoResizeLimitSlider->value() * 5);
     settings->setExpandLimit(ui->expandLimitSlider->value());
     settings->setThumbnailerThreadCount(ui->thumbnailerThreadsSlider->value());
@@ -669,7 +671,7 @@ void SettingsDialog::resetZoomLevels() const
 void SettingsDialog::selectMpvPath()
 {
     QFileDialog dialog;
-    QString     file = dialog.getOpenFileName(this, tr("Navigate to mpv binary"), "", "mpv*");
+    QString     file = dialog.getOpenFileName(this, tr("Navigate to mpv binary"), QString(), QS("mpv*"));
     if (!file.isEmpty())
         ui->mpvLineEdit->setText(file);
 }
@@ -677,19 +679,19 @@ void SettingsDialog::selectMpvPath()
 void SettingsDialog::onExpandLimitSliderChanged(int value) const
 {
     if (value == 0)
-        ui->expandLimitLabel->setText("-");
+        ui->expandLimitLabel->setText(QS("-"));
     else
-        ui->expandLimitLabel->setText(QString::number(value) + "x");
+        ui->expandLimitLabel->setText(QString::number(value) + u'x');
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::onJPEGQualitySliderChanged(int value) const
 {
-    ui->JPEGQualityLabel->setText(QString::number(value) + "%");
+    ui->JPEGQualityLabel->setText(QString::number(value) + u'%');
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::onZoomStepSliderChanged(int value) const
 {
-    ui->zoomStepLabel->setText(QString::number(value / 100.f, 'f', 2) + "x");
+    ui->zoomStepLabel->setText(QString::number(value / 100.0, 'f', 2) + u'x');
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::onThumbnailerThreadsSliderChanged(int value) const
@@ -699,12 +701,12 @@ void SettingsDialog::onThumbnailerThreadsSliderChanged(int value) const
 //------------------------------------------------------------------------------
 void SettingsDialog::onBgOpacitySliderChanged(int value) const
 {
-    ui->bgOpacityPercentLabel->setText(QString::number(value) + "%");
+    ui->bgOpacityPercentLabel->setText(QString::number(value) + u'%');
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::onAutoResizeLimitSliderChanged(int value) const
 {
-    ui->autoResizeLimit->setText(QString::number(value * 5.f, 'f', 0) + "%");
+    ui->autoResizeLimit->setText(QString::number(value * 5.0, 'f', 0) + u'%');
 }
 //------------------------------------------------------------------------------
 int SettingsDialog::exec()

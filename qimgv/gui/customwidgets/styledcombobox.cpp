@@ -12,7 +12,7 @@ StyledComboBox::StyledComboBox(QWidget *parent)
 void StyledComboBox::setIconPath(QString path)
 {
     if (dpr >= (1.0 + 0.001)) {
-        path.replace(QChar('.'), QS("@2x."));
+        path.replace(u'.', QS("@2x."));
         hiResPixmap = true;
         downArrow.load(path);
         if (dpr >= (2.0 - 0.001))

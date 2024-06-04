@@ -8,16 +8,16 @@ Settings::Settings(QObject *parent)
       stateConf(QCoreApplication::organizationName(), QS("savedState")),
       themeConf(QCoreApplication::organizationName(), QS("theme"))
 #else
-      mConfDir(QApplication::applicationDirPath() + QS("/conf")),
-      settingsConf(mConfDir.absolutePath() + QChar('/') + qApp->applicationName() + QS(".ini"), QSettings::IniFormat),
-      stateConf   (mConfDir.absolutePath() + QS("/savedState.ini"), QSettings::IniFormat),
-      themeConf   (mConfDir.absolutePath() + QS("/theme.ini"), QSettings::IniFormat)
+      mConfDir(QApplication::applicationDirPath() + QSV("/conf")),
+      settingsConf(mConfDir.absolutePath() + u'/' + qApp->applicationName() + QSV(".ini"), QSettings::IniFormat),
+      stateConf   (mConfDir.absolutePath() + QSV("/savedState.ini"), QSettings::IniFormat),
+      themeConf   (mConfDir.absolutePath() + QSV("/theme.ini"), QSettings::IniFormat)
 #endif
 {
     // config files
 #ifdef Q_OS_LINUX
 #else
-    mConfDir.mkpath(QApplication::applicationDirPath() + QS("/conf"));
+    mConfDir.mkpath(QApplication::applicationDirPath() + QSV("/conf"));
 #endif
 
     fillVideoFormats();
@@ -54,17 +54,17 @@ void Settings::setupCache()
     QFileInfo dirTest(mTmpDir.absolutePath());
     if (!dirTest.isDir() || !dirTest.isWritable() || !dirTest.exists()) {
         // fallback
-        qDebug() << QSV("Error: cache dir is not writable") << mTmpDir.absolutePath();
-        qDebug() << QSV("Trying to use") << genericCacheLocation << QSV("instead");
+        qDebug() << u"Error: cache dir is not writable" << mTmpDir.absolutePath();
+        qDebug() << u"Trying to use" << genericCacheLocation << u"instead";
         mTmpDir.setPath(genericCacheLocation);
         mTmpDir.mkpath(mTmpDir.absolutePath());
     }
     mThumbCacheDir = QDir(mTmpDir.absolutePath() + QS("/thumbnails"));
     mThumbCacheDir.mkpath(mThumbCacheDir.absolutePath());
 #else
-    mTmpDir = QDir(QApplication::applicationDirPath() + QS("/cache"));
+    mTmpDir = QDir(QApplication::applicationDirPath() + QSV("/cache"));
     mTmpDir.mkpath(mTmpDir.absolutePath());
-    mThumbCacheDir = QDir(QApplication::applicationDirPath() + QS("/thumbnails"));
+    mThumbCacheDir = QDir(QApplication::applicationDirPath() + QSV("/thumbnails"));
     mThumbCacheDir.mkpath(mThumbCacheDir.absolutePath());
 #endif
 }
@@ -77,12 +77,12 @@ void Settings::sync()
 //------------------------------------------------------------------------------
 QString Settings::thumbnailCacheDir() const
 {
-    return mThumbCacheDir.path() + QChar('/');
+    return mThumbCacheDir.path() + u'/';
 }
 //------------------------------------------------------------------------------
 QString Settings::tmpDir() const
 {
-    return mTmpDir.path() + QChar('/');
+    return mTmpDir.path() + u'/';
 }
 //------------------------------------------------------------------------------
 // This here is temporarily, will be moved to some sort of theme manager class.
@@ -152,17 +152,17 @@ void Settings::loadStylesheet()
         unsigned context_menu_button_height = static_cast<unsigned>(32.0 * pDpr);
         unsigned rename_overlay_width       = static_cast<unsigned>(380.0 * pDpr);
 
-        qDebug() << QSV("dpr=") << qApp->devicePixelRatio() << QSV("pDpr=") << pDpr;
+        qDebug() << u"dpr=" << qApp->devicePixelRatio() << u"pDpr=" << pDpr;
 
         // --- write variables into stylesheet --------------------------
-        styleSheet.replace(QS("%font_small%"), QString::number(font_small) + QS("pt"));
-        styleSheet.replace(QS("%font_large%"), QString::number(font_large) + QS("pt"));
-        styleSheet.replace(QS("%button_height%"), QString::number(button_height) + QS("px"));
-        styleSheet.replace(QS("%top_panel_height%"), QString::number(top_panel_height) + QS("px"));
-        styleSheet.replace(QS("%overlay_header_size%"), QString::number(overlay_header_size) + QS("px"));
-        styleSheet.replace(QS("%context_menu_width%"), QString::number(context_menu_width) + QS("px"));
-        styleSheet.replace(QS("%context_menu_button_height%"), QString::number(context_menu_button_height) + QS("px"));
-        styleSheet.replace(QS("%rename_overlay_width%"), QString::number(rename_overlay_width) + QS("px"));
+        styleSheet.replace(QS("%font_small%"), QString::number(font_small) + QSV("pt"));
+        styleSheet.replace(QS("%font_large%"), QString::number(font_large) + QSV("pt"));
+        styleSheet.replace(QS("%button_height%"), QString::number(button_height) + QSV("px"));
+        styleSheet.replace(QS("%top_panel_height%"), QString::number(top_panel_height) + QSV("px"));
+        styleSheet.replace(QS("%overlay_header_size%"), QString::number(overlay_header_size) + QSV("px"));
+        styleSheet.replace(QS("%context_menu_width%"), QString::number(context_menu_width) + QSV("px"));
+        styleSheet.replace(QS("%context_menu_button_height%"), QString::number(context_menu_button_height) + QSV("px"));
+        styleSheet.replace(QS("%rename_overlay_width%"), QString::number(rename_overlay_width) + QSV("px"));
 
         styleSheet.replace(QS("%icontheme%"), QS("light"));
         // Qt::Popup can't do transparency under windows, use square window
@@ -177,9 +177,9 @@ void Settings::loadStylesheet()
         styleSheet.replace(QS("%sys_window_tinted_lc2%"), sys_window_tinted_lc2.name());
         styleSheet.replace(QS("%sys_window_tinted_hc%"), sys_window_tinted_hc.name());
         styleSheet.replace(QS("%sys_window_tinted_hc2%"), sys_window_tinted_hc2.name());
-        styleSheet.replace(QS("%sys_text_secondary_rgba%"), QS("rgba(") + QString::number(sys_text.red()) + QChar(',') +
-                                                            QString::number(sys_text.green()) + QChar(',') +
-                                                            QString::number(sys_text.blue()) + QS(",50%)"));
+        styleSheet.replace(QS("%sys_text_secondary_rgba%"), QSV("rgba(") + QString::number(sys_text.red()) + u',' +
+                                                            QString::number(sys_text.green()) + u',' +
+                                                            QString::number(sys_text.blue()) + QSV(",50%)"));
 
         styleSheet.replace(QS("%button%"), colors.button.name());
         styleSheet.replace(QS("%button_hover%"), colors.button_hover.name());
@@ -208,18 +208,18 @@ void Settings::loadStylesheet()
         styleSheet.replace(QS("%folderview_button_hover%"), colors.folderview_button_hover.name());
         styleSheet.replace(QS("%folderview_button_pressed%"), colors.folderview_button_pressed.name());
 
-        styleSheet.replace(QS("%text_secondary_rgba%"), QS("rgba(") + QString::number(colors.text.red()) + QChar(',') +
-                                                        QString::number(colors.text.green()) + QChar(',') +
-                                                        QString::number(colors.text.blue()) + QS(",62%)"));
-        styleSheet.replace(QS("%accent_hover_rgba%"), QS("rgba(") + QString::number(colors.accent.red()) + QChar(',') +
-                                                      QString::number(colors.accent.green()) + QChar(',') +
-                                                      QString::number(colors.accent.blue()) + QS(",65%)"));
-        styleSheet.replace(QS("%overlay_rgba%"), QS("rgba(") + QString::number(colors.overlay.red()) + QChar(',') +
-                                                 QString::number(colors.overlay.green()) + QChar(',') +
-                                                 QString::number(colors.overlay.blue()) + QS(",90%)"));
-        styleSheet.replace(QS("%fv_backdrop_rgba%"), QS("rgba(") + QString::number(colors.folderview_hc2.red()) + QChar(',') +
-                                                     QString::number(colors.folderview_hc2.green()) + QChar(',') +
-                                                     QString::number(colors.folderview_hc2.blue()) + QS(",80%)"));
+        styleSheet.replace(QS("%text_secondary_rgba%"), QSV("rgba(") + QString::number(colors.text.red()) + u',' +
+                                                        QString::number(colors.text.green()) + u',' +
+                                                        QString::number(colors.text.blue()) + QSV(",62%)"));
+        styleSheet.replace(QS("%accent_hover_rgba%"), QSV("rgba(") + QString::number(colors.accent.red()) + u',' +
+                                                      QString::number(colors.accent.green()) + u',' +
+                                                      QString::number(colors.accent.blue()) + QSV(",65%)"));
+        styleSheet.replace(QS("%overlay_rgba%"), QSV("rgba(") + QString::number(colors.overlay.red()) + u',' +
+                                                 QString::number(colors.overlay.green()) + u',' +
+                                                 QString::number(colors.overlay.blue()) + QSV(",90%)"));
+        styleSheet.replace(QS("%fv_backdrop_rgba%"), QSV("rgba(") + QString::number(colors.folderview_hc2.red()) + u',' +
+                                                     QString::number(colors.folderview_hc2.green()) + u',' +
+                                                     QString::number(colors.folderview_hc2.blue()) + QSV(",80%)"));
         // do not show separator line if topbar color matches folderview
         if (colors.folderview != colors.folderview_topbar)
             styleSheet.replace(QS("%topbar_border_rgba%"), QS("rgba(0,0,0,14%)"));
@@ -318,7 +318,7 @@ QString Settings::mpvBinary() const
     QString mpvPath = settingsConf.value(QSV("mpvBinary"), QS("")).toString();
     if (!QFile::exists(mpvPath)) {
 #ifdef Q_OS_WIN32
-        mpvPath = QCoreApplication::applicationDirPath() + QS("/mpv.exe");
+        mpvPath = QCoreApplication::applicationDirPath() + QSV("/mpv.exe");
 #elif defined __linux__
         mpvPath = QS("/usr/bin/mpv");
 #endif
@@ -340,7 +340,7 @@ QList<QByteArray> Settings::supportedFormats() const
     formats << "jfif";
     if (videoPlayback())
         formats << mVideoFormatsMap.values();
-    formats.removeAll(QS("pdf"));
+    formats.removeAll("pdf");
     return formats;
 }
 //------------------------------------------------------------------------------
@@ -351,9 +351,9 @@ QString Settings::supportedFormatsFilter() const
     QString filters;
     auto    formats = supportedFormats();
     filters.append(QSV("Supported files ("));
-    for (int i = 0; i < formats.count(); i++)
-        filters.append(QS("*.") + QString(formats.at(i)) + QChar(' '));
-    filters.append(QChar(')'));
+    for (auto &fmt : formats)
+        filters.append(QSV("*.") + QString::fromUtf8(fmt) + u' ');
+    filters.append(u')');
     return filters;
 }
 //------------------------------------------------------------------------------
@@ -362,8 +362,8 @@ QString Settings::supportedFormatsRegex() const
     QString           filter;
     QList<QByteArray> formats = supportedFormats();
     filter.append(QSV(".*\\.("));
-    for (int i = 0; i < formats.count(); i++)
-        filter.append(QString(formats.at(i)) + QChar('|'));
+    for (auto &fmt : formats)
+        filter.append(QString::fromUtf8(fmt) + u'|');
     filter.chop(1);
     filter.append(QSV(")$"));
     return filter;
@@ -377,7 +377,7 @@ QStringList Settings::supportedMimeTypes() const
     if (videoPlayback())
         mimeTypes << mVideoFormatsMap.keys();
     for (int i = 0; i < mimeTypes.count(); i++)
-        filters << QString(mimeTypes.at(i));
+        filters << QString::fromLatin1(mimeTypes.at(i));
     return filters;
 }
 //------------------------------------------------------------------------------
@@ -454,10 +454,11 @@ void Settings::setBackgroundOpacity(qreal value)
 //------------------------------------------------------------------------------
 bool Settings::blurBackground() const
 {
-#ifndef USE_KDE_BLUR
+#ifdef USE_KDE_BLUR
+    return settingsConf.value(QSV("blurBackground"), true).toBool();
+#else
     return false;
 #endif
-    return settingsConf.value(QSV("blurBackground"), true).toBool();
 }
 
 void Settings::setBlurBackground(bool mode)
@@ -668,7 +669,7 @@ ImageFitMode Settings::imageFitMode() const
 {
     int mode = settingsConf.value(QSV("defaultFitMode"), 0).toInt();
     if (mode < 0 || mode > 2) {
-        qDebug() << QSV("Settings: Invalid fit mode ( ") << QString::number(mode) << QSV(" ). Resetting to default.");
+        qDebug() << u"Settings: Invalid fit mode ( " << QString::number(mode) << u" ). Resetting to default.";
         mode = 0;
     }
     return static_cast<ImageFitMode>(mode);
@@ -678,7 +679,7 @@ void Settings::setImageFitMode(ImageFitMode mode)
 {
     int modeInt = static_cast<int>(mode);
     if (modeInt < 0 || modeInt > 2) {
-        qDebug() << QSV("Settings: Invalid fit mode ( ") << QString::number(modeInt) << QSV(" ). Resetting to default.");
+        qDebug() << u"Settings: Invalid fit mode ( " << QString::number(modeInt) << u" ). Resetting to default.";
         modeInt = 0;
     }
     settingsConf.setValue(QSV("defaultFitMode"), modeInt);
@@ -718,10 +719,10 @@ void Settings::readShortcuts(QMap<QString, QString> &shortcuts)
     QStringList in, pair;
     in = settingsConf.value(QSV("shortcuts")).toStringList();
     for (int i = 0; i < in.count(); i++) {
-        pair = in[i].split(QChar('='));
+        pair = in[i].split(u'=');
         if (!pair[0].isEmpty() && !pair[1].isEmpty()) {
             if (pair[1] == QSV("eq"))
-                pair[1] = QChar('=');
+                pair[1] = u'=';
             shortcuts.insert(pair[1], pair[0]);
         }
     }
@@ -735,10 +736,10 @@ void Settings::saveShortcuts(QMap<QString, QString> const &shortcuts)
     QStringList                    out;
     while (i.hasNext()) {
         i.next();
-        if (i.key() == QChar('='))
-            out << i.value() + QChar('=') + QS("eq");
+        if (i.key() == u'=')
+            out << i.value() + u'=' + QS("eq");
         else
-            out << i.value() + QChar('=') + i.key();
+            out << i.value() + u'=' + i.key();
     }
     settingsConf.setValue(QSV("shortcuts"), out);
     settingsConf.endGroup();

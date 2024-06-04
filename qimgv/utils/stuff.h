@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <QStringView>
 #include <filesystem>
 #include <cstddef>
 
@@ -23,16 +24,12 @@ static constexpr QChar pathsep = QChar(L'\\');
 static constexpr QChar pathsep = QChar(L'/');
 #endif
 
-StdString QStringToStdString(QString const &str);
-QString   StdStringToQString(StdString const &str);
-QString   StdPathToQString(std::filesystem::path const &str);
+using namespace Qt::Literals::StringLiterals;
 
-inline std::filesystem::path QStringToStdPath(QString const &filePath)
-{
-    auto view = std::basic_string_view{filePath.data_ptr().data(),
-                                       static_cast<size_t>(filePath.size())};
-    return std::filesystem::path{view};
-}
+auto QStringToStdString(QString const &str) -> StdString;
+auto StdStringToQString(StdString const &str) -> QString;
+auto StdPathToQString(std::filesystem::path const &str) -> QString;
+auto QStringToStdPath(QString const &filePath) -> std::filesystem::path;
 
 inline QString QStringViewToQString(QStringView const &view)
 {
@@ -44,6 +41,8 @@ QString get_backtrace();
 #ifdef Q_OS_WIN32
 extern void OpenConsoleWindow();
 extern void CloseConsoleWindow();
+extern void WaitForAnyKey();
 #endif
+
 
 } // namespace util

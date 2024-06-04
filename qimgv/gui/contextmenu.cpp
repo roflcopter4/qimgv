@@ -114,7 +114,7 @@ ContextMenu::~ContextMenu()
 void ContextMenu::fillOpenWithMenu()
 {
     auto const &scripts = ScriptManager::allScripts();
-    for (auto const &[key, val] : scripts.asKeyValueRange()) {
+    for (auto const [key, val] : scripts.asKeyValueRange()) {
         if (!val.command.isEmpty()) {
             auto btn = new ContextMenuItem();
             btn->setAction(QS("s:") + key);

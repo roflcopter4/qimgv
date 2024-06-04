@@ -18,7 +18,7 @@ static QString win32ErrorString(DWORD error)
     );
 
     return res == 0 ? QString::number(error)
-                    : QS(__FILE__ "::" QT_STRINGIFY(__LINE__) ": ") +
+                    : QSV(__FILE__ "::" QT_STRINGIFY(__LINE__) ": ") +
                       QString::fromWCharArray(buffer, res);
 }
 
@@ -35,7 +35,9 @@ WindowsWatcherPrivate::WindowsWatcherPrivate(WindowsWatcher* qq)
 HANDLE WindowsWatcherPrivate::requestDirectoryHandle(QString const &path)
 {
     HANDLE hDirectory;
-    auto wpath = LR"(\\?\)" + absolute(util::QStringToStdPath(path)).wstring();
+    std::wstring wpath = path.startsWith(QSV(R"(\\?\)"))
+        ? path.toStdWString()
+        : util::QStringToStdPath(path).wstring();
 
     do {
         hDirectory = ::CreateFileW(
@@ -51,7 +53,7 @@ HANDLE WindowsWatcherPrivate::requestDirectoryHandle(QString const &path)
         if (hDirectory == INVALID_HANDLE_VALUE) {
             DWORD err = ::GetLastError();
             if (err == ERROR_SHARING_VIOLATION) {
-                qDebug() << QSV("ERROR_SHARING_VIOLATION waiting for 1 sec");
+                qDebug() << u"ERROR_SHARING_VIOLATION waiting for 1 sec";
                 QThread::sleep(1);
             } else {
                 qDebug() << win32ErrorString(err);
@@ -101,7 +103,7 @@ void WindowsWatcherPrivate::dispatchNotify(PFILE_NOTIFY_INFORMATION notify)
         break;
 
     default:
-        qDebug() << QSV("Some error, notify->Action") << notify->Action;
+        qDebug() << u"Some error, notify->Action" << notify->Action;
         break;
     }
 }
@@ -130,14 +132,14 @@ WindowsWatcher::WindowsWatcher(QString const & path)
     setWatchPath(path);
 }
 
-void WindowsWatcher::setWatchPath(QString const &path)
+void WindowsWatcher::setWatchPath(QString path)
 {
     Q_D(WindowsWatcher);
 
     DirectoryWatcher::setWatchPath(path);
     HANDLE hDirectory = d->requestDirectoryHandle(path);
     if (hDirectory == INVALID_HANDLE_VALUE) {
-        qDebug() << QSV("requestDirectoryHandle: INVALID_HANDLE_VALUE");
+        qDebug() << u"requestDirectoryHandle: INVALID_HANDLE_VALUE";
         return;
     }
 

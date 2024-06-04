@@ -29,8 +29,8 @@
 struct State {
     bool    hasActiveImage  = false;
     bool    delayModel      = false;
-    QString currentFilePath = "";
-    QString directoryPath   = "";
+    QString currentFilePath;
+    QString directoryPath;
     std::shared_ptr<Image> currentImg;
 };
 
@@ -129,7 +129,7 @@ class Core final : public QObject
     void interactiveMove(QList<QString> const &paths, QString const &destDirectory);
     void movePathsTo(QList<QString> const &paths, QString const &destDirectory);
     void onFileRemoved(QString const &filePath, int index);
-    void onFileRenamed(QString const &fromPath, int indexFrom, QString toPath, int indexTo);
+    void onFileRenamed(QString const &fromPath, int indexFrom, const QString &toPath, int indexTo);
     void onFileAdded(QString const &filePath);
     void onFileModified(QString const &filePath);
     void showResizeDialog();

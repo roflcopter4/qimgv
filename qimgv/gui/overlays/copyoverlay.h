@@ -9,9 +9,9 @@
 #include "settings.h"
 #include "components/actionmanager/actionmanager.h"
 
-enum CopyOverlayMode {
-    OVERLAY_COPY,
-    OVERLAY_MOVE
+enum class CopyOverlayMode {
+    COPY,
+    MOVE,
 };
 
 namespace Ui {
@@ -25,7 +25,7 @@ public:
     ~CopyOverlay() override;
     void saveSettings();    
     void setDialogMode(CopyOverlayMode _mode);
-    CopyOverlayMode operationMode();
+    CopyOverlayMode operationMode() const;
 
 public slots:
     void show();

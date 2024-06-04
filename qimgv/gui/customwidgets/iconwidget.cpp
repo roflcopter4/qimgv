@@ -8,7 +8,7 @@ IconWidget::IconWidget(QWidget *parent)
     dpr = this->devicePixelRatioF();
     color = settings->colorScheme().icons;
     connect(settings, &Settings::settingsChanged, [this]() {
-        if(colorMode == ICON_COLOR_THEME && color != settings->colorScheme().icons) {
+        if(colorMode == IconColorMode::THEME && color != settings->colorScheme().icons) {
             color = settings->colorScheme().icons;
             applyColor();
         }
@@ -67,7 +67,7 @@ void IconWidget::setIconOffset(int x, int y) {
 }
 
 void IconWidget::setColorMode(IconColorMode _mode) {
-    if(colorMode != _mode && _mode == ICON_COLOR_SOURCE) {
+    if(colorMode != _mode && _mode == IconColorMode::SOURCE) {
         colorMode = _mode;
         // reload uncolored
         loadIcon();
@@ -78,13 +78,13 @@ void IconWidget::setColorMode(IconColorMode _mode) {
 }
 
 void IconWidget::setColor(QColor const &_color) {
-    colorMode = ICON_COLOR_CUSTOM;
+    colorMode = IconColorMode::CUSTOM;
     color = _color;
     applyColor();
 }
 
 void IconWidget::applyColor() {
-    if(!pixmap || pixmap->isNull() || colorMode == ICON_COLOR_SOURCE)
+    if(!pixmap || pixmap->isNull() || colorMode == IconColorMode::SOURCE)
         return;
     ImageLib::recolor(*pixmap, color);
 }

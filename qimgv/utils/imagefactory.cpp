@@ -7,7 +7,7 @@ ImageFactory::createImage(QString const &path)
     std::shared_ptr<Image>        img = nullptr;
 
     if (docInfo->type() == DocumentType::NONE)
-        qDebug() << QSV("ImageFactory: cannot load ") << docInfo->filePath();
+        qDebug() << u"ImageFactory: cannot load " << docInfo->filePath();
     else if (docInfo->type() == DocumentType::ANIMATED)
         img.reset(new ImageAnimated(std::move(docInfo)));
     else if (docInfo->type() == DocumentType::VIDEO)

@@ -523,7 +523,7 @@ void ViewerWidget::hideEvent(QHideEvent *event)
 }
 
 // block native tab-switching so we can use it in shortcuts
-bool ViewerWidget::focusNextPrevChild(bool mode)
+bool ViewerWidget::focusNextPrevChild(bool)
 {
     return false;
 }

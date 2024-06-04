@@ -45,32 +45,33 @@ class DirectoryManager : public QObject
     void setSortingMode(SortingMode mode);
 
     ND QDateTime lastModified(QString const &filePath) const;
-    ND QString   dirNameAt(int index) const;
-    ND QString   dirPathAt(int index) const;
+    ND QString   dirNameAt(qsizetype index) const;
+    ND QString   dirPathAt(qsizetype index) const;
     ND QString   directoryPath() const;
-    ND QString   fileNameAt(int index) const;
-    ND QString   filePathAt(int index) const;
+    ND QString   fileNameAt(qsizetype index) const;
+    ND QString   filePathAt(qsizetype index) const;
     ND QString   firstFile() const;
     ND QString   lastFile() const;
     ND QString   nextOfDir(QString const &dirPath) const;
     ND QString   nextOfFile(QString const &filePath) const;
     ND QString   prevOfDir(QString const &dirPath) const;
     ND QString   prevOfFile(QString const &filePath) const;
-    ND int    indexOfDir(QString const &dirPath) const;
-    ND int    indexOfFile(QString const &filePath) const;
+    ND qsizetype indexOfDir(QString const &dirPath) const;
+    ND qsizetype indexOfFile(QString const &filePath) const;
     ND bool      containsDir(QString const &dirPath) const;
     ND bool      containsFile(QString const &filePath) const;
     ND bool      fileWatcherActive() const;
     ND bool      isEmpty() const;
     ND bool      isSupportedFile(QString const &filePath) const;
-    ND int    dirCount() const;
-    ND int    fileCount() const;
-    ND int    totalCount() const;
+    ND qsizetype dirCount() const;
+    ND qsizetype fileCount() const;
+    ND qsizetype totalCount() const;
 
-    ND static bool    isDir(QString const &filePath);
-    ND static bool    isFile(QString const &filePath);
+    ND static bool isDir(QString const &filePath);
+    ND static bool isFile(QString const &filePath);
+
     ND SortingMode    sortingMode() const;
-    ND FSEntry const &fileEntryAt(int index) const;
+    ND FSEntry const &fileEntryAt(qsizetype index) const;
 
     bool insertFileEntry(QString const &filePath);
     bool forceInsertFileEntry(QString const &filePath);
@@ -110,12 +111,13 @@ class DirectoryManager : public QObject
     ND bool size_entry_compare(FSEntry const &e1, FSEntry const &e2) const;
     ND bool size_entry_compare_reverse(FSEntry const &e1, FSEntry const &e2) const;
 
-    void    startFileWatcher(QString const &directoryPath);
-    void    stopFileWatcher();
-    void    addEntriesFromDirectory(std::vector<FSEntry> &entryVec, QString const &directoryPath);
-    void    addEntriesFromDirectoryRecursive(std::vector<FSEntry> &entryVec, QString const &directoryPath) const;
-    ND bool checkFileRange(int index) const;
-    ND bool checkDirRange(int index) const;
+    void startFileWatcher(QString const &directoryPath);
+    void stopFileWatcher();
+    void addEntriesFromDirectory(std::vector<FSEntry> &entryVec, QString const &directoryPath);
+    void addEntriesFromDirectoryRecursive(std::vector<FSEntry> &entryVec, QString const &directoryPath) const;
+
+    ND bool checkFileRange(qsizetype index) const;
+    ND bool checkDirRange(qsizetype index) const;
 
     CompareFunction compareFunction();
 
@@ -131,9 +133,9 @@ class DirectoryManager : public QObject
     void fileRemoved(QString filePath, int);
     void fileModified(QString filePath);
     void fileAdded(QString filePath);
-    void fileRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo);
+    void fileRenamed(QString fromPath, qsizetype indexFrom, QString toPath, qsizetype indexTo);
 
     void dirRemoved(QString dirPath, int);
     void dirAdded(QString dirPath);
-    void dirRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo);
+    void dirRenamed(QString fromPath, qsizetype indexFrom, QString toPath, qsizetype indexTo);
 };

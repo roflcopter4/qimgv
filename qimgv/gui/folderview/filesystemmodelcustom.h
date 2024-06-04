@@ -7,14 +7,19 @@
 #include "settings.h"
 #include "utils/imagelib.h"
 
-class FileSystemModelCustom : public QFileSystemModel
+class FileSystemModelCustom final : public QFileSystemModel
 {
   public:
-    FileSystemModelCustom(QObject *parent = nullptr);
-    QVariant data(const QModelIndex &index, int role) const override;
+    explicit FileSystemModelCustom(QObject *parent = nullptr);
+
+    ND QVariant data(QModelIndex const &index, int role) const override;
 
   protected:
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    ND Qt::ItemFlags flags(QModelIndex const &index) const override;
+
+#if 0
+    bool event(QEvent *event) override;
+#endif
 
   private:
     QPixmap folderIcon;

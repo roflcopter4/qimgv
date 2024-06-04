@@ -1,13 +1,12 @@
 #include "thumbnailerrunnable.h"
 
-ThumbnailerRunnable::ThumbnailerRunnable(ThumbnailCache*_cache, QString const &_path, int _size, bool _crop, bool _force) :
-    path(_path),
-    size(_size),
-    crop(_crop),
-    force(_force),
-    cache(_cache)
-{
-}
+ThumbnailerRunnable::ThumbnailerRunnable(ThumbnailCache *cache, QString path, int size, bool crop, bool force)
+    : path(std::move(path)),
+      size(size),
+      crop(crop),
+      force(force),
+      cache(cache)
+{}
 
 void ThumbnailerRunnable::run() {
     emit taskStart(path, size);
@@ -19,7 +18,7 @@ QString ThumbnailerRunnable::generateIdString(QString const &path, int size, boo
     QString queryStr = path + QString::number(size);
     if(crop)
         queryStr.append(QS("s"));
-    queryStr = QS("%1").arg(QString(QCryptographicHash::hash(queryStr.toUtf8(),QCryptographicHash::Md5).toHex()));
+    queryStr = QS("%1").arg(QString::fromLatin1(QCryptographicHash::hash(queryStr.toUtf8(),QCryptographicHash::Md5).toHex()));
     return queryStr;
 }
 

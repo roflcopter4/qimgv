@@ -19,8 +19,9 @@ public:
 
     void show();
     void hide();
-    bool underMouse();
-    bool isVisible();
+
+    ND bool underMouse() const;
+    ND bool isVisible() const;
 
 signals:
     void seek(int pos);

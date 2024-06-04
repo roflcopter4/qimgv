@@ -194,8 +194,9 @@ class ImageViewerV2 Q_DECL_FINAL : public QGraphicsView
     QPair<QPointF, QPoint> zoomAnchor; // [pixmap coords, viewport coords]
     QElapsedTimer          lastTouchpadScroll;
     QPixmap               *checkboard;
-    QTimeLine             *scrollTimeLineX;
-    QTimeLine             *scrollTimeLineY;
+
+    QTimeLine *scrollTimeLineX;
+    QTimeLine *scrollTimeLineY;
 
     void zoomAnchored(qreal newScale);
     void fitNormal();

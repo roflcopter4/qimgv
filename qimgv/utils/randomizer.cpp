@@ -5,7 +5,8 @@ Randomizer::Randomizer()
     setCount(0);
 }
 
-Randomizer::Randomizer(qsizetype count) : currentIndex(0)
+Randomizer::Randomizer(qsizetype count)
+    : currentIndex(0)
 {
     setCount(count);
 }
@@ -57,10 +58,10 @@ void Randomizer::fill()
 
 void Randomizer::print() const
 {
-    qDebug() << QSV("---vector---");
+    qDebug() << u"---vector---";
     for (uint32_t it : vec)
         qDebug() << it;
-    qDebug() << QSV("----end----");
+    qDebug() << u"----end----";
 }
 
 uint32_t Randomizer::next()

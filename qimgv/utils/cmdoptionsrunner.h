@@ -6,9 +6,11 @@
 #include <QString>
 #include "core.h"
 
-class CmdOptionsRunner : public QObject {
+class CmdOptionsRunner : public QObject
+{
     Q_OBJECT
-public slots:
-    void generateThumbs(QString const &dirPath, int size);
-    void showBuildOptions();
+
+  public Q_SLOTS:
+    static void generateThumbs(QString const &dirPath, int size);
+    static void showBuildOptions();
 };

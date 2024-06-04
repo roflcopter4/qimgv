@@ -63,7 +63,7 @@ void Loader::onLoadFinished(std::shared_ptr<Image> const &image, QString const &
 
 void Loader::clearPool()
 {
-    QHashIterator<QString, LoaderRunnable *> i(tasks);
+    QHashIterator i(tasks);
     while (i.hasNext()) {
         i.next();
         if (pool->tryTake(i.value()))
