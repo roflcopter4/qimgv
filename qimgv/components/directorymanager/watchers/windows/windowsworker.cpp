@@ -30,7 +30,7 @@ void WindowsWorker::run()
         qDebug() << u"[WindowsWorker] CreateEvent failed?";
         QMessageBox::warning(
             nullptr, QS("Error"),
-            QS("CreateEvent failed in " PRETTY_FUNCTION_SIG ". \n"
+            QS("CreateEvent failed in ") + QString::fromLatin1(PRETTY_FUNCTION_SIG) + QS(". \n"
                "This probably means everything will break catastrophically. Fairly warned, be thee, says I.")
         );
     }

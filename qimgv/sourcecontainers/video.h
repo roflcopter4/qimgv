@@ -12,7 +12,7 @@ public:
     Video(std::unique_ptr<DocumentInfo> info);
 
     std::unique_ptr<QPixmap>      getPixmap() override;
-    std::shared_ptr<const QImage> getImage() override;
+    QSharedPointer<const QImage> getImage() override;
 
     int   height() override;
     int   width() override;

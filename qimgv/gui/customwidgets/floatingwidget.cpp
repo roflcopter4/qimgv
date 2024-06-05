@@ -1,10 +1,20 @@
 #include "floatingwidget.h"
 
+#include <iostream>
+
 FloatingWidget::FloatingWidget(FloatingWidgetContainer *parent) : QWidget(parent), mAcceptKeyboardFocus(false)
 {
     setAccessibleName(QS("OverlayWidget"));
     connect(parent, &FloatingWidgetContainer::resized, this, &FloatingWidget::onContainerResized);
     hide();
+}
+
+FloatingWidget::~FloatingWidget()
+{
+    if (destructorCount++ > 0) {
+        std::cerr << "Not gonna lie, this is bad. Very bad. This is visit number " << destructorCount << " to " << __PRETTY_FUNCTION__ << '\n';
+        std::cerr.flush();
+    }
 }
 
 QSize FloatingWidget::containerSize() const

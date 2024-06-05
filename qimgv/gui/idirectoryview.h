@@ -29,14 +29,14 @@ class IDirectoryView
     virtual void reloadItem(qsizetype index)    = 0;
     virtual void setDragHover(qsizetype index)  = 0;
 
-    virtual void setThumbnail(qsizetype pos, std::shared_ptr<Thumbnail> thumb) = 0;
+    virtual void setThumbnail(qsizetype pos, QSharedPointer<Thumbnail> thumb) = 0;
 
     ND virtual SelectionList       &selection()       = 0;
     ND virtual SelectionList const &selection() const = 0;
 
     // signals
     virtual void itemActivated(qsizetype)                             = 0;
-    virtual void thumbnailsRequested(SelectionList, int, bool, bool)  = 0;
+    virtual void thumbnailsRequested(SelectionList, int size, bool, bool)  = 0;
     virtual void draggedOut()                                         = 0;
     virtual void draggedToBookmarks(SelectionList)                    = 0;
     virtual void draggedOver(qsizetype)                               = 0;

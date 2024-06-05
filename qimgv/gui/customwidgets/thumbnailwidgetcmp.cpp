@@ -101,7 +101,7 @@ QSizeF ThumbnailWidgetCmp::effectiveSizeHint(Qt::SizeHint which, const QSizeF &c
     return sizeHint(which, constraint);
 }
 
-void ThumbnailWidgetCmp::setThumbnail(std::shared_ptr<Thumbnail> _thumbnail) {
+void ThumbnailWidgetCmp::setThumbnail(QSharedPointer<Thumbnail> _thumbnail) {
     if(_thumbnail) {
         thumbnail = _thumbnail;
         isLoaded = true;

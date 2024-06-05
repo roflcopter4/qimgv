@@ -7,6 +7,7 @@ MW::MW(QWidget *parent)
       currentDisplay(0),
       maximized(false),
       activeSidePanel(ActiveSidePanel::NONE),
+      windowGeometryChangeTimer(new QTimer(this)),
       cropPanel(nullptr),
       cropOverlay(nullptr),
       saveOverlay(nullptr),
@@ -17,31 +18,44 @@ MW::MW(QWidget *parent)
       floatingMessage(nullptr)
 {
     setAttribute(Qt::WA_TranslucentBackground, true);
-    layout.setContentsMargins(0, 0, 0, 0);
-    layout.setSpacing(0);
+    layout = new QHBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
     setMinimumSize(10, 10);
 
     // do not steal focus when clicked
     // this is just a container. accept key events only
     // via passthrough from child widgets
     setFocusPolicy(Qt::NoFocus);
-    this->setLayout(&layout);
+    setLayout(layout);
     setWindowTitle(QCoreApplication::applicationName() + u' ' + QCoreApplication::applicationVersion());
-    this->setMouseTracking(true);
-    this->setAcceptDrops(true);
-    this->setAccessibleName(QS("mainwindow"));
-    windowGeometryChangeTimer.setSingleShot(true);
-    windowGeometryChangeTimer.setInterval(30);
+    setMouseTracking(true);
+    setAcceptDrops(true);
+    setAccessibleName(QS("mainwindow"));
+    windowGeometryChangeTimer->setSingleShot(true);
+    windowGeometryChangeTimer->setInterval(30);
     setupUi();
 
     connect(settings, &Settings::settingsChanged, this, &MW::readSettings);
-    connect(&windowGeometryChangeTimer, &QTimer::timeout, this, &MW::onWindowGeometryChanged);
+    connect(windowGeometryChangeTimer, &QTimer::timeout, this, &MW::onWindowGeometryChanged);
     connect(this, &MW::fullscreenStateChanged, this, &MW::adaptToWindowState);
 
     readSettings();
     currentDisplay = settings->lastDisplay();
     maximized      = settings->maximizedWindow();
     restoreWindowGeometry();
+}
+
+MW::~MW()
+{
+}
+
+namespace {
+QSharedPointer<ViewerWidget>    global_viewerWidget;
+QSharedPointer<InfoBarProxy>    global_infoBarWindowed;
+QSharedPointer<DocumentWidget>  global_docWidget;
+QSharedPointer<FolderViewProxy> global_folderView;
+QSharedPointer<CentralWidget>   global_centralWidget;
 }
 
 /*                                                             |--[ImageViewer]
@@ -54,10 +68,21 @@ MW::MW(QWidget *parent)
  */
 void MW::setupUi()
 {
-    viewerWidget.reset(new ViewerWidget(this));
-    infoBarWindowed.reset(new InfoBarProxy(this));
-    docWidget.reset(new DocumentWidget(viewerWidget, infoBarWindowed));
-    folderView.reset(new FolderViewProxy(this));
+    viewerWidget    = QSharedPointer<ViewerWidget>(new ViewerWidget());
+    infoBarWindowed = QSharedPointer<InfoBarProxy>(new InfoBarProxy());
+    docWidget       = QSharedPointer<DocumentWidget>(new DocumentWidget(viewerWidget, infoBarWindowed));
+    folderView      = QSharedPointer<FolderViewProxy>(new FolderViewProxy());
+    
+    global_viewerWidget    = viewerWidget;
+    global_infoBarWindowed = infoBarWindowed;
+    global_docWidget       = docWidget;
+    global_folderView      = folderView;
+
+    //viewerWidget    = new ViewerWidget(this);
+    //infoBarWindowed = new InfoBarProxy(this);
+    //docWidget       = new DocumentWidget(viewerWidget, infoBarWindowed);
+    //folderView      = new FolderViewProxy(this);
+
     connect(folderView.get(), &FolderViewProxy::sortingSelected,    this, &MW::sortingSelected);
     connect(folderView.get(), &FolderViewProxy::directorySelected,  this, &MW::opened);
     connect(folderView.get(), &FolderViewProxy::copyUrlsRequested,  this, &MW::copyUrlsRequested);
@@ -70,9 +95,10 @@ void MW::setupUi()
     floatingMessage   = new FloatingMessageProxy(viewerWidget.get()); // todo: use additional one for folderview?
     sidePanel         = new SidePanel(this);
 
-    centralWidget.reset(new CentralWidget(docWidget, folderView, this));
-    layout.addWidget(centralWidget.get());
-    layout.addWidget(sidePanel);
+    centralWidget = QSharedPointer<CentralWidget>(new CentralWidget(docWidget.get(), folderView.get(), this));
+    global_centralWidget = centralWidget;
+    layout->addWidget(centralWidget.get());
+    layout->addWidget(sidePanel);
 
     connect(viewerWidget.get(), &ViewerWidget::scalingRequested,   this, &MW::scalingRequested);
     connect(viewerWidget.get(), &ViewerWidget::draggedOut,         this, qOverload<>(&MW::draggedOut));
@@ -264,7 +290,7 @@ void MW::showImage(std::unique_ptr<QPixmap> pixmap)
     updateCropPanelData();
 }
 
-void MW::showAnimation(std::shared_ptr<QMovie> const &movie)
+void MW::showAnimation(QSharedPointer<QMovie> const &movie)
 {
     if (settings->autoResizeWindow())
         preShowResize(movie->frameRect().size());
@@ -393,7 +419,7 @@ void MW::setFilter(ScalingFilter filter)
     case ScalingFilter::CV_CUBIC:            filterName = QS("bicubic");            break;
     case ScalingFilter::CV_CUBIC_SHARPEN:    filterName = QS("bicubic + sharpen");  break;
     default:
-        filterName = QS("configured ") + QString::number(static_cast<int>(filter));
+        filterName = QSV("configured ") + QString::number(static_cast<int>(filter));
         break;
     }
     showMessage(QSV("Filter ") + filterName, 600);
@@ -462,12 +488,12 @@ void MW::mouseMoveEvent(QMouseEvent *event)
 
 bool MW::event(QEvent *event)
 {
-    // only save maximized state if we are already visible
-    // this filter out out events while the window is still being set up
+    // Only save maximized state if we are already visible.
+    // This filters out events while the window is still being set up.
     if (event->type() == QEvent::WindowStateChange && isVisible() && !isFullScreen())
         maximized = isMaximized();
     else if (event->type() == QEvent::Move || event->type() == QEvent::Resize)
-        windowGeometryChangeTimer.start();
+        windowGeometryChangeTimer->start();
     return QWidget::event(event);
 }
 
@@ -844,8 +870,8 @@ void MW::closeFullScreenOrExit()
 }
 
 // todo: this is crap, use shared state object
-void MW::setCurrentInfo(int            fileIndex,
-                        int            fileCount,
+void MW::setCurrentInfo(qsizetype      fileIndex,
+                        qsizetype      fileCount,
                         QString const &filePath,
                         QString const &fileName,
                         QSize          imageSize,
@@ -935,12 +961,12 @@ void MW::setExifInfo(QMap<QString, QString> const &xinfo)
         imageInfoOverlay->setExifInfo(xinfo);
 }
 
-std::shared_ptr<FolderViewProxy> MW::getFolderView()
+QSharedPointer<FolderViewProxy> MW::getFolderView()
 {
     return folderView;
 }
 
-std::shared_ptr<ThumbnailStripProxy> MW::getThumbnailPanel() const
+QSharedPointer<ThumbnailStripProxy> MW::getThumbnailPanel()
 {
     return docWidget->thumbPanel();
 }

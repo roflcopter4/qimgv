@@ -11,7 +11,7 @@ class Loader : public QObject
   public:
     explicit Loader();
 
-    static std::shared_ptr<Image> load(QString const &path);
+    static QSharedPointer<Image> load(QString const &path);
 
     void loadAsyncPriority(QString const &path);
     void loadAsync(QString const &path);
@@ -28,9 +28,9 @@ class Loader : public QObject
     void doLoadAsync(QString const &path, int priority);
 
   signals:
-    void loadFinished(std::shared_ptr<Image>, const QString &path);
+    void loadFinished(QSharedPointer<Image>, const QString &path);
     void loadFailed(const QString &path);
 
   private slots:
-    void onLoadFinished(std::shared_ptr<Image> const &, const QString &);
+    void onLoadFinished(QSharedPointer<Image> const &, const QString &);
 };

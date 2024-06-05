@@ -53,7 +53,7 @@ void ImageStatic::loadGeneric()
         image.reset(imgConverted);
     } else {
         // set image
-        image = std::move(img);
+        image = QSharedPointer<QImage const>(img.release());
     }
     mLoaded = true;
 }
@@ -68,7 +68,7 @@ void ImageStatic::loadICO()
     for (auto sz : sizes)
         if (maxSize.width() < sz.width())
             maxSize = sz;
-    image   = std::make_unique<QImage const>(icon.pixmap(maxSize).toImage());
+    image   = QSharedPointer<QImage const>(new QImage (icon.pixmap(maxSize).toImage()));
     mLoaded = true;
 }
 
@@ -143,12 +143,12 @@ std::unique_ptr<QPixmap> ImageStatic::getPixmap()
     return pix;
 }
 
-std::shared_ptr<QImage const> ImageStatic::getSourceImage()
+QSharedPointer<QImage const> ImageStatic::getSourceImage()
 {
     return image;
 }
 
-std::shared_ptr<QImage const> ImageStatic::getImage()
+QSharedPointer<QImage const> ImageStatic::getImage()
 {
     return isEdited() ? imageEdited : image;
 }
@@ -172,7 +172,7 @@ bool ImageStatic::setEditedImage(std::unique_ptr<QImage const> imageEditedNew)
 {
     if (imageEditedNew && imageEditedNew->width() != 0) {
         discardEditedImage();
-        imageEdited = std::move(imageEditedNew);
+        imageEdited = QSharedPointer<QImage const>(imageEditedNew.release());
         mEdited     = true;
         return true;
     }

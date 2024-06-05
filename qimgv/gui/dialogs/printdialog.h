@@ -21,7 +21,7 @@ class PrintDialog : public QDialog {
 public:
     explicit PrintDialog(QWidget *parent = nullptr);
     ~PrintDialog() override;
-    void setImage(std::shared_ptr<const QImage> const &_img);
+    void setImage(QSharedPointer<const QImage> const &_img);
     void setOutputPath(QString path);
 
 private slots:
@@ -36,7 +36,7 @@ private slots:
 private:
     void saveSettings();
     Ui::PrintDialog *ui;
-    std::shared_ptr<const QImage> img = nullptr;
+    QSharedPointer<const QImage> img = nullptr;
     QPrinter pdfPrinter, *printer = nullptr;
     bool printPdfDefault = false;
 };

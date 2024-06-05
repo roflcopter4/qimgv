@@ -258,7 +258,7 @@ void FolderView::populate(qsizetype count)
     ui->thumbnailGrid->populate(count);
 }
 
-void FolderView::setThumbnail(qsizetype pos, std::shared_ptr<Thumbnail> thumb)
+void FolderView::setThumbnail(qsizetype pos, QSharedPointer<Thumbnail> thumb)
 {
     ui->thumbnailGrid->setThumbnail(pos, std::move(thumb));
 }

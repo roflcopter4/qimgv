@@ -6,10 +6,12 @@
 
 #include "Common.h"
 
+#include <QSharedPointer>
+
 class Thumbnail
 {
   public:
-    Thumbnail(QString name, QString info, int size, std::shared_ptr<QPixmap> const &pixmap);
+    Thumbnail(QString name, QString info, int size, QSharedPointer<QPixmap> pixmap);
 
     ND QString const &name() const &;
     ND QString const &info() const &;
@@ -17,10 +19,11 @@ class Thumbnail
     ND int  size() const;
     ND bool hasAlphaChannel() const;
 
-    ND std::shared_ptr<QPixmap> pixmap();
+    ND QSharedPointer<QPixmap> pixmap();
+    ND QSharedPointer<QPixmap> const &pixmap() const;
 
   private:
-    std::shared_ptr<QPixmap> mPixmap;
+    QSharedPointer<QPixmap> mPixmap;
 
     QString mName;
     QString mInfo;

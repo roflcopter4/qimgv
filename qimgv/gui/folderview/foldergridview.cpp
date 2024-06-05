@@ -4,24 +4,28 @@
 
 FolderGridView::FolderGridView(QWidget *parent)
     : ThumbnailView(Qt::Vertical, parent),
+      holderWidget(new QGraphicsWidget()),
       shiftedCol(-1)
 {
     offscreenPreloadArea = 2300;
 
-    this->setAcceptDrops(true);
-
-    this->viewport()->setAttribute(Qt::WA_OpaquePaintEvent, true);
-    this->scene.setBackgroundBrush(settings->colorScheme().folderview);
-    this->setCacheMode(QGraphicsView::CacheBackground);
+    setAcceptDrops(true);
+    viewport()->setAttribute(Qt::WA_OpaquePaintEvent, true);
+    scene->setBackgroundBrush(settings->colorScheme().folderview);
+    setCacheMode(QGraphicsView::CacheBackground);
 
     // turn this off until [multi]selection is implemented
     setDrawScrollbarIndicator(false);
     setSelectMode(ThumbnailSelectMode::ACTIVATE_BY_DOUBLECLICK);
 
-    connect(settings, &Settings::settingsChanged, [this]() { this->scene.setBackgroundBrush(settings->colorScheme().folderview); });
+    connect(settings, &Settings::settingsChanged, [this]() { this->scene->setBackgroundBrush(settings->colorScheme().folderview); });
 
     setupLayout();
     connect(this, &ThumbnailView::itemActivated, this, &FolderGridView::onitemSelected);
+}
+
+FolderGridView::~FolderGridView()
+{
 }
 
 void FolderGridView::dropEvent(QDropEvent *event)
@@ -50,7 +54,7 @@ void FolderGridView::dragMoveEvent(QDragMoveEvent *event)
         index = thumbnails.indexOf(item);
     // unselect previous
     if (index != lastDragTarget && checkRange(lastDragTarget))
-        thumbnails.at(lastDragTarget)->setDropHovered(false);
+        thumbnails[lastDragTarget]->setDropHovered(false);
     emit draggedOver(index);
     lastDragTarget = index;
 }
@@ -60,14 +64,14 @@ void FolderGridView::dragLeaveEvent(QDragLeaveEvent *event)
     event->accept();
     if (lastDragTarget < 0 || lastDragTarget >= thumbnails.count())
         return;
-    thumbnails.at(lastDragTarget)->setDropHovered(false);
+    thumbnails[lastDragTarget]->setDropHovered(false);
 }
 
 void FolderGridView::setDragHover(qsizetype index)
 {
     if (!checkRange(index))
         return;
-    auto item = thumbnails.at(index);
+    auto item = thumbnails[index];
     item->setDropHovered(true);
 }
 
@@ -81,7 +85,7 @@ void FolderGridView::updateScrollbarIndicator()
     if (!thumbnails.count() || !selection().count())
         return;
     ThumbnailWidget *thumb = thumbnails.at(lastSelected());
-    qreal itemCenter = (thumb->pos().y() + (thumb->height() / 2)) / scene.height();
+    qreal itemCenter = (thumb->pos().y() + (thumb->height() / 2)) / scene->height();
     indicator = QRect(2, scrollBar->height() * itemCenter - indicatorSize, scrollBar->width() - 4, indicatorSize);
 }
 
@@ -103,7 +107,7 @@ void FolderGridView::setShowLabels(bool mode)
 {
     auto style = mode ? ThumbnailStyle::NORMAL : ThumbnailStyle::SIMPLE;
     for (qsizetype i = 0; i < thumbnails.count(); i++)
-        thumbnails.at(i)->setThumbStyle(style);
+        thumbnails[i]->setThumbStyle(style);
     updateLayout();
     fitSceneToContents();
     focusOnSelection();
@@ -279,7 +283,7 @@ void FolderGridView::focusOn(qsizetype index)
 {
     if (!checkRange(index))
         return;
-    ThumbnailWidget *thumb = thumbnails.at(index);
+    ThumbnailWidget *thumb = thumbnails[index];
     ensureVisible(thumb, 0, 0);
     loadVisibleThumbnailsDelayed();
 }
@@ -291,9 +295,9 @@ void FolderGridView::setupLayout()
     flowLayout = new FlowLayout();
     flowLayout->setContentsMargins(9, 6, 9, 0);
     setFrameShape(QFrame::NoFrame);
-    scene.addItem(&holderWidget);
-    holderWidget.setLayout(flowLayout);
-    holderWidget.setContentsMargins(0, 0, 0, 0);
+    scene->addItem(holderWidget);
+    holderWidget->setLayout(flowLayout);
+    holderWidget->setContentsMargins(0, 0, 0, 0);
 }
 
 ThumbnailWidget *FolderGridView::createThumbnailWidget()
@@ -312,7 +316,7 @@ ThumbnailWidget *FolderGridView::createThumbnailWidget()
 
 void FolderGridView::addItemToLayout(ThumbnailWidget *widget, qsizetype pos)
 {
-    scene.addItem(widget);
+    scene->addItem(widget);
     flowLayout->insertItem(pos, widget);
 }
 
@@ -407,7 +411,7 @@ void FolderGridView::setThumbnailSize(int newSize)
     newSize        = std::clamp(newSize, THUMBNAIL_SIZE_MIN, THUMBNAIL_SIZE_MAX);
     mThumbnailSize = newSize;
     for (qsizetype i = 0; i < thumbnails.count(); i++)
-        thumbnails.at(i)->setThumbnailSize(newSize);
+        thumbnails[i]->setThumbnailSize(newSize);
     updateLayout();
     fitSceneToContents();
     if (lastSelected() != -1)
@@ -419,9 +423,9 @@ void FolderGridView::setThumbnailSize(int newSize)
 void FolderGridView::fitSceneToContents()
 {
     if (scrollBar->isVisible())
-        holderWidget.setGeometry(0, 0, width() - scrollBar->width(), height());
+        holderWidget->setGeometry(0, 0, width() - scrollBar->width(), height());
     else
-        holderWidget.setGeometry(0, 0, width(), height());
+        holderWidget->setGeometry(0, 0, width(), height());
     ThumbnailView::fitSceneToContents();
 }
 

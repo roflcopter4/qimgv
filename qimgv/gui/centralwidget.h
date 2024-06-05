@@ -9,21 +9,21 @@
 class CentralWidget : public QStackedWidget
 {
     Q_OBJECT
-public:
-    explicit CentralWidget(std::shared_ptr<DocumentWidget> const &aDocWidget,
-                           std::shared_ptr<FolderViewProxy> const &aFolderView,
-                           QWidget *parent = nullptr);
+
+  public:
+    explicit CentralWidget(DocumentWidget *DocWidget, FolderViewProxy *aFolderView, QWidget *parent = nullptr);
+
+    ~CentralWidget() override;
 
     ViewMode currentViewMode() const;
-signals:
 
-public slots:
+  public slots:
     void showDocumentView();
     void showFolderView();
     void toggleViewMode();
 
-private:
-    std::shared_ptr<DocumentWidget> documentView;
-    std::shared_ptr<FolderViewProxy> folderView;
-    ViewMode mode;
+  private:
+    DocumentWidget  *documentView;
+    FolderViewProxy *folderView;
+    ViewMode         mode;
 };

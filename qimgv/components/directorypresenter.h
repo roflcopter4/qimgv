@@ -17,9 +17,10 @@ class DirectoryPresenter : public QObject
 
   public:
     explicit DirectoryPresenter(QObject *parent = nullptr);
+    ~DirectoryPresenter() override;
 
-    void setView(std::shared_ptr<IDirectoryView> newView);
-    void setModel(std::shared_ptr<DirectoryModel> newModel);
+    void setView(QSharedPointer<IDirectoryView> newView);
+    void setModel(QSharedPointer<DirectoryModel> newModel);
     void unsetModel();
 
     void selectAndFocus(qsizetype index) const;
@@ -52,7 +53,7 @@ class DirectoryPresenter : public QObject
 
   private Q_SLOTS:
     void generateThumbnails(IDirectoryView::SelectionList const &, int, bool, bool);
-    void onThumbnailReady(std::shared_ptr<Thumbnail> const &thumb, QString const &filePath) const;
+    void onThumbnailReady(QSharedPointer<Thumbnail> const &thumb, QString const &filePath) const;
     void populateView();
     void onItemActivated(qsizetype absoluteIndex);
     void onDraggedOut();
@@ -61,8 +62,9 @@ class DirectoryPresenter : public QObject
     void onDroppedInto(QMimeData const *data, QObject *source, qsizetype targetIndex);
 
   private:
-    std::shared_ptr<IDirectoryView> view  = nullptr;
-    std::shared_ptr<DirectoryModel> model = nullptr;
-    Thumbnailer                     thumbnailer;
-    bool                            mShowDirs;
+    QSharedPointer<IDirectoryView> view  = nullptr;
+    QSharedPointer<DirectoryModel> model = nullptr;
+
+    Thumbnailer *thumbnailer;
+    bool        mShowDirs;
 };

@@ -234,14 +234,14 @@ bool ImageViewerV2::showAnimationFrame(int frame)
 
 void ImageViewerV2::updatePixmap(std::unique_ptr<QPixmap> newPixmap)
 {
-    pixmap = std::move(newPixmap);
+    pixmap = QSharedPointer<QPixmap>(newPixmap.release());
     pixmap->setDevicePixelRatio(dpr);
     pixmapItem.setPixmap(*pixmap);
     pixmapItem.show();
     pixmapItem.update();
 }
 
-void ImageViewerV2::showAnimation(std::shared_ptr<QMovie> const &movie_)
+void ImageViewerV2::showAnimation(QSharedPointer<QMovie> const &movie_)
 {
     if (movie_ && movie_->isValid()) {
         reset();
@@ -276,7 +276,7 @@ void ImageViewerV2::showImage(std::unique_ptr<QPixmap> pixmap_)
     reset();
     if (pixmap_) {
         pixmapItemScaled.hide();
-        pixmap = std::move(pixmap_);
+        pixmap = QSharedPointer<QPixmap>(pixmap_.release());
         pixmap->setDevicePixelRatio(dpr);
         pixmapItem.setPixmap(*pixmap);
         auto mode = Qt::TransformationMode::SmoothTransformation;

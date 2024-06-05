@@ -28,7 +28,7 @@ void Thumbnailer::clearTasks()
     pool->clear();
 }
 
-std::shared_ptr<Thumbnail> Thumbnailer::getThumbnail(QString const &filePath, int size)
+QSharedPointer<Thumbnail> Thumbnailer::getThumbnail(QString const &filePath, int size)
 {
     return ThumbnailerRunnable::generate(nullptr, filePath, size, false, false);
 }
@@ -53,7 +53,7 @@ void Thumbnailer::onTaskStart(QString const &filePath, int size)
     runningTasks.insert(filePath, size);
 }
 
-void Thumbnailer::onTaskEnd(std::shared_ptr<Thumbnail> const &thumbnail, QString const &filePath)
+void Thumbnailer::onTaskEnd(QSharedPointer<Thumbnail> const &thumbnail, QString const &filePath)
 {
     runningTasks.remove(filePath, thumbnail->size());
     emit thumbnailReady(thumbnail, filePath);

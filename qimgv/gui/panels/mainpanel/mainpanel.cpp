@@ -1,10 +1,15 @@
 #include "Common.h"
 #include "mainpanel.h"
 
+namespace {
+QSharedPointer<ThumbnailStripProxy> global_thumbnailStrip;
+}
+
 MainPanel::MainPanel(FloatingWidgetContainer *parent) : SlidePanel(parent)
 {
     // buttons stuff
-    buttonsWidget.setAccessibleName(QS("panelButtonsWidget"));
+    buttonsWidget = new QWidget();
+    buttonsWidget->setAccessibleName(QS("panelButtonsWidget"));
     openButton = new ActionButton(QS("open"), QS(":res/icons/common/buttons/panel/open20.png"), 30, this);
     openButton->setAccessibleName(QS("ButtonSmall"));
     openButton->setTriggerMode(TriggerMode::Press);
@@ -23,20 +28,21 @@ MainPanel::MainPanel(FloatingWidgetContainer *parent) : SlidePanel(parent)
     pinButton->setCheckable(true);
     connect(pinButton, &ActionButton::toggled, this, &MainPanel::onPinClicked);
 
-    buttonsLayout.setDirection(QBoxLayout::BottomToTop);
-    buttonsLayout.setSpacing(0);
-    buttonsLayout.addWidget(settingsButton);
-    buttonsLayout.addWidget(openButton);
-    buttonsLayout.addStretch(0);
-    buttonsLayout.addWidget(pinButton);
-    buttonsLayout.addWidget(folderViewButton);
-    buttonsLayout.addWidget(exitButton);
+    buttonsLayout = new QVBoxLayout();
+    buttonsLayout->setDirection(QBoxLayout::BottomToTop);
+    buttonsLayout->setSpacing(0);
+    buttonsLayout->addWidget(settingsButton);
+    buttonsLayout->addWidget(openButton);
+    buttonsLayout->addStretch(0);
+    buttonsLayout->addWidget(pinButton);
+    buttonsLayout->addWidget(folderViewButton);
+    buttonsLayout->addWidget(exitButton);
 
-    buttonsWidget.setLayout(&buttonsLayout);
+    buttonsWidget->setLayout(buttonsLayout);
+    this->layout()->addWidget(buttonsWidget);
 
-    layout()->addWidget(&buttonsWidget);
-
-    thumbnailStrip.reset(new ThumbnailStripProxy(this));
+    thumbnailStrip = QSharedPointer<ThumbnailStripProxy>(new ThumbnailStripProxy(this));
+    global_thumbnailStrip = thumbnailStrip;
     setWidget(thumbnailStrip);
 
     readSettings();
@@ -45,10 +51,6 @@ MainPanel::MainPanel(FloatingWidgetContainer *parent) : SlidePanel(parent)
 
 MainPanel::~MainPanel()
 {
-    delete openButton;
-    delete settingsButton;
-    delete exitButton;
-    delete folderViewButton;
 }
 
 void MainPanel::onPinClicked()
@@ -64,24 +66,24 @@ void MainPanel::setPosition(PanelPosition p)
     SlidePanel::setPosition(p);
     switch (p) {
     case PanelPosition::TOP:
-        buttonsLayout.setDirection(QBoxLayout::BottomToTop);
+        buttonsLayout->setDirection(QBoxLayout::BottomToTop);
         layout()->setContentsMargins(0, 0, 0, 1);
-        buttonsLayout.setContentsMargins(4, 0, 0, 0);
+        buttonsLayout->setContentsMargins(4, 0, 0, 0);
         break;
     case PanelPosition::BOTTOM:
-        buttonsLayout.setDirection(QBoxLayout::BottomToTop);
+        buttonsLayout->setDirection(QBoxLayout::BottomToTop);
         layout()->setContentsMargins(0, 3, 0, 0);
-        buttonsLayout.setContentsMargins(4, 0, 0, 0);
+        buttonsLayout->setContentsMargins(4, 0, 0, 0);
         break;
     case PanelPosition::LEFT:
-        buttonsLayout.setDirection(QBoxLayout::LeftToRight);
+        buttonsLayout->setDirection(QBoxLayout::LeftToRight);
         layout()->setContentsMargins(0, 0, 1, 0);
-        buttonsLayout.setContentsMargins(0, 0, 0, 4);
+        buttonsLayout->setContentsMargins(0, 0, 0, 4);
         break;
     case PanelPosition::RIGHT:
-        buttonsLayout.setDirection(QBoxLayout::LeftToRight);
+        buttonsLayout->setDirection(QBoxLayout::LeftToRight);
         layout()->setContentsMargins(1, 0, 0, 0);
-        buttonsLayout.setContentsMargins(0, 0, 0, 4);
+        buttonsLayout->setContentsMargins(0, 0, 0, 4);
         break;
     }
     recalculateGeometry();
@@ -92,7 +94,7 @@ void MainPanel::setExitButtonEnabled(bool mode)
     exitButton->setHidden(!mode);
 }
 
-std::shared_ptr<ThumbnailStripProxy> MainPanel::getThumbnailStrip()
+QSharedPointer<ThumbnailStripProxy> MainPanel::getThumbnailStrip()
 {
     return thumbnailStrip;
 }

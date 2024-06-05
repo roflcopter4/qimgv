@@ -30,7 +30,7 @@ class DirectoryModel final : public QObject
     bool setDirectory(QString const &);
     bool saveFile(QString const &filePath);
     bool saveFile(QString const &filePath, QString const &destPath);
-    void updateImage(QString const &filePath, std::shared_ptr<Image> const &img);
+    void updateImage(QString const &filePath, QSharedPointer<Image> const &img);
 
     ND qsizetype fileCount() const;
     ND qsizetype dirCount() const;
@@ -49,8 +49,8 @@ class DirectoryModel final : public QObject
     ND QString prevOf(QString const &filePath) const;
 
     ND auto fileEntryAt(qsizetype index) const -> FSEntry const &;
-    ND auto getImage(QString const &filePath) const -> std::shared_ptr<Image>;
-    ND auto getImageAt(qsizetype index) const -> std::shared_ptr<Image>;
+    ND auto getImage(QString const &filePath) const -> QSharedPointer<Image>;
+    ND auto getImageAt(qsizetype index) const -> QSharedPointer<Image>;
     ND auto lastModified(QString const &filePath) const -> QDateTime;
     ND auto source() const -> FileListSource;
     ND bool autoRefresh() const;
@@ -82,7 +82,7 @@ class DirectoryModel final : public QObject
     void loadFailed(QString const &path);
     void sortingChanged(SortingMode);
     void indexChanged(qsizetype oldIndex, qsizetype index);
-    void imageReady(std::shared_ptr<Image> img, QString const &);
+    void imageReady(QSharedPointer<Image> img, QString const &);
     void imageUpdated(QString filePath);
 
   private:
@@ -92,7 +92,7 @@ class DirectoryModel final : public QObject
     FileListSource   fileListSource;
 
   private Q_SLOTS:
-    void onImageReady(std::shared_ptr<Image> const &img, QString const &path);
+    void onImageReady(QSharedPointer<Image> const &img, QString const &path);
     void onSortingChanged();
     void onFileAdded(QString const &filePath);
     void onFileRemoved(QString const &filePath, qsizetype index);

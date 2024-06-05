@@ -232,7 +232,7 @@ bool DirectoryModel::loaderBusy() const
     return loader.isBusy();
 }
 
-void DirectoryModel::onImageReady(std::shared_ptr<Image> const &img, QString const &path)
+void DirectoryModel::onImageReady(QSharedPointer<Image> const &img, QString const &path)
 {
     if (!img) {
         emit loadFailed(path);
@@ -319,7 +319,7 @@ bool DirectoryModel::isLoaded(QString const &filePath) const
     return cache.contains(filePath);
 }
 
-std::shared_ptr<Image> DirectoryModel::getImageAt(qsizetype index) const
+QSharedPointer<Image> DirectoryModel::getImageAt(qsizetype index) const
 {
     return getImage(filePathAt(index));
 }
@@ -327,15 +327,15 @@ std::shared_ptr<Image> DirectoryModel::getImageAt(qsizetype index) const
 // returns cached image
 // if image is not cached, loads it in the main thread
 // for async access use loadAsync(), then catch onImageReady()
-std::shared_ptr<Image> DirectoryModel::getImage(QString const &filePath) const
+QSharedPointer<Image> DirectoryModel::getImage(QString const &filePath) const
 {
-    std::shared_ptr<Image> img = cache.get(filePath);
+    QSharedPointer<Image> img = cache.get(filePath);
     if (!img)
         img = Loader::load(filePath);
     return img;
 }
 
-void DirectoryModel::updateImage(QString const &filePath, std::shared_ptr<Image> const &img)
+void DirectoryModel::updateImage(QString const &filePath, QSharedPointer<Image> const &img)
 {
     if (containsFile(filePath) /*& cache.contains(filePath)*/) {
         if (!cache.contains(filePath)) {

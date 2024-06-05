@@ -7,10 +7,10 @@ class CacheItem
 {
   public:
     CacheItem();
-    explicit CacheItem(std::shared_ptr<Image> const &contents);
+    explicit CacheItem(QSharedPointer<Image> const &contents);
     ~CacheItem();
 
-    std::shared_ptr<Image> getContents();
+    QSharedPointer<Image> getContents();
 
     void lock();
     void unlock();
@@ -19,6 +19,6 @@ class CacheItem
     DELETE_COPY_MOVE_CONSTRUCTORS(CacheItem);
 
   private:
-    std::shared_ptr<Image> contents;
+    QSharedPointer<Image> contents;
     QSemaphore             *sem{};
 };

@@ -19,7 +19,7 @@ public:
     ThumbnailerRunnable(ThumbnailCache*cache, QString path, int size, bool crop, bool force);
     ~ThumbnailerRunnable() override;
     void                              run() override;
-    static std::shared_ptr<Thumbnail> generate(ThumbnailCache *cache, QString const &path, int size, bool crop, bool force);
+    static QSharedPointer<Thumbnail> generate(ThumbnailCache *cache, QString const &path, int size, bool crop, bool force);
 private:
     static QString                   generateIdString(QString const &path, int size, bool crop);
     static std::pair<QImage*, QSize> createThumbnail(QString const &path, const char*format, int size, bool crop);
@@ -32,5 +32,5 @@ private:
 
 signals:
     void taskStart(QString, int);
-    void taskEnd(std::shared_ptr<Thumbnail>, QString);
+    void taskEnd(QSharedPointer<Thumbnail>, QString);
 };

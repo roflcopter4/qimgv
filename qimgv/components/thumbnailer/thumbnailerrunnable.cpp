@@ -10,7 +10,7 @@ ThumbnailerRunnable::ThumbnailerRunnable(ThumbnailCache *cache, QString path, in
 
 void ThumbnailerRunnable::run() {
     emit taskStart(path, size);
-    std::shared_ptr<Thumbnail> thumbnail = generate(cache, path, size, crop, force);
+    QSharedPointer<Thumbnail> thumbnail = generate(cache, path, size, crop, force);
     emit taskEnd(thumbnail, path);
 }
 
@@ -22,7 +22,7 @@ QString ThumbnailerRunnable::generateIdString(QString const &path, int size, boo
     return queryStr;
 }
 
-std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache*cache, QString const &path, int size, bool crop, bool force) {
+QSharedPointer<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache*cache, QString const &path, int size, bool crop, bool force) {
     DocumentInfo imgInfo(path);
     QString thumbnailId = generateIdString(path, size, crop);
     std::unique_ptr<QImage> image;
@@ -37,7 +37,7 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache*cache, Q
 
     if(!image) {
         if(imgInfo.type() == DocumentType::NONE) {
-            std::shared_ptr<Thumbnail> thumbnail(new Thumbnail(imgInfo.fileName(), QS(""), size, nullptr));
+            QSharedPointer<Thumbnail> thumbnail(new Thumbnail(imgInfo.fileName(), QS(""), size, nullptr));
             return thumbnail;
         }
         std::pair<QImage*, QSize> pair;
@@ -81,8 +81,8 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache*cache, Q
                 image->text(QS("originalHeight")) +
                 image->text(QS("label"));
     }
-    std::shared_ptr<QPixmap> pixmapPtr(tmpPixmap);
-    std::shared_ptr<Thumbnail> thumbnail(new Thumbnail(imgInfo.fileName(), label, size, pixmapPtr));
+    QSharedPointer<QPixmap> pixmapPtr(tmpPixmap);
+    QSharedPointer<Thumbnail> thumbnail(new Thumbnail(imgInfo.fileName(), label, size, pixmapPtr));
     return thumbnail;
 }
 

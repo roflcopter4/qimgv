@@ -33,7 +33,7 @@ class ThumbnailWidgetCmp : public QGraphicsWidget
     enum { Type = UserType + 1 };
     ND int type() const override { return Type; }
 
-    void  setThumbnail(std::shared_ptr<Thumbnail> _thumbnail);
+    void  setThumbnail(QSharedPointer<Thumbnail> _thumbnail);
     void  setHighlighted(bool mode);
     bool  isHighlighted();
     void  setDropHovered(bool mode);
@@ -77,7 +77,7 @@ class ThumbnailWidgetCmp : public QGraphicsWidget
 
     ND QSizeF sizeHint(Qt::SizeHint which, QSizeF const &constraint = QSizeF()) const override;
 
-    std::shared_ptr<Thumbnail> thumbnail;
+    QSharedPointer<Thumbnail> thumbnail;
 
     QRectF bgRect;
     QRectF mBoundingRect;

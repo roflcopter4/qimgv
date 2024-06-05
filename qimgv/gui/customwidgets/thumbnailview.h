@@ -42,6 +42,7 @@ class ThumbnailView : public QGraphicsView, public IDirectoryView
 
   public:
     explicit ThumbnailView(Qt::Orientation orientation, QWidget *parent = nullptr);
+    ~ThumbnailView() override;
 
     void setDirectoryPath(QString path) override;
     void select(SelectionList) override;
@@ -52,10 +53,10 @@ class ThumbnailView : public QGraphicsView, public IDirectoryView
 
     ND qsizetype itemCount() const { return thumbnails.count(); }
 
-    void setSelectMode(ThumbnailSelectMode mode);
-    int  lastSelected();
-    void clearSelection();
-    void deselect(qsizetype index);
+    void      setSelectMode(ThumbnailSelectMode mode);
+    qsizetype lastSelected();
+    void      clearSelection();
+    void      deselect(qsizetype index);
 
   public Q_SLOTS:
     void show();
@@ -69,7 +70,7 @@ class ThumbnailView : public QGraphicsView, public IDirectoryView
     void showEvent(QShowEvent *event) override;
     void focusOnSelection() override = 0;
     void populate(qsizetype count) override;
-    void setThumbnail(qsizetype pos, std::shared_ptr<Thumbnail> thumb) override;
+    void setThumbnail(qsizetype pos, QSharedPointer<Thumbnail> thumb) override;
     void insertItem(qsizetype index) override;
     void removeItem(qsizetype index) override;
     void reloadItem(qsizetype index) override;
@@ -108,7 +109,7 @@ class ThumbnailView : public QGraphicsView, public IDirectoryView
     ScrollDirection lastScrollDirection = ScrollDirection::FORWARDS;
 
     bool rangeSelection; // true if shift is pressed
-    int  mThumbnailSize;
+    int  mThumbnailSize       = 120;
     int  offscreenPreloadArea = 3000;
     int  scrollRefreshRate    = 16;
 
@@ -116,7 +117,7 @@ class ThumbnailView : public QGraphicsView, public IDirectoryView
 
     QScrollBar    *scrollBar;
     QTimeLine     *scrollTimeLine;
-    QGraphicsScene scene;
+    QGraphicsScene *scene;
     QPointF        viewportCenter;
     SelectionList  rangeSelectionSnapshot;
     QRect          indicator;

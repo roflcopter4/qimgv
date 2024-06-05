@@ -20,7 +20,7 @@ ScriptManager *ScriptManager::getInstance()
     return scriptManager;
 }
 
-void ScriptManager::runScript(QString const &scriptName, std::shared_ptr<Image> const &img)
+void ScriptManager::runScript(QString const &scriptName, QSharedPointer<Image> const &img)
 {
     if(scripts.contains(scriptName)) {
         Script script = scripts.value(scriptName);
@@ -72,7 +72,7 @@ void ScriptManager::runCommandDetached(QString const &cmd)
 }
 
 // TODO: what if filename contains one of the tags?
-void ScriptManager::processArguments(QStringList &cmd, std::shared_ptr<Image> const &img)
+void ScriptManager::processArguments(QStringList &cmd, QSharedPointer<Image> const &img)
 {
     QString field = QS("%file%");
     for (auto &i : cmd) {

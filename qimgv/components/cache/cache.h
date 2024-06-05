@@ -14,13 +14,13 @@ class Cache
     explicit Cache() = default;
 
     void remove(QString const &path);
-    bool insert(std::shared_ptr<Image> const &img);
+    bool insert(QSharedPointer<Image> const &img);
     void trimTo(QStringList const &list);
     bool release(QString const &path);
     bool reserve(QString const &path);
     void clear();
 
-    ND auto get(QString const &path) const -> std::shared_ptr<Image>;
+    ND auto get(QString const &path) const -> QSharedPointer<Image>;
     ND auto keys() const -> QList<QString>;
     ND bool contains(QString const &path) const;
 

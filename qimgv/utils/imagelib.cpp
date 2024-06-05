@@ -22,7 +22,7 @@ QImage *rotatedRaw(QImage const *src, int grad)
     return img;
 }
 
-QImage *rotated(std::shared_ptr<QImage const> const &src, int grad)
+QImage *rotated(QSharedPointer<QImage const> const &src, int grad)
 {
     return rotatedRaw(src.get(), grad);
 }
@@ -37,7 +37,7 @@ QImage *croppedRaw(QImage const *src, QRect newRect)
     return new QImage();
 }
 
-QImage *cropped(std::shared_ptr<QImage const> const &src, QRect newRect)
+QImage *cropped(QSharedPointer<QImage const> const &src, QRect newRect)
 {
     return croppedRaw(src.get(), newRect);
 }
@@ -49,7 +49,7 @@ QImage *flippedHRaw(QImage const *src)
     return new QImage(src->mirrored(true, false));
 }
 
-QImage *flippedH(std::shared_ptr<QImage const> const &src)
+QImage *flippedH(QSharedPointer<QImage const> const &src)
 {
     return flippedHRaw(src.get());
 }
@@ -61,7 +61,7 @@ QImage *flippedVRaw(QImage const *src)
     return new QImage(src->mirrored(false, true));
 }
 
-QImage *flippedV(std::shared_ptr<QImage const> const &src)
+QImage *flippedV(QSharedPointer<QImage const> const &src)
 {
     return flippedVRaw(src.get());
 }
@@ -151,7 +151,7 @@ QImage *cropped(QRect newRect, QRect targetRes, bool upscaled) {
 }
 #endif
 
-QImage *scaled(std::shared_ptr<QImage const> const &source, QSize destSize, ScalingFilter filter)
+QImage *scaled(QSharedPointer<QImage const> const &source, QSize destSize, ScalingFilter filter)
 {
     if (!source)
         return new QImage();
@@ -160,7 +160,7 @@ QImage *scaled(std::shared_ptr<QImage const> const &source, QSize destSize, Scal
         auto newFmt = QImage::Format_RGB32;
         if (source->hasAlphaChannel())
             newFmt = QImage::Format_ARGB32;
-        scaleTarget.reset(new QImage(source->convertToFormat(newFmt)));
+        scaleTarget = QSharedPointer<QImage>(new QImage(source->convertToFormat(newFmt)));
     }
 #ifdef USE_OPENCV
     if (filter > ScalingFilter::BILINEAR && !QtOcv::isSupported(scaleTarget->format()))
@@ -184,7 +184,7 @@ QImage *scaled(std::shared_ptr<QImage const> const &source, QSize destSize, Scal
     }
 }
 
-QImage *scaled_Qt(std::shared_ptr<QImage const> const &source, QSize destSize, bool smooth)
+QImage *scaled_Qt(QSharedPointer<QImage const> const &source, QSize destSize, bool smooth)
 {
     if (!source)
         return new QImage();
@@ -197,7 +197,7 @@ QImage *scaled_Qt(std::shared_ptr<QImage const> const &source, QSize destSize, b
 #ifdef USE_OPENCV
 // this probably leaks, needs checking
 QImage *
-scaled_CV(std::shared_ptr<QImage const> const &source,
+scaled_CV(QSharedPointer<QImage const> const &source,
           QSize destSize, cv::InterpolationFlags filter, int sharpen)
 {
     auto *dest = new QImage();
@@ -210,7 +210,7 @@ scaled_CV(std::shared_ptr<QImage const> const &source,
 
     if (destSize == source->size()) {
         // TODO: should this return a copy?
-        //result.reset(new StaticImageContainer(std::make_shared<cv::Mat>(srcMat)));
+        //result = QSharedPointer<StaticImageContainer>(new StaticImageContainer(std::make_shared<cv::Mat>(srcMat)));
     }
     else if (destSize.width() > source->width()) { // upscale
         cv::Mat dstMat(destSizeCv, srcMat.type());

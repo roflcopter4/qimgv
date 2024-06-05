@@ -6,9 +6,10 @@ SlidePanel::SlidePanel(FloatingWidgetContainer *parent)
       slideAmount(40),
       mWidget(nullptr)
 {
-    mLayout.setSpacing(0);
-    mLayout.setContentsMargins(0, 0, 0, 0);
-    this->setLayout(&mLayout);
+    mLayout = new QHBoxLayout(this);
+    mLayout->setSpacing(0);
+    mLayout->setContentsMargins(0, 0, 0, 0);
+    this->setLayout(mLayout);
 
     // fade effect
     fadeEffect = new QGraphicsOpacityEffect(this);
@@ -68,15 +69,15 @@ void SlidePanel::setLayoutManaged(bool mode)
         recalculateGeometry();
 }
 
-void SlidePanel::setWidget(std::shared_ptr<QWidget> const &w)
+void SlidePanel::setWidget(QSharedPointer<QWidget> const &w)
 {
     if (!w)
         return;
     if (hasWidget())
-        layout()->removeWidget(mWidget.get());
-    mWidget = w;
+        layout()->removeWidget(mWidget);
+    mWidget = w.get();
     mWidget->setParent(this);
-    mLayout.insertWidget(0, mWidget.get());
+    mLayout->insertWidget(0, mWidget);
 }
 
 bool SlidePanel::hasWidget() const
@@ -149,9 +150,9 @@ QRect SlidePanel::triggerRect() const
 void SlidePanel::setPosition(PanelPosition p)
 {
     if (p == PanelPosition::TOP || p == PanelPosition::BOTTOM)
-        mLayout.setDirection(QBoxLayout::LeftToRight);
+        mLayout->setDirection(QBoxLayout::LeftToRight);
     else
-        mLayout.setDirection(QBoxLayout::BottomToTop);
+        mLayout->setDirection(QBoxLayout::BottomToTop);
     mPosition = p;
     recalculateGeometry();
 }

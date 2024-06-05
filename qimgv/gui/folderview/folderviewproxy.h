@@ -23,7 +23,7 @@ class FolderViewProxy : public QWidget, public IDirectoryView
 
   public Q_SLOTS:
     void populate(qsizetype) override;
-    void setThumbnail(qsizetype pos, std::shared_ptr<Thumbnail> thumb) override;
+    void setThumbnail(qsizetype pos, QSharedPointer<Thumbnail> thumb) override;
     void select(SelectionList) override;
     void select(qsizetype) override;
     void focusOn(qsizetype) override;
@@ -57,8 +57,8 @@ class FolderViewProxy : public QWidget, public IDirectoryView
     void draggedOver(qsizetype) override;
 
   private:
-    std::shared_ptr<FolderView> folderView;
-    QVBoxLayout                 layout;
+    QSharedPointer<FolderView> folderView;
+    QVBoxLayout                 *layout;
     FolderViewStateBuffer       stateBuf;
     QMutex                      m;
 };

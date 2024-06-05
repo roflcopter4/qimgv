@@ -40,7 +40,7 @@ class VideoPlayerInitProxy : public VideoPlayer
     void setLoopPlayback(bool mode) override;
     bool isInitialized() const;
 
-    std::shared_ptr<VideoPlayer> getPlayer();
+    QSharedPointer<VideoPlayer> getPlayer();
 
   public Q_SLOTS:
     void show() override;
@@ -50,7 +50,7 @@ class VideoPlayerInitProxy : public VideoPlayer
     void paintEvent(QPaintEvent *event) override;
 
   private:
-    std::shared_ptr<VideoPlayer> player;
+    QSharedPointer<VideoPlayer> player;
     QString     libFile;
     QStringList libDirs;
     QLibrary    playerLib;

@@ -45,7 +45,7 @@ ThumbnailWidget *ThumbnailStrip::createThumbnailWidget()
 
 void ThumbnailStrip::addItemToLayout(ThumbnailWidget *widget, qsizetype pos)
 {
-    scene.addItem(widget);
+    scene->addItem(widget);
     updateThumbnailPositions(pos, thumbnails.count() - 1);
 }
 
@@ -53,7 +53,7 @@ void ThumbnailStrip::removeItemFromLayout(qsizetype pos)
 {
     if (checkRange(pos)) {
         ThumbnailWidget *thumb = thumbnails[pos];
-        scene.removeItem(thumb);
+        scene->removeItem(thumb);
         // move items
         if (orientation() == Qt::Horizontal) {
             for (auto *th : thumbnails)
@@ -67,7 +67,7 @@ void ThumbnailStrip::removeItemFromLayout(qsizetype pos)
 
 void ThumbnailStrip::removeAll()
 {
-    scene.clear(); // also calls delete on all items
+    scene->clear(); // also calls delete on all items
     thumbnails.clear();
 }
 

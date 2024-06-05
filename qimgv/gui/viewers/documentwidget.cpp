@@ -1,6 +1,12 @@
 #include "documentwidget.h"
 
-DocumentWidget::DocumentWidget(std::shared_ptr<ViewerWidget> const &viewWidget, std::shared_ptr<InfoBarProxy> const &infoBar, QWidget *parent)
+namespace {
+QSharedPointer<ViewerWidget> global_ViewWidget;
+QSharedPointer<InfoBarProxy> global_InfoBar;
+QSharedPointer<MainPanel>    global_mainPanel;
+}
+
+DocumentWidget::DocumentWidget(QSharedPointer<ViewerWidget> const &viewWidget, QSharedPointer<InfoBarProxy> const &infoBar, QWidget *parent)
     : FloatingWidgetContainer(parent),
       mainPanel(nullptr),
       avoidPanelFlag(false),
@@ -21,25 +27,34 @@ DocumentWidget::DocumentWidget(std::shared_ptr<ViewerWidget> const &viewWidget, 
     setLayout(layoutRoot);
     setAttribute(Qt::WA_TranslucentBackground, true);
     setMouseTracking(true);
+
     mViewWidget = viewWidget;
-    mViewWidget->setParent(this);
+    global_ViewWidget = mViewWidget;
+    //mViewWidget->setParent(this);
     layout->addWidget(mViewWidget.get());
     mViewWidget->show();
+
     mInfoBar = infoBar;
-    mInfoBar->setParent(this);
+    global_InfoBar = mInfoBar;
+    //mInfoBar->setParent(this);
     layoutRoot->addWidget(mInfoBar.get());
     setFocusProxy(mViewWidget.get());
 
     setInteractionEnabled(true);
 
-    mainPanel.reset(new MainPanel(this));
+    mainPanel = QSharedPointer<MainPanel>(new MainPanel(this));
+    global_mainPanel = (mainPanel);
     connect(mainPanel.get(), &MainPanel::pinned, this, &DocumentWidget::setPanelPinned);
 
     connect(settings, &Settings::settingsChanged, this, &DocumentWidget::readSettings);
     readSettings();
 }
 
-std::shared_ptr<ViewerWidget> DocumentWidget::viewWidget()
+DocumentWidget::~DocumentWidget()
+{
+}
+
+QSharedPointer<ViewerWidget> &DocumentWidget::viewWidget()
 {
     return mViewWidget;
 }
@@ -96,7 +111,7 @@ bool DocumentWidget::panelPinned() const
     return mPanelPinned;
 }
 
-std::shared_ptr<ThumbnailStripProxy> DocumentWidget::thumbPanel() const
+QSharedPointer<ThumbnailStripProxy> DocumentWidget::thumbPanel() const
 {
     return mainPanel->getThumbnailStrip();
 }

@@ -18,25 +18,25 @@
 namespace ImageLib {
 
  QImage *rotatedRaw(QImage const *src, int grad);
- QImage *rotated(std::shared_ptr<QImage const> const &src, int grad);
+ QImage *rotated(QSharedPointer<QImage const> const &src, int grad);
 
  QImage *croppedRaw(QImage const *src, QRect newRect);
- QImage *cropped(std::shared_ptr<QImage const> const &src, QRect newRect);
+ QImage *cropped(QSharedPointer<QImage const> const &src, QRect newRect);
 
  QImage *flippedHRaw(QImage const *src);
- QImage *flippedH(std::shared_ptr<QImage const> const &src);
+ QImage *flippedH(QSharedPointer<QImage const> const &src);
 
  QImage *flippedVRaw(QImage const *src);
- QImage *flippedV(std::shared_ptr<QImage const> const &src);
+ QImage *flippedV(QSharedPointer<QImage const> const &src);
 
 // QImage *scaled(const QImage *source, QSize destSize, ScalingFilter filter);
- QImage *scaled(std::shared_ptr<QImage const> const &source, QSize destSize, ScalingFilter filter);
+ QImage *scaled(QSharedPointer<QImage const> const &source, QSize destSize, ScalingFilter filter);
 
  QImage *scaled_Qt(QImage const *source, QSize destSize, bool smooth);
- QImage *scaled_Qt(std::shared_ptr<QImage const> const &source, QSize destSize, bool smooth);
+ QImage *scaled_Qt(QSharedPointer<QImage const> const &source, QSize destSize, bool smooth);
 
 #ifdef USE_OPENCV
- QImage *scaled_CV(std::shared_ptr<QImage const> const &source, QSize destSize, cv::InterpolationFlags filter, int sharpen);
+ QImage *scaled_CV(QSharedPointer<QImage const> const &source, QSize destSize, cv::InterpolationFlags filter, int sharpen);
 #endif
  std::unique_ptr<QImage const> exifRotated(std::unique_ptr<QImage const> src, int orientation);
  std::unique_ptr<QImage>       exifRotated(std::unique_ptr<QImage> src, int orientation);

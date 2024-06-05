@@ -18,7 +18,7 @@ class Image
     virtual ~Image() = default;
 
     virtual std::unique_ptr<QPixmap>      getPixmap() = 0;
-    virtual std::shared_ptr<QImage const> getImage()  = 0;
+    virtual QSharedPointer<QImage const> getImage()  = 0;
 
     virtual int   height()               = 0;
     virtual int   width()                = 0;

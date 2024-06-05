@@ -1,19 +1,19 @@
 #include "imagefactory.h"
 
-std::shared_ptr<Image>
+QSharedPointer<Image>
 ImageFactory::createImage(QString const &path)
 {
     std::unique_ptr<DocumentInfo> docInfo(new DocumentInfo(path));
-    std::shared_ptr<Image>        img = nullptr;
+    QSharedPointer<Image>        img = nullptr;
 
     if (docInfo->type() == DocumentType::NONE)
         qDebug() << u"ImageFactory: cannot load " << docInfo->filePath();
     else if (docInfo->type() == DocumentType::ANIMATED)
-        img.reset(new ImageAnimated(std::move(docInfo)));
+        img = QSharedPointer<ImageAnimated>(new ImageAnimated(std::move(docInfo)));
     else if (docInfo->type() == DocumentType::VIDEO)
-        img.reset(new Video(std::move(docInfo)));
+        img = QSharedPointer<Video>(new Video(std::move(docInfo)));
     else
-        img.reset(new ImageStatic(std::move(docInfo)));
+        img = QSharedPointer<ImageStatic>(new ImageStatic(std::move(docInfo)));
 
     return img;
 }

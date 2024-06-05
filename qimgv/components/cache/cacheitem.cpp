@@ -5,7 +5,7 @@ CacheItem::CacheItem()
 {
 }
 
-CacheItem::CacheItem(std::shared_ptr<Image> const &contents)
+CacheItem::CacheItem(QSharedPointer<Image> const &contents)
     : contents(contents),
       sem(new QSemaphore(1))
 {
@@ -16,7 +16,7 @@ CacheItem::~CacheItem()
     delete sem;
 }
 
-std::shared_ptr<Image> CacheItem::getContents()
+QSharedPointer<Image> CacheItem::getContents()
 {
     return contents;
 }

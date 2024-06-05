@@ -31,7 +31,7 @@ struct State {
     bool    delayModel      = false;
     QString currentFilePath;
     QString directoryPath;
-    std::shared_ptr<Image> currentImg;
+    QSharedPointer<Image> currentImg;
 };
 
 class Core final : public QObject
@@ -41,8 +41,11 @@ class Core final : public QObject
   public:
     enum class MimeDataTarget { TARGET_CLIPBOARD, TARGET_DROP };
 
-    Core();
+    explicit Core(QObject *parent);
+    ~Core() override;
     void showGui() const;
+
+    Q_DISABLE_COPY_MOVE(Core)
 
   public Q_SLOTS:
     void updateInfoString();
@@ -60,7 +63,7 @@ class Core final : public QObject
     void onFirstRun();
 
     // ui stuff
-    MW   *mw;
+    MW   *mw = nullptr;
     State state;
     bool  loopSlideshow;
     bool  slideshow;
@@ -69,40 +72,40 @@ class Core final : public QObject
     FolderEndAction folderEndAction;
 
     // components
-    std::shared_ptr<DirectoryModel> model;
+    QSharedPointer<DirectoryModel> model;
 
-    DirectoryPresenter thumbPanelPresenter;
-    DirectoryPresenter folderViewPresenter;
+    DirectoryPresenter *thumbPanelPresenter;
+    DirectoryPresenter *folderViewPresenter;
 
     void rotateByDegrees(int degrees);
     void reset();
     bool setDirectory(QString const &path);
 
     QDrag       *mDrag;
-    QTranslator *translator = nullptr;
+    QTranslator *translator;
     Randomizer   randomizer;
     QTimer       slideshowTimer;
 
     void    syncRandomizer();
-    void    attachModel(DirectoryModel *_model);
+    void    attachModel(DirectoryModel *newModel);
     QString selectedPath();
-    void    guiSetImage(std::shared_ptr<Image> const &img);
+    void    guiSetImage(QSharedPointer<Image> const &img);
     void    startSlideshowTimer();
     void    startSlideshow();
     void    stopSlideshow();
     bool    saveFile(QString const &filePath, QString const &newPath);
     bool    saveFile(QString const &filePath);
 
-    ND auto getEditableImage(QString const &filePath) const -> std::shared_ptr<ImageStatic>;
-    auto    currentSelection() const -> QList<QString>;
+    ND auto getEditableImage(QString const &filePath) const -> QSharedPointer<ImageStatic>;
+    ND auto currentSelection() const -> QList<QString>;
 
     template <typename... Args>
-    void edit_template(bool save, QString const &actionName, std::function<QImage *(std::shared_ptr<QImage const>, Args...)> const &editFunc, Args &&...as);
+    void edit_template(bool save, QString const &actionName, std::function<QImage *(QSharedPointer<QImage const>, Args...)> const &editFunc, Args &&...as);
 
     void doInteractiveCopy(QString const &path, QString const &destDirectory, DialogResult &overwriteFiles);
     void doInteractiveMove(QString const &path, QString const &destDirectory, DialogResult &overwriteFiles);
 
-    static QMimeData *getMimeDataForImage(std::shared_ptr<Image> const &img, MimeDataTarget target);
+    static QMimeData *getMimeDataForImage(QSharedPointer<Image> const &img, MimeDataTarget target);
 
   private Q_SLOTS:
     FileOpResult removeFile(QString const &filePath, bool trash);
@@ -113,7 +116,7 @@ class Core final : public QObject
     void nextImageSlideshow();
     void jumpToFirst();
     void jumpToLast();
-    void onModelItemReady(std::shared_ptr<Image> const &, QString const &);
+    void onModelItemReady(QSharedPointer<Image> const &, QString const &);
     void onModelItemUpdated(QString const &filePath);
     void onModelSortingChanged(SortingMode mode);
     void onLoadFailed(QString const &path) const;

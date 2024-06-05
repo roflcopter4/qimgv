@@ -40,7 +40,7 @@ void VideoPlayerInitProxy::onSettingsChanged()
     player->setVideoUnscaled(!settings->expandImage());
 }
 
-std::shared_ptr<VideoPlayer> VideoPlayerInitProxy::getPlayer()
+QSharedPointer<VideoPlayer> VideoPlayerInitProxy::getPlayer()
 {
     return player;
 }

@@ -14,8 +14,8 @@ class ImageAnimated : public Image
     ~ImageAnimated() override = default;
 
     std::unique_ptr<QPixmap>      getPixmap() override;
-    std::shared_ptr<QImage const> getImage() override;
-    std::shared_ptr<QMovie>       getMovie();
+    QSharedPointer<QImage const> getImage() override;
+    QSharedPointer<QMovie>       getMovie();
 
     int   height() override;
     int   width() override;
@@ -36,7 +36,7 @@ class ImageAnimated : public Image
   private:
     QSize mSize;
     int   mFrameCount;
-    std::shared_ptr<QMovie> movie;
+    QSharedPointer<QMovie> movie;
 
     void load() override;
     void loadMovie();

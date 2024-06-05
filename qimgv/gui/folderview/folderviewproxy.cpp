@@ -1,11 +1,16 @@
 #include "folderviewproxy.h"
 
+namespace {
+QSharedPointer<FolderView> global_folderView;
+}
+
 FolderViewProxy::FolderViewProxy(QWidget *parent)
     : QWidget(parent),
-      folderView(nullptr)
+      folderView(nullptr),
+      layout(new QVBoxLayout(this))
 {
     stateBuf.sortingMode = settings->sortingMode();
-    layout.setContentsMargins(0,0,0,0);
+    layout->setContentsMargins(0,0,0,0);
 }
 
 void FolderViewProxy::init()
@@ -14,12 +19,13 @@ void FolderViewProxy::init()
     QMutexLocker ml(&m);
     if (folderView)
         return;
-    folderView.reset(new FolderView());
+    folderView = QSharedPointer<FolderView>(new FolderView(this));
+    global_folderView = (folderView);
     folderView->setParent(this);
     ml.unlock();
-    layout.addWidget(folderView.get());
-    this->setFocusProxy(folderView.get());
-    this->setLayout(&layout);
+    layout->addWidget(folderView.get());
+    setFocusProxy(folderView.get());
+    setLayout(layout);
 
     connect(folderView.get(), &FolderView::itemActivated,       this, &FolderViewProxy::itemActivated);
     connect(folderView.get(), &FolderView::thumbnailsRequested, this, &FolderViewProxy::thumbnailsRequested);
@@ -59,7 +65,7 @@ void FolderViewProxy::populate(qsizetype count)
     }
 }
 
-void FolderViewProxy::setThumbnail(qsizetype pos, std::shared_ptr<Thumbnail> thumb)
+void FolderViewProxy::setThumbnail(qsizetype pos, QSharedPointer<Thumbnail> thumb)
 {
     if (folderView)
         folderView->setThumbnail(pos, std::move(thumb));

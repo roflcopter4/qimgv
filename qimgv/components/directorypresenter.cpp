@@ -2,9 +2,14 @@
 
 DirectoryPresenter::DirectoryPresenter(QObject *parent)
     : QObject(parent),
+      thumbnailer(new Thumbnailer),
       mShowDirs(false)
 {
-    connect(&thumbnailer, &Thumbnailer::thumbnailReady, this, &DirectoryPresenter::onThumbnailReady);
+    connect(thumbnailer, &Thumbnailer::thumbnailReady, this, &DirectoryPresenter::onThumbnailReady);
+}
+
+DirectoryPresenter::~DirectoryPresenter()
+{
 }
 
 void DirectoryPresenter::unsetModel()
@@ -31,7 +36,7 @@ struct StaticAssertHack {
     }
 };
 
-void DirectoryPresenter::setView(std::shared_ptr<IDirectoryView> newView)
+void DirectoryPresenter::setView(QSharedPointer<IDirectoryView> newView)
 {
     if (view)
         return;
@@ -60,7 +65,7 @@ void DirectoryPresenter::setView(std::shared_ptr<IDirectoryView> newView)
 #endif
 }
 
-void DirectoryPresenter::setModel(std::shared_ptr<DirectoryModel> newModel)
+void DirectoryPresenter::setModel(QSharedPointer<DirectoryModel> newModel)
 {
     if (model)
         unsetModel();
@@ -220,13 +225,13 @@ void DirectoryPresenter::generateThumbnails(IDirectoryView::SelectionList const 
 {
     if (!view || !model)
         return;
-    thumbnailer.clearTasks();
+    thumbnailer->clearTasks();
     if (!mShowDirs) {
-        for (int i : indexes)
-            thumbnailer.getThumbnailAsync(model->filePathAt(i), size, crop, force);
+        for (auto i : indexes)
+            thumbnailer->getThumbnailAsync(model->filePathAt(i), size, crop, force);
         return;
     }
-    for (int i : indexes) {
+    for (auto i : indexes) {
         if (i < model->dirCount()) {
             // tmp ------------------------------------------------------------
             // gen thumb for a directory
@@ -243,17 +248,17 @@ void DirectoryPresenter::generateThumbnails(IDirectoryView::SelectionList const 
 
             ImageLib::recolor(*pixmap, settings->colorScheme().icons);
 
-            auto thumb = std::make_shared<Thumbnail>(model->dirNameAt(i), QS("Folder"), size, std::shared_ptr<QPixmap>(pixmap));
+            auto thumb = QSharedPointer<Thumbnail>(new Thumbnail(model->dirNameAt(i), QS("Folder"), size, QSharedPointer<QPixmap>(pixmap)));
             // ^----------------------------------------------------------------
             view->setThumbnail(i, std::move(thumb));
         } else {
             QString path = model->filePathAt(i - model->dirCount());
-            thumbnailer.getThumbnailAsync(path, size, crop, force);
+            thumbnailer->getThumbnailAsync(path, size, crop, force);
         }
     }
 }
 
-void DirectoryPresenter::onThumbnailReady(std::shared_ptr<Thumbnail> const &thumb, QString const &filePath) const
+void DirectoryPresenter::onThumbnailReady(QSharedPointer<Thumbnail> const &thumb, QString const &filePath) const
 {
     if (!view || !model)
         return;

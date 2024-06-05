@@ -17,8 +17,8 @@ class ImageStatic : public Image
     ~ImageStatic() override;
 
     std::unique_ptr<QPixmap>      getPixmap() override;
-    std::shared_ptr<QImage const> getSourceImage();
-    std::shared_ptr<QImage const> getImage() override;
+    QSharedPointer<QImage const> getSourceImage();
+    QSharedPointer<QImage const> getImage() override;
 
     int   height() override;
     int   width() override;
@@ -33,8 +33,8 @@ class ImageStatic : public Image
     bool save(QString destPath) override;
 
   private:
-    std::shared_ptr<QImage const> image;
-    std::shared_ptr<QImage const> imageEdited;
+    QSharedPointer<QImage const> image;
+    QSharedPointer<QImage const> imageEdited;
 
     void load() override;
     void loadGeneric();

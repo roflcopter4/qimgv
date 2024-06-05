@@ -17,6 +17,6 @@ class LoaderRunnable : public QObject, public QRunnable
     QString path_;
 
   signals:
-    void finished(std::shared_ptr<Image>, QString);
+    void finished(QSharedPointer<Image>, QString);
     void failed(QString);
 };

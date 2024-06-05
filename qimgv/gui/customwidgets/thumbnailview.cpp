@@ -9,13 +9,13 @@ ThumbnailView::ThumbnailView(Qt::Orientation orientation, QWidget *parent)
       mouseReleaseSelect(false),
       selectMode(ThumbnailSelectMode::ACTIVATE_BY_PRESS),
       rangeSelection(false),
-      mThumbnailSize(120),
       scrollTimeLine(nullptr)
 {
     setAccessibleName(QS("thumbnailView"));
     setMouseTracking(true);
     setAcceptDrops(false);
-    setScene(&scene);
+    scene = new QGraphicsScene(this);
+    setScene(scene);
     setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
     setAttribute(Qt::WA_TranslucentBackground, false);
     setOptimizationFlag(QGraphicsView::DontAdjustForAntialiasing, true);
@@ -45,6 +45,10 @@ ThumbnailView::ThumbnailView(Qt::Orientation orientation, QWidget *parent)
     verticalScrollBar()->setContextMenuPolicy(Qt::NoContextMenu);
     verticalScrollBar()->installEventFilter(this);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, [this]() { loadVisibleThumbnails(); });
+}
+
+ThumbnailView::~ThumbnailView()
+{
 }
 
 Qt::Orientation ThumbnailView::orientation() const
@@ -93,7 +97,7 @@ void ThumbnailView::createScrollTimeLine()
         lastScrollFrameTime = scrollFrameTimer.elapsed();
         if (scrollTimeLine->state() == QTimeLine::Running && lastScrollFrameTime > scrollRefreshRate) {
             scrollTimeLine->setPaused(true);
-            int newTime = qMin(scrollTimeLine->duration(), scrollTimeLine->currentTime() + lastScrollFrameTime);
+            auto newTime = qMin(scrollTimeLine->duration(), scrollTimeLine->currentTime() + lastScrollFrameTime);
             scrollTimeLine->setCurrentTime(newTime);
             scrollTimeLine->setPaused(false);
         }
@@ -137,7 +141,7 @@ void ThumbnailView::select(SelectionList indices)
         if (*it < 0 || *it >= itemCount()) {
             it = indices.erase(it);
         } else {
-            thumbnails.at(*it)->setHighlighted(true);
+            thumbnails[*it]->setHighlighted(true);
             ++it;
         }
     }
@@ -159,7 +163,7 @@ void ThumbnailView::deselect(qsizetype index)
         return;
     if (mSelection.count() > 1) {
         mSelection.removeAll(index);
-        thumbnails.at(index)->setHighlighted(false);
+        thumbnails[index]->setHighlighted(false);
     }
 }
 
@@ -187,11 +191,11 @@ void ThumbnailView::addSelectionRange(qsizetype indexTo)
 void ThumbnailView::clearSelection()
 {
     for (auto i : mSelection)
-        thumbnails.at(i)->setHighlighted(false);
+        thumbnails[i]->setHighlighted(false);
     mSelection.clear();
 }
 
-int ThumbnailView::lastSelected()
+qsizetype ThumbnailView::lastSelected()
 {
     if (!selection().count())
         return -1;
@@ -330,11 +334,11 @@ void ThumbnailView::reloadItem(qsizetype index)
 {
     if (!checkRange(index))
         return;
-    auto thumb = thumbnails.at(index);
+    auto thumb = thumbnails[index];
     if (thumb->isLoaded)
         thumb->unsetThumbnail();
     emit thumbnailsRequested(SelectionList() << index,
-                             static_cast<int>(qApp->devicePixelRatio() * mThumbnailSize),
+                             static_cast<qsizetype>(qApp->devicePixelRatio() * mThumbnailSize),
                              mCropThumbnails,
                              true);
 }
@@ -357,10 +361,10 @@ void ThumbnailView::setDrawScrollbarIndicator(bool mode)
     mDrawScrollbarIndicator = mode;
 }
 
-void ThumbnailView::setThumbnail(qsizetype pos, std::shared_ptr<Thumbnail> thumb)
+void ThumbnailView::setThumbnail(qsizetype pos, QSharedPointer<Thumbnail> thumb)
 {
     if (thumb && thumb->size() == floor(mThumbnailSize * qApp->devicePixelRatio()) && checkRange(pos))
-        thumbnails.at(pos)->setThumbnail(thumb);
+        thumbnails[pos]->setThumbnail(thumb);
 }
 
 void ThumbnailView::unloadAllThumbnails()
@@ -386,20 +390,20 @@ void ThumbnailView::loadVisibleThumbnails()
 
         QList<QGraphicsItem *> visibleItems;
         if (lastScrollDirection == ScrollDirection::FORWARDS)
-            visibleItems = scene.items(visRect, Qt::IntersectsItemBoundingRect, Qt::AscendingOrder);
+            visibleItems = scene->items(visRect, Qt::IntersectsItemBoundingRect, Qt::AscendingOrder);
         else
-            visibleItems = scene.items(visRect, Qt::IntersectsItemBoundingRect, Qt::DescendingOrder);
-        visibleItems.append(scene.items(offRectBack, Qt::IntersectsItemBoundingRect, Qt::DescendingOrder));
-        visibleItems.append(scene.items(offRectFront, Qt::IntersectsItemBoundingRect, Qt::AscendingOrder));
+            visibleItems = scene->items(visRect, Qt::IntersectsItemBoundingRect, Qt::DescendingOrder);
+        visibleItems.append(scene->items(offRectBack, Qt::IntersectsItemBoundingRect, Qt::DescendingOrder));
+        visibleItems.append(scene->items(offRectFront, Qt::IntersectsItemBoundingRect, Qt::AscendingOrder));
 
         // select
         SelectionList loadList;
         for (qsizetype i = 0; i < visibleItems.count(); i++) {
-            auto *widget = qgraphicsitem_cast<ThumbnailWidget *>(visibleItems.at(i));
+            auto *widget = qgraphicsitem_cast<ThumbnailWidget *>(visibleItems[i]);
             if (widget && !widget->isLoaded) {
                 qsizetype idx = thumbnails.indexOf(widget);
-                if (!loadList.contains(static_cast<int>(idx)))
-                    loadList.append(static_cast<int>(idx));
+                if (!loadList.contains(idx))
+                    loadList.append(idx);
             }
         }
 
@@ -469,13 +473,13 @@ void ThumbnailView::fitSceneToContents()
 {
     QPointF center;
     if (this->mOrientation == Qt::Vertical) {
-        int height = qMax(static_cast<int>(scene.itemsBoundingRect().height()), this->height());
-        scene.setSceneRect(QRectF(0, 0, this->width(), height));
+        int height = qMax(static_cast<int>(scene->itemsBoundingRect().height()), this->height());
+        scene->setSceneRect(QRectF(0, 0, this->width(), height));
         center = mapToScene(viewport()->rect().center());
         QGraphicsView::centerOn(0, center.y() + 1);
     } else {
-        int width = qMax(static_cast<int>(scene.itemsBoundingRect().width()), this->width());
-        scene.setSceneRect(QRectF(0, 0, width, this->height()));
+        int width = qMax(static_cast<int>(scene->itemsBoundingRect().width()), this->width());
+        scene->setSceneRect(QRectF(0, 0, width, this->height()));
         center = mapToScene(viewport()->rect().center());
         QGraphicsView::centerOn(center.x() + 1, 0);
     }
@@ -488,6 +492,7 @@ void ThumbnailView::wheelEvent(QWheelEvent *event)
     auto pixelDelta = event->pixelDelta().y();
     auto angleDelta = event->angleDelta().ry();
     bool isWheel    = angleDelta && !(angleDelta % 120) && lastTouchpadScroll.elapsed() > 100;
+
     if (isWheel) {
         if (!settings->enableSmoothScroll()) {
             if (pixelDelta)
@@ -532,7 +537,7 @@ void ThumbnailView::scrollByItem(int delta)
     int minScroll = qMin(thumbnailSize() / 2, 100);
     // grab fully visible thumbs
     QRectF visRect = mapToScene(viewport()->geometry()).boundingRect().adjusted(-minScroll, -minScroll, minScroll, minScroll);
-    QList<QGraphicsItem *> visibleItems = scene.items(visRect, Qt::ContainsItemBoundingRect, Qt::AscendingOrder);
+    QList<QGraphicsItem *> visibleItems = scene->items(visRect, Qt::ContainsItemBoundingRect, Qt::AscendingOrder);
 
     if (thumbnails.isEmpty() || visibleItems.isEmpty())
         return;
@@ -556,10 +561,12 @@ void ThumbnailView::scrollToItem(qsizetype index)
 {
     if (!checkRange(index))
         return;
-    ThumbnailWidget *item      = thumbnails.at(index);
-    QRectF           sceneRect = mapToScene(viewport()->rect()).boundingRect();
-    QRectF           itemRect  = item->mapRectToScene(item->rect());
-    bool             visible   = sceneRect.contains(itemRect);
+    ThumbnailWidget *item = thumbnails[index];
+
+    QRectF sceneRect = mapToScene(viewport()->rect()).boundingRect();
+    QRectF itemRect  = item->mapRectToScene(item->rect());
+    bool   visible   = sceneRect.contains(itemRect);
+
     if (!visible) {
         qreal delta;
         if (mOrientation == Qt::Vertical)
@@ -572,9 +579,9 @@ void ThumbnailView::scrollToItem(qsizetype index)
         else // RIGHT
             delta = sceneRect.left() - itemRect.left();
         if (settings->enableSmoothScroll())
-            scrollSmooth(delta);
+            scrollSmooth(static_cast<int>(delta));
         else
-            scrollPrecise(delta);
+            scrollPrecise(static_cast<int>(delta));
     }
 }
 
@@ -638,7 +645,7 @@ void ThumbnailView::mousePressEvent(QMouseEvent *event)
     mouseReleaseSelect = false;
     dragStartPos       = QPoint(0, 0);
 
-    if (auto *item = dynamic_cast<ThumbnailWidget *>(itemAt(event->pos())))
+    if (auto *item = qgraphicsitem_cast<ThumbnailWidget *>(itemAt(event->pos())))
     {
         qsizetype index = thumbnails.indexOf(item);
 
@@ -652,16 +659,16 @@ void ThumbnailView::mousePressEvent(QMouseEvent *event)
                 addSelectionRange(index);
             } else if (selection().count() <= 1) {
                 if (selectMode == ThumbnailSelectMode::ACTIVATE_BY_PRESS) {
-                    emit itemActivated((int)index);
+                    emit itemActivated(index);
                     return;
                 }
-                select((int)index);
+                select(index);
             } else {
                 mouseReleaseSelect = true;
             }
             dragStartPos = event->pos();
         } else if (event->button() == Qt::RightButton) { // todo: context menu maybe?
-            select((int)index);
+            select(index);
             return;
         }
     }
@@ -688,7 +695,7 @@ void ThumbnailView::mouseReleaseEvent(QMouseEvent *event)
         auto *item = dynamic_cast<ThumbnailWidget *>(itemAt(event->pos()));
         if (item) {
             qsizetype index = thumbnails.indexOf(item);
-            select((int)index);
+            select(index);
         }
     }
 }
@@ -697,7 +704,7 @@ void ThumbnailView::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
         if (auto *item = dynamic_cast<ThumbnailWidget *>(itemAt(event->pos()))) {
-            emit itemActivated(static_cast<int>(thumbnails.indexOf(item)));
+            emit itemActivated(thumbnails.indexOf(item));
             return;
         }
     }

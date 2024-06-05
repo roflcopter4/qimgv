@@ -1,9 +1,14 @@
 #include "thumbnailstripproxy.h"
 
 ThumbnailStripProxy::ThumbnailStripProxy(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent),
+      layout(new QVBoxLayout(this))
 {
-    layout.setContentsMargins(0, 0, 0, 0);
+    layout->setContentsMargins(0, 0, 0, 0);
+}
+
+ThumbnailStripProxy::~ThumbnailStripProxy()
+{
 }
 
 void ThumbnailStripProxy::init()
@@ -12,15 +17,14 @@ void ThumbnailStripProxy::init()
     QMutexLocker ml(&m);
     if (thumbnailStrip)
         return;
-    thumbnailStrip.reset(new ThumbnailStrip());
-    thumbnailStrip->setParent(this);
+    thumbnailStrip = new ThumbnailStrip(this);
     ml.unlock();
-    layout.addWidget(thumbnailStrip.get());
-    this->setFocusProxy(thumbnailStrip.get());
-    this->setLayout(&layout);
+    layout->addWidget(thumbnailStrip);
+    setFocusProxy(thumbnailStrip);
+    setLayout(layout);
 
-    connect(thumbnailStrip.get(), &ThumbnailStrip::itemActivated,       this, &ThumbnailStripProxy::itemActivated);
-    connect(thumbnailStrip.get(), &ThumbnailStrip::thumbnailsRequested, this, &ThumbnailStripProxy::thumbnailsRequested);
+    connect(thumbnailStrip, &ThumbnailStrip::itemActivated,       this, &ThumbnailStripProxy::itemActivated);
+    connect(thumbnailStrip, &ThumbnailStrip::thumbnailsRequested, this, &ThumbnailStripProxy::thumbnailsRequested);
 
     thumbnailStrip->show();
 
@@ -50,7 +54,7 @@ void ThumbnailStripProxy::populate(qsizetype count)
     }
 }
 
-void ThumbnailStripProxy::setThumbnail(qsizetype pos, std::shared_ptr<Thumbnail> thumb)
+void ThumbnailStripProxy::setThumbnail(qsizetype pos, QSharedPointer<Thumbnail> thumb)
 {
     if (thumbnailStrip)
         thumbnailStrip->setThumbnail(pos, thumb);
@@ -109,11 +113,11 @@ void ThumbnailStripProxy::removeItem(qsizetype index)
     if (thumbnailStrip) {
         thumbnailStrip->removeItem(index);
     } else {
-        stateBuf.itemCount--;
+        --stateBuf.itemCount;
         stateBuf.selection.removeAll(index);
-        for (int i = 0; i < stateBuf.selection.count(); i++)
+        for (qsizetype i = 0; i < stateBuf.selection.count(); i++)
             if (stateBuf.selection[i] > index)
-                stateBuf.selection[i]--;
+                --stateBuf.selection[i];
         if (!stateBuf.selection.count())
             stateBuf.selection << ((index >= stateBuf.itemCount) ? stateBuf.itemCount - 1 : index);
     }

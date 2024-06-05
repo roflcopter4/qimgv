@@ -29,7 +29,7 @@ void ImageAnimated::load()
 
 void ImageAnimated::loadMovie()
 {
-    movie.reset(new QMovie());
+    movie = QSharedPointer<QMovie>(new QMovie());
     movie->setFileName(mPath);
     movie->setFormat(mDocInfo->format().toStdString().c_str());
     movie->jumpToFrame(0);
@@ -79,12 +79,12 @@ std::unique_ptr<QPixmap> ImageAnimated::getPixmap()
     return std::make_unique<QPixmap>(mPath, mDocInfo->format().toStdString().c_str());
 }
 
-std::shared_ptr<QImage const> ImageAnimated::getImage()
+QSharedPointer<QImage const> ImageAnimated::getImage()
 {
-    return std::make_shared<QImage const>(mPath, mDocInfo->format().toStdString().c_str());
+    return QSharedPointer<QImage const>(new QImage (mPath, mDocInfo->format().toStdString().c_str()));
 }
 
-std::shared_ptr<QMovie> ImageAnimated::getMovie()
+QSharedPointer<QMovie> ImageAnimated::getMovie()
 {
     if (movie == nullptr)
         loadMovie();

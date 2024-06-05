@@ -27,11 +27,12 @@ class ThumbnailWidget : public QGraphicsWidget
 
   public:
     explicit ThumbnailWidget(QGraphicsItem *parent = nullptr);
+    ~ThumbnailWidget() override;
 
     enum { Type = UserType + 1 };
     ND int type() const override { return Type; }
 
-       void setThumbnail(std::shared_ptr<Thumbnail> const &_thumbnail);
+       void setThumbnail(QSharedPointer<Thumbnail> newThumbnail);
        void setHighlighted(bool mode);
     ND bool isHighlighted() const;
        void setDropHovered(bool mode);
@@ -39,8 +40,8 @@ class ThumbnailWidget : public QGraphicsWidget
        void setThumbnailSize(int size);
        void setGeometry(QRectF const &rect) override;
        void setThumbStyle(ThumbnailStyle _style);
-       void setPadding(int _padding);
-       void setMargins(int _marginX, int _marginY);
+       void setPadding(int newPadding);
+       void setMargins(int newMarginX, int newMarginY);
     ND int  thumbnailSize() const;
        void reset();
        void unsetThumbnail();
@@ -74,7 +75,7 @@ class ThumbnailWidget : public QGraphicsWidget
     ND bool   isHovered() const;
     ND QSizeF sizeHint(Qt::SizeHint which, QSizeF const &constraint = QSizeF()) const override;
 
-    std::shared_ptr<Thumbnail> thumbnail;
+    QSharedPointer<Thumbnail> thumbnail;
 
     QRectF bgRect;
     QRectF mBoundingRect;

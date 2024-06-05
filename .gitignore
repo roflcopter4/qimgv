@@ -24,3 +24,9 @@ Makefile
 /deb/
 .vs/
 bak/
+/MSVC.bak2
+/MSVC.bak
+/CMakeSettings.json
+/.clang-format
+/external/mpv-x64
+/MSVC.bak3

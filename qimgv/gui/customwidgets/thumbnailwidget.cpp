@@ -25,6 +25,10 @@ ThumbnailWidget::ThumbnailWidget(QGraphicsItem *parent)
     textHeight = fm.height();
 }
 
+ThumbnailWidget::~ThumbnailWidget()
+{
+}
+
 void ThumbnailWidget::setThumbnailSize(int size)
 {
     if (mThumbnailSize != size && size > 0) {
@@ -39,16 +43,16 @@ void ThumbnailWidget::setThumbnailSize(int size)
     }
 }
 
-void ThumbnailWidget::setPadding(int _padding)
+void ThumbnailWidget::setPadding(int newPadding)
 {
-    padding = _padding;
+    padding = newPadding;
     updateBoundingRect();
 }
 
-void ThumbnailWidget::setMargins(int _marginX, int _marginY)
+void ThumbnailWidget::setMargins(int newMarginX, int newMarginY)
 {
-    marginX = _marginX;
-    marginY = _marginY;
+    marginX = newMarginX;
+    marginY = newMarginY;
     updateBoundingRect();
 }
 
@@ -92,8 +96,7 @@ void ThumbnailWidget::setGeometry(QRectF const &rect)
 
 QRectF ThumbnailWidget::geometry() const
 {
-    return {QGraphicsWidget::geometry().topLeft(),
-            boundingRect().size()};
+    return {QGraphicsWidget::geometry().topLeft(), boundingRect().size()};
 }
 
 QSizeF ThumbnailWidget::effectiveSizeHint(Qt::SizeHint which, QSizeF const &constraint) const
@@ -101,10 +104,10 @@ QSizeF ThumbnailWidget::effectiveSizeHint(Qt::SizeHint which, QSizeF const &cons
     return sizeHint(which, constraint);
 }
 
-void ThumbnailWidget::setThumbnail(std::shared_ptr<Thumbnail> const &_thumbnail)
+void ThumbnailWidget::setThumbnail(QSharedPointer<Thumbnail> newThumbnail)
 {
-    if (_thumbnail) {
-        thumbnail = _thumbnail;
+    if (newThumbnail) {
+        thumbnail = std::move(newThumbnail);
         isLoaded  = true;
         updateThumbnailDrawPosition();
         setupTextLayout();
@@ -192,10 +195,8 @@ qreal ThumbnailWidget::height() const
     return boundingRect().height();
 }
 
-void ThumbnailWidget::paint(QPainter *painter, QStyleOptionGraphicsItem const *option, QWidget *widget)
+void ThumbnailWidget::paint(QPainter *painter, QStyleOptionGraphicsItem const *, QWidget *)
 {
-    Q_UNUSED(widget)
-    Q_UNUSED(option)
     painter->setRenderHints(QPainter::Antialiasing);
     qreal dpr = painter->paintEngine()->paintDevice()->devicePixelRatioF();
     if (isHovered() && !isHighlighted())

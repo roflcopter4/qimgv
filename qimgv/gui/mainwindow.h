@@ -44,17 +44,17 @@
 #include "Common.h"
 
 struct CurrentInfo {
-    int     index;
-    int     fileCount;
-    QString fileName;
-    QString filePath;
-    QString directoryName;
-    QString directoryPath;
-    QSize   imageSize;
-    qint64  fileSize;
-    bool    slideshow;
-    bool    shuffle;
-    bool    edited;
+    qsizetype index;
+    qsizetype fileCount;
+    QString   fileName;
+    QString   filePath;
+    QString   directoryName;
+    QString   directoryPath;
+    QSize     imageSize;
+    qint64    fileSize;
+    bool      slideshow;
+    bool      shuffle;
+    bool      edited;
 };
 
 enum class ActiveSidePanel : uint8_t {
@@ -68,18 +68,19 @@ class MW Q_DECL_FINAL : public FloatingWidgetContainer
 
   public:
     explicit MW(QWidget *parent = nullptr);
+    ~MW() override;
 
     bool isCropPanelActive() const;
     void onScalingFinished(std::unique_ptr<QPixmap> scaled);
     void showImage(std::unique_ptr<QPixmap> pixmap);
-    void showAnimation(std::shared_ptr<QMovie> const &movie);
+    void showAnimation(QSharedPointer<QMovie> const &movie);
     void showVideo(QString const &file);
 
-    void setCurrentInfo(int fileIndex, int fileCount, QString const &filePath, QString const &fileName, QSize imageSize, qint64 fileSize, bool slideshow, bool shuffle, bool edited);
+    void setCurrentInfo(qsizetype fileIndex, qsizetype fileCount, QString const &filePath, QString const &fileName, QSize imageSize, qint64 fileSize, bool slideshow, bool shuffle, bool edited);
     void setExifInfo(QMap<QString, QString> const &);
 
-    std::shared_ptr<FolderViewProxy>     getFolderView();
-    std::shared_ptr<ThumbnailStripProxy> getThumbnailPanel() const;
+    QSharedPointer<FolderViewProxy>     getFolderView();
+    QSharedPointer<ThumbnailStripProxy> getThumbnailPanel();
 
     ND ViewMode currentViewMode() const;
 
@@ -96,14 +97,15 @@ class MW Q_DECL_FINAL : public FloatingWidgetContainer
 
     PanelPosition   panelPosition;
     ActiveSidePanel activeSidePanel;
-    QHBoxLayout     layout;
-    QTimer          windowGeometryChangeTimer;
 
-    std::shared_ptr<ViewerWidget>    viewerWidget;
-    std::shared_ptr<DocumentWidget>  docWidget;
-    std::shared_ptr<FolderViewProxy> folderView;
-    std::shared_ptr<CentralWidget>   centralWidget;
-    std::shared_ptr<InfoBarProxy>    infoBarWindowed;
+    QTimer          *windowGeometryChangeTimer;
+    QHBoxLayout     *layout;
+
+    QSharedPointer<ViewerWidget>    viewerWidget;
+    QSharedPointer<DocumentWidget>  docWidget;
+    QSharedPointer<FolderViewProxy> folderView;
+    QSharedPointer<CentralWidget>   centralWidget;
+    QSharedPointer<InfoBarProxy>    infoBarWindowed;
 
     SidePanel                  *sidePanel;
     CropPanel                  *cropPanel;

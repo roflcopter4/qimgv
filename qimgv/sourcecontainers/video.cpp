@@ -71,7 +71,7 @@ std::unique_ptr<QPixmap> Video::getPixmap()
     return nullptr;
 }
 
-std::shared_ptr<const QImage> Video::getImage()
+QSharedPointer<const QImage> Video::getImage()
 {
     qDebug() << QSV("[Video] getImage() is not implemented.");
     // TODO: find out some easy way to get frames from video source

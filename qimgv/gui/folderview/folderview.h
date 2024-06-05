@@ -33,7 +33,7 @@ class FolderView : public FloatingWidgetContainer, public IDirectoryView
     void hide();
 
     void populate(qsizetype) override;
-    void setThumbnail(qsizetype pos, std::shared_ptr<Thumbnail> thumb) override;
+    void setThumbnail(qsizetype pos, QSharedPointer<Thumbnail> thumb) override;
     void select(SelectionList) override;
     void select(qsizetype index) override;
     void focusOn(qsizetype index) override;

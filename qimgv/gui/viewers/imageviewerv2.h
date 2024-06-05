@@ -59,7 +59,7 @@ class ImageViewerV2 Q_DECL_FINAL : public QGraphicsView
     ND QSize scaledSizeR() const;
 
     virtual void showImage(std::unique_ptr<QPixmap> pixmap_);
-    virtual void showAnimation(std::shared_ptr<QMovie> const &movie_);
+    virtual void showAnimation(QSharedPointer<QMovie> const &movie_);
     virtual void setScaledPixmap(std::unique_ptr<QPixmap> newFrame);
     void         pauseResume();
 
@@ -145,9 +145,9 @@ class ImageViewerV2 Q_DECL_FINAL : public QGraphicsView
     static constexpr qreal FAST_SCALE_THRESHOLD       = 1.0;
 
     QGraphicsScene          *scene;
-    std::shared_ptr<QPixmap> pixmap;
+    QSharedPointer<QPixmap> pixmap;
     std::unique_ptr<QPixmap> pixmapScaled;
-    std::shared_ptr<QMovie>  movie;
+    QSharedPointer<QMovie>  movie;
     QGraphicsPixmapItem      pixmapItem;
     QGraphicsPixmapItem      pixmapItemScaled;
 

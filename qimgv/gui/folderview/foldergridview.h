@@ -14,6 +14,7 @@ class FolderGridView : public ThumbnailView
 
   public:
     explicit FolderGridView(QWidget *parent = nullptr);
+    ~FolderGridView() override;
 
     static constexpr int THUMBNAIL_SIZE_MIN = 80;  // px
     static constexpr int THUMBNAIL_SIZE_MAX = 400; // these should be divisible by ZOOM_STEP
@@ -46,9 +47,9 @@ class FolderGridView : public ThumbnailView
     void scrollToCurrent();
 
     FlowLayout     *flowLayout;
-    QGraphicsWidget holderWidget;
-    int             shiftedCol;
-    int             lastDragTarget = -1;
+    QGraphicsWidget *holderWidget;
+    qsizetype       shiftedCol;
+    qsizetype       lastDragTarget = -1;
 
   private Q_SLOTS:
     void onitemSelected();

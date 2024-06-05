@@ -5,7 +5,7 @@ bool Cache::contains(QString const &path) const
     return items.contains(path);
 }
 
-bool Cache::insert(std::shared_ptr<Image> const &img)
+bool Cache::insert(QSharedPointer<Image> const &img)
 {
     if (img) {
         if (items.contains(img->filePath())) {
@@ -37,7 +37,7 @@ void Cache::clear()
     }
 }
 
-std::shared_ptr<Image> Cache::get(QString const &path) const
+QSharedPointer<Image> Cache::get(QString const &path) const
 {
     if (items.contains(path)) {
         CacheItem *item = items.value(path);

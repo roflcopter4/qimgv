@@ -30,7 +30,7 @@ class ViewerWidget Q_DECL_FINAL : public FloatingWidgetContainer
        void  setInteractionEnabled(bool mode);
     ND bool  interactionEnabled() const;
        bool  showImage(std::unique_ptr<QPixmap> pixmap);
-       bool  showAnimation(std::shared_ptr<QMovie> const &movie);
+       bool  showAnimation(QSharedPointer<QMovie> const &movie);
        void  onScalingFinished(std::unique_ptr<QPixmap> scaled);
     ND bool  isDisplaying() const;
     ND bool  lockZoomEnabled() const;
@@ -41,8 +41,8 @@ class ViewerWidget Q_DECL_FINAL : public FloatingWidgetContainer
     static constexpr int CURSOR_HIDE_TIMEOUT_MS = 1000;
 
     QVBoxLayout                           layout;
-    std::unique_ptr<ImageViewerV2>        imageViewer;
-    std::unique_ptr<VideoPlayerInitProxy> videoPlayer;
+    ImageViewerV2*        imageViewer;
+    VideoPlayerInitProxy* videoPlayer;
     std::unique_ptr<ContextMenu>          contextMenu;
     VideoControlsProxyWrapper            *videoControls;
     ZoomIndicatorOverlayProxy            *zoomIndicator;

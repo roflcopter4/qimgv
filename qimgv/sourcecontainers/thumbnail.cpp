@@ -1,13 +1,13 @@
 #include "thumbnail.h"
 
-Thumbnail::Thumbnail(QString name, QString info, int size, std::shared_ptr<QPixmap> const &pixmap)
+Thumbnail::Thumbnail(QString name, QString info, int size, QSharedPointer<QPixmap> pixmap)
     : mPixmap(pixmap),
       mName(std::move(name)),
       mInfo(std::move(info)),
       mSize(size)
 {
-    if (pixmap)
-        mHasAlphaChannel = pixmap->hasAlphaChannel();
+    if (mPixmap)
+        mHasAlphaChannel = mPixmap->hasAlphaChannel();
 }
 
 QString const &Thumbnail::name() const &
@@ -30,7 +30,12 @@ bool Thumbnail::hasAlphaChannel() const
     return mHasAlphaChannel;
 }
 
-std::shared_ptr<QPixmap> Thumbnail::pixmap()
+QSharedPointer<QPixmap> Thumbnail::pixmap()
+{
+    return mPixmap;
+}
+
+QSharedPointer<QPixmap> const &Thumbnail::pixmap() const
 {
     return mPixmap;
 }

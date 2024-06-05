@@ -20,7 +20,7 @@ class ScriptManager : public QObject
     static ScriptManager *getInstance();
     ~ScriptManager() override;
 
-    void runScript(QString const &scriptName, std::shared_ptr<Image> const &img);
+    void runScript(QString const &scriptName, QSharedPointer<Image> const &img);
     void readScripts();
     void saveScripts() const;
     void removeScript(QString const &scriptName);
@@ -47,7 +47,7 @@ class ScriptManager : public QObject
     QMap<QString, Script> scripts; // <name, script>
 
     explicit    ScriptManager(QObject *parent = nullptr);
-    static void processArguments(QStringList &cmd, std::shared_ptr<Image> const &img);
+    static void processArguments(QStringList &cmd, QSharedPointer<Image> const &img);
 };
 
 extern ScriptManager *scriptManager;

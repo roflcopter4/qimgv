@@ -21,6 +21,7 @@ class FloatingWidget : public QWidget
 
   public:
     explicit FloatingWidget(FloatingWidgetContainer *parent);
+    ~FloatingWidget() override;
 
     ND QSize containerSize() const;
     ND bool  acceptKeyboardFocus() const;
@@ -44,6 +45,7 @@ class FloatingWidget : public QWidget
     // size of whatever widget we are overlayed on
     QSize container;
     bool  mAcceptKeyboardFocus;
+    quint16 destructorCount = 0; 
 
   private Q_SLOTS:
     void onContainerResized(QSize size);

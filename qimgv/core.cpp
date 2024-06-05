@@ -11,13 +11,22 @@
 # include <shlobj.h>
 #endif
 
-Core::Core()
+namespace {
+QSharedPointer<DirectoryModel> global_model;
+QSharedPointer<IDirectoryView> global_view;
+}
+
+Core::Core(QObject *parent)
     : loopSlideshow(false),
       slideshow(false),
       shuffle(false),
       folderEndAction(FolderEndAction::NOTHING),
-      mDrag(nullptr)
+      thumbPanelPresenter(new DirectoryPresenter(this)),
+      folderViewPresenter(new DirectoryPresenter(this)),
+      mDrag(nullptr),
+      translator(nullptr)
 {
+    setParent(parent);
     loadTranslation();
     initGui();
     initComponents();
@@ -34,14 +43,21 @@ Core::Core()
         onUpdate();
 }
 
+Core::~Core()
+{
+    auto tmp = mw;
+    mw = nullptr;
+    delete tmp;
+}
+
 void Core::readSettings()
 {
     loopSlideshow   = settings->loopSlideshow();
     folderEndAction = settings->folderEndAction();
     slideshowTimer.setInterval(settings->slideshowInterval());
     bool showDirs = (settings->folderViewMode() == FolderViewMode::EXT_FOLDERS);
-    if (folderViewPresenter.showDirs() != showDirs)
-        folderViewPresenter.setShowDirs(showDirs);
+    if (folderViewPresenter->showDirs() != showDirs)
+        folderViewPresenter->setShowDirs(showDirs);
     if (shuffle)
         syncRandomizer();
 }
@@ -63,13 +79,14 @@ void Core::initGui()
     mw->hide();
 }
 
-void Core::attachModel(DirectoryModel *_model)
+void Core::attachModel(DirectoryModel *newModel)
 {
-    model.reset(_model);
-    thumbPanelPresenter.setModel(model);
-    folderViewPresenter.setModel(model);
+    model = QSharedPointer<DirectoryModel>(newModel);
+    global_model = model;
+    thumbPanelPresenter->setModel(model);
+    folderViewPresenter->setModel(model);
     bool showDirs = (settings->folderViewMode() == FolderViewMode::EXT_FOLDERS);
-    folderViewPresenter.setShowDirs(showDirs);
+    folderViewPresenter->setShowDirs(showDirs);
     if (shuffle)
         syncRandomizer();
 }
@@ -81,16 +98,16 @@ void Core::initComponents()
 
 void Core::connectComponents()
 {
-    thumbPanelPresenter.setView(mw->getThumbnailPanel());
-    connect(&thumbPanelPresenter, &DirectoryPresenter::fileActivated, this, &Core::onDirectoryViewFileActivated);
-    connect(&thumbPanelPresenter, &DirectoryPresenter::dirActivated, this, &Core::loadPath);
+    thumbPanelPresenter->setView(mw->getThumbnailPanel());
+    connect(thumbPanelPresenter, &DirectoryPresenter::fileActivated, this, &Core::onDirectoryViewFileActivated);
+    connect(thumbPanelPresenter, &DirectoryPresenter::dirActivated, this, &Core::loadPath);
 
-    folderViewPresenter.setView(mw->getFolderView());
-    connect(&folderViewPresenter, &DirectoryPresenter::fileActivated, this, &Core::onDirectoryViewFileActivated);
-    connect(&folderViewPresenter, &DirectoryPresenter::dirActivated, this, &Core::loadPath);
+    folderViewPresenter->setView(mw->getFolderView());
+    connect(folderViewPresenter, &DirectoryPresenter::fileActivated, this, &Core::onDirectoryViewFileActivated);
+    connect(folderViewPresenter, &DirectoryPresenter::dirActivated, this, &Core::loadPath);
 
-    connect(&folderViewPresenter, &DirectoryPresenter::draggedOut, this, qOverload<QList<QString> const &>(&Core::onDraggedOut));
-    connect(&folderViewPresenter, &DirectoryPresenter::droppedInto, this, qOverload<QList<QString> const &, QString const &>(&Core::movePathsTo));
+    connect(folderViewPresenter, &DirectoryPresenter::draggedOut, this, qOverload<QList<QString> const &>(&Core::onDraggedOut));
+    connect(folderViewPresenter, &DirectoryPresenter::droppedInto, this, qOverload<QList<QString> const &, QString const &>(&Core::movePathsTo));
 
     connect(scriptManager, &ScriptManager::error, mw, &MW::showError);
 
@@ -328,10 +345,10 @@ void Core::syncRandomizer()
 
 void Core::onModelLoaded()
 {
-    thumbPanelPresenter.reloadModel();
-    folderViewPresenter.reloadModel();
-    thumbPanelPresenter.selectAndFocus(state.currentFilePath);
-    folderViewPresenter.selectAndFocus(state.currentFilePath);
+    thumbPanelPresenter->reloadModel();
+    folderViewPresenter->reloadModel();
+    thumbPanelPresenter->selectAndFocus(state.currentFilePath);
+    folderViewPresenter->selectAndFocus(state.currentFilePath);
     if (shuffle)
         syncRandomizer();
 }
@@ -449,7 +466,7 @@ void Core::enableDocumentView()
         return;
     mw->enableDocumentView();
     if (model && model->fileCount() && state.currentFilePath.isEmpty()) {
-        auto selected = folderViewPresenter.selectedPaths().first();
+        auto selected = folderViewPresenter->selectedPaths().first();
         // if it is a directory - ignore and just open the first file
         if (model->containsFile(selected))
             loadPath(selected);
@@ -690,7 +707,7 @@ void Core::onDraggedOut(QList<QString> const &paths)
     mDrag->exec(Qt::CopyAction | Qt::MoveAction | Qt::LinkAction, Qt::CopyAction);
 }
 
-QMimeData *Core::getMimeDataForImage(std::shared_ptr<Image> const &img, MimeDataTarget target)
+QMimeData *Core::getMimeDataForImage(QSharedPointer<Image> const &img, MimeDataTarget target)
 {
     auto mimeData = new QMimeData();
     if (!img)
@@ -722,8 +739,8 @@ void Core::sortBy(SortingMode mode) const
 
 void Core::setFoldersDisplay(bool mode)
 {
-    if (folderViewPresenter.showDirs() != mode)
-        folderViewPresenter.setShowDirs(mode);
+    if (folderViewPresenter->showDirs() != mode)
+        folderViewPresenter->setShowDirs(mode);
 }
 
 void Core::renameCurrentSelection(QString const &newName)
@@ -751,7 +768,7 @@ FileOpResult Core::removeFile(QString const &filePath, bool trash)
         return FileOpResult::NOTHING_TO_DO;
 
     bool reopen = false;
-    std::shared_ptr<Image> img;
+    QSharedPointer<Image> img;
     if (state.currentFilePath == filePath) {
         img = model->getImage(filePath);
         if (img->type() == DocumentType::ANIMATED || img->type() == DocumentType::VIDEO) {
@@ -1092,16 +1109,16 @@ void Core::showResizeDialog()
 
 // ---------------------------------------------------------------- image operations
 
-std::shared_ptr<ImageStatic> Core::getEditableImage(QString const &filePath) const
+QSharedPointer<ImageStatic> Core::getEditableImage(QString const &filePath) const
 {
-    return std::dynamic_pointer_cast<ImageStatic>(model->getImage(filePath));
+    return qSharedPointerDynamicCast<ImageStatic>(model->getImage(filePath));
 }
 
 template <typename... Args>
 void Core::edit_template(
     bool save,
     QString const &actionName,
-    std::function<QImage *(std::shared_ptr<QImage const>, Args...)> const &editFunc,
+    std::function<QImage *(QSharedPointer<QImage const>, Args...)> const &editFunc,
     Args &&...as)
 {
     if (model->isEmpty())
@@ -1115,7 +1132,7 @@ void Core::edit_template(
             continue;
         img->setEditedImage(
             std::unique_ptr<QImage const>(editFunc(img->getImage(), std::forward<Args>(as)...)));
-        model->updateImage(path, std::static_pointer_cast<Image>(img));
+        model->updateImage(path, qSharedPointerCast<Image>(img));
         if (save) {
             saveFile(path);
             if (state.currentFilePath != path)
@@ -1204,7 +1221,7 @@ void Core::discardEdits()
     if (model->isEmpty())
         return;
 
-    std::shared_ptr<Image> img = model->getImage(selectedPath());
+    QSharedPointer<Image> img = model->getImage(selectedPath());
     if (img && img->type() == DocumentType::STATIC) {
         auto imgStatic = dynamic_cast<ImageStatic *>(img.get());
         imgStatic->discardEditedImage();
@@ -1219,7 +1236,7 @@ QString Core::selectedPath()
     if (!model)
         return {};
     if (mw->currentViewMode() == ViewMode::FOLDERVIEW)
-        return folderViewPresenter.selectedPaths().last();
+        return folderViewPresenter->selectedPaths().last();
     return state.currentFilePath;
 }
 
@@ -1228,7 +1245,7 @@ QList<QString> Core::currentSelection() const
     if (!model)
         return {};
     if (mw->currentViewMode() == ViewMode::FOLDERVIEW)
-        return folderViewPresenter.selectedPaths();
+        return folderViewPresenter->selectedPaths();
     return QList<QString>() << state.currentFilePath;
 }
 
@@ -1330,7 +1347,7 @@ void Core::scalingRequest(QSize size, ScalingFilter filter) const
 {
     // filter out an unnecessary scale request at statup
     if (mw->isVisible() && state.hasActiveImage) {
-        std::shared_ptr<Image> forScale = model->getImage(state.currentFilePath);
+        QSharedPointer<Image> forScale = model->getImage(state.currentFilePath);
         if (forScale)
             model->scaler->requestScaled(ScalerRequest(forScale, size, state.currentFilePath, filter));
     }
@@ -1428,8 +1445,8 @@ bool Core::loadFileIndex(int index, bool async, bool preload)
         model->preload(model->nextOf(entry.path));
         model->preload(model->prevOf(entry.path));
     }
-    thumbPanelPresenter.selectAndFocus(entry.path);
-    folderViewPresenter.selectAndFocus(entry.path);
+    thumbPanelPresenter->selectAndFocus(entry.path);
+    folderViewPresenter->selectAndFocus(entry.path);
     updateInfoString();
     return true;
 }
@@ -1443,7 +1460,7 @@ void Core::loadParentDir()
     QFileInfo parentDir(currentDir.absolutePath());
     if (parentDir.exists() && parentDir.isReadable())
         loadPath(parentDir.absoluteFilePath());
-    folderViewPresenter.selectAndFocus(currentDir.absoluteFilePath());
+    folderViewPresenter->selectAndFocus(currentDir.absoluteFilePath());
 }
 
 void Core::nextDirectory()
@@ -1617,7 +1634,7 @@ void Core::onLoadFailed(QString const &path) const
         mw->closeImage();
 }
 
-void Core::onModelItemReady(std::shared_ptr<Image> const &img, QString const &path)
+void Core::onModelItemReady(QSharedPointer<Image> const &img, QString const &path)
 {
     if (path == state.currentFilePath) {
         state.currentImg = img;
@@ -1651,13 +1668,13 @@ void Core::onModelItemUpdated(QString const &filePath)
 void Core::onModelSortingChanged(SortingMode mode)
 {
     mw->onSortingChanged(mode);
-    thumbPanelPresenter.reloadModel();
-    thumbPanelPresenter.selectAndFocus(state.currentFilePath);
-    folderViewPresenter.reloadModel();
-    folderViewPresenter.selectAndFocus(state.currentFilePath);
+    thumbPanelPresenter->reloadModel();
+    thumbPanelPresenter->selectAndFocus(state.currentFilePath);
+    folderViewPresenter->reloadModel();
+    folderViewPresenter->selectAndFocus(state.currentFilePath);
 }
 
-void Core::guiSetImage(std::shared_ptr<Image> const &img)
+void Core::guiSetImage(QSharedPointer<Image> const &img)
 {
     state.hasActiveImage = true;
     if (!img) {

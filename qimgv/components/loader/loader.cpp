@@ -22,7 +22,7 @@ bool Loader::isLoading(QString const &path) const
     return tasks.contains(path);
 }
 
-std::shared_ptr<Image> Loader::load(QString const &path)
+QSharedPointer<Image> Loader::load(QString const &path)
 {
     return ImageFactory::createImage(path);
 }
@@ -51,7 +51,7 @@ void Loader::doLoadAsync(QString const &path, int priority)
     pool->start(runnable, priority);
 }
 
-void Loader::onLoadFinished(std::shared_ptr<Image> const &image, QString const &path)
+void Loader::onLoadFinished(QSharedPointer<Image> const &image, QString const &path)
 {
     auto task = tasks.take(path);
     delete task;

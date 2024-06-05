@@ -56,7 +56,7 @@ PrintDialog::~PrintDialog() {
     delete ui;
 }
 
-void PrintDialog::setImage(std::shared_ptr<const QImage> const &_img) {
+void PrintDialog::setImage(QSharedPointer<const QImage> const &_img) {
     img = _img;
     updatePreview();
 }

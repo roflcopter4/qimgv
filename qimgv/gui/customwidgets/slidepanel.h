@@ -24,7 +24,7 @@ class SlidePanel : public FloatingWidget
     ~SlidePanel() override;
 
     ND bool hasWidget() const;
-    void setWidget(std::shared_ptr<QWidget> const &w);
+    void setWidget(QSharedPointer<QWidget> const &w);
     // Use visibleGeometry instead of geometry() here.
     // If this is called mid-animation then geometry() will be all wrong.
     ND QRect triggerRect() const;
@@ -58,14 +58,15 @@ class SlidePanel : public FloatingWidget
     int           panelSize;
     int           slideAmount;
     PanelPosition mPosition;
-    QHBoxLayout   mLayout;
+    QHBoxLayout   *mLayout;
     QRect         mTriggerRect;
     QTimer        timer;
     QTimeLine     timeline;
     QEasingCurve  outCurve;
 
     QGraphicsOpacityEffect  *fadeEffect;
-    std::shared_ptr<QWidget> mWidget;
+    //QSharedPointer<QWidget> mWidget;
+    QWidget *mWidget;
 
   private:
     void setOrientation();

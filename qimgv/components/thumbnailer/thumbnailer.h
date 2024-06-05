@@ -16,7 +16,7 @@ class Thumbnailer : public QObject
     void clearTasks();
     void waitForDone();
 
-    static std::shared_ptr<Thumbnail> getThumbnail(QString const &filePath, int size);
+    static QSharedPointer<Thumbnail> getThumbnail(QString const &filePath, int size);
 
   public Q_SLOTS:
     void getThumbnailAsync(QString const &path, int size, bool crop, bool force);
@@ -30,8 +30,8 @@ class Thumbnailer : public QObject
 
   private Q_SLOTS:
     void onTaskStart(QString const &filePath, int size);
-    void onTaskEnd(std::shared_ptr<Thumbnail> const &thumbnail, QString const &filePath);
+    void onTaskEnd(QSharedPointer<Thumbnail> const &thumbnail, QString const &filePath);
 
   Q_SIGNALS:
-    void thumbnailReady(std::shared_ptr<Thumbnail> thumbnail, QString filePath);
+    void thumbnailReady(QSharedPointer<Thumbnail> thumbnail, QString filePath);
 };
