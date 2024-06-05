@@ -1,4 +1,4 @@
-#include "actions.h"
+#include "Actions.h"
 
 Actions *appActions = nullptr;
 

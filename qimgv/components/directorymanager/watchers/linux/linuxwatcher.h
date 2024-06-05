@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../directorywatcher.h"
+#include "../DirectoryWatcher.h"
 
 class LinuxWatcherPrivate;
 

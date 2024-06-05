@@ -1,6 +1,6 @@
-#include "directorymanager.h"
+#include "DirectoryManager.h"
+#include "utils/Stuff.h"
 #include <ranges>
-#include "utils/stuff.h"
 
 #include <QMessageBox>
 

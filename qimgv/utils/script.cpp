@@ -1,4 +1,4 @@
-#include "script.h"
+#include "Script.h"
 
 
 Script::Script(QString path, bool blocking)

@@ -1,9 +1,9 @@
 #ifndef DIRECTORYWATCHER_P_H
 #define DIRECTORYWATCHER_P_H
 
-#include "directorywatcher.h"
-#include "watcherevent.h"
-#include "watcherworker.h"
+#include "DirectoryWatcher.h"
+#include "WatcherEvent.h"
+#include "WatcherWorker.h"
 
 #include <QStringList>
 #include <QThread>

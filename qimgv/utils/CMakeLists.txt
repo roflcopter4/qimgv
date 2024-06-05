@@ -1,15 +1,15 @@
 ## SOURCES FOR QIMGV UTILITY CLASSES
 
 target_sources(qimgv PRIVATE
-    actions.cpp
-    cmdoptionsrunner.cpp
-    imagefactory.cpp
-    imagelib.cpp
-    inputmap.cpp
-    randomizer.cpp
-    script.cpp
-    sleep.cpp
-    stuff.cpp
-    wallpapersetter.cpp
-    fileoperations.cpp
+    Actions.cpp
+    CmdOptionsRunner.cpp
+    ImageFactory.cpp
+    ImageLib.cpp
+    InputMap.cpp
+    Randomizer.cpp
+    Script.cpp
+    Sleep.cpp
+    Stuff.cpp
+    WallpaperSetter.cpp
+    FileOperations.cpp
 )

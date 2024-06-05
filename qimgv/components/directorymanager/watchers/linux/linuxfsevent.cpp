@@ -1,6 +1,6 @@
 #include <QDebug>
 
-#include "linuxfsevent.h"
+#include "LinuxFsEvent.h"
 
 LinuxFsEvent::LinuxFsEvent(char *data, uint dataSize) :
     mData(data),

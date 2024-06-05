@@ -1,4 +1,4 @@
-#include "imagelib.h"
+#include "ImageLib.h"
 
 namespace ImageLib {
 

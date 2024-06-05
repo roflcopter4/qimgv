@@ -1,4 +1,5 @@
 #include "fsentry.h"
+#include <QDebug>
 
 FSEntry::FSEntry(QString const &filePath)
 {
@@ -14,7 +15,8 @@ FSEntry::FSEntry(QString const &filePath)
             size       = stdEntry.file_size();
             modifyTime = stdEntry.last_write_time();
         }
-    } catch (std::filesystem::filesystem_error const &) {
+    } catch (std::filesystem::filesystem_error const &err) {
+        qDebug() << u"Caught file system error:" << QString::fromUtf8(err.what());
     }
 }
 
@@ -43,5 +45,5 @@ FSEntry::FSEntry( QString const &_path, QString const &_name, bool _isDirectory)
 
 bool FSEntry::operator==(QString const &anotherPath) const
 {
-    return this->path == anotherPath;
+    return path == anotherPath;
 }

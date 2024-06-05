@@ -1,4 +1,4 @@
-#include "inputmap.h"
+#include "InputMap.h"
 
 InputMap *inputMap = nullptr;
 

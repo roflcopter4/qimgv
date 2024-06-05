@@ -11,11 +11,6 @@
 # include <shlobj.h>
 #endif
 
-namespace {
-QSharedPointer<DirectoryModel> global_model;
-QSharedPointer<IDirectoryView> global_view;
-}
-
 Core::Core(QObject *parent)
     : loopSlideshow(false),
       slideshow(false),
@@ -81,8 +76,7 @@ void Core::initGui()
 
 void Core::attachModel(DirectoryModel *newModel)
 {
-    model = QSharedPointer<DirectoryModel>(newModel);
-    global_model = model;
+    model = newModel;
     thumbPanelPresenter->setModel(model);
     folderViewPresenter->setModel(model);
     bool showDirs = (settings->folderViewMode() == FolderViewMode::EXT_FOLDERS);
@@ -100,51 +94,46 @@ void Core::connectComponents()
 {
     thumbPanelPresenter->setView(mw->getThumbnailPanel());
     connect(thumbPanelPresenter, &DirectoryPresenter::fileActivated, this, &Core::onDirectoryViewFileActivated);
-    connect(thumbPanelPresenter, &DirectoryPresenter::dirActivated, this, &Core::loadPath);
+    connect(thumbPanelPresenter, &DirectoryPresenter::dirActivated,  this, &Core::loadPath);
 
     folderViewPresenter->setView(mw->getFolderView());
     connect(folderViewPresenter, &DirectoryPresenter::fileActivated, this, &Core::onDirectoryViewFileActivated);
-    connect(folderViewPresenter, &DirectoryPresenter::dirActivated, this, &Core::loadPath);
-
-    connect(folderViewPresenter, &DirectoryPresenter::draggedOut, this, qOverload<QList<QString> const &>(&Core::onDraggedOut));
-    connect(folderViewPresenter, &DirectoryPresenter::droppedInto, this, qOverload<QList<QString> const &, QString const &>(&Core::movePathsTo));
+    connect(folderViewPresenter, &DirectoryPresenter::dirActivated,  this, &Core::loadPath);
+    connect(folderViewPresenter, &DirectoryPresenter::draggedOut,    this, qOverload<QList<QString> const &>(&Core::onDraggedOut));
+    connect(folderViewPresenter, &DirectoryPresenter::droppedInto,   this, qOverload<QList<QString> const &, QString const &>(&Core::movePathsTo));
 
     connect(scriptManager, &ScriptManager::error, mw, &MW::showError);
 
-    connect(mw, &MW::opened, this, &Core::loadPath);
-    connect(mw, &MW::droppedIn, this, &Core::onDropIn);
-    connect(mw, &MW::copyRequested, this, &Core::copyCurrentFile);
-    connect(mw, &MW::moveRequested, this, &Core::moveCurrentFile);
-
-    connect(mw, &MW::copyUrlsRequested, this, qOverload<QList<QString> const &, QString const &>(&Core::copyPathsTo));
-    connect(mw, &MW::moveUrlsRequested, this, &Core::movePathsTo);
-
-    connect(mw, &MW::cropRequested, this, &Core::crop);
-    connect(mw, &MW::cropAndSaveRequested, this, &Core::cropAndSave);
-    connect(mw, &MW::saveAsClicked, this, &Core::requestSavePath);
-    connect(mw, &MW::saveRequested, this, &Core::saveCurrentFile);
-    connect(mw, &MW::saveAsRequested, this, &Core::saveCurrentFileAs);
-    connect(mw, &MW::resizeRequested, this, &Core::resize);
-    connect(mw, &MW::renameRequested, this, &Core::renameCurrentSelection);
-    connect(mw, &MW::sortingSelected, this, &Core::sortBy);
-    connect(mw, &MW::showFoldersChanged, this, &Core::setFoldersDisplay);
+    connect(mw, &MW::opened,                this, &Core::loadPath);
+    connect(mw, &MW::droppedIn,             this, &Core::onDropIn);
+    connect(mw, &MW::copyRequested,         this, &Core::copyCurrentFile);
+    connect(mw, &MW::moveRequested,         this, &Core::moveCurrentFile);
+    connect(mw, &MW::copyUrlsRequested,     this, qOverload<QList<QString> const &, QString const &>(&Core::copyPathsTo));
+    connect(mw, &MW::moveUrlsRequested,     this, &Core::movePathsTo);
+    connect(mw, &MW::cropRequested,         this, &Core::crop);
+    connect(mw, &MW::cropAndSaveRequested,  this, &Core::cropAndSave);
+    connect(mw, &MW::saveAsClicked,         this, &Core::requestSavePath);
+    connect(mw, &MW::saveRequested,         this, &Core::saveCurrentFile);
+    connect(mw, &MW::saveAsRequested,       this, &Core::saveCurrentFileAs);
+    connect(mw, &MW::resizeRequested,       this, &Core::resize);
+    connect(mw, &MW::renameRequested,       this, &Core::renameCurrentSelection);
+    connect(mw, &MW::sortingSelected,       this, &Core::sortBy);
+    connect(mw, &MW::showFoldersChanged,    this, &Core::setFoldersDisplay);
     connect(mw, &MW::discardEditsRequested, this, &Core::discardEdits);
-    connect(mw, &MW::draggedOut, this, qOverload<>(&Core::onDraggedOut));
+    connect(mw, &MW::draggedOut,            this, qOverload<>(&Core::onDraggedOut));
+    connect(mw, &MW::playbackFinished,      this, &Core::onPlaybackFinished);
+    connect(mw, &MW::scalingRequested,      this, &Core::scalingRequest);
 
-    connect(mw, &MW::playbackFinished, this, &Core::onPlaybackFinished);
-
-    connect(mw, &MW::scalingRequested, this, &Core::scalingRequest);
     connect(model->scaler, &Scaler::scalingFinished, this, &Core::onScalingFinished);
-
-    connect(model.get(), &DirectoryModel::fileAdded, this, &Core::onFileAdded);
-    connect(model.get(), &DirectoryModel::fileRemoved, this, &Core::onFileRemoved);
-    connect(model.get(), &DirectoryModel::fileRenamed, this, &Core::onFileRenamed);
-    connect(model.get(), &DirectoryModel::fileModified, this, &Core::onFileModified);
-    connect(model.get(), &DirectoryModel::loaded, this, &Core::onModelLoaded);
-    connect(model.get(), &DirectoryModel::imageReady, this, &Core::onModelItemReady);
-    connect(model.get(), &DirectoryModel::imageUpdated, this, &Core::onModelItemUpdated);
-    connect(model.get(), &DirectoryModel::sortingChanged, this, &Core::onModelSortingChanged);
-    connect(model.get(), &DirectoryModel::loadFailed, this, &Core::onLoadFailed);
+    connect(model, &DirectoryModel::fileAdded,       this, &Core::onFileAdded);
+    connect(model, &DirectoryModel::fileRemoved,     this, &Core::onFileRemoved);
+    connect(model, &DirectoryModel::fileRenamed,     this, &Core::onFileRenamed);
+    connect(model, &DirectoryModel::fileModified,    this, &Core::onFileModified);
+    connect(model, &DirectoryModel::loaded,          this, &Core::onModelLoaded);
+    connect(model, &DirectoryModel::imageReady,      this, &Core::onModelItemReady);
+    connect(model, &DirectoryModel::imageUpdated,    this, &Core::onModelItemUpdated);
+    connect(model, &DirectoryModel::sortingChanged,  this, &Core::onModelSortingChanged);
+    connect(model, &DirectoryModel::loadFailed,      this, &Core::onLoadFailed);
 
     connect(&slideshowTimer, &QTimer::timeout, this, &Core::nextImageSlideshow);
 }
@@ -355,7 +344,7 @@ void Core::onModelLoaded()
 
 void Core::onDirectoryViewFileActivated(QString const &filePath)
 {
-    // we aren`t using async load so it won't flicker with empty view
+    // We aren`t using async load, so it won't flicker with empty view.
     mw->enableDocumentView();
     loadPath(filePath);
 }
@@ -1710,7 +1699,7 @@ void Core::updateInfoString()
         fileSize  = img->fileSize();
         edited    = img->isEdited();
     }
-    int index = model->indexOfFile(state.currentFilePath);
+    auto index = model->indexOfFile(state.currentFilePath);
     mw->setCurrentInfo(index,
                        model->fileCount(),
                        model->filePathAt(index),

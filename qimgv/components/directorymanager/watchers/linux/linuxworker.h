@@ -1,7 +1,7 @@
 #pragma once
 
-#include "linuxfsevent.h"
-#include "../watcherworker.h"
+#include "LinuxFsEvent.h"
+#include "../WatcherWorker.h"
 
 class LinuxWorker : public WatcherWorker
 {

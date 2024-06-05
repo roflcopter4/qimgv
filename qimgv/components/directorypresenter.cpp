@@ -1,4 +1,4 @@
-﻿#include "directorypresenter.h"
+﻿#include "DirectoryPresenter.h"
 
 DirectoryPresenter::DirectoryPresenter(QObject *parent)
     : QObject(parent),
@@ -14,13 +14,16 @@ DirectoryPresenter::~DirectoryPresenter()
 
 void DirectoryPresenter::unsetModel()
 {
-    disconnect(model.get(), &DirectoryModel::fileRemoved,  this, &DirectoryPresenter::onFileRemoved);
-    disconnect(model.get(), &DirectoryModel::fileAdded,    this, &DirectoryPresenter::onFileAdded);
-    disconnect(model.get(), &DirectoryModel::fileRenamed,  this, &DirectoryPresenter::onFileRenamed);
-    disconnect(model.get(), &DirectoryModel::fileModified, this, &DirectoryPresenter::onFileModified);
-    disconnect(model.get(), &DirectoryModel::dirRemoved,   this, &DirectoryPresenter::onDirRemoved);
-    disconnect(model.get(), &DirectoryModel::dirAdded,     this, &DirectoryPresenter::onDirAdded);
-    disconnect(model.get(), &DirectoryModel::dirRenamed,   this, &DirectoryPresenter::onDirRenamed);
+    disconnect(model, &DirectoryModel::fileRemoved,  this, &DirectoryPresenter::onFileRemoved);
+    disconnect(model, &DirectoryModel::fileAdded,    this, &DirectoryPresenter::onFileAdded);
+    disconnect(model, &DirectoryModel::fileRenamed,  this, &DirectoryPresenter::onFileRenamed);
+    disconnect(model, &DirectoryModel::fileModified, this, &DirectoryPresenter::onFileModified);
+    disconnect(model, &DirectoryModel::dirRemoved,   this, &DirectoryPresenter::onDirRemoved);
+    disconnect(model, &DirectoryModel::dirAdded,     this, &DirectoryPresenter::onDirAdded);
+    disconnect(model, &DirectoryModel::dirRenamed,   this, &DirectoryPresenter::onDirRenamed);
+    //delete model;
+    //delete view;
+    //view = nullptr;
     model = nullptr;
     // also empty view?
 }
@@ -36,7 +39,7 @@ struct StaticAssertHack {
     }
 };
 
-void DirectoryPresenter::setView(QSharedPointer<IDirectoryView> newView)
+void DirectoryPresenter::setView(IDirectoryView *newView)
 {
     if (view)
         return;
@@ -46,26 +49,26 @@ void DirectoryPresenter::setView(QSharedPointer<IDirectoryView> newView)
         view->populate(n);
     }
 
-    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(itemActivated(qsizetype)), this, SLOT(onItemActivated(qsizetype)));
-    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(draggedOut()), this, SLOT(onDraggedOut()));
-    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(draggedOver(qsizetype)), this, SLOT(onDraggedOver(qsizetype)));
-    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(droppedInto(const QMimeData*, QObject*, qsizetype)), this, SLOT(onDroppedInto(const QMimeData*, QObject*, qsizetype)));
+    connect(dynamic_cast<QObject *>(view), SIGNAL(itemActivated(qsizetype)), this, SLOT(onItemActivated(qsizetype)));
+    connect(dynamic_cast<QObject *>(view), SIGNAL(draggedOut()), this, SLOT(onDraggedOut()));
+    connect(dynamic_cast<QObject *>(view), SIGNAL(draggedOver(qsizetype)), this, SLOT(onDraggedOver(qsizetype)));
+    connect(dynamic_cast<QObject *>(view), SIGNAL(droppedInto(const QMimeData*, QObject*, qsizetype)), this, SLOT(onDroppedInto(const QMimeData*, QObject*, qsizetype)));
 
 #if 0
-    connect(view.get(), &IDirectoryView::thumbnailsRequested, this, &DirectoryPresenter::generateThumbnails);
+    connect(view, &IDirectoryView::thumbnailsRequested, this, &DirectoryPresenter::generateThumbnails);
 #else
     if constexpr (std::is_same_v<qsizetype, long long>)
-        connect(dynamic_cast<QObject *>(view.get()), SIGNAL(thumbnailsRequested(QList<long long>, int, bool, bool)), this, SLOT(generateThumbnails(QList<long long>, int, bool, bool)));
+        connect(dynamic_cast<QObject *>(view), SIGNAL(thumbnailsRequested(QList<long long>, int, bool, bool)), this, SLOT(generateThumbnails(QList<long long>, int, bool, bool)));
     else if constexpr (std::is_same_v<qsizetype, long>)
-        connect(dynamic_cast<QObject *>(view.get()), SIGNAL(thumbnailsRequested(QList<long>, int, bool, bool)), this, SLOT(generateThumbnails(QList<long>, int, bool, bool)));
+        connect(dynamic_cast<QObject *>(view), SIGNAL(thumbnailsRequested(QList<long>, int, bool, bool)), this, SLOT(generateThumbnails(QList<long>, int, bool, bool)));
     else if constexpr (std::is_same_v<qsizetype, int>)
-        connect(dynamic_cast<QObject *>(view.get()), SIGNAL(thumbnailsRequested(QList<int>, int, bool, bool)), this, SLOT(generateThumbnails(QList<int>, int, bool, bool)));
+        connect(dynamic_cast<QObject *>(view), SIGNAL(thumbnailsRequested(QList<int>, int, bool, bool)), this, SLOT(generateThumbnails(QList<int>, int, bool, bool)));
     else
         StaticAssertHack::InvalidQSizeType();
 #endif
 }
 
-void DirectoryPresenter::setModel(QSharedPointer<DirectoryModel> newModel)
+void DirectoryPresenter::setModel(DirectoryModel *newModel)
 {
     if (model)
         unsetModel();
@@ -75,13 +78,13 @@ void DirectoryPresenter::setModel(QSharedPointer<DirectoryModel> newModel)
     populateView();
 
     // filesystem changes
-    connect(model.get(), &DirectoryModel::fileRemoved,  this, &DirectoryPresenter::onFileRemoved);
-    connect(model.get(), &DirectoryModel::fileAdded,    this, &DirectoryPresenter::onFileAdded);
-    connect(model.get(), &DirectoryModel::fileRenamed,  this, &DirectoryPresenter::onFileRenamed);
-    connect(model.get(), &DirectoryModel::fileModified, this, &DirectoryPresenter::onFileModified);
-    connect(model.get(), &DirectoryModel::dirRemoved,   this, &DirectoryPresenter::onDirRemoved);
-    connect(model.get(), &DirectoryModel::dirAdded,     this, &DirectoryPresenter::onDirAdded);
-    connect(model.get(), &DirectoryModel::dirRenamed,   this, &DirectoryPresenter::onDirRenamed);
+    connect(model, &DirectoryModel::fileRemoved,  this, &DirectoryPresenter::onFileRemoved);
+    connect(model, &DirectoryModel::fileAdded,    this, &DirectoryPresenter::onFileAdded);
+    connect(model, &DirectoryModel::fileRenamed,  this, &DirectoryPresenter::onFileRenamed);
+    connect(model, &DirectoryModel::fileModified, this, &DirectoryPresenter::onFileModified);
+    connect(model, &DirectoryModel::dirRemoved,   this, &DirectoryPresenter::onDirRemoved);
+    connect(model, &DirectoryModel::dirAdded,     this, &DirectoryPresenter::onDirAdded);
+    connect(model, &DirectoryModel::dirRenamed,   this, &DirectoryPresenter::onDirRenamed);
 }
 
 void DirectoryPresenter::reloadModel()
@@ -248,7 +251,7 @@ void DirectoryPresenter::generateThumbnails(IDirectoryView::SelectionList const 
 
             ImageLib::recolor(*pixmap, settings->colorScheme().icons);
 
-            auto thumb = QSharedPointer<Thumbnail>(new Thumbnail(model->dirNameAt(i), QS("Folder"), size, QSharedPointer<QPixmap>(pixmap)));
+            auto thumb = Thumbnail *(new Thumbnail(model->dirNameAt(i), QS("Folder"), size, QSharedPointer<QPixmap>(pixmap)));
             // ^----------------------------------------------------------------
             view->setThumbnail(i, std::move(thumb));
         } else {
@@ -258,7 +261,7 @@ void DirectoryPresenter::generateThumbnails(IDirectoryView::SelectionList const 
     }
 }
 
-void DirectoryPresenter::onThumbnailReady(QSharedPointer<Thumbnail> const &thumb, QString const &filePath) const
+void DirectoryPresenter::onThumbnailReady(Thumbnail *thumb, QString const &filePath) const
 {
     if (!view || !model)
         return;

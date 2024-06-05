@@ -1,4 +1,4 @@
-#include "randomizer.h"
+#include "Randomizer.h"
 
 Randomizer::Randomizer()
 {

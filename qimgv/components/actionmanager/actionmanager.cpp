@@ -2,15 +2,16 @@
 
 ActionManager *actionManager = nullptr;
 
+
 ActionManager::ActionManager(QObject *parent)
     : QObject(parent)
 {
 }
-//------------------------------------------------------------------------------
+
 ActionManager::~ActionManager()
 {
 }
-//------------------------------------------------------------------------------
+
 ActionManager *ActionManager::getInstance()
 {
     static std::mutex mtx;
@@ -23,7 +24,9 @@ ActionManager *ActionManager::getInstance()
     }
     return actionManager;
 }
+
 //------------------------------------------------------------------------------
+
 void ActionManager::initDefaults()
 {
     defaults.insert(QS("Right"),               QS("nextImage"));
@@ -101,41 +104,40 @@ void ActionManager::initDefaults()
     // defaults.insert(QS("Backspace"), QS("goUp")); // todo: shortcut scopes?
 }
 
-//------------------------------------------------------------------------------
 void ActionManager::initShortcuts()
 {
     readShortcuts();
     if (shortcuts.isEmpty())
         resetDefaults();
 }
-//------------------------------------------------------------------------------
+
 void ActionManager::addShortcut(QString const &keys, QString const &action)
 {
     ActionType type = validateAction(action);
     if (type != ActionType::INVALID)
         shortcuts.insert(keys, action);
 }
-//------------------------------------------------------------------------------
+
 void ActionManager::removeShortcut(QString const &keys)
 {
     shortcuts.remove(keys);
 }
-//------------------------------------------------------------------------------
+
 QStringList ActionManager::actionList()
 {
     return appActions->getList();
 }
-//------------------------------------------------------------------------------
+
 QMap<QString, QString> const &ActionManager::allShortcuts()
 {
     return shortcuts;
 }
-//------------------------------------------------------------------------------
+
 void ActionManager::removeAllShortcuts()
 {
     shortcuts.clear();
 }
-//------------------------------------------------------------------------------
+
 // Removes all shortcuts for specified action. Slow (reverse map lookup).
 void ActionManager::removeAllShortcuts(QString const &actionName)
 {
@@ -148,19 +150,19 @@ void ActionManager::removeAllShortcuts(QString const &actionName)
         else
             ++i;
 }
-//------------------------------------------------------------------------------
+
 QString ActionManager::keyForNativeScancode(quint32 scanCode)
 {
     if (inputMap->keys().contains(scanCode))
         return inputMap->keys()[scanCode];
     return QS("");
 }
-//------------------------------------------------------------------------------
+
 void ActionManager::resetDefaults()
 {
     shortcuts = actionManager->defaults;
 }
-//------------------------------------------------------------------------------
+
 void ActionManager::resetDefaults(QString const &action)
 {
     removeAllShortcuts(action);
@@ -173,7 +175,7 @@ void ActionManager::resetDefaults(QString const &action)
         }
     }
 }
-//------------------------------------------------------------------------------
+
 void ActionManager::adjustFromVersion(QVersionNumber const &lastVer)
 {
     // swap Ctrl-P & P
@@ -214,12 +216,12 @@ void ActionManager::adjustFromVersion(QVersionNumber const &lastVer)
     // apply
     saveShortcuts();
 }
-//------------------------------------------------------------------------------
+
 void ActionManager::saveShortcuts()
 {
     settings->saveShortcuts(shortcuts);
 }
-//------------------------------------------------------------------------------
+
 QString ActionManager::actionForShortcut(QString const &keys)
 {
     return shortcuts[keys];
@@ -236,7 +238,6 @@ QStringList ActionManager::shortcutsForAction(QString const &action) const
     return shortcuts.keys(action);
 }
 
-//------------------------------------------------------------------------------
 bool ActionManager::invokeAction(QString const &actionName)
 {
     ActionType type = validateAction(actionName);
@@ -251,14 +252,14 @@ bool ActionManager::invokeAction(QString const &actionName)
     }
     return false;
 }
-//------------------------------------------------------------------------------
+
 bool ActionManager::invokeActionForShortcut(QString const &shortcut)
 {
     if (!shortcut.isEmpty() && shortcuts.contains(shortcut))
         return invokeAction(shortcuts[shortcut]);
     return false;
 }
-//------------------------------------------------------------------------------
+
 void ActionManager::validateShortcuts()
 {
     for (auto i = shortcuts.begin(); i != shortcuts.end();)
@@ -267,7 +268,7 @@ void ActionManager::validateShortcuts()
         else
             ++i;
 }
-//------------------------------------------------------------------------------
+
 ActionType ActionManager::validateAction(QString const &actionName)
 {
     if (appActions->getMap().contains(actionName))
@@ -280,15 +281,14 @@ ActionType ActionManager::validateAction(QString const &actionName)
     }
     return ActionType::INVALID;
 }
-//------------------------------------------------------------------------------
+
 void ActionManager::readShortcuts()
 {
     settings->readShortcuts(shortcuts);
     validateShortcuts();
 }
-//------------------------------------------------------------------------------
+
 bool ActionManager::processEvent(QInputEvent *event)
 {
     return invokeActionForShortcut(ShortcutBuilder::fromEvent(event));
 }
-//------------------------------------------------------------------------------

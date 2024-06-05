@@ -1,4 +1,4 @@
-#include "cmdoptionsrunner.h"
+#include "CmdOptionsRunner.h"
 
 #ifdef Q_OS_WIN32
 # define Win32OpenConsole() util::OpenConsoleWindow()

@@ -1,4 +1,4 @@
-#include "stuff.h"
+#include "Stuff.h"
 #include <QDebug>
 #include <QFileInfo>
 #include <QString>
@@ -232,11 +232,11 @@ QString get_backtrace()
     static constexpr size_t  namelen  = 1024ULL * sizeof(wchar_t);
     static constexpr wchar_t format[] = L"\n{:3}: {}  -  [0x{:08X}]";
     using symbol_type = ::SYMBOL_INFOW;
-#define SymFromAddr SymFromAddrW
+#  define SymFromAddr SymFromAddrW
 # else
     static constexpr size_t namelen = 1024ULL * sizeof(char);
     using symbol_type = ::SYMBOL_INFO;
-#define SymFromAddr SymFromAddr
+#  define SymFromAddr SymFromAddr
 # endif
 
     void    *stack[256];
@@ -324,7 +324,7 @@ void CloseConsoleWindow()
 void WaitForAnyKey()
 {
     std::cout.flush();
-    std::wcout << L"\nPress any key...";
+    std::wcout << L"\nPress any key (may need to press enter)...";
     std::wcout.flush();
     std::wstring in;
     std::getline(std::wcin, in);

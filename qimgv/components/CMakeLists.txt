@@ -1,31 +1,31 @@
 ## SOURCES FOR QIMGV COMPONENTS
 
 target_sources(qimgv PRIVATE
-    directorymodel.cpp
-    directorypresenter.cpp
+    DirectoryModel.cpp
+    DirectoryPresenter.cpp
 
-    scriptmanager/scriptmanager.cpp
-    actionmanager/actionmanager.cpp
+    scriptManager/ScriptManager.cpp
+    actionManager/ActionManager.cpp
 
-    cache/cache.cpp
-    cache/cacheitem.cpp
-    cache/thumbnailcache.cpp
+    cache/Cache.cpp
+    cache/CacheItem.cpp
+    cache/ThumbnailCache.cpp
 
-    loader/loader.cpp
-    loader/loaderrunnable.cpp
+    loader/Loader.cpp
+    loader/LoaderRunnable.cpp
 
-    scaler/scaler.cpp
-    scaler/scalerrunnable.cpp
+    scaler/Scaler.cpp
+    scaler/ScalerRunnable.cpp
 
-    thumbnailer/thumbnailer.cpp
-    thumbnailer/thumbnailerrunnable.cpp
+    thumbnailer/Thumbnailer.cpp
+    thumbnailer/ThumbnailerRunnable.cpp
 
-    directorymanager/directorymanager.cpp
+    directoryManager/DirectoryManager.cpp
 
-    directorymanager/watchers/directorywatcher.cpp
-    directorymanager/watchers/dummywatcher.cpp
-    directorymanager/watchers/watcherevent.cpp
-    directorymanager/watchers/watcherworker.cpp
+    directoryManager/watchers/DirectoryWatcher.cpp
+    directoryManager/watchers/DummyWatcher.cpp
+    directoryManager/watchers/WatcherEvent.cpp
+    directoryManager/watchers/WatcherWorker.cpp
 
 )
 
@@ -36,11 +36,11 @@ if(APPLE)
     #    directorymanager/watchers/linux/linuxworker.cpp)
 elseif(UNIX)
     target_sources(qimgv PRIVATE
-        directorymanager/watchers/linux/linuxfsevent.cpp
-        directorymanager/watchers/linux/linuxwatcher.cpp
-        directorymanager/watchers/linux/linuxworker.cpp)
+        directoryManager/watchers/linux/LinuxFsEvent.cpp
+        directoryManager/watchers/linux/LinuxWatcher.cpp
+        directoryManager/watchers/linux/LinuxWorker.cpp)
 elseif(WIN32)
     target_sources(qimgv PRIVATE
-        directorymanager/watchers/windows/windowswatcher.cpp
-        directorymanager/watchers/windows/windowsworker.cpp)
+        directoryManager/watchers/windows/WindowsWatcher.cpp
+        directoryManager/watchers/windows/WindowsWorker.cpp)
 endif()

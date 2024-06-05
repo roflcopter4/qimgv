@@ -1,5 +1,5 @@
-#include "fileoperations.h"
-#include "stuff.h"
+#include "FileOperations.h"
+#include "Stuff.h"
 
 QString FileOperations::generateHash(QString const &str)
 {
@@ -138,6 +138,7 @@ void FileOperations::moveFileTo(QString const &srcFilePath, QString const &destD
     QFileInfo srcFile(srcFilePath);
     QString   tmpPath;
     bool      exists = false;
+
     // error checks
     if (destDirPath == srcFile.absolutePath()) {
         result = FileOpResult::NOTHING_TO_DO;
@@ -184,6 +185,7 @@ void FileOperations::moveFileTo(QString const &srcFilePath, QString const &destD
         QFile::rename(destFile.absoluteFilePath(), tmpPath);
         exists = true;
     }
+
     // move
     auto srcModTime  = srcFile.lastModified();
     auto srcReadTime = srcFile.lastRead();
@@ -214,6 +216,7 @@ void FileOperations::moveFileTo(QString const &srcFilePath, QString const &destD
         // could not COPY
         result = FileOpResult::OTHER_ERROR;
     }
+
     if (exists) // failed; revert backup
         QFile::rename(tmpPath, destFile.absoluteFilePath());
 }

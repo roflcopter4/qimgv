@@ -18,9 +18,7 @@
 #include "settings.h"
 #include "sourcecontainers/fsentry.h"
 #include "utils/stuff.h"
-#include "watchers/directorywatcher.h"
-
-#include "Common.h"
+#include "watchers/DirectoryWatcher.h"
 
 enum class FileListSource { // rename? wip
     DIRECTORY,

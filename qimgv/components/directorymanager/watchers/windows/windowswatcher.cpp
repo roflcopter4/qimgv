@@ -1,7 +1,6 @@
-#include "Common.h"
-#include "windowswatcher_p.h"
-#include "windowsworker.h"
-#include "utils/stuff.h"
+#include "WindowsWatcher_p.h"
+#include "WindowsWorker.h"
+#include "utils/Stuff.h"
 
 static QString win32ErrorString(DWORD error)
 {

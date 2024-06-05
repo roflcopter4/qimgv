@@ -5,7 +5,7 @@
 #include <QThread>
 #include <QDebug>
 
-#include "linuxworker.h"
+#include "LinuxWorker.h"
 
 #define TAG         "[LinuxWatcherWorker]"
 #define TIMEOUT     300 // ms

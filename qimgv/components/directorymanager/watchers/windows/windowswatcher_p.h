@@ -6,8 +6,8 @@
 #endif
 #include <Windows.h>
 
-#include "../windows/windowswatcher.h"
-#include "../directorywatcher_p.h"
+#include "../windows/WindowsWatcher.h"
+#include "../DirectoryWatcher_p.h"
 #include <QDebug>
 #include <QObject>
 #include <QtClassHelperMacros>

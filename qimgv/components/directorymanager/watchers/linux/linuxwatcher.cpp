@@ -2,8 +2,8 @@
 
 #include <sys/inotify.h>
 
-#include "linuxwatcher_p.h"
-#include "linuxworker.h"
+#include "LinuxWatcher_p.h"
+#include "LinuxWorker.h"
 
 #define TAG                 "[LinuxDirectoryWatcher]"
 #define INOTIFY_EVENT_MASK  IN_CREATE | IN_MODIFY | IN_DELETE | IN_MOVE

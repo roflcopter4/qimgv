@@ -1,7 +1,7 @@
 #pragma once
 #include <QString>
 #include <filesystem>
-#include "utils/stuff.h"
+#include "utils/Stuff.h"
 
 #if 0
 class FSEntry

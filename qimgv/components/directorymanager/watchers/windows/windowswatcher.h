@@ -1,7 +1,7 @@
 #ifndef WINDOWSWATCHER_H
 #define WINDOWSWATCHER_H
 
-#include "../directorywatcher.h"
+#include "../DirectoryWatcher.h"
 
 class WindowsWatcherPrivate;
 

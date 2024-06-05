@@ -1,16 +1,19 @@
 #pragma once
 
 #include <QCryptographicHash>
-#include <QDebug>
-#include <QString>
-#include <QFileInfo>
-#include <QDir>
 #include <QDateTime>
+#include <QDebug>
+#include <QDir>
+#include <QFileInfo>
 #include <QStandardPaths>
+#include <QString>
 #include <QtGlobal>
 
 #ifdef Q_OS_WIN32
-#include "windows.h"
+# ifndef WIN32_LEAN_AND_MEAN
+#  define WIN32_LEAN_AND_MEAN
+# endif
+# include "Windows.h"
 #endif
 
 enum class FileOpResult {
@@ -26,8 +29,9 @@ enum class FileOpResult {
     OTHER_ERROR
 };
 
-class FileOperations {
-public:
+class FileOperations
+{
+  public:
     static void copyFileTo(const QString &srcFilePath, const QString &destDirPath, bool force, FileOpResult &result);
     static void moveFileTo(const QString &srcFilePath, const QString &destDirPath, bool force, FileOpResult &result);
     static void rename(const QString &srcFilePath, const QString &newName, bool force, FileOpResult &result);
@@ -37,7 +41,7 @@ public:
 
     static QString decodeResult(const FileOpResult &result);
 
-private:
-    static bool moveToTrashImpl(const QString &path);
+  private:
+    static bool    moveToTrashImpl(const QString &filePath);
     static QString generateHash(const QString &str);
 };

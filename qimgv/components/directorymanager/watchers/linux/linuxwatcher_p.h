@@ -1,8 +1,8 @@
 #ifndef LINUXDIRECTORYWATCHER_P_H
 #define LINUXDIRECTORYWATCHER_P_H
 
-#include "../linux/linuxwatcher.h"
-#include "../directorywatcher_p.h"
+#include "../linux/LinuxWatcher.h"
+#include "../DirectoryWatcher_p.h"
 
 #include <errno.h>
 #include <QDebug>

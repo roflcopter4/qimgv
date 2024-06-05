@@ -34,16 +34,16 @@ endif()
 
 # ADD EXECUTABLE
 add_executable(qimgv
-    appversion.cpp
-    core.cpp
-    main.cpp
-    settings.cpp
-    themestore.cpp
-    sharedresources.cpp
-    shortcutbuilder.cpp
-    proxystyle.cpp
-    macosapplication.cpp
-    resources.qrc
+    AppVersion.cpp
+    Core.cpp
+    Main.cpp
+    Settings.cpp
+    ThemeStore.cpp
+    SharedResources.cpp
+    ShortcutBuilder.cpp
+    ProxyStyle.cpp
+    MacOSApplication.cpp
+    Resources.qrc
     qimgv.rc
     ${APPLE_ICON_PATH}
     ${QM_FILES}
@@ -65,7 +65,9 @@ if(OPENCV_SUPPORT)
 endif()
 
 # C++ STANDARD
-target_compile_features(qimgv PRIVATE cxx_std_17)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
+target_compile_features(qimgv PRIVATE cxx_std_20)
 #set_target_properties(qimgv PROPERTIES CXX_EXTENSIONS OFF)
 
 # LINK STUFF
@@ -136,7 +138,6 @@ elseif(NOT UNIX)
 endif()
 
 if (MSVC)
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FI Common.h")
     target_compile_options(qimgv PRIVATE
           $<$<COMPILE_LANGUAGE:CXX>:/FI Common.h>)
 else ()

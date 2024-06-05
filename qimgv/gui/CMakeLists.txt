@@ -1,11 +1,11 @@
 ## SOURCES FOR QIMGV GUI
 
 target_sources(qimgv PRIVATE
-    centralwidget.cpp
-    contextmenu.cpp
-    flowlayout.cpp
-    idirectoryview.cpp
-    mainwindow.cpp
+    CentralWidget.cpp
+    ContextMenu.cpp
+    FlowLayout.cpp
+    IDirectoryView.cpp
+    MainWindow.cpp
 
     customwidgets/actionbutton.cpp
     customwidgets/clickablelabel.cpp

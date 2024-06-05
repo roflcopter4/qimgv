@@ -7,7 +7,7 @@
 #endif
 #include <Windows.h>
 
-#include "../watcherworker.h"
+#include "../WatcherWorker.h"
 #include <QDebug>
 #include <QObject>
 #include <QtClassHelperMacros>
