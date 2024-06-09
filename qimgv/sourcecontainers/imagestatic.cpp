@@ -4,13 +4,13 @@
 ImageStatic::ImageStatic(QString const &path)
     : Image(path)
 {
-    load();
+    ImageStatic::load();
 }
 
 ImageStatic::ImageStatic(std::unique_ptr<DocumentInfo> info)
     : Image(std::move(info))
 {
-    load();
+    ImageStatic::load();
 }
 
 ImageStatic::~ImageStatic() = default;
@@ -26,55 +26,57 @@ void ImageStatic::load()
         loadGeneric();
 }
 
-
-void ImageStatic::loadGeneric()
+std::unique_ptr<QImage const>
+ImageStatic::readImage(QString const &path, QByteArray const &format)
 {
     /* QImageReader::read() seems more reliable than just reading via QImage.
-     * For example: QSV("Invalid JPEG file structure: two SOF markers")
+     * For example: "Invalid JPEG file structure: two SOF markers"
      * QImageReader::read() returns false, but still reads an image. Meanwhile, QImage just fails.
      * I haven't checked QImage's code, but it seems like it sees an exception
      * from libjpeg or whatever and just gives up on reading the file.
      *
      * tldr: QImage bad
      */
-    QImageReader r(mPath, mDocInfo->format().toStdString().c_str());
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     QImageReader::setAllocationLimit(settings->memoryAllocationLimit());
 #endif
-    QImage *tmp = new QImage();
-    r.read(tmp);
-    std::unique_ptr<QImage const> img(tmp);
+    auto reader = QImageReader(path, format);
+    auto tmp = new QImage();
+    reader.read(tmp);
+    return std::unique_ptr<QImage const>{tmp};
+}
+
+void ImageStatic::loadGeneric()
+{
+    auto img = readImage(mPath, mDocInfo->format());
     img = ImageLib::exifRotated(std::move(img), mDocInfo->exifOrientation());
-    // scaling this format via qt results in transparent background
-    // it rare enough so lets just convert it to the closest working thing
-    if (img->format() == QImage::Format_Mono) {
-        QImage *imgConverted = new QImage();
-        *imgConverted        = img->convertToFormat(QImage::Format_Grayscale8);
-        image.reset(imgConverted);
-    } else {
-        // set image
-        image = QSharedPointer<QImage const>(img.release());
-    }
+
+    // Scaling this format via qt results in transparent background.
+    // It is rare enough so lets just convert it to the closest working thing.
+    if (img->format() == QImage::Format_Mono)
+        image.reset(new QImage(img->convertToFormat(QImage::Format_Grayscale8)));
+    else
+        image.reset(img.release());
+
     mLoaded = true;
 }
 
 // TODO: move this out somewhere to use in other places
 void ImageStatic::loadICO()
 {
-    // Big brain code. It's mostly for small ico files so whatever. I'm not patching Qt for this.
-    QIcon        icon(mPath);
-    QList<QSize> sizes = icon.availableSizes();
-    QSize        maxSize(0, 0);
-    for (auto sz : sizes)
+    // Big brain code. It's mostly for small ico files so whatever. I'mtx not patching Qt for this.
+    QIcon icon(mPath);
+    QSize maxSize(0, 0);
+    for (QSize sz : icon.availableSizes())
         if (maxSize.width() < sz.width())
             maxSize = sz;
-    image   = QSharedPointer<QImage const>(new QImage (icon.pixmap(maxSize).toImage()));
+    image   = QSharedPointer<QImage const>(new QImage(icon.pixmap(maxSize).toImage()));
     mLoaded = true;
 }
 
 QString ImageStatic::generateHash(QString const &str)
 {
-    return QString::fromLatin1(QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Md5).toHex());
+    return QString::fromLatin1(QCryptographicHash::hash(str.toLatin1(), QCryptographicHash::Md5).toHex());
 }
 
 // TODO: move saving to directorymodel
@@ -83,6 +85,7 @@ bool ImageStatic::save(QString destPath)
     QString   tmpPath = destPath + u'_' + generateHash(destPath);
     QFileInfo fi(destPath);
     QString   ext = fi.suffix();
+
     // png compression note from libpng
     // Note that tests have shown that zlib compression levels 3-6 usually perform as well
     // as level 9 for PNG images, and do considerably fewer caclulations
@@ -106,6 +109,7 @@ bool ImageStatic::save(QString destPath)
         }
         backupExists = true;
     }
+
     // save file
     if (isEdited()) {
         success = imageEdited->save(destPath, ext.toStdString().c_str(), quality);
@@ -114,6 +118,7 @@ bool ImageStatic::save(QString destPath)
     } else {
         success = image->save(destPath, ext.toStdString().c_str(), quality);
     }
+
     if (backupExists) {
         if (success) {
             // everything ok - remove the backup
@@ -126,6 +131,7 @@ bool ImageStatic::save(QString destPath)
             QFile::remove(tmpPath);
         }
     }
+
     if (destPath == mPath && success)
         mDocInfo->refresh();
     return success;
@@ -153,17 +159,17 @@ QSharedPointer<QImage const> ImageStatic::getImage()
     return isEdited() ? imageEdited : image;
 }
 
-int ImageStatic::height()
+int ImageStatic::height() const
 {
     return isEdited() ? imageEdited->height() : image->height();
 }
 
-int ImageStatic::width()
+int ImageStatic::width() const
 {
     return isEdited() ? imageEdited->width() : image->width();
 }
 
-QSize ImageStatic::size()
+QSize ImageStatic::size() const
 {
     return isEdited() ? imageEdited->size() : image->size();
 }

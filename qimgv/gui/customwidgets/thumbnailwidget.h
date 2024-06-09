@@ -9,11 +9,9 @@
 #include <QPaintEngine>
 #include <cmath>
 #include "sourcecontainers/thumbnail.h"
-#include "utils/imagelib.h"
-#include "settings.h"
-#include "sharedresources.h"
-
-#include "Common.h"
+#include "utils/ImageLib.h"
+#include "Settings.h"
+#include "SharedResources.h"
 
 enum class ThumbnailStyle : uint8_t {
     SIMPLE,
@@ -32,14 +30,14 @@ class ThumbnailWidget : public QGraphicsWidget
     enum { Type = UserType + 1 };
     ND int type() const override { return Type; }
 
-       void setThumbnail(QSharedPointer<Thumbnail> newThumbnail);
+       void setThumbnail(QSharedPointer<Thumbnail> const &newThumbnail);
        void setHighlighted(bool mode);
     ND bool isHighlighted() const;
        void setDropHovered(bool mode);
     ND bool isDropHovered() const;
        void setThumbnailSize(int size);
        void setGeometry(QRectF const &rect) override;
-       void setThumbStyle(ThumbnailStyle _style);
+       void setThumbStyle(ThumbnailStyle style);
        void setPadding(int newPadding);
        void setMargins(int newMarginX, int newMarginY);
     ND int  thumbnailSize() const;

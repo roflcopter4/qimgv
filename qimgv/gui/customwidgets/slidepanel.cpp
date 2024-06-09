@@ -4,19 +4,17 @@ SlidePanel::SlidePanel(FloatingWidgetContainer *parent)
     : FloatingWidget(parent),
       panelSize(50),
       slideAmount(40),
+      fadeEffect(new QGraphicsOpacityEffect(this)),
+      mLayout(new QHBoxLayout(this)),
       mWidget(nullptr)
 {
-    mLayout = new QHBoxLayout(this);
     mLayout->setSpacing(0);
     mLayout->setContentsMargins(0, 0, 0, 0);
-    this->setLayout(mLayout);
+    setLayout(mLayout);
 
     // fade effect
-    fadeEffect = new QGraphicsOpacityEffect(this);
-    this->setGraphicsEffect(fadeEffect);
-
+    setGraphicsEffect(fadeEffect);
     startPosition = geometry().topLeft();
-
     outCurve.setType(QEasingCurve::OutQuart);
 
     timeline.setDuration(ANIMATION_DURATION);
@@ -33,9 +31,8 @@ SlidePanel::SlidePanel(FloatingWidgetContainer *parent)
     connect(&timeline, &QTimeLine::frameChanged, this, &SlidePanel::animationUpdate);
     connect(&timeline, &QTimeLine::finished, this, &SlidePanel::onAnimationFinish);
 
-    this->setAttribute(Qt::WA_NoMousePropagation, true);
-    this->setFocusPolicy(Qt::NoFocus);
-
+    setAttribute(Qt::WA_NoMousePropagation, true);
+    setFocusPolicy(Qt::NoFocus);
     setPosition(PanelPosition::TOP);
 
     QWidget::hide();
@@ -53,7 +50,7 @@ void SlidePanel::hideAnimated()
 {
     if (layoutManaged())
         hide();
-    else if (!this->isHidden() && timeline.state() != QTimeLine::Running)
+    else if (!isHidden() && timeline.state() != QTimeLine::Running)
         timeline.start();
 }
 
@@ -69,13 +66,13 @@ void SlidePanel::setLayoutManaged(bool mode)
         recalculateGeometry();
 }
 
-void SlidePanel::setWidget(QSharedPointer<QWidget> const &w)
+void SlidePanel::setWidget(QWidget *w)
 {
     if (!w)
         return;
     if (hasWidget())
         layout()->removeWidget(mWidget);
-    mWidget = w.get();
+    mWidget = w;
     mWidget->setParent(this);
     mLayout->insertWidget(0, mWidget);
 }
@@ -92,7 +89,7 @@ void SlidePanel::show()
         fadeEffect->setOpacity(panelVisibleOpacity);
         setProperty("pos", startPosition);
         QWidget::show();
-        QWidget::raise();
+        raise();
     } else {
         qDebug() << u"Warning: Trying to show panel containing no widget!";
     }
@@ -113,6 +110,7 @@ void SlidePanel::animationUpdate(int frame)
 {
     // Calculate local cursor position; correct for the current pos() animation
     QPoint adjustedPos = mapFromGlobal(QCursor::pos()) + this->pos();
+
     if (triggerRect().contains(adjustedPos, true)) {
         // Cancel the animation if cursor is back at the panel
         timeline.stop();
@@ -183,7 +181,7 @@ void SlidePanel::recalculateGeometry()
                           QPoint(containerSize().width() - width(), 0) + QPoint(slideAmount, 0));
         saveStaticGeometry(QRect(containerSize().width() - width(), 0, containerSize().width(), containerSize().height()));
     }
-    this->setGeometry(staticGeometry());
+    setGeometry(staticGeometry());
     updateTriggerRect();
 }
 

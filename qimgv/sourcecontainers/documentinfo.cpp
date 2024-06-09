@@ -53,7 +53,7 @@ QMimeType DocumentInfo::mimeType() const
     return mMimeType;
 }
 
-QString DocumentInfo::format() const
+QByteArray DocumentInfo::format() const
 {
     return mFormat;
 }
@@ -90,43 +90,43 @@ void DocumentInfo::detectFormat()
     auto suffix       = fileInfo.suffix().toLower().toUtf8();
 
     if (mimeName == QSV("image/jpeg")) {
-        mFormat       = QS("jpg");
+        mFormat       = "jpg";
         mDocumentType = DocumentType::STATIC;
     } else if (mimeName == QSV("image/png")) {
         if (QImageReader::supportedImageFormats().contains(QByteArrayView("apng")) && detectAPNG()) {
-            mFormat       = QS("apng");
+            mFormat       = "apng";
             mDocumentType = DocumentType::ANIMATED;
         } else {
-            mFormat       = QS("png");
+            mFormat       = "png";
             mDocumentType = DocumentType::STATIC;
         }
     } else if (mimeName == QSV("image/gif")) {
-        mFormat       = QS("gif");
+        mFormat       = "gif";
         mDocumentType = DocumentType::ANIMATED;
     } else if (mimeName == QSV("image/webp") || (mimeName == QSV("audio/x-riff") && suffix == "webp")) {
-        mFormat       = QS("webp");
+        mFormat       = "webp";
         mDocumentType = detectAnimatedWebP() ? DocumentType::ANIMATED : DocumentType::STATIC;
     } else if (mimeName == QSV("image/jxl")) {
-        mFormat       = QS("jxl");
+        mFormat       = "jxl";
         mDocumentType = detectAnimatedJxl() ? DocumentType::ANIMATED : DocumentType::STATIC;
         if (mDocumentType == DocumentType::ANIMATED && !settings->jxlAnimation()) {
             mDocumentType = DocumentType::NONE;
             qDebug() << u"animated jxl is off; skipping file";
         }
     } else if (mimeName == QSV("image/avif")) {
-        mFormat       = QS("avif");
+        mFormat       = "avif";
         mDocumentType = detectAnimatedAvif() ? DocumentType::ANIMATED : DocumentType::STATIC;
     } else if (mimeName == QSV("image/bmp")) {
-        mFormat       = QS("bmp");
+        mFormat       = "bmp";
         mDocumentType = DocumentType::STATIC;
     } else if (settings->videoPlayback() && settings->videoFormats().contains(mimeNameUTF8)) {
         mDocumentType = DocumentType::VIDEO;
-        mFormat       = QString::fromUtf8(settings->videoFormats().value(mimeNameUTF8));
+        mFormat       = settings->videoFormats().value(mimeNameUTF8);
     } else {
         // just try to open via suffix if all of the above fails
-        mFormat = QString::fromUtf8(suffix);
-        if (mFormat.compare(QSV("jfif"), Qt::CaseInsensitive) == 0)
-            mFormat = QS("jpg");
+        mFormat = suffix;
+        if (mFormat.compare("jfif", Qt::CaseInsensitive) == 0)
+            mFormat = "jpg";
         if (settings->videoPlayback() && settings->videoFormats().values().contains(suffix))
             mDocumentType = DocumentType::VIDEO;
         else
@@ -159,8 +159,8 @@ bool DocumentInfo::detectAnimatedWebP() const
     if (f.open(QFile::ReadOnly)) {
         QDataStream in(&f);
         in.skipRawData(12);
-        char *buf = static_cast<char *>(malloc(5));
-        buf[4]    = '\0';
+        char buf[5];
+        buf[4] = '\0';
         in.readRawData(buf, 4);
         if (strcmp(buf, "VP8X") == 0) {
             in.skipRawData(4);
@@ -169,7 +169,6 @@ bool DocumentInfo::detectAnimatedWebP() const
             if (flags & (1 << 1))
                 result = true;
         }
-        free(buf);
     }
     return result;
 }
@@ -188,12 +187,11 @@ bool DocumentInfo::detectAnimatedAvif() const
     if (f.open(QFile::ReadOnly)) {
         QDataStream in(&f);
         in.skipRawData(4); // skip box size
-        char *buf = static_cast<char *>(malloc(9));
-        buf[8]    = '\0';
+        char buf[9];
+        buf[8] = '\0';
         in.readRawData(buf, 8);
         if (strcmp(buf, "ftypavis") == 0)
             result = true;
-        free(buf);
     }
     return result;
 }
@@ -323,15 +321,7 @@ void DocumentInfo::loadExifOrientation()
 {
     if (mDocumentType == DocumentType::VIDEO || mDocumentType == DocumentType::NONE)
         return;
-
-    QString       path   = filePath();
-    QImageReader *reader = nullptr;
-    if (!mFormat.isEmpty())
-        reader = new QImageReader(path, mFormat.toStdString().c_str());
-    else
-        reader = new QImageReader(path);
-
+    auto reader = std::make_unique<QImageReader>(filePath(), mFormat);
     if (reader->canRead())
         mOrientation = static_cast<int>(reader->transformation());
-    delete reader;
 }

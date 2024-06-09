@@ -97,16 +97,16 @@ void MpvWidget::paintGL()
         // Clang actually raises an error without this cast.
         .fbo = static_cast<decltype(mpv_opengl_fbo::fbo)>(defaultFramebufferObject()),
         .w   = width(),
-        .h   = height()
+        .h   = height(),
+        .internal_format = 0,
     };
-
     mpv_render_param params[] = {
         {MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo },
         {MPV_RENDER_PARAM_FLIP_Y,     &flip_y},
         {MPV_RENDER_PARAM_INVALID,    nullptr}
     };
-    // See render_gl.h on what OpenGL environment mpv expects, and
-    // other API details.
+
+    // See render_gl.h on what OpenGL environment mpv expects, and other API details.
     mpv_render_context_render(mpv_gl, params);
 }
 
@@ -177,32 +177,26 @@ void MpvWidget::on_update(void *ctx)
 
 void MpvWidget::setMuted(bool mode) const
 {
-    if (mode)
-        mpv::qt::set_property(mpv, QS("mute"), QS("yes"));
-    else
-        mpv::qt::set_property(mpv, QS("mute"), QS("no"));
+    mpv::qt::set_property(mpv, QS("mute"), mode ? QS("yes") : QS("no"));
 }
 
 bool MpvWidget::muted() const
 {
-    return mpv::qt::get_property_variant(mpv, QS("mute")).toBool();
+    return mpv::qt::get_property(mpv, QS("mute")).toBool();
 }
 
 int MpvWidget::volume() const
 {
-    return mpv::qt::get_property_variant(mpv, QS("volume")).toInt();
+    return mpv::qt::get_property(mpv, QS("volume")).toInt();
 }
 
 void MpvWidget::setVolume(int vol) const
 {
     qBound(0, vol, 100);
-    mpv::qt::set_property_variant(mpv, QS("volume"), vol);
+    mpv::qt::set_property(mpv, QS("volume"), vol);
 }
 
 void MpvWidget::setRepeat(bool mode) const
 {
-    if (mode)
-        mpv::qt::set_property(mpv, QS("loop-file"), QS("inf"));
-    else
-        mpv::qt::set_property(mpv, QS("loop-file"), QS("no"));
+    mpv::qt::set_property(mpv, QS("loop-file"), mode ? QS("inf") : QS("no"));
 }

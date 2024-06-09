@@ -7,14 +7,12 @@ ThumbnailStripProxy::ThumbnailStripProxy(QWidget *parent)
     layout->setContentsMargins(0, 0, 0, 0);
 }
 
-ThumbnailStripProxy::~ThumbnailStripProxy()
-{
-}
+ThumbnailStripProxy::~ThumbnailStripProxy() = default;
 
 void ThumbnailStripProxy::init()
 {
     qApp->processEvents(); // chew through events in case we have something that alters stateBuf in queue
-    QMutexLocker ml(&m);
+    QMutexLocker ml(&mtx);
     if (thumbnailStrip)
         return;
     thumbnailStrip = new ThumbnailStrip(this);
@@ -44,7 +42,7 @@ bool ThumbnailStripProxy::isInitialized() const
 
 void ThumbnailStripProxy::populate(qsizetype count)
 {
-    QMutexLocker ml(&m);
+    QMutexLocker ml(&mtx);
     stateBuf.itemCount = count;
     if (thumbnailStrip) {
         ml.unlock();
@@ -80,12 +78,14 @@ void ThumbnailStripProxy::select(qsizetype index)
 
 IDirectoryView::SelectionList &ThumbnailStripProxy::selection()
 {
-    return thumbnailStrip ? thumbnailStrip->selection() : stateBuf.selection;
+    return thumbnailStrip ? thumbnailStrip->selection()
+                          : stateBuf.selection;
 }
 
 IDirectoryView::SelectionList const &ThumbnailStripProxy::selection() const
 {
-    return thumbnailStrip ? thumbnailStrip->selection() : stateBuf.selection;
+    return thumbnailStrip ? thumbnailStrip->selection()
+                          : stateBuf.selection;
 }
 
 void ThumbnailStripProxy::focusOn(qsizetype index)
@@ -105,7 +105,7 @@ void ThumbnailStripProxy::insertItem(qsizetype index)
     if (thumbnailStrip)
         thumbnailStrip->insertItem(index);
     else
-        stateBuf.itemCount++;
+        ++stateBuf.itemCount;
 }
 
 void ThumbnailStripProxy::removeItem(qsizetype index)
@@ -119,7 +119,7 @@ void ThumbnailStripProxy::removeItem(qsizetype index)
             if (stateBuf.selection[i] > index)
                 --stateBuf.selection[i];
         if (!stateBuf.selection.count())
-            stateBuf.selection << ((index >= stateBuf.itemCount) ? stateBuf.itemCount - 1 : index);
+            stateBuf.selection << (index >= stateBuf.itemCount ? stateBuf.itemCount - 1 : index);
     }
 }
 
@@ -137,7 +137,6 @@ void ThumbnailStripProxy::setDragHover(qsizetype index)
 
 void ThumbnailStripProxy::setDirectoryPath(QString path)
 {
-    Q_UNUSED(path)
 }
 
 void ThumbnailStripProxy::addItem()

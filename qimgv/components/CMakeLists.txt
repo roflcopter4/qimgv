@@ -23,24 +23,24 @@ target_sources(qimgv PRIVATE
     directoryManager/DirectoryManager.cpp
 
     directoryManager/watchers/DirectoryWatcher.cpp
-    directoryManager/watchers/DummyWatcher.cpp
-    directoryManager/watchers/WatcherEvent.cpp
-    directoryManager/watchers/WatcherWorker.cpp
+    directoryManager/watchers/DummyDirectoryWatcher.cpp
+    directoryManager/watchers/DirectoryWatcherEvent.cpp
+    directoryManager/watchers/DirectoryWatcherWorker.cpp
 
 )
 
 if(APPLE)
     #target_sources(qimgv PRIVATE
-    #    directorymanager/watchers/linux/linuxfsevent.cpp
-    #    directorymanager/watchers/linux/linuxwatcher.cpp
-    #    directorymanager/watchers/linux/linuxworker.cpp)
-elseif(UNIX)
+    #    directorymanager/watchers/linux/LinuxFsEvent.cpp
+    #    directorymanager/watchers/linux/LinuxDirectoryWatcher.cpp
+    #    directorymanager/watchers/linux/LinuxDirectoryWorker.cpp)
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     target_sources(qimgv PRIVATE
         directoryManager/watchers/linux/LinuxFsEvent.cpp
-        directoryManager/watchers/linux/LinuxWatcher.cpp
-        directoryManager/watchers/linux/LinuxWorker.cpp)
+        directoryManager/watchers/linux/LinuxDirectoryWatcher.cpp
+        directoryManager/watchers/linux/LinuxDirectoryWorker.cpp)
 elseif(WIN32)
     target_sources(qimgv PRIVATE
-        directoryManager/watchers/windows/WindowsWatcher.cpp
-        directoryManager/watchers/windows/WindowsWorker.cpp)
+        directoryManager/watchers/windows/WindowsDirectoryWatcher.cpp
+        directoryManager/watchers/windows/WindowsDirectoryWorker.cpp)
 endif()

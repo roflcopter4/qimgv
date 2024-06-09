@@ -8,7 +8,7 @@ class FolderViewProxy : public QWidget, public IDirectoryView
     Q_OBJECT
     Q_INTERFACES(IDirectoryView)
 
-    struct FolderViewStateBuffer {
+    struct StateBuffer {
         QString       directory;
         SelectionList selection;
         qsizetype     itemCount      = 0;
@@ -17,7 +17,7 @@ class FolderViewProxy : public QWidget, public IDirectoryView
     };
 
   public:
-    explicit FolderViewProxy(QWidget *parent = nullptr);
+    explicit FolderViewProxy(QWidget *parent);
 
     void init();
 
@@ -37,8 +37,8 @@ class FolderViewProxy : public QWidget, public IDirectoryView
     void onFullscreenModeChanged(bool mode);
     void onSortingChanged(SortingMode mode);
 
-    ND SelectionList       &selection() override;
-    ND SelectionList const &selection() const override;
+    SelectionList       &selection() override;
+    SelectionList const &selection() const override;
 
   protected:
     void showEvent(QShowEvent *event) override;
@@ -57,8 +57,8 @@ class FolderViewProxy : public QWidget, public IDirectoryView
     void draggedOver(qsizetype) override;
 
   private:
-    QSharedPointer<FolderView> folderView;
-    QVBoxLayout                 *layout;
-    FolderViewStateBuffer       stateBuf;
-    QMutex                      m;
+    FolderView  *folderView;
+    QVBoxLayout *layout;
+    StateBuffer  stateBuf;
+    QMutex       mtx;
 };

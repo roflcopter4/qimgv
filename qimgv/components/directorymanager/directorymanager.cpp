@@ -6,7 +6,10 @@
 
 using util::pathsep;
 
-DirectoryManager::DirectoryManager() : watcher(nullptr), mSortingMode(SortingMode::NAME)
+DirectoryManager::DirectoryManager(QObject *parent)
+    : QObject(parent),
+      watcher(nullptr),
+      mSortingMode(SortingMode::NAME)
 {
     regex.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
     collator.setNumericMode(true);
@@ -89,7 +92,8 @@ void DirectoryManager::startFileWatcher(QString const &directoryPath)
     if (directoryPath.isEmpty())
         return;
     if (!watcher)
-        watcher = DirectoryWatcher::newInstance();
+        watcher = DirectoryWatcher::newInstance(this);
+    watcher->setParent(this);
 
     connect(watcher, &DirectoryWatcher::fileCreated,  this, &DirectoryManager::onFileAddedExternal,    Qt::UniqueConnection);
     connect(watcher, &DirectoryWatcher::fileDeleted,  this, &DirectoryManager::onFileRemovedExternal,  Qt::UniqueConnection);

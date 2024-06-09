@@ -102,7 +102,7 @@ static void demangle_setup()
     ::SymSetOptions(SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
     if (::BOOL ret = ::SymInitialize(::GetCurrentProcess(), nullptr, true); !ret) {
         ::DWORD e = ::GetLastError();
-        qCritical() << std::error_code(static_cast<int>(e), std::system_category()).message();
+        qCritical() << GetErrorMessage(e);
         qFatal() << u"SymInitialize()";
     }
 #endif
@@ -160,7 +160,7 @@ static void demangle_setup()
 
 #if 0
 
-QString get_backtrace()
+QString GetBacktrace()
 {
     // g_on_error_stack_trace(program_invocation_short_name);
     std::stringstream ss;
@@ -172,7 +172,7 @@ QString get_backtrace()
 
 #elif __has_include(<execinfo.h>)
 
-QString get_backtrace()
+QString GetBacktrace()
 {
     void   *arr[256];
     int     num     = ::backtrace(arr, 256);
@@ -226,7 +226,7 @@ QString get_backtrace()
 
 #elif defined Q_OS_WIN32
 
-QString get_backtrace()
+QString GetBacktrace()
 {
 # ifdef _MSC_VER
     static constexpr size_t  namelen  = 1024ULL * sizeof(wchar_t);
@@ -269,9 +269,24 @@ QString get_backtrace()
 
 #else
 
-QString get_backtrace() { return QS("Backtrace not supported"); }
+QString GetBacktrace() { return QS("Backtrace not supported"); }
 
 #endif
+
+QString GetErrorMessage(unsigned errVal)
+{
+#if defined Q_OS_WIN
+    wchar_t buf[512];
+    DWORD res = ::FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr,
+                                 errVal, LANG_SYSTEM_DEFAULT, buf, std::size(buf), nullptr);
+    return (res == 0 ? QString::fromWCharArray(buf, res) : QS(u"Unknown error")) +
+           QSV(" (") + QString::number(errVal, 16) + u')';
+#else
+    char buf[512];
+    strerror_r(errno, buf, std::size(buf));
+    return QString::fromUtf8(buf) QSV(" (") + QString::number(errVal) + u')';
+#endif
+}
 
 #ifdef Q_OS_WIN32
 
@@ -285,9 +300,9 @@ static void do_OpenConsoleWindow()
         ::DWORD err = ::GetLastError();
         ::WCHAR buf[128];
         ::swprintf_s(buf, std::size(buf),
-                     L"Failed to allocate a console (error %lX). "
+                     L"Failed to allocate a console (error %ls). "
                      L"If this happens your computer is probably on fire.",
-                     err);
+                     reinterpret_cast<wchar_t const *>(GetErrorMessage(err).data()));
         ::MessageBoxW(nullptr, buf, L"Fatal Error", MB_OK | MB_ICONERROR);
 #ifdef QT_VERSION
         ::QCoreApplication::exit(1);

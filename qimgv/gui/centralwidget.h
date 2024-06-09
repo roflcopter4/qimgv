@@ -3,7 +3,7 @@
 #include <QStackedWidget>
 #include "gui/folderview/folderviewproxy.h"
 #include "gui/viewers/documentwidget.h"
-#include "settings.h"
+#include "Settings.h"
 
 
 class CentralWidget : public QStackedWidget
@@ -11,7 +11,7 @@ class CentralWidget : public QStackedWidget
     Q_OBJECT
 
   public:
-    explicit CentralWidget(DocumentWidget *DocWidget, FolderViewProxy *aFolderView, QWidget *parent = nullptr);
+    explicit CentralWidget(DocumentWidget *DocWidget, FolderViewProxy *aFolderView, QWidget *parent);
 
     ~CentralWidget() override;
 

@@ -122,11 +122,11 @@ void CopyOverlay::saveSettings() {
 
 void CopyOverlay::createDefaultPaths() {
     QString home = QDir::homePath();
-    if (paths.count() < 1 || paths.at(0).isEmpty() || paths.at(0)[0] == u'@') {
+    if (paths.count() < 1 || paths[0].isEmpty() || paths[0][0] == u'@') {
         paths.clear();
         paths << home;
     }
-    if (paths.count() == 1 && paths.at(0) == home) {
+    if (paths.count() == 1 && paths[0] == home) {
         QDir dir(home);
         foreach(QFileInfo mfi, dir.entryInfoList()) {
             if (paths.count() >= maxPathCount) {

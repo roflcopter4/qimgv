@@ -1,26 +1,29 @@
 #pragma once
 
-#include <QFileDialog>
 #include "gui/customwidgets/menuitem.h"
-#include "settings.h"
+#include "Settings.h"
+#include <QFileDialog>
 
-class PathSelectorMenuItem : public MenuItem {
+class PathSelectorMenuItem : public MenuItem
+{
     Q_OBJECT
-public:
-    PathSelectorMenuItem(QWidget *parent);
-    QString directory();
-    QString path();
 
-public slots:
+  public:
+    explicit PathSelectorMenuItem(QWidget *parent);
+
+    ND QString directory() const;
+    ND QString path() const;
+
+  public Q_SLOTS:
     void setDirectory(QString const &path);
 
-protected:
+  protected:
     void onPress() override;
 
-signals:
+  Q_SIGNALS:
     void directorySelected(QString);
 
-private:
+  private:
     QString mDirectory;
     QString mPath;
 };

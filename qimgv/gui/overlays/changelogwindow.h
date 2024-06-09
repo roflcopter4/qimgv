@@ -7,8 +7,8 @@
 #include <QWheelEvent>
 #include <QTextBrowser>
 #include "gui/customwidgets/overlaywidget.h"
-#include "settings.h"
-#include "components/actionmanager/actionmanager.h"
+#include "Settings.h"
+#include "components/actionManager/ActionManager.h"
 
 namespace Ui {
     class ChangelogWindow;

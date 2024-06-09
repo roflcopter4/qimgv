@@ -5,8 +5,8 @@
 ThumbnailStrip::ThumbnailStrip(QWidget *parent)
     : ThumbnailView(Qt::Horizontal, parent)
 {
-    this->setAttribute(Qt::WA_NoMousePropagation, true);
-    this->setFocusPolicy(Qt::NoFocus);
+    setAttribute(Qt::WA_NoMousePropagation, true);
+    setFocusPolicy(Qt::NoFocus);
     setupLayout();
     readSettings();
 }
@@ -165,9 +165,8 @@ QSize ThumbnailStrip::itemSize()
         w.setThumbStyle(mCurrentStyle);
         w.setThumbnailSize(mThumbnailSize);
         return w.boundingRect().size().toSize();
-    } else {
-        return thumbnails[0]->boundingRect().size().toSize();
     }
+    return thumbnails[0]->boundingRect().size().toSize();
 }
 
 void ThumbnailStrip::resizeEvent(QResizeEvent *event)

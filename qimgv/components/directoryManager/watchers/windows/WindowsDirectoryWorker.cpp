@@ -1,16 +1,16 @@
-#include "windowsworker.h"
-
+#include "WindowsDirectoryWorker.h"
 #include <QMessageBox>
+#include <QThread>
 
 
-void WindowsWorker::setDirectoryHandle(HANDLE handle)
+void WindowsDirectoryWorker::setDirectoryHandle(HANDLE handle)
 {
     // qDebug() << "setHandle" << this->handle << " -> " << handle;
     freeHandle();
     hDir = handle;
 }
 
-void WindowsWorker::freeHandle()
+void WindowsDirectoryWorker::freeHandle()
 {
     if (hDir == INVALID_HANDLE_VALUE)
         return;
@@ -20,10 +20,10 @@ void WindowsWorker::freeHandle()
 }
 
 
-void WindowsWorker::run()
+void WindowsDirectoryWorker::run()
 {
     DWORD      dwBytes = 0;
-    OVERLAPPED ovl = {.hEvent = ::CreateEventW(nullptr, TRUE, FALSE, nullptr)};
+    OVERLAPPED ovl = {.hEvent = ::CreateEventW(nullptr, false, false, L"ReadDirectoryChangesW Overlapped Event")};
 
     if (!ovl.hEvent || ovl.hEvent == INVALID_HANDLE_VALUE) {
         qDebug() << u"[WindowsWorker] CreateEvent failed?";
@@ -71,4 +71,8 @@ void WindowsWorker::run()
 
         ::Sleep(POLL_RATE_MS);
     }
+
+    if (hDir == INVALID_HANDLE_VALUE)
+        CloseHandle(hDir);
+    QThread::currentThread()->exit();
 }

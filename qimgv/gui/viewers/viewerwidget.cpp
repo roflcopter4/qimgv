@@ -7,10 +7,11 @@
 
 ViewerWidget::ViewerWidget(QWidget *parent)
     : FloatingWidgetContainer(parent),
+      layout(new QVBoxLayout(this)),
       imageViewer(nullptr),
       videoPlayer(nullptr),
-      contextMenu(nullptr),
       videoControls(nullptr),
+      contextMenu(nullptr),
       currentWidget(CurrentWidget::UNSET),
       mInteractionEnabled(false),
       mWaylandCursorWorkaround(false),
@@ -26,11 +27,11 @@ ViewerWidget::ViewerWidget(QWidget *parent)
         mWaylandCursorWorkaround = true;
 #endif
 
-    layout.setContentsMargins(0, 0, 0, 0);
-    layout.setSpacing(0);
-    this->setLayout(&layout);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    setLayout(layout);
     imageViewer = new ImageViewerV2(this);
-    layout.addWidget(imageViewer);
+    layout->addWidget(imageViewer);
     imageViewer->hide();
 
     connect(imageViewer, &ImageViewerV2::scalingRequested, this, &ViewerWidget::scalingRequested);
@@ -43,7 +44,7 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     connect(this, &ViewerWidget::setScalingFilter,       imageViewer, &ImageViewerV2::setScalingFilter);
 
     videoPlayer = new VideoPlayerInitProxy(this);
-    layout.addWidget(videoPlayer);
+    layout->addWidget(videoPlayer);
     videoPlayer->hide();
     videoControls = new VideoControlsProxyWrapper(this);
     // tmp no wrapper
@@ -61,6 +62,14 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     connect(settings, &Settings::settingsChanged, this, &ViewerWidget::readSettings);
 
     readSettings();
+}
+
+ViewerWidget::~ViewerWidget()
+{
+    delete imageViewer;
+    delete videoPlayer;
+    delete videoControls;
+    delete zoomIndicator;
 }
 
 QRect ViewerWidget::imageRect() const

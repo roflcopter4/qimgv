@@ -7,10 +7,10 @@ ScriptEditorDialog::ScriptEditorDialog(QWidget *parent)
       editMode(false)
 {
     ui->setupUi(this);
-    this->setWindowTitle(tr("New application/script"));
+    setWindowTitle(tr("New application/script"));
     ui->keywordsLabel->setText(tr("Keywords:") + QSV(" %file%"));
     connect(ui->nameLineEdit, &QLineEdit::textChanged, this, &ScriptEditorDialog::onNameChanged);
-    this->onNameChanged(ui->nameLineEdit->text());
+    onNameChanged(ui->nameLineEdit->text());
 }
 
 ScriptEditorDialog::ScriptEditorDialog(QString name, Script const &script, QWidget *parent)
@@ -19,14 +19,14 @@ ScriptEditorDialog::ScriptEditorDialog(QString name, Script const &script, QWidg
       editMode(true)
 {
     ui->setupUi(this);
-    this->setWindowTitle(tr("Edit"));
-    this->onNameChanged(ui->nameLineEdit->text());
+    setWindowTitle(tr("Edit"));
+    onNameChanged(ui->nameLineEdit->text());
     editTarget = std::move(name);
     connect(ui->nameLineEdit, &QLineEdit::textChanged, this, &ScriptEditorDialog::onNameChanged);
     ui->nameLineEdit->setText(editTarget);
     ui->pathLineEdit->setText(script.command);
     ui->blockingCheckBox->setChecked(script.blocking);
-    this->onNameChanged(ui->nameLineEdit->text());
+    onNameChanged(ui->nameLineEdit->text());
 }
 
 ScriptEditorDialog::~ScriptEditorDialog()

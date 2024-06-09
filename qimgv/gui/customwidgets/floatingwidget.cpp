@@ -11,10 +11,6 @@ FloatingWidget::FloatingWidget(FloatingWidgetContainer *parent) : QWidget(parent
 
 FloatingWidget::~FloatingWidget()
 {
-    if (destructorCount++ > 0) {
-        std::cerr << "Not gonna lie, this is bad. Very bad. This is visit number " << destructorCount << " to " << __PRETTY_FUNCTION__ << '\n';
-        std::cerr.flush();
-    }
 }
 
 QSize FloatingWidget::containerSize() const

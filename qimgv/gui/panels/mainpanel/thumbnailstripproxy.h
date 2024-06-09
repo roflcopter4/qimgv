@@ -38,8 +38,8 @@ class ThumbnailStripProxy : public QWidget, public IDirectoryView
     void setDirectoryPath(QString path) override;
     void addItem();
 
-    ND SelectionList       &selection() final;
-    ND SelectionList const &selection() const final;
+    SelectionList       &selection() final;
+    SelectionList const &selection() const final;
 
   protected:
     void showEvent(QShowEvent *event) override;
@@ -57,5 +57,5 @@ class ThumbnailStripProxy : public QWidget, public IDirectoryView
 
     QVBoxLayout               *layout;
     ThumbnailStripStateBuffer stateBuf{};
-    QMutex                    m{};
+    QMutex                    mtx{};
 };

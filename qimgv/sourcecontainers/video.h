@@ -6,26 +6,25 @@
 #include <QFile>
 #include "image.h"
 
-class Video : public Image {
-public:
-    Video(QString const &path);
-    Video(std::unique_ptr<DocumentInfo> info);
+class Video : public Image
+{
+  public:
+    explicit Video(QString const &path);
+    explicit Video(std::unique_ptr<DocumentInfo> info);
 
-    std::unique_ptr<QPixmap>      getPixmap() override;
-    QSharedPointer<const QImage> getImage() override;
+    ND auto  getPixmap() -> std::unique_ptr<QPixmap> override;
+    ND auto  getImage() -> QSharedPointer<QImage const> override;
+    ND int   height() const override;
+    ND int   width() const override;
+    ND QSize size() const override;
 
-    int   height() override;
-    int   width() override;
-    QSize size() override;
-
-public slots:
+  public Q_SLOTS:
     bool save() override;
     bool save(QString destPath) override;
 
-
-private:
+  private:
     void load() override;
 
-    uint srcWidth = 0;
-    uint srcHeight = 0;
+    int srcWidth  = 0;
+    int srcHeight = 0;
 };

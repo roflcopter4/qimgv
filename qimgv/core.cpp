@@ -5,6 +5,7 @@
  */
 
 #include "core.h"
+#include <stdexcept>
 
 #ifdef Q_OS_WINDOWS
 # include <Shlwapi.h>
@@ -40,9 +41,7 @@ Core::Core(QObject *parent)
 
 Core::~Core()
 {
-    auto tmp = mw;
-    mw = nullptr;
-    delete tmp;
+    delete mw;
 }
 
 void Core::readSettings()
@@ -70,16 +69,18 @@ void Core::showGui() const
 // create MainWindow and all widgets
 void Core::initGui()
 {
+    if (mw)
+        throw std::logic_error("Cannot initialize main window twice.");
     mw = new MW();
     mw->hide();
 }
 
 void Core::attachModel(DirectoryModel *newModel)
 {
-    model = newModel;
+    model = QSharedPointer<DirectoryModel>(newModel);
     thumbPanelPresenter->setModel(model);
     folderViewPresenter->setModel(model);
-    bool showDirs = (settings->folderViewMode() == FolderViewMode::EXT_FOLDERS);
+    bool showDirs = settings->folderViewMode() == FolderViewMode::EXT_FOLDERS;
     folderViewPresenter->setShowDirs(showDirs);
     if (shuffle)
         syncRandomizer();
@@ -87,7 +88,7 @@ void Core::attachModel(DirectoryModel *newModel)
 
 void Core::initComponents()
 {
-    attachModel(new DirectoryModel());
+    attachModel(new DirectoryModel(nullptr));
 }
 
 void Core::connectComponents()
@@ -125,15 +126,15 @@ void Core::connectComponents()
     connect(mw, &MW::scalingRequested,      this, &Core::scalingRequest);
 
     connect(model->scaler, &Scaler::scalingFinished, this, &Core::onScalingFinished);
-    connect(model, &DirectoryModel::fileAdded,       this, &Core::onFileAdded);
-    connect(model, &DirectoryModel::fileRemoved,     this, &Core::onFileRemoved);
-    connect(model, &DirectoryModel::fileRenamed,     this, &Core::onFileRenamed);
-    connect(model, &DirectoryModel::fileModified,    this, &Core::onFileModified);
-    connect(model, &DirectoryModel::loaded,          this, &Core::onModelLoaded);
-    connect(model, &DirectoryModel::imageReady,      this, &Core::onModelItemReady);
-    connect(model, &DirectoryModel::imageUpdated,    this, &Core::onModelItemUpdated);
-    connect(model, &DirectoryModel::sortingChanged,  this, &Core::onModelSortingChanged);
-    connect(model, &DirectoryModel::loadFailed,      this, &Core::onLoadFailed);
+    connect(model.get(), &DirectoryModel::fileAdded,       this, &Core::onFileAdded);
+    connect(model.get(), &DirectoryModel::fileRemoved,     this, &Core::onFileRemoved);
+    connect(model.get(), &DirectoryModel::fileRenamed,     this, &Core::onFileRenamed);
+    connect(model.get(), &DirectoryModel::fileModified,    this, &Core::onFileModified);
+    connect(model.get(), &DirectoryModel::loaded,          this, &Core::onModelLoaded);
+    connect(model.get(), &DirectoryModel::imageReady,      this, &Core::onModelItemReady);
+    connect(model.get(), &DirectoryModel::imageUpdated,    this, &Core::onModelItemUpdated);
+    connect(model.get(), &DirectoryModel::sortingChanged,  this, &Core::onModelSortingChanged);
+    connect(model.get(), &DirectoryModel::loadFailed,      this, &Core::onLoadFailed);
 
     connect(&slideshowTimer, &QTimer::timeout, this, &Core::nextImageSlideshow);
 }
@@ -547,8 +548,7 @@ void Core::openFromClipboard()
         int       quality = 95;
         if (ext.compare(QSV("png"), Qt::CaseInsensitive) == 0)
             quality = 30;
-        else if (ext.compare(QSV("jpg"), Qt::CaseInsensitive) == 0 ||
-                 ext.compare(QSV("jpeg"), Qt::CaseInsensitive) == 0)
+        else if (ext.compare(QSV("jpg"), Qt::CaseInsensitive) == 0 || ext.compare(QSV("jpeg"), Qt::CaseInsensitive) == 0)
             quality = settings->JPEGSaveQuality();
 
         bool backupExists = false, success = false, originalExists = false;
@@ -591,25 +591,29 @@ static QString evilWindowsMimeDataHack(QMimeData const *mimeData)
 {
     QByteArray shIdList = mimeData->data(QS("application/x-qt-windows-mime;value=\"Shell IDList Array\""));
 
-    BYTE const *data = reinterpret_cast<BYTE const *>(shIdList.constData());
-    BYTE const *end  = data + shIdList.size();
-    BYTE const *last = data + *reinterpret_cast<uint32_t const *>(data + 8);
+    char const *data = shIdList.constData();
+    char const *end  = data + shIdList.size();
+    char const *last = data + *reinterpret_cast<uint32_t const *>(data + 8);
     data += 35;
 
     // The drive letter is an ASCII string only.
-    QString str = QSV(R"(\\?\)") + QString::fromLatin1(data);
+    //QString str = QSV(R"(\\?\)") + QString::fromLatin1(data);
+    QString str = QSV(R"(\\?\)") + QString::fromLatin1(data, strnlen(data, end - data));
+
     // We blindly add path separators later so ensure there isn't one.
     if (str.endsWith(u'\\'))
         str.chop(1);
     data += str.size() + 1;
+    if (data >= end)
+        return {};
     // The data always appears to be aligned to an odd offset. So we make sure.
     if ((reinterpret_cast<uintptr_t>(data) & 1) == 0)
         ++data;
-    data += 32; // Skip 32 bytes of data.
+    data += 28; // Skip 32 bytes of data.
 
     while (data + 2 < end) {
         // ASCII short name (null-terminated)
-        data += strnlen(reinterpret_cast<char const *>(data), end - data) + 1;
+        data += strnlen(data, end - data) + 1;
         if (data + 1 >= end)
             break;
         if ((reinterpret_cast<uintptr_t>(data) & 1) == 0)
@@ -1459,10 +1463,12 @@ void Core::nextDirectory()
     stopSlideshow();
     QFileInfo currentDir(model->directoryPath());
     QFileInfo parentDir(currentDir.absolutePath());
+
     if (parentDir.exists() && parentDir.isReadable()) {
-        DirectoryManager dm;
+        auto dm = DirectoryManager(nullptr);
         if (!dm.setDirectory(parentDir.absoluteFilePath()))
             return;
+
         QString next = dm.nextOfDir(model->directoryPath());
         if (!next.isEmpty()) {
             if (!setDirectory(next))
@@ -1483,9 +1489,11 @@ void Core::prevDirectory(bool selectLast)
         return;
     QFileInfo currentDir(model->directoryPath());
     QFileInfo parentDir(currentDir.absolutePath());
+
     if (parentDir.exists() && parentDir.isReadable()) {
-        DirectoryManager dm;
+        auto dm = DirectoryManager(nullptr);
         dm.setDirectory(parentDir.absoluteFilePath());
+
         QString prev = dm.prevOfDir(model->directoryPath());
         if (!prev.isEmpty()) {
             if (!setDirectory(prev))

@@ -4,18 +4,16 @@
 
 class LinuxFsEvent : public QObject
 {
-public:
-    LinuxFsEvent(char* data, uint dataSize);
-    ~LinuxFsEvent();
+  public:
+    LinuxFsEvent(char *data, uint dataSize);
+    ~LinuxFsEvent() override;
 
-    uint dataSize() const;
-    void setDataSize(uint dataSize);
+    ND uint dataSize() const;
+       void setDataSize(uint dataSize);
+    ND char *data() const;
+       void  setData(char *data);
 
-    char *data() const;
-    void setData(char *data);
-
-private:
-    char* mData;
-    uint mDataSize;
-
+  private:
+    char *mData;
+    uint  mDataSize;
 };

@@ -13,29 +13,24 @@ class ImageAnimated : public Image
     explicit ImageAnimated(std::unique_ptr<DocumentInfo> info);
     ~ImageAnimated() override = default;
 
-    std::unique_ptr<QPixmap>      getPixmap() override;
-    QSharedPointer<QImage const> getImage() override;
-    QSharedPointer<QMovie>       getMovie();
-
-    int   height() override;
-    int   width() override;
-    QSize size() override;
-
-    bool isEditable();
-    bool isEdited();
-
+    ND auto getMovie() -> QSharedPointer<QMovie>;
+    ND auto getPixmap() -> std::unique_ptr<QPixmap> override;
+    ND auto getImage() -> QSharedPointer<QImage const> override;
+    ND int   height() const override;
+    ND int   width() const override;
+    ND QSize size() const override;
     ND int frameCount() const;
 
-  public slots:
+  public Q_SLOTS:
     bool save() override;
     bool save(QString destPath) override;
 
-  signals:
+  Q_SIGNALS:
     void frameChanged(QPixmap *);
 
   private:
-    QSize mSize;
     int   mFrameCount;
+    QSize mSize;
     QSharedPointer<QMovie> movie;
 
     void load() override;

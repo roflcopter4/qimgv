@@ -1,21 +1,20 @@
 #include "contextmenuitem.h"
 
 ContextMenuItem::ContextMenuItem(QWidget *parent)
-    : MenuItem(parent),
-      mAction()
+    : MenuItem(parent)
+{}
+
+ContextMenuItem::~ContextMenuItem() = default;
+
+void ContextMenuItem::setAction(QString const &action)
 {
-}
-
-ContextMenuItem::~ContextMenuItem() {
-}
-
-void ContextMenuItem::setAction(QString const &text) {
-    this->mAction = text;
+    mAction = action;
     setShortcutText(actionManager->shortcutForAction(mAction));
 }
 
-void ContextMenuItem::onPress() {
+void ContextMenuItem::onPress()
+{
     emit pressed();
-    if(!mAction.isEmpty())
+    if (!mAction.isEmpty())
         actionManager->invokeAction(mAction);
 }

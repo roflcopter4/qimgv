@@ -4,19 +4,17 @@
 // TODO: this class is kinda useless now. redesign?
 
 ImageAnimated::ImageAnimated(QString const &path)
-    : Image(path)
+    : Image(path),
+      mSize(0, 0)
 {
-    mSize.setWidth(0);
-    mSize.setHeight(0);
-    load();
+    ImageAnimated::load();
 }
 
 ImageAnimated::ImageAnimated(std::unique_ptr<DocumentInfo> info)
-    : Image(std::move(info))
+    : Image(std::move(info)),
+      mSize(0, 0)
 {
-    mSize.setWidth(0);
-    mSize.setHeight(0);
-    load();
+    ImageAnimated::load();
 }
 
 void ImageAnimated::load()
@@ -76,12 +74,12 @@ bool ImageAnimated::save()
 // in case of gif returns current frame
 std::unique_ptr<QPixmap> ImageAnimated::getPixmap()
 {
-    return std::make_unique<QPixmap>(mPath, mDocInfo->format().toStdString().c_str());
+    return std::make_unique<QPixmap>(mPath, mDocInfo->format());
 }
 
 QSharedPointer<QImage const> ImageAnimated::getImage()
 {
-    return QSharedPointer<QImage const>(new QImage (mPath, mDocInfo->format().toStdString().c_str()));
+    return QSharedPointer<QImage const>(new QImage (mPath, mDocInfo->format()));
 }
 
 QSharedPointer<QMovie> ImageAnimated::getMovie()
@@ -91,17 +89,17 @@ QSharedPointer<QMovie> ImageAnimated::getMovie()
     return movie;
 }
 
-int ImageAnimated::height()
+int ImageAnimated::height() const
 {
     return mSize.height();
 }
 
-int ImageAnimated::width()
+int ImageAnimated::width() const
 {
     return mSize.width();
 }
 
-QSize ImageAnimated::size()
+QSize ImageAnimated::size() const
 {
     return mSize;
 }

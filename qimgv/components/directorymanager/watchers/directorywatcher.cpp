@@ -1,9 +1,10 @@
-#include "directorywatcher_p.h"
+#include "../DirectoryManager.h"
+#include "DirectoryWatcher_p.h"
 
 #if defined __linux__
 # include "linux/linuxwatcher.h"
 #elif defined Q_OS_WIN32
-# include "windows/windowswatcher.h"
+# include "windows/WindowsDirectoryWatcher.h"
 #elif defined Q_OS_APPLE
   // TODO: implement this
 # include "dummywatcher.h"
@@ -15,43 +16,66 @@
 # include "dummywatcher.h"
 #endif
 
-DirectoryWatcherPrivate::DirectoryWatcherPrivate(DirectoryWatcher *qq, WatcherWorker *w)
+/****************************************************************************************/
+
+DirectoryWatcherPrivate::DirectoryWatcherPrivate(DirectoryWatcher *qq, DirectoryWatcherWorker *w)
     : q_ptr(qq),
       worker(w),
-      workerThread(new QThread())
+      workerThread(new QThread(this))
 {
+}
+
+DirectoryWatcherPrivate::~DirectoryWatcherPrivate()
+{
+    workerThread->wait();
+}
+
+void DirectoryWatcherPrivate::setWatchPath(QString path)
+{
+    currentDirectory = std::move(path);
+}
+
+/****************************************************************************************/
+
+DirectoryWatcher::DirectoryWatcher(DirectoryWatcherPrivate *ptr, DirectoryManager *parent)
+    : QObject(parent),
+      d_ptr(ptr)
+{
+    Q_D(DirectoryWatcher);
+    connect(d->worker.get(), &DirectoryWatcherWorker::started,  this,   &DirectoryWatcher::observingStarted);
+    connect(d->worker.get(), &DirectoryWatcherWorker::finished, this,   &DirectoryWatcher::observingStopped);
 }
 
 DirectoryWatcher::~DirectoryWatcher()
 {
-    delete d_ptr;
-    d_ptr = nullptr;
+    stopObserving();
+    DirectoryWatcher::setWatchPath(QString());
 }
 
 // Move this function to some creational class
-DirectoryWatcher *DirectoryWatcher::newInstance()
+DirectoryWatcher *DirectoryWatcher::newInstance(DirectoryManager *parent)
 {
     DirectoryWatcher *watcher;
 
 #if defined Q_OS_LINUX
-    watcher = new LinuxWatcher();
+    watcher = new LinuxWatcher(parent);
 #elif defined Q_OS_WIN32
-    watcher = new WindowsWatcher();
+    watcher = new WindowsDirectoryWatcher(parent);
 #elif defined Q_OS_APPLE
-      watcher = new DummyWatcher();
+      watcher = new DummyDirectoryWatcher(parent);
 #elif defined Q_OS_UNIX
-      watcher = new DummyWatcher();
+      watcher = new DummyDirectoryWatcher(parent);
 #else
-      watcher = new DummyWatcher();
+      watcher = new DummyDirectoryWatcher(parent);
 #endif
 
     return watcher;
 }
 
-void DirectoryWatcher::setWatchPath(QString path)
+void DirectoryWatcher::setWatchPath(QString const &path)
 {
     Q_D(DirectoryWatcher);
-    d->currentDirectory = std::move(path);
+    d->setWatchPath(path);
 }
 
 QString DirectoryWatcher::watchPath() const
@@ -83,7 +107,3 @@ bool DirectoryWatcher::isObserving() const
     return d->workerThread->isRunning();
 }
 
-DirectoryWatcher::DirectoryWatcher(DirectoryWatcherPrivate *ptr)
-{
-    d_ptr = ptr;
-}

@@ -8,9 +8,5 @@ LoaderRunnable::LoaderRunnable(QString path)
 
 void LoaderRunnable::run()
 {
-    //QElapsedTimer t;
-    //t.start();
-    auto image = ImageFactory::createImage(path_);
-    //qDebug() << u"L:" << t.elapsed();
-    emit finished(std::move(image), path_);
+    emit finished(ImageFactory::createImage(path_), path_);
 }

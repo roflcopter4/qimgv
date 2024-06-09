@@ -2,21 +2,23 @@
 
 #include <QObject>
 
-class WatcherWorker : public QObject
+class DirectoryWatcherWorker : public QObject
 {
     Q_OBJECT
-public:
-    WatcherWorker();
+
+  public:
+    DirectoryWatcherWorker();
+    ~DirectoryWatcherWorker() override = default;
     virtual void run() = 0;
 
-public Q_SLOTS:
+  public Q_SLOTS:
     bool setRunning(bool running);
 
-Q_SIGNALS:
+  Q_SIGNALS:
     void error(QString const &errorMessage);
     void started();
     void finished();
 
-protected:
+  protected:
     std::atomic_bool isRunning = false;
 };

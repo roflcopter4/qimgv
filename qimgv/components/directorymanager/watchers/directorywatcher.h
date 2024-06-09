@@ -3,21 +3,21 @@
 #include <qmetatype.h>
 #include <QObject>
 
+class DirectoryManager;
 class DirectoryWatcherPrivate;
 
 class DirectoryWatcher : public QObject
 {
     Q_OBJECT
+    Q_DECLARE_PRIVATE(DirectoryWatcher)
 
   public:
-    static DirectoryWatcher *newInstance();
+    static DirectoryWatcher *newInstance(DirectoryManager *parent);
     ~DirectoryWatcher() override;
 
-    virtual void    setWatchPath(QString path);
-    ND virtual auto watchPath() const -> QString;
-    ND bool         isObserving() const;
-
-    DELETE_COPY_MOVE_CONSTRUCTORS(DirectoryWatcher);
+    void    setWatchPath(QString const &path);
+    ND auto watchPath() const -> QString;
+    ND bool isObserving() const;
 
   public Q_SLOTS:
     void observe();
@@ -33,9 +33,7 @@ class DirectoryWatcher : public QObject
     void observingStopped();
 
   protected:
-    DirectoryWatcher(DirectoryWatcherPrivate *ptr);
-    DirectoryWatcherPrivate *d_ptr;
+    explicit DirectoryWatcher(DirectoryWatcherPrivate *ptr, DirectoryManager *parent);
 
-  private:
-    Q_DECLARE_PRIVATE(DirectoryWatcher)
+    std::unique_ptr<DirectoryWatcherPrivate> d_ptr;
 };

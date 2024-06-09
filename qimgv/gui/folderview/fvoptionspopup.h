@@ -3,7 +3,7 @@
 #include <QWidget>
 #include <QStyleOption>
 #include <QPainter>
-#include "components/actionmanager/actionmanager.h"
+#include "components/actionManager/ActionManager.h"
 #include "gui/customwidgets/floatingwidget.h"
 #include <QDebug>
 

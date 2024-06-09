@@ -7,10 +7,14 @@ FloatingMessageProxy::FloatingMessageProxy(FloatingWidgetContainer *parent)
 }
 
 FloatingMessageProxy::~FloatingMessageProxy()
+#if 0
 {
     if (overlay)
         overlay->deleteLater();
 }
+#else
+    = default;
+#endif
 
 void FloatingMessageProxy::showMessage(QString const &text, FloatingMessageIcon icon, int duration)
 {
@@ -18,10 +22,11 @@ void FloatingMessageProxy::showMessage(QString const &text, FloatingMessageIcon 
     overlay->showMessage(text, icon, duration);
 }
 
-void FloatingMessageProxy::showMessage(QString const         &text,
-                                       FloatingWidgetPosition position,
-                                       FloatingMessageIcon    icon,
-                                       int                    duration)
+void FloatingMessageProxy::showMessage(
+      QString const         &text,
+      FloatingWidgetPosition position,
+      FloatingMessageIcon    icon,
+      int                    duration)
 {
     init();
     overlay->showMessage(text, position, icon, duration);

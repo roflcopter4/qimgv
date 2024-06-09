@@ -30,8 +30,8 @@
 #include "gui/dialogs/resizedialog.h"
 #include "gui/centralwidget.h"
 #include "gui/dialogs/filereplacedialog.h"
-#include "components/actionmanager/actionmanager.h"
-#include "settings.h"
+#include "components/actionManager/ActionManager.h"
+#include "Settings.h"
 #include "gui/dialogs/settingsdialog.h"
 #include "gui/viewers/documentwidget.h"
 #include "gui/folderview/folderviewproxy.h"
@@ -76,50 +76,52 @@ class MW Q_DECL_FINAL : public FloatingWidgetContainer
     void showAnimation(QSharedPointer<QMovie> const &movie);
     void showVideo(QString const &file);
 
-    void setCurrentInfo(qsizetype fileIndex, qsizetype fileCount, QString const &filePath, QString const &fileName, QSize imageSize, qint64 fileSize, bool slideshow, bool shuffle, bool edited);
     void setExifInfo(QMap<QString, QString> const &);
+    void setCurrentInfo(qsizetype fileIndex, qsizetype fileCount,
+                        QString const &filePath, QString const &fileName,
+                        QSize imageSize, qint64 fileSize,
+                        bool slideshow, bool shuffle, bool edited);
 
-    QSharedPointer<FolderViewProxy>     getFolderView();
-    QSharedPointer<ThumbnailStripProxy> getThumbnailPanel();
+    FolderViewProxy *getFolderView();
+    ThumbnailStripProxy *getThumbnailPanel();
 
     ND ViewMode currentViewMode() const;
 
     bool showConfirmation(QString const &title, QString const &msg);
 
-    DialogResult fileReplaceDialog(QString const &source, QString const &dest, FileReplaceMode mode, bool multiple);
+    DialogResult fileReplaceDialog(QString const &source, QString const &dest,
+                                   FileReplaceMode mode, bool multiple);
 
   private:
-    int  currentDisplay;
-    bool cropPanelActive;
-    bool showInfoBarFullscreen;
-    bool showInfoBarWindowed;
-    bool maximized;
+    bool cropPanelActive       = false;
+    bool showInfoBarFullscreen = false;
+    bool showInfoBarWindowed   = false;
+    bool maximized             = false;
 
-    PanelPosition   panelPosition;
-    ActiveSidePanel activeSidePanel;
+    PanelPosition   panelPosition   = PanelPosition::TOP;
+    ActiveSidePanel activeSidePanel = ActiveSidePanel::NONE;
+    qsizetype       currentDisplay  = 0;
 
-    QTimer          *windowGeometryChangeTimer;
-    QHBoxLayout     *layout;
+    QHBoxLayout                *layout; // Initialized in constructor
+    QTimer                     *windowGeometryChangeTimer = nullptr;
+    ViewerWidget               *viewerWidget              = nullptr;
+    DocumentWidget             *docWidget                 = nullptr;
+    FolderViewProxy            *folderView                = nullptr;
+    CentralWidget              *centralWidget             = nullptr;
+    InfoBarProxy               *infoBarWindowed           = nullptr;
+    SidePanel                  *sidePanel                 = nullptr;
+    CropPanel                  *cropPanel                 = nullptr;
+    CropOverlay                *cropOverlay               = nullptr;
+    SaveConfirmOverlay         *saveOverlay               = nullptr;
+    ChangelogWindow            *changelogWindow           = nullptr;
+    CopyOverlay                *copyOverlay               = nullptr;
+    RenameOverlay              *renameOverlay             = nullptr;
+    ImageInfoOverlayProxy      *imageInfoOverlay          = nullptr;
+    ControlsOverlay            *controlsOverlay           = nullptr;
+    FullscreenInfoOverlayProxy *infoBarFullscreen         = nullptr;
+    FloatingMessageProxy       *floatingMessage           = nullptr;
 
-    QSharedPointer<ViewerWidget>    viewerWidget;
-    QSharedPointer<DocumentWidget>  docWidget;
-    QSharedPointer<FolderViewProxy> folderView;
-    QSharedPointer<CentralWidget>   centralWidget;
-    QSharedPointer<InfoBarProxy>    infoBarWindowed;
-
-    SidePanel                  *sidePanel;
-    CropPanel                  *cropPanel;
-    CropOverlay                *cropOverlay;
-    SaveConfirmOverlay         *saveOverlay;
-    ChangelogWindow            *changelogWindow;
-    CopyOverlay                *copyOverlay;
-    RenameOverlay              *renameOverlay;
-    ImageInfoOverlayProxy      *imageInfoOverlay;
-    ControlsOverlay            *controlsOverlay;
-    FullscreenInfoOverlayProxy *infoBarFullscreen;
-    FloatingMessageProxy       *floatingMessage;
-
-    CurrentInfo info;
+    CurrentInfo info{};
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     QDesktopWidget desktopWidget;
 #endif
@@ -140,7 +142,7 @@ class MW Q_DECL_FINAL : public FloatingWidgetContainer
     void preShowResize(QSize sz);
     void setInteractionEnabled(bool mode);
 
-  private slots:
+  private Q_SLOTS:
     void updateCurrentDisplay();
     void readSettings();
     void adaptToWindowState();
@@ -164,7 +166,8 @@ class MW Q_DECL_FINAL : public FloatingWidgetContainer
     void leaveEvent(QEvent *event) override;
 
     // bool focusNextPrevChild(bool);
-  signals:
+
+  Q_SIGNALS:
     void opened(QString);
     void fullscreenStateChanged(bool);
     void copyRequested(QString);
@@ -207,7 +210,7 @@ class MW Q_DECL_FINAL : public FloatingWidgetContainer
     void setLoopPlayback(bool);
     void playbackFinished();
 
-  public slots:
+  public Q_SLOTS:
     void setupFullUi();
     void showDefault();
     void showCropPanel();

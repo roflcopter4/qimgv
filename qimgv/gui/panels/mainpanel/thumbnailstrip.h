@@ -20,7 +20,7 @@ class ThumbnailStrip final : public ThumbnailView
     Q_OBJECT
 
   public:
-    explicit ThumbnailStrip(QWidget *parent = nullptr);
+    explicit ThumbnailStrip(QWidget *parent);
 
     QSize itemSize();
     void  readSettings();
@@ -46,6 +46,5 @@ class ThumbnailStrip final : public ThumbnailView
     void addItemToLayout(ThumbnailWidget *widget, qsizetype pos) override;
     void removeItemFromLayout(qsizetype pos) override;
     void removeAll() override;
-
-    ThumbnailWidget *createThumbnailWidget() override;
+    auto createThumbnailWidget() -> ThumbnailWidget * override;
 };

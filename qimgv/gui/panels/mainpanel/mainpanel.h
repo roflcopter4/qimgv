@@ -15,7 +15,7 @@ public:
     void  setExitButtonEnabled(bool mode);
     void  setupThumbnailStrip();
     QSize sizeHint() const override;
-    auto  getThumbnailStrip() -> QSharedPointer<ThumbnailStripProxy>;
+    auto  getThumbnailStrip() -> ThumbnailStripProxy *;
 
 public slots:
     void readSettings();
@@ -29,7 +29,7 @@ private slots:
 private:
     QVBoxLayout *buttonsLayout;
     QWidget *buttonsWidget;
-    QSharedPointer<ThumbnailStripProxy> thumbnailStrip;
+    ThumbnailStripProxy *thumbnailStrip;
     ActionButton *openButton, *settingsButton, *exitButton, *folderViewButton, *pinButton;
 
 protected:

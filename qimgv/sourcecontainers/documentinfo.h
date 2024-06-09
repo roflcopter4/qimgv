@@ -10,7 +10,7 @@
 #include <cmath>
 #include <cstring>
 #include "utils/stuff.h"
-#include "settings.h"
+#include "Settings.h"
 
 #ifdef USE_EXIV2
 
@@ -26,7 +26,7 @@
 #include "Common.h"
 
 
-enum class DocumentType {
+enum class DocumentType : uint8_t {
     NONE,
     STATIC,
     ANIMATED,
@@ -48,9 +48,9 @@ class DocumentInfo
     ND QMimeType    mimeType() const;
 
     // file extension (guessed from mime-type)
-    ND QString   format() const;
-    ND int       exifOrientation() const;
-    ND QDateTime lastModified() const;
+    ND QByteArray format() const;
+    ND QDateTime  lastModified() const;
+    ND int        exifOrientation() const;
 
     void refresh();
     void loadExifTags();
@@ -64,9 +64,9 @@ class DocumentInfo
 
   private:
     QFileInfo    fileInfo;
-    DocumentType mDocumentType;
+    QByteArray   mFormat;
     int          mOrientation;
-    QString      mFormat;
+    DocumentType mDocumentType;
     bool         exifLoaded;
 
     // guesses file type from its contents

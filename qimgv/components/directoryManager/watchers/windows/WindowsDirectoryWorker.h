@@ -7,22 +7,23 @@
 #endif
 #include <Windows.h>
 
-#include "../WatcherWorker.h"
+#include "../DirectoryWatcherWorker.h"
 #include <QDebug>
 #include <QObject>
 #include <QtClassHelperMacros>
 
-class WindowsWorker : public WatcherWorker
+class WindowsDirectoryWorker : public DirectoryWatcherWorker
 {
     Q_OBJECT
 
   public:
-    WindowsWorker() = default;
+    WindowsDirectoryWorker() = default;
+    ~WindowsDirectoryWorker() override = default;
 
     void setDirectoryHandle(HANDLE handle);
     void run() override;
 
-  signals:
+  Q_SIGNALS:
     void notifyEvent(PFILE_NOTIFY_INFORMATION);
 
   private:

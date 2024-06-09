@@ -1,12 +1,6 @@
 #include "documentwidget.h"
 
-namespace {
-QSharedPointer<ViewerWidget> global_ViewWidget;
-QSharedPointer<InfoBarProxy> global_InfoBar;
-QSharedPointer<MainPanel>    global_mainPanel;
-}
-
-DocumentWidget::DocumentWidget(QSharedPointer<ViewerWidget> const &viewWidget, QSharedPointer<InfoBarProxy> const &infoBar, QWidget *parent)
+DocumentWidget::DocumentWidget(ViewerWidget *viewWidget, InfoBarProxy *infoBar, QWidget *parent)
     : FloatingWidgetContainer(parent),
       mainPanel(nullptr),
       avoidPanelFlag(false),
@@ -29,22 +23,19 @@ DocumentWidget::DocumentWidget(QSharedPointer<ViewerWidget> const &viewWidget, Q
     setMouseTracking(true);
 
     mViewWidget = viewWidget;
-    global_ViewWidget = mViewWidget;
     //mViewWidget->setParent(this);
-    layout->addWidget(mViewWidget.get());
+    layout->addWidget(mViewWidget);
     mViewWidget->show();
 
     mInfoBar = infoBar;
-    global_InfoBar = mInfoBar;
     //mInfoBar->setParent(this);
-    layoutRoot->addWidget(mInfoBar.get());
-    setFocusProxy(mViewWidget.get());
+    layoutRoot->addWidget(mInfoBar);
+    setFocusProxy(mViewWidget);
 
     setInteractionEnabled(true);
 
-    mainPanel = QSharedPointer<MainPanel>(new MainPanel(this));
-    global_mainPanel = (mainPanel);
-    connect(mainPanel.get(), &MainPanel::pinned, this, &DocumentWidget::setPanelPinned);
+    mainPanel = new MainPanel(this);
+    connect(mainPanel, &MainPanel::pinned, this, &DocumentWidget::setPanelPinned);
 
     connect(settings, &Settings::settingsChanged, this, &DocumentWidget::readSettings);
     readSettings();
@@ -54,7 +45,7 @@ DocumentWidget::~DocumentWidget()
 {
 }
 
-QSharedPointer<ViewerWidget> &DocumentWidget::viewWidget()
+ViewerWidget *DocumentWidget::viewWidget()
 {
     return mViewWidget;
 }
@@ -82,10 +73,10 @@ void DocumentWidget::setPanelPinned(bool mode)
         return;
     if (!mode) { // unpin
         if (mPanelPinned)
-            layout->removeWidget(mainPanel.get());
+            layout->removeWidget(mainPanel);
         mainPanel->setLayoutManaged(false);
     } else { // pin
-        layout->insertWidget(1, mainPanel.get());
+        layout->insertWidget(1, mainPanel);
         switch (settings->panelPosition()) {
         case PanelPosition::TOP:
             layout->setDirection(QBoxLayout::BottomToTop);
@@ -111,7 +102,7 @@ bool DocumentWidget::panelPinned() const
     return mPanelPinned;
 }
 
-QSharedPointer<ThumbnailStripProxy> DocumentWidget::thumbPanel() const
+ThumbnailStripProxy *DocumentWidget::thumbPanel() const
 {
     return mainPanel->getThumbnailStrip();
 }

@@ -71,10 +71,10 @@ void ThumbnailWidget::reset()
     update();
 }
 
-void ThumbnailWidget::setThumbStyle(ThumbnailStyle _style)
+void ThumbnailWidget::setThumbStyle(ThumbnailStyle style)
 {
-    if (thumbStyle != _style) {
-        thumbStyle = _style;
+    if (thumbStyle != style) {
+        thumbStyle = style;
         updateBoundingRect();
         updateThumbnailDrawPosition();
         setupTextLayout();
@@ -104,10 +104,10 @@ QSizeF ThumbnailWidget::effectiveSizeHint(Qt::SizeHint which, QSizeF const &cons
     return sizeHint(which, constraint);
 }
 
-void ThumbnailWidget::setThumbnail(QSharedPointer<Thumbnail> newThumbnail)
+void ThumbnailWidget::setThumbnail(QSharedPointer<Thumbnail> const &newThumbnail)
 {
     if (newThumbnail) {
-        thumbnail = std::move(newThumbnail);
+        thumbnail = newThumbnail;
         isLoaded  = true;
         updateThumbnailDrawPosition();
         setupTextLayout();
@@ -228,6 +228,7 @@ void ThumbnailWidget::paint(QPainter *painter, QStyleOptionGraphicsItem const *,
         if (thumbStyle != ThumbnailStyle::SIMPLE)
             drawLabel(painter);
     }
+
     if (isDropHovered())
         drawDropHover(painter);
 }
@@ -342,16 +343,13 @@ void ThumbnailWidget::drawThumbnail(QPainter *painter, QPixmap const *pixmap)
 
 void ThumbnailWidget::drawIcon(QPainter *painter, QPixmap const *pixmap)
 {
-    QPointF drawPosCentered(width() / 2 - pixmap->width() / (2 * pixmap->devicePixelRatioF()),
-                            height() / 2 - pixmap->height() / (2 * pixmap->devicePixelRatioF()));
+    QPointF drawPosCentered(width()  / 2.0 - pixmap->width()  / (2.0 * pixmap->devicePixelRatioF()),
+                            height() / 2.0 - pixmap->height() / (2.0 * pixmap->devicePixelRatioF()));
     painter->drawPixmap(drawPosCentered, *pixmap, QRectF(QPoint(0, 0), pixmap->size()));
 }
 
-QSizeF ThumbnailWidget::sizeHint(Qt::SizeHint which, QSizeF const &constraint) const
+QSizeF ThumbnailWidget::sizeHint(Qt::SizeHint, QSizeF const &) const
 {
-    Q_UNUSED(which);
-    Q_UNUSED(constraint);
-
     return boundingRect().size();
 }
 
@@ -389,14 +387,17 @@ void ThumbnailWidget::updateThumbnailDrawPosition()
             pixmapSize = thumbnail->pixmap()->size() / qApp->devicePixelRatio();
         else
             pixmapSize = thumbnail->pixmap()->size().scaled(mThumbnailSize, mThumbnailSize, Qt::KeepAspectRatio);
+
         bool verticalFit = (pixmapSize.height() >= pixmapSize.width());
         topLeft.setX((width() - pixmapSize.width()) / 2.0);
+
         if (thumbStyle == ThumbnailStyle::SIMPLE)
             topLeft.setY((height() - pixmapSize.height()) / 2.0);
         else if (thumbStyle == ThumbnailStyle::NORMAL_CENTERED && !verticalFit)
             topLeft.setY((height() - pixmapSize.height()) / 2.0 - textHeight);
         else // NORMAL - snap thumbnail to the filename label
             topLeft.setY(padding + marginY + mThumbnailSize - pixmapSize.height());
+
         drawRectCentered = QRect(topLeft, pixmapSize);
     }
 }

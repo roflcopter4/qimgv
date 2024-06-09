@@ -2,7 +2,7 @@
 
 DirectoryPresenter::DirectoryPresenter(QObject *parent)
     : QObject(parent),
-      thumbnailer(new Thumbnailer),
+      thumbnailer(new Thumbnailer(this)),
       mShowDirs(false)
 {
     connect(thumbnailer, &Thumbnailer::thumbnailReady, this, &DirectoryPresenter::onThumbnailReady);
@@ -14,17 +14,20 @@ DirectoryPresenter::~DirectoryPresenter()
 
 void DirectoryPresenter::unsetModel()
 {
-    disconnect(model, &DirectoryModel::fileRemoved,  this, &DirectoryPresenter::onFileRemoved);
-    disconnect(model, &DirectoryModel::fileAdded,    this, &DirectoryPresenter::onFileAdded);
-    disconnect(model, &DirectoryModel::fileRenamed,  this, &DirectoryPresenter::onFileRenamed);
-    disconnect(model, &DirectoryModel::fileModified, this, &DirectoryPresenter::onFileModified);
-    disconnect(model, &DirectoryModel::dirRemoved,   this, &DirectoryPresenter::onDirRemoved);
-    disconnect(model, &DirectoryModel::dirAdded,     this, &DirectoryPresenter::onDirAdded);
-    disconnect(model, &DirectoryModel::dirRenamed,   this, &DirectoryPresenter::onDirRenamed);
+    if (!model)
+        return;
+
+    disconnect(model.get(), &DirectoryModel::fileRemoved,  this, &DirectoryPresenter::onFileRemoved);
+    disconnect(model.get(), &DirectoryModel::fileAdded,    this, &DirectoryPresenter::onFileAdded);
+    disconnect(model.get(), &DirectoryModel::fileRenamed,  this, &DirectoryPresenter::onFileRenamed);
+    disconnect(model.get(), &DirectoryModel::fileModified, this, &DirectoryPresenter::onFileModified);
+    disconnect(model.get(), &DirectoryModel::dirRemoved,   this, &DirectoryPresenter::onDirRemoved);
+    disconnect(model.get(), &DirectoryModel::dirAdded,     this, &DirectoryPresenter::onDirAdded);
+    disconnect(model.get(), &DirectoryModel::dirRenamed,   this, &DirectoryPresenter::onDirRenamed);
     //delete model;
     //delete view;
     //view = nullptr;
-    model = nullptr;
+    model.reset();
     // also empty view?
 }
 
@@ -43,7 +46,7 @@ void DirectoryPresenter::setView(IDirectoryView *newView)
 {
     if (view)
         return;
-    view = std::move(newView);
+    view = newView;
     if (model) {
         auto n = mShowDirs ? model->totalCount() : model->fileCount();
         view->populate(n);
@@ -68,23 +71,23 @@ void DirectoryPresenter::setView(IDirectoryView *newView)
 #endif
 }
 
-void DirectoryPresenter::setModel(DirectoryModel *newModel)
+void DirectoryPresenter::setModel(QSharedPointer<DirectoryModel> const &newModel)
 {
     if (model)
         unsetModel();
     if (!newModel)
         return;
-    model = std::move(newModel);
+    model = newModel;
     populateView();
 
     // filesystem changes
-    connect(model, &DirectoryModel::fileRemoved,  this, &DirectoryPresenter::onFileRemoved);
-    connect(model, &DirectoryModel::fileAdded,    this, &DirectoryPresenter::onFileAdded);
-    connect(model, &DirectoryModel::fileRenamed,  this, &DirectoryPresenter::onFileRenamed);
-    connect(model, &DirectoryModel::fileModified, this, &DirectoryPresenter::onFileModified);
-    connect(model, &DirectoryModel::dirRemoved,   this, &DirectoryPresenter::onDirRemoved);
-    connect(model, &DirectoryModel::dirAdded,     this, &DirectoryPresenter::onDirAdded);
-    connect(model, &DirectoryModel::dirRenamed,   this, &DirectoryPresenter::onDirRenamed);
+    connect(model.get(), &DirectoryModel::fileRemoved,  this, &DirectoryPresenter::onFileRemoved);
+    connect(model.get(), &DirectoryModel::fileAdded,    this, &DirectoryPresenter::onFileAdded);
+    connect(model.get(), &DirectoryModel::fileRenamed,  this, &DirectoryPresenter::onFileRenamed);
+    connect(model.get(), &DirectoryModel::fileModified, this, &DirectoryPresenter::onFileModified);
+    connect(model.get(), &DirectoryModel::dirRemoved,   this, &DirectoryPresenter::onDirRemoved);
+    connect(model.get(), &DirectoryModel::dirAdded,     this, &DirectoryPresenter::onDirAdded);
+    connect(model.get(), &DirectoryModel::dirRenamed,   this, &DirectoryPresenter::onDirRenamed);
 }
 
 void DirectoryPresenter::reloadModel()
@@ -251,7 +254,7 @@ void DirectoryPresenter::generateThumbnails(IDirectoryView::SelectionList const 
 
             ImageLib::recolor(*pixmap, settings->colorScheme().icons);
 
-            auto thumb = Thumbnail *(new Thumbnail(model->dirNameAt(i), QS("Folder"), size, QSharedPointer<QPixmap>(pixmap)));
+            auto thumb = QSharedPointer<Thumbnail>(new Thumbnail(model->dirNameAt(i), QS("Folder"), size, QSharedPointer<QPixmap>(pixmap)));
             // ^----------------------------------------------------------------
             view->setThumbnail(i, std::move(thumb));
         } else {
@@ -261,7 +264,7 @@ void DirectoryPresenter::generateThumbnails(IDirectoryView::SelectionList const 
     }
 }
 
-void DirectoryPresenter::onThumbnailReady(Thumbnail *thumb, QString const &filePath) const
+void DirectoryPresenter::onThumbnailReady(QSharedPointer<Thumbnail> const &thumb, QString const &filePath) const
 {
     if (!view || !model)
         return;

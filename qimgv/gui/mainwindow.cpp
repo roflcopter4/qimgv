@@ -1,24 +1,14 @@
 #include "mainwindow.h"
+#include <stdexcept>
 
 // TODO: nuke this and rewrite
 
 MW::MW(QWidget *parent)
     : FloatingWidgetContainer(parent),
-      currentDisplay(0),
-      maximized(false),
-      activeSidePanel(ActiveSidePanel::NONE),
-      windowGeometryChangeTimer(new QTimer(this)),
-      cropPanel(nullptr),
-      cropOverlay(nullptr),
-      saveOverlay(nullptr),
-      copyOverlay(nullptr),
-      renameOverlay(nullptr),
-      imageInfoOverlay(nullptr),
-      infoBarFullscreen(nullptr),
-      floatingMessage(nullptr)
+      layout(new QHBoxLayout(this)),
+      windowGeometryChangeTimer(new QTimer(this))
 {
     setAttribute(Qt::WA_TranslucentBackground, true);
-    layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     setMinimumSize(10, 10);
@@ -48,14 +38,9 @@ MW::MW(QWidget *parent)
 
 MW::~MW()
 {
-}
-
-namespace {
-QSharedPointer<ViewerWidget>    global_viewerWidget;
-QSharedPointer<InfoBarProxy>    global_infoBarWindowed;
-QSharedPointer<DocumentWidget>  global_docWidget;
-QSharedPointer<FolderViewProxy> global_folderView;
-QSharedPointer<CentralWidget>   global_centralWidget;
+    util::DeleteAndNullify(infoBarFullscreen);
+    util::DeleteAndNullify(imageInfoOverlay);
+    util::DeleteAndNullify(floatingMessage);
 }
 
 /*                                                             |--[ImageViewer]
@@ -68,62 +53,51 @@ QSharedPointer<CentralWidget>   global_centralWidget;
  */
 void MW::setupUi()
 {
-    viewerWidget    = QSharedPointer<ViewerWidget>(new ViewerWidget());
-    infoBarWindowed = QSharedPointer<InfoBarProxy>(new InfoBarProxy());
-    docWidget       = QSharedPointer<DocumentWidget>(new DocumentWidget(viewerWidget, infoBarWindowed));
-    folderView      = QSharedPointer<FolderViewProxy>(new FolderViewProxy());
+    viewerWidget    = new ViewerWidget(this);
+    infoBarWindowed = new InfoBarProxy(this);
+    docWidget       = new DocumentWidget(viewerWidget, infoBarWindowed, this);
+    folderView      = new FolderViewProxy(this);
     
-    global_viewerWidget    = viewerWidget;
-    global_infoBarWindowed = infoBarWindowed;
-    global_docWidget       = docWidget;
-    global_folderView      = folderView;
+    connect(folderView, &FolderViewProxy::sortingSelected,    this, &MW::sortingSelected);
+    connect(folderView, &FolderViewProxy::directorySelected,  this, &MW::opened);
+    connect(folderView, &FolderViewProxy::copyUrlsRequested,  this, &MW::copyUrlsRequested);
+    connect(folderView, &FolderViewProxy::moveUrlsRequested,  this, &MW::moveUrlsRequested);
+    connect(folderView, &FolderViewProxy::showFoldersChanged, this, &MW::showFoldersChanged);
 
-    //viewerWidget    = new ViewerWidget(this);
-    //infoBarWindowed = new InfoBarProxy(this);
-    //docWidget       = new DocumentWidget(viewerWidget, infoBarWindowed);
-    //folderView      = new FolderViewProxy(this);
-
-    connect(folderView.get(), &FolderViewProxy::sortingSelected,    this, &MW::sortingSelected);
-    connect(folderView.get(), &FolderViewProxy::directorySelected,  this, &MW::opened);
-    connect(folderView.get(), &FolderViewProxy::copyUrlsRequested,  this, &MW::copyUrlsRequested);
-    connect(folderView.get(), &FolderViewProxy::moveUrlsRequested,  this, &MW::moveUrlsRequested);
-    connect(folderView.get(), &FolderViewProxy::showFoldersChanged, this, &MW::showFoldersChanged);
-
-    controlsOverlay   = new ControlsOverlay(docWidget.get());
-    infoBarFullscreen = new FullscreenInfoOverlayProxy(viewerWidget.get());
-    imageInfoOverlay  = new ImageInfoOverlayProxy(viewerWidget.get());
-    floatingMessage   = new FloatingMessageProxy(viewerWidget.get()); // todo: use additional one for folderview?
+    controlsOverlay   = new ControlsOverlay(docWidget);
+    infoBarFullscreen = new FullscreenInfoOverlayProxy(viewerWidget);
+    imageInfoOverlay  = new ImageInfoOverlayProxy(viewerWidget);
+    floatingMessage   = new FloatingMessageProxy(viewerWidget); // todo: use additional one for folderview?
     sidePanel         = new SidePanel(this);
 
-    centralWidget = QSharedPointer<CentralWidget>(new CentralWidget(docWidget.get(), folderView.get(), this));
-    global_centralWidget = centralWidget;
-    layout->addWidget(centralWidget.get());
+    centralWidget = new CentralWidget(docWidget, folderView, this);
+    layout->addWidget(centralWidget);
     layout->addWidget(sidePanel);
 
-    connect(viewerWidget.get(), &ViewerWidget::scalingRequested,   this, &MW::scalingRequested);
-    connect(viewerWidget.get(), &ViewerWidget::draggedOut,         this, qOverload<>(&MW::draggedOut));
-    connect(viewerWidget.get(), &ViewerWidget::playbackFinished,   this, &MW::playbackFinished);
-    connect(viewerWidget.get(), &ViewerWidget::showScriptSettings, this, &MW::showScriptSettings);
+    connect(viewerWidget, &ViewerWidget::scalingRequested,   this, &MW::scalingRequested);
+    connect(viewerWidget, &ViewerWidget::draggedOut,         this, qOverload<>(&MW::draggedOut));
+    connect(viewerWidget, &ViewerWidget::playbackFinished,   this, &MW::playbackFinished);
+    connect(viewerWidget, &ViewerWidget::showScriptSettings, this, &MW::showScriptSettings);
 
-    connect(this, &MW::zoomIn,                 viewerWidget.get(), &ViewerWidget::zoomIn);
-    connect(this, &MW::zoomOut,                viewerWidget.get(), &ViewerWidget::zoomOut);
-    connect(this, &MW::zoomInCursor,           viewerWidget.get(), &ViewerWidget::zoomInCursor);
-    connect(this, &MW::zoomOutCursor,          viewerWidget.get(), &ViewerWidget::zoomOutCursor);
-    connect(this, &MW::scrollUp,               viewerWidget.get(), &ViewerWidget::scrollUp);
-    connect(this, &MW::scrollDown,             viewerWidget.get(), &ViewerWidget::scrollDown);
-    connect(this, &MW::scrollLeft,             viewerWidget.get(), &ViewerWidget::scrollLeft);
-    connect(this, &MW::scrollRight,            viewerWidget.get(), &ViewerWidget::scrollRight);
-    connect(this, &MW::pauseVideo,             viewerWidget.get(), &ViewerWidget::pauseResumePlayback);
-    connect(this, &MW::stopPlayback,           viewerWidget.get(), &ViewerWidget::stopPlayback);
-    connect(this, &MW::seekVideoForward,       viewerWidget.get(), &ViewerWidget::seekForward);
-    connect(this, &MW::seekVideoBackward,      viewerWidget.get(), &ViewerWidget::seekBackward);
-    connect(this, &MW::frameStep,              viewerWidget.get(), &ViewerWidget::frameStep);
-    connect(this, &MW::frameStepBack,          viewerWidget.get(), &ViewerWidget::frameStepBack);
-    connect(this, &MW::toggleMute,             viewerWidget.get(), &ViewerWidget::toggleMute);
-    connect(this, &MW::volumeUp,               viewerWidget.get(), &ViewerWidget::volumeUp);
-    connect(this, &MW::volumeDown,             viewerWidget.get(), &ViewerWidget::volumeDown);
-    connect(this, &MW::toggleTransparencyGrid, viewerWidget.get(), &ViewerWidget::toggleTransparencyGrid);
-    connect(this, &MW::setLoopPlayback,        viewerWidget.get(), &ViewerWidget::setLoopPlayback);
+    connect(this, &MW::zoomIn,                 viewerWidget, &ViewerWidget::zoomIn);
+    connect(this, &MW::zoomOut,                viewerWidget, &ViewerWidget::zoomOut);
+    connect(this, &MW::zoomInCursor,           viewerWidget, &ViewerWidget::zoomInCursor);
+    connect(this, &MW::zoomOutCursor,          viewerWidget, &ViewerWidget::zoomOutCursor);
+    connect(this, &MW::scrollUp,               viewerWidget, &ViewerWidget::scrollUp);
+    connect(this, &MW::scrollDown,             viewerWidget, &ViewerWidget::scrollDown);
+    connect(this, &MW::scrollLeft,             viewerWidget, &ViewerWidget::scrollLeft);
+    connect(this, &MW::scrollRight,            viewerWidget, &ViewerWidget::scrollRight);
+    connect(this, &MW::pauseVideo,             viewerWidget, &ViewerWidget::pauseResumePlayback);
+    connect(this, &MW::stopPlayback,           viewerWidget, &ViewerWidget::stopPlayback);
+    connect(this, &MW::seekVideoForward,       viewerWidget, &ViewerWidget::seekForward);
+    connect(this, &MW::seekVideoBackward,      viewerWidget, &ViewerWidget::seekBackward);
+    connect(this, &MW::frameStep,              viewerWidget, &ViewerWidget::frameStep);
+    connect(this, &MW::frameStepBack,          viewerWidget, &ViewerWidget::frameStepBack);
+    connect(this, &MW::toggleMute,             viewerWidget, &ViewerWidget::toggleMute);
+    connect(this, &MW::volumeUp,               viewerWidget, &ViewerWidget::volumeUp);
+    connect(this, &MW::volumeDown,             viewerWidget, &ViewerWidget::volumeDown);
+    connect(this, &MW::toggleTransparencyGrid, viewerWidget, &ViewerWidget::toggleTransparencyGrid);
+    connect(this, &MW::setLoopPlayback,        viewerWidget, &ViewerWidget::setLoopPlayback);
 }
 
 void MW::setupFullUi()
@@ -139,8 +113,9 @@ void MW::setupCropPanel()
 {
     if (cropPanel)
         return;
-    cropOverlay = new CropOverlay(viewerWidget.get());
+    cropOverlay = new CropOverlay(viewerWidget);
     cropPanel   = new CropPanel(cropOverlay, this);
+
     connect(cropPanel, &CropPanel::cancel,      this, &MW::hideCropPanel);
     connect(cropPanel, &CropPanel::crop,        this, &MW::hideCropPanel);
     connect(cropPanel, &CropPanel::crop,        this, &MW::cropRequested);
@@ -150,14 +125,18 @@ void MW::setupCropPanel()
 
 void MW::setupCopyOverlay()
 {
-    copyOverlay = new CopyOverlay(viewerWidget.get());
+    if (copyOverlay)
+        throw std::logic_error("Overlay already exists.");
+    copyOverlay = new CopyOverlay(viewerWidget);
     connect(copyOverlay, &CopyOverlay::copyRequested, this, &MW::copyRequested);
     connect(copyOverlay, &CopyOverlay::moveRequested, this, &MW::moveRequested);
 }
 
 void MW::setupSaveOverlay()
 {
-    saveOverlay = new SaveConfirmOverlay(viewerWidget.get());
+    if (saveOverlay)
+        throw std::logic_error("Overlay already exists.");
+    saveOverlay = new SaveConfirmOverlay(viewerWidget);
     connect(saveOverlay, &SaveConfirmOverlay::saveClicked,    this, &MW::saveRequested);
     connect(saveOverlay, &SaveConfirmOverlay::saveAsClicked,  this, &MW::saveAsClicked);
     connect(saveOverlay, &SaveConfirmOverlay::discardClicked, this, &MW::discardEditsRequested);
@@ -165,6 +144,8 @@ void MW::setupSaveOverlay()
 
 void MW::setupRenameOverlay()
 {
+    if (renameOverlay)
+        throw std::logic_error("Overlay already exists.");
     renameOverlay = new RenameOverlay(this);
     renameOverlay->setName(info.fileName);
     connect(renameOverlay, &RenameOverlay::renameRequested, this, &MW::renameRequested);
@@ -254,7 +235,7 @@ void MW::preShowResize(QSize sz)
 {
     auto screens = qApp->screens();
 
-    if (this->windowState() != Qt::WindowNoState || !screens.count() || screens.count() <= currentDisplay)
+    if (windowState() != Qt::WindowNoState || !screens.count() || screens.count() <= currentDisplay)
         return;
 
     int   decorationSize = frameGeometry().height() - height();
@@ -274,12 +255,10 @@ void MW::preShowResize(QSize sz)
     newGeom.moveCenter(availableGeom.center());
     newGeom.translate(0, decorationSize / 2);
 
-    if (this->isVisible())
+    if (isVisible())
         setGeometry(newGeom);
-    else // setGeometry wont work on hidden windows, so we just save for it to be restored later
+    else // setGeometry won't work on hidden windows, so we just save for it to be restored later
         settings->setWindowGeometry(newGeom);
-
-    qApp->processEvents(); // not needed anymore with patched qt?
 }
 
 void MW::showImage(std::unique_ptr<QPixmap> pixmap)
@@ -356,7 +335,7 @@ void MW::toggleLockView()
 
 void MW::toggleFullscreenInfoBar()
 {
-    if (!this->isFullScreen())
+    if (!isFullScreen())
         return;
     showInfoBarFullscreen = !showInfoBarFullscreen;
     if (showInfoBarFullscreen)
@@ -438,7 +417,7 @@ void MW::onScalingFinished(std::unique_ptr<QPixmap> scaled)
 
 void MW::saveWindowGeometry()
 {
-    if (this->windowState() == Qt::WindowNoState)
+    if (windowState() == Qt::WindowNoState)
         settings->setWindowGeometry(geometry());
     settings->setMaximizedWindow(maximized);
 }
@@ -446,9 +425,9 @@ void MW::saveWindowGeometry()
 // does not apply fullscreen; window size / maximized state only
 void MW::restoreWindowGeometry()
 {
-    this->setGeometry(settings->windowGeometry());
+    setGeometry(settings->windowGeometry());
     if (settings->maximizedWindow())
-        this->setWindowState(Qt::WindowMaximized);
+        setWindowState(Qt::WindowMaximized);
     updateCurrentDisplay();
 }
 
@@ -458,7 +437,7 @@ void MW::updateCurrentDisplay()
     currentDisplay = desktopWidget.screenNumber(this);
 #else
     auto screens   = qApp->screens();
-    currentDisplay = screens.indexOf(this->window()->screen());
+    currentDisplay = screens.indexOf(window()->screen());
 #endif
 }
 
@@ -473,7 +452,7 @@ void MW::saveCurrentDisplay()
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     settings->setLastDisplay(desktopWidget.screenNumber(this));
 #else
-    settings->setLastDisplay(qApp->screens().indexOf(this->window()->screen()));
+    settings->setLastDisplay(qApp->screens().indexOf(window()->screen()));
 #endif
 }
 
@@ -525,12 +504,12 @@ void MW::mouseReleaseEvent(QMouseEvent *event)
 void MW::mouseDoubleClickEvent(QMouseEvent *event)
 {
     event->accept();
-    auto fakePressEvent = std::make_unique<QMouseEvent>(
+    auto fakePressEvent = QMouseEvent{
         QEvent::MouseButtonPress,
         event->position(), event->globalPosition(),
         event->button(), event->buttons(), event->modifiers()
-    );
-    actionManager->processEvent(fakePressEvent.get());
+    };
+    actionManager->processEvent(&fakePressEvent);
     actionManager->processEvent(event);
 }
 
@@ -541,7 +520,7 @@ void MW::close()
     // try to close window sooner
     // since qt6.3 QWidget::close() no longer works on hidden windows (bug?)
 #if QT_VERSION < QT_VERSION_CHECK(6, 3, 0)
-    this->hide();
+    hide();
 #endif
     if (copyOverlay)
         copyOverlay->saveSettings();
@@ -577,7 +556,7 @@ void MW::resizeEvent(QResizeEvent *event)
 
 void MW::showDefault()
 {
-    if (!this->isVisible()) {
+    if (!isVisible()) {
         if (settings->fullscreenMode())
             showFullScreen();
         else
@@ -596,7 +575,7 @@ QString MW::getSaveFileName(QString const &filePath)
 {
     docWidget->hideFloatingPanel();
     QStringList filters;
-    // generate filter for writable images
+    // Generate filter for writable images.
     // todo: some may need to be blacklisted
     QList<QByteArray> writerFormats = QImageWriter::supportedImageFormats();
     if (writerFormats.contains(QByteArrayView("jpg")))
@@ -605,7 +584,7 @@ QString MW::getSaveFileName(QString const &filePath)
         filters.append(QS("PNG (*.png)"));
     if (writerFormats.contains(QByteArrayView("webp")))
         filters.append(QS("WebP (*.webp)"));
-    // may not work..
+    // May not work...
     if (writerFormats.contains(QByteArrayView("jp2")))
         filters.append(QS("JPEG 2000 (*.jp2 *.j2k *.jpf *.jpx *.jpm *.jpgx)"));
     if (writerFormats.contains(QByteArrayView("jxl")))
@@ -630,7 +609,7 @@ QString MW::getSaveFileName(QString const &filePath)
         filters.append(QS("DDS (*.dds)"));
     if (writerFormats.contains(QByteArrayView("wbmp")))
         filters.append(QS("WBMP (*.wbmp)"));
-    // add everything else from imagewriter
+    // Add everything else from imagewriter.
     for (auto const &fmt : writerFormats) {
         auto qsFmt = QString::fromUtf8(fmt);
         if (filters.filter(qsFmt).isEmpty())
@@ -638,7 +617,7 @@ QString MW::getSaveFileName(QString const &filePath)
     }
     QString filterString = filters.join(QSV(";; "));
 
-    // find matching filter for the current image
+    // Find matching filter for the current image.
     auto selectedFilter = QS("JPEG (*.jpg *.jpeg *jpe *jfif)");
     auto fi = QFileInfo(filePath);
 
@@ -721,17 +700,18 @@ void MW::showFullScreen()
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     qsizetype trueCurrentDisplay = desktopWidget.screenNumber(this);
 #else
-    qsizetype trueCurrentDisplay = screens.indexOf(this->window()->screen());
+    qsizetype trueCurrentDisplay = screens.indexOf(window()->screen());
 #endif
 
     // move to target screen
-    if (screens.count() > currentDisplay && currentDisplay != trueCurrentDisplay)
-        this->move(screens.at(currentDisplay)->geometry().x(),
-                   screens.at(currentDisplay)->geometry().y());
+    if (screens.count() > currentDisplay && currentDisplay != trueCurrentDisplay) {
+        auto const &geom = screens[currentDisplay]->geometry();
+        move(geom.x(), geom.y());
+    }
     QWidget::showFullScreen();
 
-    // try to repaint sooner
-    qApp->processEvents();
+    //// try to repaint sooner
+    //qApp->processEvents();
     emit fullscreenStateChanged(true);
 }
 
@@ -741,8 +721,8 @@ void MW::showWindowed()
         QWidget::showNormal();
     restoreWindowGeometry();
     QWidget::show();
-    // try to repaint sooner
-    qApp->processEvents();
+    //// try to repaint sooner
+    //qApp->processEvents();
     emit fullscreenStateChanged(false);
 }
 
@@ -863,8 +843,8 @@ void MW::triggerMoveOverlay()
 // quit fullscreen or exit the program
 void MW::closeFullScreenOrExit()
 {
-    if (this->isFullScreen())
-        this->showWindowed();
+    if (isFullScreen())
+        showWindowed();
     else
         actionManager->invokeAction(QS("exit"));
 }
@@ -903,7 +883,7 @@ void MW::onInfoUpdated()
         resString = QString::number(info.imageSize.width()) + QSV(" x ") + QString::number(info.imageSize.height());
     QString sizeString;
     if (info.fileSize)
-        sizeString = this->locale().formattedDataSize(info.fileSize, 1);
+        sizeString = locale().formattedDataSize(info.fileSize, 1);
 
     if (renameOverlay)
         renameOverlay->setName(info.fileName);
@@ -961,12 +941,12 @@ void MW::setExifInfo(QMap<QString, QString> const &xinfo)
         imageInfoOverlay->setExifInfo(xinfo);
 }
 
-QSharedPointer<FolderViewProxy> MW::getFolderView()
+FolderViewProxy *MW::getFolderView()
 {
     return folderView;
 }
 
-QSharedPointer<ThumbnailStripProxy> MW::getThumbnailPanel()
+ThumbnailStripProxy *MW::getThumbnailPanel()
 {
     return docWidget->thumbPanel();
 }

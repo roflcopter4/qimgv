@@ -5,21 +5,24 @@
 #include <QThread>
 #include <QDebug>
 
-#include "LinuxWorker.h"
+#include "LinuxDirectoryWorker.h"
+#include "utils/Stuff.h"
 
-#define TAG         "[LinuxWatcherWorker]"
-#define TIMEOUT     300 // ms
+#define TAG "[LinuxWatcherWorker]"
+static constexpr int TIMEOUT = 300; // ms
 
-LinuxWorker::LinuxWorker() :
-    fd(-1)
+LinuxDirectoryWorker::LinuxWorker()
+    : fd(-1)
 {
 }
 
-void LinuxWorker::setDescriptor(int desc) {
+void LinuxDirectoryWorker::setDescriptor(int desc)
+{
     fd = desc;
 }
 
-void LinuxWorker::run() {
+void LinuxDirectoryWorker::run()
+{
     emit started();
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     isRunning.store(true);
@@ -28,17 +31,17 @@ void LinuxWorker::run() {
 #endif
 
     if (fd == -1) {
-        qDebug() << TAG << "File descriptor isn't set! Stopping";
+        qDebug() << TAG << u"File descriptor isn't set! Stopping";
         emit finished();
         return;
     }
 
     while (isRunning) {
-        int errorCode = 0;
+        int  errorCode      = 0;
         uint bytesAvailable = 0;
 
         // File descriptor event struct for polling service
-        pollfd pollDescriptor = { fd, POLLIN, 0 };
+        pollfd pollDescriptor = {fd, POLLIN, 0};
 
         // Freeze thread till next event
         errorCode = poll(&pollDescriptor, 1, TIMEOUT);
@@ -48,12 +51,11 @@ void LinuxWorker::run() {
         errorCode = ioctl(fd, FIONREAD, &bytesAvailable);
         handleErrorCode(errorCode);
 
-        if (bytesAvailable == 0) {
+        if (bytesAvailable == 0)
             continue;
-        }
 
-        char* eventData = new char[bytesAvailable];
-        errorCode = read(fd, eventData, bytesAvailable);
+        char *eventData = new char[bytesAvailable];
+        errorCode       = read(fd, eventData, bytesAvailable);
         handleErrorCode(errorCode);
 
         emit fileEvent(new LinuxFsEvent(eventData, bytesAvailable));
@@ -62,9 +64,11 @@ void LinuxWorker::run() {
     emit finished();
 }
 
-void LinuxWorker::handleErrorCode(int code) {
+void LinuxDirectoryWorker::handleErrorCode(int code)
+{
     if (code == -1) {
-        qDebug() << TAG << strerror(errno);
-        emit error(strerror(errno));
+        QString err = util::GetErrorMessage(errno);
+        qDebug() << TAG << u"Error:" << err;
+        emit error(err);
     }
 }

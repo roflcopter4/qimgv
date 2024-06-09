@@ -20,9 +20,9 @@ class EntryInfoItem final : public QWidget
     void paintEvent(QPaintEvent *event) override;
 
   private:
+    QHBoxLayout *layout;
     QString     name;
     QString     value;
-    QHBoxLayout layout;
     QLabel      nameLabel;
     QLabel      valueLabel;
 };

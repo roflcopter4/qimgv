@@ -12,7 +12,7 @@ class DirectoryModel final : public QObject
     Q_OBJECT
 
   public:
-    explicit DirectoryModel(QObject *parent = nullptr);
+    explicit DirectoryModel(QObject *parent);
     ~DirectoryModel() override;
 
     void load(QString const &filePath, bool asyncHint);
@@ -86,10 +86,11 @@ class DirectoryModel final : public QObject
     void imageUpdated(QString filePath);
 
   private:
-    DirectoryManager dirManager;
-    Loader           loader;
-    Cache            cache;
-    FileListSource   fileListSource;
+    DirectoryManager *dirManager;
+
+    Loader         loader;
+    Cache          cache;
+    FileListSource fileListSource;
 
   private Q_SLOTS:
     void onImageReady(QSharedPointer<Image> const &img, QString const &path);

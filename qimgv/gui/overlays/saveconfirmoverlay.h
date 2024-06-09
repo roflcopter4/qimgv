@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gui/customwidgets/overlaywidget.h"
-#include "settings.h"
+#include "Settings.h"
 #include <QPushButton>
 
 namespace Ui {

@@ -1,10 +1,57 @@
 #include "FileSystemModelCustom.h"
+#include <QFileIconProvider>
+#include <QFileSystemModel>
+
+class FileSystemModelCustom::FileIconProvider : public QAbstractFileIconProvider
+{
+    static QString getFileType(const QFileInfo &info)
+    {
+        if (info.isRoot())
+            return QGuiApplication::translate("QAbstractFileIconProvider", "Drive");
+        if (info.isFile())
+            return QGuiApplication::translate("QAbstractFileIconProvider", "File");
+        if (info.isDir())
+#ifdef Q_OS_WIN
+            return QGuiApplication::translate("QAbstractFileIconProvider", "File Folder", "Match Windows Explorer");
+#else
+            return QGuiApplication::translate("QAbstractFileIconProvider", "Folder", "All other platforms");
+#endif
+        if (info.isSymLink())
+#ifdef Q_OS_MACOS
+            return QGuiApplication::translate("QAbstractFileIconProvider", "Alias", "macOS Finder");
+#else
+            return QGuiApplication::translate("QAbstractFileIconProvider", "Shortcut", "All other platforms");
+#endif
+        return QGuiApplication::translate("QAbstractFileIconProvider", "Unknown");
+    }
+
+  public:
+    FileIconProvider()           = default;
+    ~FileIconProvider() override = default;
+
+    QString type(QFileInfo const &info) const override
+    {
+        return getFileType(info);
+    }
+
+    QIcon icon(IconType) const override
+    {
+        return {};
+    }
+
+    QIcon icon(const QFileInfo &) const override
+    {
+        return {};
+    }
+};
+
 
 FileSystemModelCustom::FileSystemModelCustom(QObject *parent)
-    : QFileSystemModel(parent)
+    : QFileSystemModel(parent),
+      iconProvider(new FileIconProvider())
 {
-    setOptions(Option::DontWatchForChanges);
-    setIconProvider(nullptr);
+    setOptions(Option::DontWatchForChanges | Option::DontResolveSymlinks);
+    setIconProvider(iconProvider.get());
 
     auto dpr      = qApp->devicePixelRatio();
     auto iconPath = QS(":/res/icons/common/menuitem/folder16.png");
@@ -16,6 +63,10 @@ FileSystemModelCustom::FileSystemModelCustom(QObject *parent)
 
     connect(settings, &Settings::settingsChanged,
             [this]() { ImageLib::recolor(this->folderIcon, settings->colorScheme().icons); });
+}
+
+FileSystemModelCustom::~FileSystemModelCustom()
+{
 }
 
 QVariant FileSystemModelCustom::data(QModelIndex const &index, int role) const

@@ -22,7 +22,7 @@ void CmdOptionsRunner::generateThumbs(QString const &dirPath, int size)
         return;
     }
 
-    DirectoryManager dm;
+    auto dm = DirectoryManager(nullptr);
     if (!dm.setDirectoryRecursive(dirPath)) {
         QString out = QSV("Error: Invalid path \"") + dirPath + QSV("\".\n");
         std::cout << out.toStdString();
@@ -38,7 +38,7 @@ void CmdOptionsRunner::generateThumbs(QString const &dirPath, int size)
                   QSV("\nGenerating thumbnails...\n");
     std::cout << out.toStdString();
 
-    Thumbnailer th;
+    Thumbnailer th(nullptr);
     for (auto const &path : list)
         th.getThumbnailAsync(path, size, false, false);
 

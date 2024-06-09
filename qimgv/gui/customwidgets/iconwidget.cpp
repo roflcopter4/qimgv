@@ -32,7 +32,7 @@ void IconWidget::loadIcon() {
     delete pixmap;
     pixmap = nullptr;
     if(dpr >= (1.0 + 0.001)) {
-        path.replace(QS("."), QS("@2x."));
+        path.replace(u'.', QS("@2x."));
         hiResPixmap = true;
         pixmap = new QPixmap(path);
         if(dpr >= (2.0 - 0.001))

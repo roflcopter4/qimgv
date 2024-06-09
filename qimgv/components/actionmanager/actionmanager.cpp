@@ -1,4 +1,4 @@
-#include "actionmanager.h"
+#include "ActionManager.h"
 
 ActionManager *actionManager = nullptr;
 

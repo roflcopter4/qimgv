@@ -310,10 +310,10 @@ class Settings final : public QObject
     void setupCache();
     void fillVideoFormats();
 
-  signals:
+  Q_SIGNALS:
     void settingsChanged();
 
-  public slots:
+  public Q_SLOTS:
     void sendChangeNotification();
 
 };

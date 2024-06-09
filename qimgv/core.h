@@ -12,7 +12,7 @@
 #include <QTranslator>
 
 #include "appversion.h"
-#include "settings.h"
+#include "Settings.h"
 #include "components/directorymodel.h"
 #include "components/directorypresenter.h"
 #include "components/scriptmanager/scriptmanager.h"
@@ -26,17 +26,17 @@
 #include "Common.h"
 
 
-struct State {
-    bool    hasActiveImage  = false;
-    bool    delayModel      = false;
-    QString currentFilePath;
-    QString directoryPath;
-    QSharedPointer<Image> currentImg;
-};
-
 class Core final : public QObject
 {
     Q_OBJECT
+
+    struct State {
+        bool    hasActiveImage = false;
+        bool    delayModel     = false;
+        QString currentFilePath{};
+        QString directoryPath{};
+        QSharedPointer<Image> currentImg{};
+    };
 
   public:
     enum class MimeDataTarget { TARGET_CLIPBOARD, TARGET_DROP };
@@ -108,8 +108,7 @@ class Core final : public QObject
     static QMimeData *getMimeDataForImage(QSharedPointer<Image> const &img, MimeDataTarget target);
 
   private Q_SLOTS:
-    FileOpResult removeFile(QString const &filePath, bool trash);
-
+    auto removeFile(QString const &filePath, bool trash) -> FileOpResult;
     void readSettings();
     void nextImage();
     void prevImage();

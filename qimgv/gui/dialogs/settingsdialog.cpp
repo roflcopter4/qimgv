@@ -165,7 +165,7 @@ void SettingsDialog::adjustSizeToContents()
     ui->scrollArea_3->setMinimumWidth(ui->scrollAreaWidgetContents_3->minimumSizeHint().width());
     // container
     // ui->stackedWidget->layout()->activate();
-    this->setMinimumWidth(sizeHint().width() + 22);
+    setMinimumWidth(sizeHint().width() + 22);
 
     // qDebug() << "window:" << this->sizeHint() << this->minimumSizeHint() << this->size();
     // qDebug() << "stackedwidget:" << ui->stackedWidget->sizeHint() << ui->stackedWidget->minimumSizeHint() <<
@@ -179,7 +179,7 @@ void SettingsDialog::adjustSizeToContents()
 void SettingsDialog::resetToDesktopTheme()
 {
     settings->setColorScheme(ThemeStore::colorScheme(ColorSchemes::SYSTEM));
-    this->readColorScheme();
+    readColorScheme();
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::setupSidebar()
@@ -613,9 +613,6 @@ void SettingsDialog::removeShortcutAt(int row) const
 //------------------------------------------------------------------------------
 void SettingsDialog::editShortcut(int row) const
 {
-    using namespace util;
-    util::QStringToStdPath(QString());
-
     if (row >= 0) {
         ShortcutCreatorDialog w;
         w.setWindowTitle(tr("Edit shortcut"));

@@ -25,5 +25,5 @@ protected:
 private:
     InfoBarStateBuffer stateBuf;
     InfoBar *infoBar;
-    QVBoxLayout layout;
+    QVBoxLayout *layout;
 };

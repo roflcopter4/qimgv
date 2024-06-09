@@ -1,5 +1,5 @@
 #pragma once
-#include "settings.h"
+#include "Settings.h"
 #include "sourcecontainers/documentinfo.h"
 
 #include <QDebug>

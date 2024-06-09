@@ -6,8 +6,8 @@
 #include <QKeyEvent>
 #include "gui/customwidgets/overlaywidget.h"
 #include "gui/customwidgets/pathselectormenuitem.h"
-#include "settings.h"
-#include "components/actionmanager/actionmanager.h"
+#include "Settings.h"
+#include "components/actionManager/ActionManager.h"
 
 enum class CopyOverlayMode {
     COPY,

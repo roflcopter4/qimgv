@@ -1,4 +1,4 @@
-#include "themestore.h"
+#include "ThemeStore.h"
 
 ColorScheme ThemeStore::colorScheme(ColorSchemes name) {
     BaseColorScheme base               = {-1};

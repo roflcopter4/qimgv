@@ -10,24 +10,27 @@
 #include <QLabel>
 #include "gui/customwidgets/iconbutton.h"
 #include "gui/customwidgets/clickablelabel.h"
-#include "settings.h"
+#include "Settings.h"
 #include <QMouseEvent>
 
-class BookmarksItem : public QWidget {
+class BookmarksItem : public QWidget
+{
     Q_OBJECT
-public:
-    explicit BookmarksItem(QString const &_dirName, QString const &_dirPath, QWidget *parent = nullptr);
-    QString  path();
 
-public slots:
+  public:
+    explicit BookmarksItem(QString const &dirName, QString const &dirPath, QWidget *parent = nullptr);
+
+    ND QString path() const;
+
+  public Q_SLOTS:
     void setHighlighted(bool mode);
 
-signals:
+  Q_SIGNALS:
     void clicked(QString dirPath);
     void removeClicked(QString dirPath);
     void droppedIn(QList<QString> paths, QString dirPath);
 
-protected:
+  protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
 
@@ -36,18 +39,18 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragLeaveEvent(QDragLeaveEvent *event) override;
 
-private slots:
+  private slots:
     void onRemoveClicked();
 
-private:
+  private:
     QString dirName, dirPath;
 
-    IconWidget folderIconWidget;
-    IconButton removeItemButton;
-    QLabel dirNameLabel;
+    IconWidget   folderIconWidget;
+    IconButton   removeItemButton;
+    QLabel       dirNameLabel;
     QSpacerItem *spacer;
-    QHBoxLayout layout;
-    bool mHighlighted;
+    QHBoxLayout *layout;
+    bool         mHighlighted;
 };
 
 #endif // BOOKMARKSITEM_H

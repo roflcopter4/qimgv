@@ -1,7 +1,7 @@
 #pragma once
 
 #include "floatingwidget.h"
-#include "settings.h"
+#include "Settings.h"
 #include <QBoxLayout>
 #include <QDebug>
 #include <QGraphicsOpacityEffect>
@@ -24,7 +24,7 @@ class SlidePanel : public FloatingWidget
     ~SlidePanel() override;
 
     ND bool hasWidget() const;
-    void setWidget(QSharedPointer<QWidget> const &w);
+    void setWidget(QWidget *w);
     // Use visibleGeometry instead of geometry() here.
     // If this is called mid-animation then geometry() will be all wrong.
     ND QRect triggerRect() const;
@@ -37,11 +37,11 @@ class SlidePanel : public FloatingWidget
     ND PanelPosition position() const;
     void hideAnimated();
 
-  public slots:
+  public Q_SLOTS:
     void show();
     void hide();
 
-  private slots:
+  private Q_SLOTS:
     void onAnimationFinish();
     void animationUpdate(int frame);
 
@@ -58,15 +58,14 @@ class SlidePanel : public FloatingWidget
     int           panelSize;
     int           slideAmount;
     PanelPosition mPosition;
-    QHBoxLayout   *mLayout;
     QRect         mTriggerRect;
     QTimer        timer;
     QTimeLine     timeline;
     QEasingCurve  outCurve;
 
-    QGraphicsOpacityEffect  *fadeEffect;
-    //QSharedPointer<QWidget> mWidget;
-    QWidget *mWidget;
+    QGraphicsOpacityEffect *fadeEffect;
+    QHBoxLayout            *mLayout;
+    QWidget                *mWidget;
 
   private:
     void setOrientation();

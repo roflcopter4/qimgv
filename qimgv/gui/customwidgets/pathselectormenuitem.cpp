@@ -1,14 +1,12 @@
 #include "pathselectormenuitem.h"
 
 PathSelectorMenuItem::PathSelectorMenuItem(QWidget *parent)
-    : MenuItem(parent),
-      mDirectory(QS("")),
-      mPath(QS(""))
+    : MenuItem(parent)
 {
     setFocusPolicy(Qt::NoFocus);
     setIconPath(QS(":/res/icons/common/menuitem/folder16.png"));
-    mIconWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
-    connect(&mIconWidget, &IconButton::clicked, [this]() {
+    mIconWidget->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+    connect(mIconWidget, &IconButton::clicked, [this]() {
         QFileDialog dialog;
         dialog.setDirectory(mDirectory);
         dialog.setWindowTitle(QS("Select directory"));
@@ -21,17 +19,20 @@ PathSelectorMenuItem::PathSelectorMenuItem(QWidget *parent)
     });
 }
 
-QString PathSelectorMenuItem::directory() {
+QString PathSelectorMenuItem::directory() const
+{
     return mDirectory;
 }
 
-QString PathSelectorMenuItem::path() {
+QString PathSelectorMenuItem::path() const
+{
     return mPath;
 }
 
-void PathSelectorMenuItem::setDirectory(QString const &path) {
+void PathSelectorMenuItem::setDirectory(QString const &path)
+{
     mDirectory = path;
-    mPath = path;
+    mPath      = path;
     QString stripped;
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     stripped = mDirectory.split(QS("/")).last();
@@ -41,7 +42,8 @@ void PathSelectorMenuItem::setDirectory(QString const &path) {
     this->mTextLabel.setText(stripped);
 }
 
-void PathSelectorMenuItem::onPress() {
-    if(!mDirectory.isEmpty())
+void PathSelectorMenuItem::onPress()
+{
+    if (!mDirectory.isEmpty())
         emit directorySelected(mDirectory);
 }

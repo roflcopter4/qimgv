@@ -15,7 +15,7 @@ VideoPlayerMpv::VideoPlayerMpv(QWidget *parent)
     setMouseTracking(true);
 
     m_mpv    = new MpvWidget(this);
-    auto *vl = new QVBoxLayout();
+    auto *vl = new QVBoxLayout(this);
     vl->setContentsMargins(0,0,0,0);
     vl->addWidget(m_mpv);
     setLayout(vl);

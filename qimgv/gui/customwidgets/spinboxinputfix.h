@@ -5,7 +5,7 @@
 #include <QSpinBox>
 #include <QKeyEvent>
 #include <QDebug>
-#include "components/actionmanager/actionmanager.h"
+#include "components/actionManager/ActionManager.h"
 
 class SpinBoxInputFix : public QSpinBox
 {

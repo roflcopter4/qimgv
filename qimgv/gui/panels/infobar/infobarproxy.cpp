@@ -1,41 +1,49 @@
 #include "Common.h"
 #include "infobarproxy.h"
 
-InfoBarProxy::InfoBarProxy(QWidget *parent) : QWidget(parent), infoBar(nullptr) {
+InfoBarProxy::InfoBarProxy(QWidget *parent)
+    : QWidget(parent),
+      infoBar(nullptr),
+      layout(new QVBoxLayout(this))
+{
     setAccessibleName(QS("InfoBarProxy"));
-    this->setMinimumHeight(23);
-    this->setMaximumHeight(23);
-    layout.setContentsMargins(0,0,0,0);
-    setLayout(&layout);
+    setMinimumHeight(23);
+    setMaximumHeight(23);
+    layout->setContentsMargins(0, 0, 0, 0);
+    setLayout(layout);
 }
 
-InfoBarProxy::~InfoBarProxy() {
-    if(infoBar)
+InfoBarProxy::~InfoBarProxy()
+{
+    if (infoBar)
         infoBar->deleteLater();
 }
 
-void InfoBarProxy::setInfo(QString const &position, QString const &fileName, QString const &info) {
-    if(infoBar) {
+void InfoBarProxy::setInfo(QString const &position, QString const &fileName, QString const &info)
+{
+    if (infoBar) {
         infoBar->setInfo(position, fileName, info);
     } else {
         stateBuf.position = position;
         stateBuf.fileName = fileName;
-        stateBuf.info = info;
+        stateBuf.info     = info;
     }
 }
 
-void InfoBarProxy::init() {
-    if(infoBar)
+void InfoBarProxy::init()
+{
+    if (infoBar)
         return;
     infoBar = new InfoBar(this);
     setFocusProxy(infoBar);
-    layout.addWidget(infoBar);
-    setLayout(&layout);
-    if(!stateBuf.fileName.isEmpty())
+    layout->addWidget(infoBar);
+    setLayout(layout);
+    if (!stateBuf.fileName.isEmpty())
         infoBar->setInfo(stateBuf.position, stateBuf.fileName, stateBuf.info);
 }
 
-void InfoBarProxy::paintEvent(QPaintEvent *event) {
+void InfoBarProxy::paintEvent(QPaintEvent *event)
+{
     Q_UNUSED(event)
     QStyleOption opt;
     opt.initFrom(this);

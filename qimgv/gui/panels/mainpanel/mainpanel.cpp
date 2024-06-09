@@ -1,10 +1,6 @@
 #include "Common.h"
 #include "mainpanel.h"
 
-namespace {
-QSharedPointer<ThumbnailStripProxy> global_thumbnailStrip;
-}
-
 MainPanel::MainPanel(FloatingWidgetContainer *parent) : SlidePanel(parent)
 {
     // buttons stuff
@@ -39,10 +35,9 @@ MainPanel::MainPanel(FloatingWidgetContainer *parent) : SlidePanel(parent)
     buttonsLayout->addWidget(exitButton);
 
     buttonsWidget->setLayout(buttonsLayout);
-    this->layout()->addWidget(buttonsWidget);
+    layout()->addWidget(buttonsWidget);
 
-    thumbnailStrip = QSharedPointer<ThumbnailStripProxy>(new ThumbnailStripProxy(this));
-    global_thumbnailStrip = thumbnailStrip;
+    thumbnailStrip = new ThumbnailStripProxy(this);
     setWidget(thumbnailStrip);
 
     readSettings();
@@ -94,7 +89,7 @@ void MainPanel::setExitButtonEnabled(bool mode)
     exitButton->setHidden(!mode);
 }
 
-QSharedPointer<ThumbnailStripProxy> MainPanel::getThumbnailStrip()
+ThumbnailStripProxy *MainPanel::getThumbnailStrip()
 {
     return thumbnailStrip;
 }

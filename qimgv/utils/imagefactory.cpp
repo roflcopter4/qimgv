@@ -4,7 +4,7 @@ QSharedPointer<Image>
 ImageFactory::createImage(QString const &path)
 {
     std::unique_ptr<DocumentInfo> docInfo(new DocumentInfo(path));
-    QSharedPointer<Image>        img = nullptr;
+    QSharedPointer<Image>         img = nullptr;
 
     if (docInfo->type() == DocumentType::NONE)
         qDebug() << u"[ImageFactory] Cannot load" << docInfo->filePath();

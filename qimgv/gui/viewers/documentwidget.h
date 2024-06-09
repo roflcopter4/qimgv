@@ -12,12 +12,11 @@
 class DocumentWidget : public FloatingWidgetContainer
 {
   public:
-    DocumentWidget(QSharedPointer<ViewerWidget> const &viewWidget, QSharedPointer<InfoBarProxy> const &infoBar, QWidget*parent = nullptr);
-
+    DocumentWidget(ViewerWidget *viewWidget, InfoBarProxy *infoBar, QWidget *parent = nullptr);
     ~DocumentWidget() override;
 
-    QSharedPointer<ViewerWidget>       &viewWidget();
-    QSharedPointer<ThumbnailStripProxy> thumbPanel() const;
+    ViewerWidget        *viewWidget();
+    ThumbnailStripProxy *thumbPanel() const;
 
     void setFocus();
     void hideFloatingPanel();
@@ -42,10 +41,10 @@ class DocumentWidget : public FloatingWidgetContainer
     void mouseMoveEvent(QMouseEvent *event) override;
 
   private:
-    QBoxLayout                   *layout, *layoutRoot;
-    QSharedPointer<ViewerWidget> mViewWidget;
-    QSharedPointer<InfoBarProxy> mInfoBar;
-    QSharedPointer<MainPanel>    mainPanel;
+    QBoxLayout   *layout, *layoutRoot;
+    ViewerWidget *mViewWidget;
+    InfoBarProxy *mInfoBar;
+    MainPanel    *mainPanel;
 
     bool avoidPanelFlag       : 1;
     bool mPanelEnabled        : 1;

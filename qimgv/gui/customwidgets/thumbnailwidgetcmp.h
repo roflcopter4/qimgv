@@ -10,7 +10,7 @@
 #include <cmath>
 #include "sourcecontainers/thumbnail.h"
 #include "utils/imagelib.h"
-#include "settings.h"
+#include "Settings.h"
 #include "sharedresources.h"
 
 #include "Common.h"

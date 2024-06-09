@@ -18,7 +18,7 @@ class ControlsOverlay : public FloatingWidget
     void show();
 
   private:
-    QHBoxLayout             layout;
+    QHBoxLayout            *layout;
     ActionButton           *closeButton;
     ActionButton           *settingsButton;
     ActionButton           *folderViewButton;

@@ -2,7 +2,8 @@
 
 WallpaperSetter::WallpaperSetter() = default;
 
-void WallpaperSetter::setWallpaper(QString const &path) {
+void WallpaperSetter::setWallpaper(QString const &path)
+{
 #ifdef Q_OS_WIN32
     bool ok = SystemParametersInfoW(
         SPI_SETDESKWALLPAPER, 0,

@@ -23,6 +23,7 @@ class ViewerWidget Q_DECL_FINAL : public FloatingWidgetContainer
 
   public:
     explicit ViewerWidget(QWidget *parent = nullptr);
+    ~ViewerWidget() override;
 
     ND QRect imageRect() const;
     ND qreal currentScale() const;
@@ -40,14 +41,15 @@ class ViewerWidget Q_DECL_FINAL : public FloatingWidgetContainer
   private:
     static constexpr int CURSOR_HIDE_TIMEOUT_MS = 1000;
 
-    QVBoxLayout                           layout;
-    ImageViewerV2*        imageViewer;
-    VideoPlayerInitProxy* videoPlayer;
-    std::unique_ptr<ContextMenu>          contextMenu;
-    VideoControlsProxyWrapper            *videoControls;
-    ZoomIndicatorOverlayProxy            *zoomIndicator;
-    QTimer                                cursorTimer;
+    QVBoxLayout               *layout;
+    ImageViewerV2             *imageViewer;
+    VideoPlayerInitProxy      *videoPlayer;
+    VideoControlsProxyWrapper *videoControls;
+    ZoomIndicatorOverlayProxy *zoomIndicator;
 
+    std::unique_ptr<ContextMenu> contextMenu;
+
+    QTimer cursorTimer;
     CurrentWidget currentWidget;
     bool          mInteractionEnabled;
     bool          mWaylandCursorWorkaround;

@@ -36,11 +36,11 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
     hs  = horizontalScrollBar();
     vs  = verticalScrollBar();
 
-    scrollTimeLineY = new QTimeLine();
+    scrollTimeLineY = new QTimeLine(1000, this);
     scrollTimeLineY->setEasingCurve(QEasingCurve::Type::OutSine);
     scrollTimeLineY->setDuration(ANIMATION_SPEED);
     scrollTimeLineY->setUpdateInterval(SCROLL_UPDATE_RATE);
-    scrollTimeLineX = new QTimeLine();
+    scrollTimeLineX = new QTimeLine(1000, this);
     scrollTimeLineX->setEasingCurve(QEasingCurve::Type::OutSine);
     scrollTimeLineX->setDuration(ANIMATION_SPEED);
     scrollTimeLineX->setUpdateInterval(SCROLL_UPDATE_RATE);
@@ -72,7 +72,7 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
     setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
 
-    scene = new QGraphicsScene();
+    scene = new QGraphicsScene(this);
     scene->setSceneRect(0.0, 0.0, 200000.0, 200000.0);
     scene->setBackgroundBrush(QColor(60, 60, 103));
     scene->addItem(&pixmapItem);
@@ -87,10 +87,15 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
 
     connect(animationTimer, &QTimer::timeout, this, &ImageViewerV2::onAnimationTimer, Qt::UniqueConnection);
 
-    QObject::connect(scaleTimer, &QTimer::timeout, [this]() { this->requestScaling(); });
+    connect(scaleTimer, &QTimer::timeout, [this]() { this->requestScaling(); });
 
     readSettings();
     connect(settings, &Settings::settingsChanged, this, &ImageViewerV2::readSettings);
+}
+
+ImageViewerV2::~ImageViewerV2()
+{
+    delete checkboard;
 }
 
 void ImageViewerV2::readSettings()
@@ -610,8 +615,8 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event)
          *     angleDelta = (x*scale,y*scale) OR (x,y)
          *   wheel:
          *     pixelDelta = (0,0)     - libinput <= 1.18
-         *     pixelDelta = (0,120*m) - libinput 1.19
-         *     angleDelta = (0,120*m)
+         *     pixelDelta = (0,120*mtx) - libinput 1.19
+         *     angleDelta = (0,120*mtx)
          * -----------------------------------------
          * macOS
          *   trackpad:
@@ -619,14 +624,14 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event)
          *     angleDelta = (x*scale,y*scale)
          *   wheel:
          *     pixelDelta = (0,y*scrollAccel)
-         *     angleDelta = (0,120*m)
+         *     angleDelta = (0,120*mtx)
          * -----------------------------------------
          * windows
          *   trackpad:
          *     ?? (dont have the hardware with precision drivers)
          *   wheel:
          *     pixelDelta = (0,0)
-         *     AngleDelta = (0,120*m)
+         *     AngleDelta = (0,120*mtx)
          */
         bool isWheel = true;
         if (trackpadDetection)

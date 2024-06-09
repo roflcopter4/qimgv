@@ -12,12 +12,13 @@
 
 VideoPlayerInitProxy::VideoPlayerInitProxy(QWidget *parent)
     : VideoPlayer(parent),
-      player(nullptr)
+      player(nullptr),
+      layout(new QVBoxLayout (this))
 {
     setAccessibleName(QS("VideoPlayerInitProxy"));
     setMouseTracking(true);
-    layout.setContentsMargins(0, 0, 0, 0);
-    setLayout(&layout);
+    layout->setContentsMargins(0, 0, 0, 0);
+    setLayout(layout);
     connect(settings, &Settings::settingsChanged, this, &VideoPlayerInitProxy::onSettingsChanged);
     libFile = QStringLiteral(QIMGV_PLAYER_PLUGIN);
 #ifdef Q_OS_WIN32
@@ -47,7 +48,7 @@ QSharedPointer<VideoPlayer> VideoPlayerInitProxy::getPlayer()
 
 bool VideoPlayerInitProxy::isInitialized() const
 {
-    return (player != nullptr);
+    return player != nullptr;
 }
 
 inline bool VideoPlayerInitProxy::initPlayer()
@@ -90,7 +91,7 @@ inline bool VideoPlayerInitProxy::initPlayer()
     player->setVolume(settings->volume());
 
     player->setParent(this);
-    layout.addWidget(player.get());
+    layout->addWidget(player.get());
     player->hide();
     setFocusProxy(player.get());
     connect(player.get(), SIGNAL(durationChanged(int)), this, SIGNAL(durationChanged(int)));
@@ -218,7 +219,7 @@ void VideoPlayerInitProxy::show()
 {
     if (initPlayer()) {
         if (errorLabel)
-            layout.removeWidget(errorLabel);
+            layout->removeWidget(errorLabel);
         player->show();
     } else if (!errorLabel) {
         errorLabel = new QLabel(this);
@@ -229,7 +230,7 @@ void VideoPlayerInitProxy::show()
         for (auto const &path : libDirs)
             errString.append(u'\n' + path + u'/');
         errorLabel->setText(errString);
-        layout.addWidget(errorLabel);
+        layout->addWidget(errorLabel);
     }
     VideoPlayer::show();
 }

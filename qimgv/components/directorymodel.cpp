@@ -2,19 +2,20 @@
 
 DirectoryModel::DirectoryModel(QObject *parent)
     : QObject(parent),
-      scaler(new Scaler(&cache)),
+      scaler(new Scaler(&cache, this)),
+      dirManager(new DirectoryManager(this)),
       fileListSource(FileListSource::DIRECTORY)
 {
-    connect(&dirManager, &DirectoryManager::fileRemoved, this, &DirectoryModel::onFileRemoved);
-    connect(&dirManager, &DirectoryManager::fileAdded, this, &DirectoryModel::onFileAdded);
-    connect(&dirManager, &DirectoryManager::fileRenamed, this, &DirectoryModel::onFileRenamed);
-    connect(&dirManager, &DirectoryManager::fileModified, this, &DirectoryModel::onFileModified);
-    connect(&dirManager, &DirectoryManager::dirRemoved, this, &DirectoryModel::dirRemoved);
-    connect(&dirManager, &DirectoryManager::dirAdded, this, &DirectoryModel::dirAdded);
-    connect(&dirManager, &DirectoryManager::dirRenamed, this, &DirectoryModel::dirRenamed);
+    connect(dirManager, &DirectoryManager::fileRemoved, this, &DirectoryModel::onFileRemoved);
+    connect(dirManager, &DirectoryManager::fileAdded, this, &DirectoryModel::onFileAdded);
+    connect(dirManager, &DirectoryManager::fileRenamed, this, &DirectoryModel::onFileRenamed);
+    connect(dirManager, &DirectoryManager::fileModified, this, &DirectoryModel::onFileModified);
+    connect(dirManager, &DirectoryManager::dirRemoved, this, &DirectoryModel::dirRemoved);
+    connect(dirManager, &DirectoryManager::dirAdded, this, &DirectoryModel::dirAdded);
+    connect(dirManager, &DirectoryManager::dirRenamed, this, &DirectoryModel::dirRenamed);
 
-    connect(&dirManager, &DirectoryManager::loaded, this, &DirectoryModel::loaded);
-    connect(&dirManager, &DirectoryManager::sortingChanged, this, &DirectoryModel::onSortingChanged);
+    connect(dirManager, &DirectoryManager::loaded, this, &DirectoryModel::loaded);
+    connect(dirManager, &DirectoryManager::sortingChanged, this, &DirectoryModel::onSortingChanged);
     connect(&loader, &Loader::loadFinished, this, &DirectoryModel::onImageReady);
     connect(&loader, &Loader::loadFailed, this, &DirectoryModel::loadFailed);
 }
@@ -22,129 +23,129 @@ DirectoryModel::DirectoryModel(QObject *parent)
 DirectoryModel::~DirectoryModel()
 {
     loader.clearTasks();
-    delete scaler;
+    //delete scaler;
 }
 
 qsizetype DirectoryModel::totalCount() const
 {
-    return dirManager.totalCount();
+    return dirManager->totalCount();
 }
 
 qsizetype DirectoryModel::fileCount() const
 {
-    return dirManager.fileCount();
+    return dirManager->fileCount();
 }
 
 qsizetype DirectoryModel::dirCount() const
 {
-    return dirManager.dirCount();
+    return dirManager->dirCount();
 }
 
 qsizetype DirectoryModel::indexOfFile(QString const &filePath) const
 {
-    return dirManager.indexOfFile(filePath);
+    return dirManager->indexOfFile(filePath);
 }
 
 qsizetype DirectoryModel::indexOfDir(QString const &filePath) const
 {
-    return dirManager.indexOfDir(filePath);
+    return dirManager->indexOfDir(filePath);
 }
 
 SortingMode DirectoryModel::sortingMode() const
 {
-    return dirManager.sortingMode();
+    return dirManager->sortingMode();
 }
 
 FSEntry const &DirectoryModel::fileEntryAt(qsizetype index) const
 {
-    return dirManager.fileEntryAt(index);
+    return dirManager->fileEntryAt(index);
 }
 
 QString DirectoryModel::fileNameAt(qsizetype index) const
 {
-    return dirManager.fileNameAt(index);
+    return dirManager->fileNameAt(index);
 }
 
 QString DirectoryModel::filePathAt(qsizetype index) const
 {
-    return dirManager.filePathAt(index);
+    return dirManager->filePathAt(index);
 }
 
 QString DirectoryModel::dirNameAt(qsizetype index) const
 {
-    return dirManager.dirNameAt(index);
+    return dirManager->dirNameAt(index);
 }
 
 QString DirectoryModel::dirPathAt(qsizetype index) const
 {
-    return dirManager.dirPathAt(index);
+    return dirManager->dirPathAt(index);
 }
 
 bool DirectoryModel::autoRefresh() const
 {
-    return dirManager.fileWatcherActive();
+    return dirManager->fileWatcherActive();
 }
 
 FileListSource DirectoryModel::source() const
 {
-    return dirManager.source();
+    return dirManager->source();
 }
 
 QString DirectoryModel::directoryPath() const
 {
-    return dirManager.directoryPath();
+    return dirManager->directoryPath();
 }
 
 bool DirectoryModel::containsFile(QString const &filePath) const
 {
-    return dirManager.containsFile(filePath);
+    return dirManager->containsFile(filePath);
 }
 
 bool DirectoryModel::containsDir(QString const &dirPath) const
 {
-    return dirManager.containsDir(dirPath);
+    return dirManager->containsDir(dirPath);
 }
 
 bool DirectoryModel::isEmpty() const
 {
-    return dirManager.isEmpty();
+    return dirManager->isEmpty();
 }
 
 QString DirectoryModel::firstFile() const
 {
-    return dirManager.firstFile();
+    return dirManager->firstFile();
 }
 
 QString DirectoryModel::lastFile() const
 {
-    return dirManager.lastFile();
+    return dirManager->lastFile();
 }
 
 QString DirectoryModel::nextOf(QString const &filePath) const
 {
-    return dirManager.nextOfFile(filePath);
+    return dirManager->nextOfFile(filePath);
 }
 
 QString DirectoryModel::prevOf(QString const &filePath) const
 {
-    return dirManager.prevOfFile(filePath);
+    return dirManager->prevOfFile(filePath);
 }
 
 QDateTime DirectoryModel::lastModified(QString const &filePath) const
 {
-    return dirManager.lastModified(filePath);
+    return dirManager->lastModified(filePath);
 }
 
 // -----------------------------------------------------------------------------
 
 bool DirectoryModel::forceInsert(QString const &filePath)
 {
-    return dirManager.forceInsertFileEntry(filePath);
+    return dirManager->forceInsertFileEntry(filePath);
 }
 
 void DirectoryModel::setSortingMode(SortingMode mode)
 {
-    dirManager.setSortingMode(mode);
+    dirManager->setSortingMode(mode);
 }
 
 void DirectoryModel::removeFile(QString const &filePath, bool trash, FileOpResult &result)
@@ -155,7 +156,7 @@ void DirectoryModel::removeFile(QString const &filePath, bool trash, FileOpResul
         FileOperations::removeFile(filePath, result);
     if (result != FileOpResult::SUCCESS)
         return;
-    dirManager.removeFileEntry(filePath);
+    dirManager->removeFileEntry(filePath);
 }
 
 void DirectoryModel::renameEntry(QString const &oldPath, QString const &newName, bool force, FileOpResult &result)
@@ -167,9 +168,9 @@ void DirectoryModel::renameEntry(QString const &oldPath, QString const &newName,
     if (result != FileOpResult::SUCCESS)
         return;
     if (isDir)
-        dirManager.renameDirEntry(oldPath, newName);
+        dirManager->renameDirEntry(oldPath, newName);
     else
-        dirManager.renameFileEntry(oldPath, newName);
+        dirManager->renameFileEntry(oldPath, newName);
 }
 
 void DirectoryModel::removeDir(QString const &dirPath, bool trash, bool recursive, FileOpResult &result)
@@ -180,7 +181,7 @@ void DirectoryModel::removeDir(QString const &dirPath, bool trash, bool recursiv
         FileOperations::removeDir(dirPath, recursive, result);
     if (result != FileOpResult::SUCCESS)
         return;
-    dirManager.removeDirEntry(dirPath);
+    dirManager->removeDirEntry(dirPath);
 }
 
 void DirectoryModel::copyFileTo(QString const &srcFile, QString const &destDirPath, bool force, FileOpResult &result)
@@ -195,14 +196,14 @@ void DirectoryModel::moveFileTo(QString const &srcFile, QString const &destDirPa
     qApp->processEvents();
     if (result == FileOpResult::SUCCESS) {
         if (destDirPath != this->directoryPath())
-            dirManager.removeFileEntry(srcFile);
+            dirManager->removeFileEntry(srcFile);
     }
 }
 // -----------------------------------------------------------------------------
 bool DirectoryModel::setDirectory(QString const &path)
 {
     cache.clear();
-    return dirManager.setDirectory(path);
+    return dirManager->setDirectory(path);
 }
 
 void DirectoryModel::unload(qsizetype index)
@@ -255,7 +256,7 @@ bool DirectoryModel::saveFile(QString const &filePath, QString const &destPath)
     auto img = cache.get(filePath);
     if (img->save(destPath)) {
         if (filePath == destPath) { // replace
-            dirManager.updateFileEntry(destPath);
+            dirManager->updateFileEntry(destPath);
             emit fileModified(destPath);
         } else { // manually add if we are saving to the same dir
             QFileInfo fiSrc(filePath);
@@ -263,7 +264,7 @@ bool DirectoryModel::saveFile(QString const &filePath, QString const &destPath)
             // handle same dir
             if (fiSrc.absolutePath() == fiDest.absolutePath()) {
                 // overwrite
-                if (!dirManager.containsFile(destPath) && dirManager.insertFileEntry(destPath))
+                if (!dirManager->containsFile(destPath) && dirManager->insertFileEntry(destPath))
                     emit fileModified(destPath);
             }
         }
@@ -369,7 +370,7 @@ void DirectoryModel::reload(QString const &filePath)
 {
     if (cache.contains(filePath)) {
         cache.remove(filePath);
-        dirManager.updateFileEntry(filePath);
+        dirManager->updateFileEntry(filePath);
         load(filePath, false);
     }
 }

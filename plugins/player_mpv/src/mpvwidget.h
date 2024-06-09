@@ -14,7 +14,7 @@
 #include <QSurfaceFormat>
 #include <QTimer>
 
-class MpvWidget Q_DECL_FINAL : public QOpenGLWidget
+class MpvWidget final : public QOpenGLWidget
 {
     Q_OBJECT
 
@@ -29,22 +29,21 @@ class MpvWidget Q_DECL_FINAL : public QOpenGLWidget
     void setRepeat(bool mode) const;
     void setVolume(int vol) const;
 
-    [[nodiscard]] auto getProperty(QString const &name) const -> QVariant;
-    [[nodiscard]] auto muted() const -> bool;
-    [[nodiscard]] auto volume() const -> int;
-
+    [[nodiscard]] QVariant getProperty(QString const &name) const;
+    [[nodiscard]] bool     muted() const;
+    [[nodiscard]] int      volume() const;
 
     // Related to this:
     // https://github.com/gnome-mpv/gnome-mpv/issues/245
-    // Let's hope this wont break more than it fixes
+    // Let's hope this won't break more than it fixes.
     [[nodiscard]] int width() const
     {
-        return static_cast<int>(QOpenGLWidget::width() * this->devicePixelRatioF());
+        return static_cast<int>(QOpenGLWidget::width() * devicePixelRatioF());
     }
 
     [[nodiscard]] int height() const
     {
-        return static_cast<int>(QOpenGLWidget::height() * this->devicePixelRatioF());
+        return static_cast<int>(QOpenGLWidget::height() * devicePixelRatioF());
     }
 
   Q_SIGNALS:

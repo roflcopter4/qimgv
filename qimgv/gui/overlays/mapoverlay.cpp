@@ -1,5 +1,5 @@
 #include "mapoverlay.h"
-#include "settings.h"
+#include "Settings.h"
 #include <QPropertyAnimation>
 
 #include "Common.h"

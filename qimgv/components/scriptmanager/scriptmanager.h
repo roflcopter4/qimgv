@@ -10,7 +10,7 @@
 #include <QProcess>
 #include "utils/script.h"
 #include "sourcecontainers/image.h"
-#include "settings.h"
+#include "Settings.h"
 
 class ScriptManager : public QObject
 {

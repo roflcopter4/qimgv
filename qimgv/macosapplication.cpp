@@ -1,2 +1,2 @@
-#include "macosapplication.h"
+#include "MacOSApplication.h"
 

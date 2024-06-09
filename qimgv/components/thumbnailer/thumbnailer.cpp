@@ -1,10 +1,10 @@
 #include "thumbnailer.h"
 
-Thumbnailer::Thumbnailer()
+Thumbnailer::Thumbnailer(QObject *parent)
+    : QObject(parent),
+      cache(new ThumbnailCache(this)),
+      pool(new QThreadPool(this))
 {
-    cache = new ThumbnailCache();
-    pool  = new QThreadPool(this);
-
     int threads       = settings->thumbnailerThreadCount();
     int globalThreads = QThreadPool::globalInstance()->maxThreadCount();
     if (threads > globalThreads)
@@ -41,9 +41,12 @@ void Thumbnailer::getThumbnailAsync(QString const &path, int size, bool crop, bo
 
 void Thumbnailer::startThumbnailerThread(QString const &filePath, int size, bool crop, bool force)
 {
-    auto runnable = new ThumbnailerRunnable(settings->useThumbnailCache() ? cache : nullptr, filePath, size, crop, force);
+    auto runnable = new ThumbnailerRunnable(settings->useThumbnailCache() ? cache : nullptr,
+                                            filePath, size, crop, force);
+
     connect(runnable, &ThumbnailerRunnable::taskStart, this, &Thumbnailer::onTaskStart);
     connect(runnable, &ThumbnailerRunnable::taskEnd, this, &Thumbnailer::onTaskEnd);
+
     runnable->setAutoDelete(true);
     pool->start(runnable);
 }

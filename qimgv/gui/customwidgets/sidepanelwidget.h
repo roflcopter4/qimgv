@@ -6,11 +6,12 @@
 class SidePanelWidget : public QWidget
 {
     Q_OBJECT
-public:
+
+  public:
     explicit SidePanelWidget(QWidget *parent = nullptr);
 
-signals:
+  Q_SIGNALS:
 
-public slots:
+  public Q_SLOTS:
     virtual void show() = 0;
 };

@@ -1,6 +1,8 @@
 #include "spinboxinputfix.h"
 
-SpinBoxInputFix::SpinBoxInputFix(QWidget *parent) : QSpinBox(parent) {
+SpinBoxInputFix::SpinBoxInputFix(QWidget *parent)
+    : QSpinBox(parent)
+{
     allowedKeys << QS("1")
                 << QS("2")
                 << QS("3")
@@ -24,12 +26,12 @@ SpinBoxInputFix::SpinBoxInputFix(QWidget *parent) : QSpinBox(parent) {
                 << QS("Backspace");
 }
 
-void SpinBoxInputFix::keyPressEvent(QKeyEvent *event) {
+void SpinBoxInputFix::keyPressEvent(QKeyEvent *event)
+{
     quint32 nativeScanCode = event->nativeScanCode();
-    QString key = actionManager->keyForNativeScancode(nativeScanCode);
-    if(allowedKeys.contains(key)) {
+    QString key            = actionManager->keyForNativeScancode(nativeScanCode);
+    if (allowedKeys.contains(key))
         QSpinBox::keyPressEvent(event);
-    } else {
+    else
         event->ignore();
-    }
 }

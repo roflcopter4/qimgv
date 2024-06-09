@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "settings.h"
+#include "Settings.h"
 #include "videoplayer.h"
 #include <QDebug>
 #include <QFileInfo>
@@ -54,7 +54,7 @@ class VideoPlayerInitProxy : public VideoPlayer
     QString     libFile;
     QStringList libDirs;
     QLibrary    playerLib;
-    QVBoxLayout layout;
+    QVBoxLayout *layout;
     QLabel     *errorLabel = nullptr;
 
     bool initPlayer();

@@ -4,7 +4,7 @@
 #include <QComboBox>
 #include <QPainter>
 #include <QKeyEvent>
-#include "settings.h"
+#include "Settings.h"
 #include "utils/imagelib.h"
 
 class StyledComboBox : public QComboBox

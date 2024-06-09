@@ -1,9 +1,5 @@
 #include "folderviewproxy.h"
 
-namespace {
-QSharedPointer<FolderView> global_folderView;
-}
-
 FolderViewProxy::FolderViewProxy(QWidget *parent)
     : QWidget(parent),
       folderView(nullptr),
@@ -16,27 +12,26 @@ FolderViewProxy::FolderViewProxy(QWidget *parent)
 void FolderViewProxy::init()
 {
     qApp->processEvents(); // chew through events in case we have something that alters stateBuf in queue
-    QMutexLocker ml(&m);
+    QMutexLocker ml(&mtx);
     if (folderView)
         return;
-    folderView = QSharedPointer<FolderView>(new FolderView(this));
-    global_folderView = (folderView);
-    folderView->setParent(this);
+    folderView = new FolderView(this);
     ml.unlock();
-    layout->addWidget(folderView.get());
-    setFocusProxy(folderView.get());
+
+    layout->addWidget(folderView);
+    setFocusProxy(folderView);
     setLayout(layout);
 
-    connect(folderView.get(), &FolderView::itemActivated,       this, &FolderViewProxy::itemActivated);
-    connect(folderView.get(), &FolderView::thumbnailsRequested, this, &FolderViewProxy::thumbnailsRequested);
-    connect(folderView.get(), &FolderView::sortingSelected,     this, &FolderViewProxy::sortingSelected);
-    connect(folderView.get(), &FolderView::showFoldersChanged,  this, &FolderViewProxy::showFoldersChanged);
-    connect(folderView.get(), &FolderView::directorySelected,   this, &FolderViewProxy::directorySelected);
-    connect(folderView.get(), &FolderView::draggedOut,          this, &FolderViewProxy::draggedOut);
-    connect(folderView.get(), &FolderView::copyUrlsRequested,   this, &FolderViewProxy::copyUrlsRequested);
-    connect(folderView.get(), &FolderView::moveUrlsRequested,   this, &FolderViewProxy::moveUrlsRequested);
-    connect(folderView.get(), &FolderView::droppedInto,         this, &FolderViewProxy::droppedInto);
-    connect(folderView.get(), &FolderView::draggedOver,         this, &FolderViewProxy::draggedOver);
+    connect(folderView, &FolderView::itemActivated,       this, &FolderViewProxy::itemActivated);
+    connect(folderView, &FolderView::thumbnailsRequested, this, &FolderViewProxy::thumbnailsRequested);
+    connect(folderView, &FolderView::sortingSelected,     this, &FolderViewProxy::sortingSelected);
+    connect(folderView, &FolderView::showFoldersChanged,  this, &FolderViewProxy::showFoldersChanged);
+    connect(folderView, &FolderView::directorySelected,   this, &FolderViewProxy::directorySelected);
+    connect(folderView, &FolderView::draggedOut,          this, &FolderViewProxy::draggedOut);
+    connect(folderView, &FolderView::copyUrlsRequested,   this, &FolderViewProxy::copyUrlsRequested);
+    connect(folderView, &FolderView::moveUrlsRequested,   this, &FolderViewProxy::moveUrlsRequested);
+    connect(folderView, &FolderView::droppedInto,         this, &FolderViewProxy::droppedInto);
+    connect(folderView, &FolderView::draggedOver,         this, &FolderViewProxy::draggedOver);
 
     folderView->show();
 
@@ -55,7 +50,7 @@ void FolderViewProxy::init()
 
 void FolderViewProxy::populate(qsizetype count)
 {
-    QMutexLocker ml(&m);
+    QMutexLocker ml(&mtx);
     stateBuf.itemCount = count;
     if (folderView) {
         ml.unlock();
@@ -126,7 +121,7 @@ void FolderViewProxy::insertItem(qsizetype index)
     if (folderView)
         folderView->insertItem(index);
     else
-        stateBuf.itemCount++;
+        ++stateBuf.itemCount;
 }
 
 void FolderViewProxy::removeItem(qsizetype index)
@@ -134,13 +129,13 @@ void FolderViewProxy::removeItem(qsizetype index)
     if (folderView) {
         folderView->removeItem(index);
     } else {
-        stateBuf.itemCount--;
+        --stateBuf.itemCount;
         stateBuf.selection.removeAll(index);
         for (qsizetype i = 0; i < stateBuf.selection.count(); ++i)
             if (stateBuf.selection[i] > index)
-                stateBuf.selection[i]--;
+                --stateBuf.selection[i];
         if (!stateBuf.selection.count())
-            stateBuf.selection << ((index >= stateBuf.itemCount) ? stateBuf.itemCount - 1 : index);
+            stateBuf.selection << (index >= stateBuf.itemCount ? stateBuf.itemCount - 1 : index);
     }
 }
 
@@ -161,7 +156,7 @@ void FolderViewProxy::addItem()
     if (folderView)
         folderView->addItem();
     else
-        stateBuf.itemCount++;
+        ++stateBuf.itemCount;
 }
 
 void FolderViewProxy::onFullscreenModeChanged(bool mode)

@@ -2,11 +2,14 @@
 #include "sidepanel.h"
 #include "ui_sidepanel.h"
 
-SidePanel::SidePanel(QWidget *parent) : QWidget(parent), ui(new Ui::SidePanel), mWidget(nullptr)
+SidePanel::SidePanel(QWidget *parent)
+    : QWidget(parent),
+      ui(new Ui::SidePanel),
+      mWidget(nullptr)
 {
     ui->setupUi(this);
-    this->setObjectName(QS("SidePanel"));
-    this->hide();
+    setObjectName(QS("SidePanel"));
+    hide();
 }
 
 SidePanel::~SidePanel()

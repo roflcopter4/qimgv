@@ -1,10 +1,10 @@
 #pragma once
 
-#include "components/actionmanager/actionmanager.h"
+#include "components/actionManager/ActionManager.h"
 #include "gui/customwidgets/colorselectorbutton.h"
 #include "gui/dialogs/scripteditordialog.h"
 #include "gui/dialogs/shortcutcreatordialog.h"
-#include "settings.h"
+#include "Settings.h"
 #include <QApplication>
 #include <QButtonGroup>
 #include <QColorDialog>

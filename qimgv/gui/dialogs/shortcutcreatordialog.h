@@ -5,7 +5,7 @@
 #include <QRadioButton>
 #include "shortcutbuilder.h"
 #include "utils/actions.h"
-#include "components/actionmanager/actionmanager.h"
+#include "components/actionManager/ActionManager.h"
 #include "components/scriptmanager/scriptmanager.h"
 // TODO: separate gui from components
 // OR move script & action stuff to project root?

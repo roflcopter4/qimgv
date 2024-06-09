@@ -3,7 +3,7 @@
 
 #include <QPixmap>
 #include "sourcecontainers/image.h"
-#include "settings.h" // move enums somewhere else?
+#include "Settings.h" // move enums somewhere else?
 
 class ScalerRequest {
 public:

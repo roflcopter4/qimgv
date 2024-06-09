@@ -48,11 +48,11 @@ class Handle
     // Return the raw handle; for use with the libmpv C API.
     operator mpv_handle *() const
     {
-        return sptr ? (*sptr).mpv : 0;
+        return sptr ? sptr->mpv : nullptr;
     }
 };
 
-static inline QVariant node_to_variant(const mpv_node *node)
+inline QVariant node_to_variant(mpv_node const *node)
 {
     switch (node->format) {
     case MPV_FORMAT_STRING:
@@ -84,23 +84,25 @@ static inline QVariant node_to_variant(const mpv_node *node)
 
 struct node_builder
 {
-    node_builder(const QVariant &v)
+    explicit node_builder(QVariant const &v)
     {
         set(&node_, v);
     }
+
     ~node_builder()
     {
         free_node(&node_);
     }
-    mpv_node *node()
-    {
-        return &node_;
-    }
+
+    [[nodiscard]] mpv_node       *node()       { return &node_; }
+    [[nodiscard]] mpv_node const *node() const { return &node_; }
+
+    Q_DISABLE_COPY(node_builder)
 
   private:
-    Q_DISABLE_COPY(node_builder)
-    mpv_node       node_;
-    mpv_node_list *create_list(mpv_node *dst, bool is_map, int num)
+    mpv_node node_;
+
+    [[nodiscard]] static mpv_node_list *create_list(mpv_node *dst, bool is_map, int num)
     {
         dst->format         = is_map ? MPV_FORMAT_NODE_MAP : MPV_FORMAT_NODE_ARRAY;
         mpv_node_list *list = new mpv_node_list();
@@ -118,19 +120,19 @@ struct node_builder
         return list;
     err:
         free_node(dst);
-        return NULL;
+        return nullptr;
     }
 
-    static char *dup_qstring(const QString &s)
+    [[nodiscard]] static char *dup_qstring(QString const &s)
     {
-        QByteArray b = s.toUtf8();
-        char      *r = new char[b.size() + 1];
+        auto b = s.toUtf8();
+        auto r = new char[b.size() + 1];
         if (r)
             std::memcpy(r, b.data(), b.size() + 1);
         return r;
     }
 
-    static bool test_type(const QVariant &v, QMetaType::Type t)
+    [[nodiscard]] static bool test_type(QVariant const &v, QMetaType::Type t)
     {
 #if 0
         // The Qt docs say: "Although this function is declared as returning
@@ -142,7 +144,7 @@ struct node_builder
         return v.typeId() == t;
     }
 
-    void set(mpv_node *dst, const QVariant &src)
+    static void set(mpv_node *dst, QVariant const &src)
     {
         if (test_type(src, QMetaType::QString)) {
             dst->format   = MPV_FORMAT_STRING;
@@ -195,11 +197,12 @@ struct node_builder
         case MPV_FORMAT_STRING:
             delete[] dst->u.string;
             break;
+
         case MPV_FORMAT_NODE_ARRAY:
         case MPV_FORMAT_NODE_MAP: {
             mpv_node_list *list = dst->u.list;
             if (list) {
-                for (int n = 0; n < list->num; n++) {
+                for (int n = 0; n < list->num; ++n) {
                     if (list->keys)
                         delete[] list->keys[n];
                     if (list->values)
@@ -211,8 +214,11 @@ struct node_builder
             delete list;
             break;
         }
-        default:;
+
+        default:
+            break;
         }
+
         dst->format = MPV_FORMAT_NONE;
     }
 };
@@ -220,12 +226,11 @@ struct node_builder
 /**
  * RAII wrapper that calls mpv_free_node_contents() on the pointer.
  */
-struct node_autofree
-{
+struct node_autofree {
     mpv_node *ptr;
-    node_autofree(mpv_node *a_ptr) : ptr(a_ptr)
-    {
-    }
+    explicit node_autofree(mpv_node *a_ptr)
+        : ptr(a_ptr)
+    {}
     ~node_autofree()
     {
         mpv_free_node_contents(ptr);
@@ -240,11 +245,12 @@ struct node_autofree
  *
  * @param name the property name
  */
-static inline QVariant get_property_variant(mpv_handle *ctx, const QString &name)
+[[deprecated("Use `set_property()`")]]
+inline QVariant get_property_variant(mpv_handle *ctx, QString const &name)
 {
     mpv_node node;
     if (mpv_get_property(ctx, name.toUtf8().data(), MPV_FORMAT_NODE, &node) < 0)
-        return QVariant();
+        return {};
     node_autofree f(&node);
     return node_to_variant(&node);
 }
@@ -254,7 +260,8 @@ static inline QVariant get_property_variant(mpv_handle *ctx, const QString &name
 
  * @deprecated use set_property() instead
  */
-static inline int set_property_variant(mpv_handle *ctx, const QString &name, const QVariant &v)
+[[deprecated("Use `set_property()`")]]
+inline int set_property_variant(mpv_handle *ctx, QString const &name, QVariant const &v)
 {
     node_builder node(v);
     return mpv_set_property(ctx, name.toUtf8().data(), MPV_FORMAT_NODE, node.node());
@@ -265,24 +272,25 @@ static inline int set_property_variant(mpv_handle *ctx, const QString &name, con
  *
  * @deprecated use set_property() instead
  */
-static inline int set_option_variant(mpv_handle *ctx, const QString &name, const QVariant &v)
+[[deprecated("Use `set_property()`")]]
+inline int set_option_variant(mpv_handle *ctx, QString const &name, QVariant const &v)
 {
     node_builder node(v);
     return mpv_set_option(ctx, name.toUtf8().data(), MPV_FORMAT_NODE, node.node());
 }
 
 /**
- * mpv_command_node() equivalent. Returns QVariant() on error (and
- * unfortunately, the same on success).
+ * mpv_command_node() equivalent. Returns QVariant() on error (and unfortunately, the same on success).
  *
  * @deprecated use command() instead
  */
-static inline QVariant command_variant(mpv_handle *ctx, const QVariant &args)
+[[deprecated("Use `command()`")]]
+inline QVariant command_variant(mpv_handle *ctx, QVariant const &args)
 {
     node_builder node(args);
     mpv_node     res;
     if (mpv_command_node(ctx, node.node(), &res) < 0)
-        return QVariant();
+        return {};
     node_autofree f(&res);
     return node_to_variant(&res);
 }
@@ -313,7 +321,7 @@ struct ErrorReturn
  *
  * @return error code (<0) or success (>=0)
  */
-static inline int get_error(const QVariant &v)
+inline int get_error(QVariant const &v)
 {
     if (!v.canConvert<ErrorReturn>())
         return 0;
@@ -323,7 +331,7 @@ static inline int get_error(const QVariant &v)
 /**
  * Return whether the QVariant carries a mpv error code.
  */
-static inline bool is_error(const QVariant &v)
+inline bool is_error(QVariant const &v)
 {
     return get_error(v) < 0;
 }
@@ -332,10 +340,11 @@ static inline bool is_error(const QVariant &v)
  * Return the given property as mpv_node converted to QVariant, or QVariant()
  * on error.
  *
+ * @param ctx The MPV handle.
  * @param name the property name
  * @return the property value, or an ErrorReturn with the error code
  */
-static inline QVariant get_property(mpv_handle *ctx, const QString &name)
+inline QVariant get_property(mpv_handle *ctx, QString const &name)
 {
     mpv_node node;
     int      err = mpv_get_property(ctx, name.toUtf8().data(), MPV_FORMAT_NODE, &node);
@@ -350,7 +359,7 @@ static inline QVariant get_property(mpv_handle *ctx, const QString &name)
  *
  * @return mpv error code (<0 on error, >= 0 on success)
  */
-static inline int set_property(mpv_handle *ctx, const QString &name, const QVariant &v)
+inline int set_property(mpv_handle *ctx, QString const &name, QVariant const &v)
 {
     node_builder node(v);
     return mpv_set_property(ctx, name.toUtf8().data(), MPV_FORMAT_NODE, node.node());
@@ -359,10 +368,11 @@ static inline int set_property(mpv_handle *ctx, const QString &name, const QVari
 /**
  * mpv_command_node() equivalent.
  *
+ * @param ctx The MPV handle.
  * @param args command arguments, with args[0] being the command name as string
  * @return the property value, or an ErrorReturn with the error code
  */
-static inline QVariant command(mpv_handle *ctx, const QVariant &args)
+inline QVariant command(mpv_handle *ctx, QVariant const &args)
 {
     node_builder node(args);
     mpv_node     res;

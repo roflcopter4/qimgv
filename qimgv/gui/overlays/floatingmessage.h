@@ -3,7 +3,7 @@
 #include <QTimer>
 #include <QLabel>
 #include "gui/customwidgets/overlaywidget.h"
-#include "settings.h"
+#include "Settings.h"
 
 #ifdef ERROR
 # undef ERROR

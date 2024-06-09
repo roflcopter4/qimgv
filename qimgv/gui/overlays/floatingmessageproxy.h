@@ -4,13 +4,15 @@
 
 class FloatingMessageProxy
 {
-public:
-    FloatingMessageProxy(FloatingWidgetContainer *parent);
+  public:
+    explicit FloatingMessageProxy(FloatingWidgetContainer *parent);
     ~FloatingMessageProxy();
+
     void showMessage(QString const &text, FloatingMessageIcon icon, int duration);
     void showMessage(QString const &text, FloatingWidgetPosition position, FloatingMessageIcon icon, int duration);
     void init();
-private:
+
+  private:
     FloatingWidgetContainer *container;
-    FloatingMessage *overlay;
+    FloatingMessage         *overlay;
 };

@@ -6,8 +6,8 @@
 #include <QTimer>
 
 #include "gui/customwidgets/overlaywidget.h"
-#include "components/actionmanager/actionmanager.h"
-#include "settings.h"
+#include "components/actionManager/ActionManager.h"
+#include "Settings.h"
 
 namespace Ui {
 class RenameOverlay;

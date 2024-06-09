@@ -9,7 +9,7 @@
 #include <QGraphicsColorizeEffect>
 #include <QDebug>
 #include "components/thumbnailer/thumbnailer.h"
-#include "settings.h"
+#include "Settings.h"
 
 namespace Ui {
 class PrintDialog;

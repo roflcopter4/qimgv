@@ -1,8 +1,8 @@
 #pragma once
 
 #include "sourcecontainers/documentinfo.h"
-#include "utils/imagelib.h"
-#include "utils/stuff.h"
+#include "utils/ImageLib.h"
+#include "utils/Stuff.h"
 #include <QDebug>
 #include <QPixmap>
 #include <QString>
@@ -17,25 +17,24 @@ class Image
     explicit Image(std::unique_ptr<DocumentInfo>);
     virtual ~Image() = default;
 
-    virtual std::unique_ptr<QPixmap>      getPixmap() = 0;
-    virtual QSharedPointer<QImage const> getImage()  = 0;
+    ND virtual auto  getPixmap() -> std::unique_ptr<QPixmap>    = 0;
+    ND virtual auto  getImage() -> QSharedPointer<QImage const> = 0;
+    ND virtual int   height() const                             = 0;
+    ND virtual int   width() const                              = 0;
+    ND virtual QSize size() const                               = 0;
 
-    virtual int   height()               = 0;
-    virtual int   width()                = 0;
-    virtual QSize size()                 = 0;
-    virtual bool  save()                 = 0;
-    virtual bool  save(QString destPath) = 0;
+    virtual bool save()                 = 0;
+    virtual bool save(QString destPath) = 0;
 
-    ND DocumentType type() const;
-    ND QString      filePath() const;
-    ND bool         isLoaded() const;
-    ND QString      fileName() const;
-    ND QString      baseName() const;
-    ND bool         isEdited() const;
-    ND qint64       fileSize() const;
-    ND QDateTime    lastModified() const;
-
-    ND QMap<QString, QString> getExifTags() const;
+    ND auto baseName() const -> QString;
+    ND auto fileName() const -> QString;
+    ND auto filePath() const -> QString;
+    ND auto fileSize() const -> qint64;
+    ND auto getExifTags() const -> QMap<QString, QString>;
+    ND auto lastModified() const -> QDateTime;
+    ND auto type() const -> DocumentType;
+    ND bool isEdited() const;
+    ND bool isLoaded() const;
 
   protected:
     virtual void load() = 0;

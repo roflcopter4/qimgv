@@ -1,6 +1,6 @@
 #pragma once
 
-#include "components/actionmanager/actionmanager.h"
+#include "components/actionManager/ActionManager.h"
 #include "gui/customwidgets/iconbutton.h"
 
 #include "Common.h"

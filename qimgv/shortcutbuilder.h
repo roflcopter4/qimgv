@@ -6,16 +6,17 @@
 #include <QDebug>
 #include "utils/inputmap.h"
 
-class ShortcutBuilder {
-public:
+class ShortcutBuilder
+{
+  public:
     static QString fromEvent(QInputEvent *event);
 
-private:
+  private:
     static QString processWheelEvent(QWheelEvent *event);
     static QString processMouseEvent(QMouseEvent *event);
     static QString processKeyEvent(QKeyEvent *event);
     static QString modifierKeys(QInputEvent *event);
-    static bool isModifier(Qt::Key key);
+    static bool    isModifier(Qt::Key key);
     static QString fromEventText(QKeyEvent *event);
     static QString fromEventNativeScanCode(QKeyEvent *event);
 };

@@ -7,7 +7,7 @@
 #include <QMimeData>
 #include <QScrollBar>
 #include <QDebug>
-#include "settings.h"
+#include "Settings.h"
 
 #include "Common.h"
 
@@ -16,7 +16,7 @@ class TreeViewCustom : public QTreeView
     Q_OBJECT
 
   public:
-    explicit TreeViewCustom(QWidget *parent = nullptr);
+    explicit TreeViewCustom(QWidget *parent);
 
     ND QSize minimumSizeHint() const override;
 

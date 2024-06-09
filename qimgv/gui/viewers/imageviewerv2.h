@@ -13,7 +13,7 @@
 #include <QDebug>
 #include <memory>
 #include <cmath>
-#include "settings.h"
+#include "Settings.h"
 
 #include "Common.h"
 
@@ -39,7 +39,7 @@ class ImageViewerV2 Q_DECL_FINAL : public QGraphicsView
 
   public:
     explicit ImageViewerV2(QWidget *parent = nullptr);
-    ~ImageViewerV2() override = default;
+    ~ImageViewerV2() override;
 
     ImageViewerV2(ImageViewerV2 const &)            = delete;
     ImageViewerV2(ImageViewerV2 &&)                 = delete;

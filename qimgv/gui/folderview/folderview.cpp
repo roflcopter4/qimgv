@@ -4,9 +4,9 @@
 
 FolderView::FolderView(QWidget *parent)
     : FloatingWidgetContainer(parent),
-      ui(new Ui::FolderView),
+      ui(new Ui::FolderView()),
       dirModel(new FileSystemModelCustom(this)),
-      optionsPopup(new FVOptionsPopup())
+      optionsPopup(new FVOptionsPopup(this))
 {
     ui->setupUi(this);
 
@@ -104,6 +104,11 @@ FolderView::FolderView(QWidget *parent)
     hide();
 }
 
+FolderView::~FolderView()
+{
+    delete ui;
+}
+
 void FolderView::readSettings() const
 {
     ui->thumbnailGrid->setThumbnailSize(settings->folderViewIconSize());
@@ -191,7 +196,7 @@ void FolderView::onViewModeSelected(FolderViewMode mode)
 {
     settings->setFolderViewMode(mode);
     ui->thumbnailGrid->setShowLabels((settings->folderViewMode() != FolderViewMode::SIMPLE));
-    emit showFoldersChanged((mode == FolderViewMode::EXT_FOLDERS));
+    emit showFoldersChanged(mode == FolderViewMode::EXT_FOLDERS);
 }
 
 void FolderView::onThumbnailSizeChanged(int newSize) const
@@ -216,11 +221,6 @@ void FolderView::onSortingChanged(SortingMode mode) const
     ui->sortingComboBox->blockSignals(true);
     ui->sortingComboBox->setCurrentIndex(static_cast<int>(mode));
     ui->sortingComboBox->blockSignals(false);
-}
-
-FolderView::~FolderView()
-{
-    delete ui;
 }
 
 // probably unneeded
@@ -336,7 +336,7 @@ void FolderView::setDirectoryPath(QString path)
     if (keepExpand)
         ui->dirTreeView->expand(targetIndex);
 
-    // OK I'm done with this shit. none of the "solutions" work just do scrollTo
+    // OK I'mtx done with this shit. none of the "solutions" work just do scrollTo
     // after a delay and hope that model is loaded by then larger than ~150ms
     // becomes too noticeable.
     QTimer::singleShot(150, this, &FolderView::fsTreeScrollToCurrent);

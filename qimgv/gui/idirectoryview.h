@@ -16,7 +16,10 @@ class IDirectoryView
   public:
     using SelectionList = QList<qsizetype>;
 
+    IDirectoryView() = default;
     virtual ~IDirectoryView() = default;
+
+    DEFAULT_COPY_MOVE_CONSTRUCTORS(IDirectoryView);
 
     virtual void populate(qsizetype)            = 0;
     virtual void select(SelectionList)          = 0;
@@ -35,12 +38,12 @@ class IDirectoryView
     ND virtual SelectionList const &selection() const = 0;
 
     // signals
-    virtual void itemActivated(qsizetype)                             = 0;
-    virtual void thumbnailsRequested(SelectionList, int size, bool, bool)  = 0;
-    virtual void draggedOut()                                         = 0;
-    virtual void draggedToBookmarks(SelectionList)                    = 0;
-    virtual void draggedOver(qsizetype)                               = 0;
-    virtual void droppedInto(QMimeData const *, QObject *, qsizetype) = 0;
+    virtual void itemActivated(qsizetype)                                 = 0;
+    virtual void thumbnailsRequested(SelectionList, int size, bool, bool) = 0;
+    virtual void draggedOut()                                             = 0;
+    virtual void draggedToBookmarks(SelectionList)                        = 0;
+    virtual void draggedOver(qsizetype)                                   = 0;
+    virtual void droppedInto(QMimeData const *, QObject *, qsizetype)     = 0;
 };
 
 Q_DECLARE_INTERFACE(IDirectoryView, "IDirectoryView")

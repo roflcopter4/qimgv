@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "components/scriptmanager/scriptmanager.h"
-#include "settings.h"
+#include "components/scriptManager/scriptmanager.h"
+#include "Settings.h"
 #include "shortcutbuilder.h"
-#include "utils/actions.h"
+#include "utils/Actions.h"
 #include <QDebug>
 #include <QKeyEvent>
 #include <QMap>

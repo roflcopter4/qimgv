@@ -3,16 +3,17 @@
 ZoomIndicatorOverlay::ZoomIndicatorOverlay(FloatingWidgetContainer *parent)
     : OverlayWidget(parent),
       fm(new QFontMetrics(QApplication::font())),
+      layout(new QHBoxLayout(this)),
       hideDelay(2000)
 {
     visibilityTimer.setSingleShot(true);
     visibilityTimer.setInterval(hideDelay);
 
-    layout.setContentsMargins(0, 0, 0, 0);
-    layout.addWidget(&label);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(&label);
     label.setAlignment(Qt::AlignCenter);
 
-    setLayout(&layout);
+    setLayout(layout);
     setPosition(FloatingWidgetPosition::BOTTOMLEFT);
     setHorizontalMargin(0);
     setVerticalMargin(16);

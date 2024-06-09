@@ -4,13 +4,16 @@
 #include <QApplication>
 #include <QFileSystemModel>
 #include <QPainter>
-#include "settings.h"
+#include "Settings.h"
 #include "utils/imagelib.h"
 
 class FileSystemModelCustom final : public QFileSystemModel
 {
+    class FileIconProvider;
+
   public:
     explicit FileSystemModelCustom(QObject *parent = nullptr);
+    ~FileSystemModelCustom() override;
 
     ND QVariant data(QModelIndex const &index, int role) const override;
 
@@ -23,6 +26,7 @@ class FileSystemModelCustom final : public QFileSystemModel
 
   private:
     QPixmap folderIcon;
+    std::unique_ptr<FileIconProvider> iconProvider;
 };
 
 #endif // FILESYSTEMMODELCUSTOM_H

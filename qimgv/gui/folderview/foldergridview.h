@@ -6,7 +6,7 @@
 #include "gui/customwidgets/thumbnailwidget.h"
 #include "gui/flowlayout.h"
 #include "utils/stuff.h"
-#include "components/actionmanager/actionmanager.h"
+#include "components/actionManager/ActionManager.h"
 
 class FolderGridView : public ThumbnailView
 {

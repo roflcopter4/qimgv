@@ -1,5 +1,8 @@
-//#define USE_VLD
-#if defined _WIN32 && defined _MSC_VER && defined USE_VLD
+#if defined _WIN32 && defined _MSC_VER
+# define USE_VLD
+#endif
+#ifdef USE_VLD
+# define VLD_FORCE_ENABLE 1
 # include <Shlwapi.h>
 # include <F:/Program Files (x86)/Visual Leak Detector/include/vld.h>
 #endif
@@ -9,15 +12,15 @@
 #include <QStyleFactory>
 #include <QEvent>
 
-#include "appversion.h"
-#include "settings.h"
-#include "components/actionmanager/actionmanager.h"
-#include "utils/inputmap.h"
-#include "utils/actions.h"
-#include "utils/cmdoptionsrunner.h"
-#include "sharedresources.h"
-#include "proxystyle.h"
-#include "core.h"
+#include "AppVersion.h"
+#include "Settings.h"
+#include "components/actionManager/ActionManager.h"
+#include "utils/InputMap.h"
+#include "utils/Actions.h"
+#include "utils/CmdOptionsRunner.h"
+#include "SharedResources.h"
+#include "ProxyStyle.h"
+#include "Core.h"
 
 #ifdef Q_OS_APPLE
 # include "macosapplication.h"
@@ -57,7 +60,7 @@ int main(int argc, char *argv[])
 {
     // Force some environment variables.
 #ifdef Q_OS_WIN32
-# ifdef _DEBUG
+# if defined _DEBUG
     util::OpenConsoleWindow();
 # else
     ::FreeConsole();
@@ -65,8 +68,8 @@ int main(int argc, char *argv[])
 
 # ifdef USE_VLD
     VLDGlobalEnable();
-    VLDSetReportOptions(VLD_OPT_UNICODE_REPORT | VLD_OPT_REPORT_TO_FILE, LR"(D:\ass\GIT\qimgv\MSVC_2\vld_report.log)");
-    VLDSetOptions(VLD_OPT_TRACE_INTERNAL_FRAMES | VLD_OPT_SKIP_CRTSTARTUP_LEAKS | VLD_OPT_VALIDATE_HEAPFREE | VLD_OPT_AGGREGATE_DUPLICATES | VLD_OPT_SKIP_HEAPFREE_LEAKS, 256, 256);
+    VLDSetReportOptions(0, nullptr);
+    VLDSetOptions(VLD_OPT_AGGREGATE_DUPLICATES | VLD_OPT_SAFE_STACK_WALK, 256, 128);
 # endif
 
     // If this is set by other app, platform plugins may fail to load.
@@ -102,6 +105,10 @@ int main(int argc, char *argv[])
     qDebug() << qgetenv("QT_ENABLE_HIGHDPI_SCALING");
 #endif
 
+    Core *core;
+    int ret;
+
+    {
 #ifdef Q_OS_APPLE
     MacOSApplication app(argc, argv);
     // default to "fusion" if available ("macos" has layout bugs, weird comboboxes etc)
@@ -109,7 +116,7 @@ int main(int argc, char *argv[])
         a.setStyle(QStyleFactory::create("Fusion"));
 #else
     auto app   = QApplication(argc, argv);
-    auto style = new ProxyStyle();
+    auto style = new ProxyStyle(nullptr);
     QApplication::setStyle(style);
 
     //QApplication app(argc, argv);
@@ -147,6 +154,10 @@ int main(int argc, char *argv[])
     qRegisterMetaType<QSharedPointer<Thumbnail>>("QSharedPointer<Thumbnail>");
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     qRegisterMetaTypeStreamOperators<Script>("Script");
+#endif
+
+#ifdef USE_VLD
+    //VLDMarkAllLeaksAsReported();
 #endif
 
     // Globals
@@ -200,7 +211,7 @@ int main(int argc, char *argv[])
 
     // -----------------------------------------------------------------------------
 
-    auto core = new Core(nullptr);
+    core = new Core(nullptr);
 
 #ifdef Q_OS_APPLE
     QObject::connect(&app, &MacOSApplication::fileOpened, &core, &Core::loadPath);
@@ -214,41 +225,26 @@ int main(int argc, char *argv[])
     // Wait for event queue to catch up before showing window.
     // This avoids white background flicker on windows (or not?).
     qApp->processEvents();
-
-#if 0
-    QThread *foo = QThread::create([]() {
-        qDebug() << u"Hello, world!";
-        QThread::sleep(1s);
-        QThread::currentThread()->exit(0);
-    });
-    foo->start(QThread::Priority::HighPriority);
-    auto r = foo->wait(30s);
-    qDebug() << u"Exit" << r;
-    delete foo;
-#endif
-
-#ifdef USE_VLD
-    VLDRefreshModules();
-#endif
-
     core->showGui();
-    int ret = QApplication::exec();
+    ret = QGuiApplication::exec();
+
+    util::DeleteAndNullify(core);
+    util::DeleteAndNullify(inputMap);
+    util::DeleteAndNullify(appActions);
+    util::DeleteAndNullify(scriptManager);
+    util::DeleteAndNullify(actionManager);
+    util::DeleteAndNullify(shrRes);
+    util::DeleteAndNullify(settings);
+    }
 
 #ifdef USE_VLD
-    VLDReportLeaks();
-    qDebug() << u"Leaks:" << VLDGetLeaksCount();
+    VLDSetReportOptions(VLD_OPT_UNICODE_REPORT | VLD_OPT_REPORT_TO_FILE,
+                        (LR"(D:\ass\GIT\qimgv\#LOGS\vld_report_)" + std::to_wstring(time(nullptr)) + L".log").c_str());
+    wprintf(L"Leaks: %u\n", VLDGetLeaksCount());
+# ifdef _DEBUG
     util::WaitForAnyKey();
-    VLDSetReportOptions(VLD_OPT_UNICODE_REPORT | VLD_OPT_REPORT_TO_FILE, LR"(D:\ass\GIT\qimgv\MSVC_2\vld_report_final.log)");
+# endif
 #endif
 
-    //util::DeleteAndNullify(inputMap);
-    //util::DeleteAndNullify(appActions);
-    //util::DeleteAndNullify(scriptManager);
-    //util::DeleteAndNullify(actionManager);
-    //util::DeleteAndNullify(shrRes);
-    //util::DeleteAndNullify(settings);
-    //util::DeleteAndNullify(style);
-
-    delete core;
     return ret;
 }

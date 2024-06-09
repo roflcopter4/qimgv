@@ -19,9 +19,9 @@ int probeOS();
 namespace util {
 
 #if defined Q_OS_WIN32 && false
-static constexpr QChar pathsep = QChar(L'\\');
+static constexpr QChar pathsep = QChar(u'\\');
 #else
-static constexpr QChar pathsep = QChar(L'/');
+static constexpr QChar pathsep = QChar(u'/');
 #endif
 
 using namespace Qt::Literals::StringLiterals;
@@ -36,7 +36,15 @@ inline QString QStringViewToQString(QStringView const &view)
     return QString{view.data(), view.size()};
 }
 
-QString get_backtrace();
+template <typename Ty>
+void DeleteAndNullify(Ty *&var)
+{
+    delete var;
+    var = nullptr;
+}
+
+QString GetBacktrace();
+QString GetErrorMessage(unsigned errVal);
 
 #ifdef Q_OS_WIN32
 extern void OpenConsoleWindow();

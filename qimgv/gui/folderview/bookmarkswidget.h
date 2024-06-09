@@ -6,35 +6,37 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QMimeData>
-#include "settings.h"
+#include "Settings.h"
 
-class BookmarksWidget : public QWidget {
+class BookmarksWidget : public QWidget
+{
     Q_OBJECT
 
-public:
+  public:
     explicit BookmarksWidget(QWidget *parent = nullptr);
     ~BookmarksWidget() override;
 
-public slots:
+  public Q_SLOTS:
     void addBookmark(QString const &directoryPath);
-
     void removeBookmark(QString const &dirPath);
     void onPathChanged(QString const &path);
-private slots:
-    void readSettings();
 
+  private Q_SLOTS:
+    void readSettings();
     void saveBookmarks();
-signals:
+
+  Q_SIGNALS:
     void bookmarkClicked(QString dirPath);
     void droppedIn(QList<QString> paths, QString dirPath);
 
-protected:
+  protected:
     void dropEvent(QDropEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
-private:
-    QVBoxLayout layout;
-    QStringList paths;
-    QString highlightedPath;
+
+  private:
+    QVBoxLayout *layout;
+    QStringList  paths;
+    QString      highlightedPath;
 };
 
 #endif // BOOKMARKSWIDGET_H

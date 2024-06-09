@@ -4,25 +4,24 @@
 #include <QImageWriter>
 #include <QSemaphore>
 #include <QCryptographicHash>
-#include "image.h"
-#include "utils/imagelib.h"
-#include <settings.h>
 #include <QIcon>
+#include "image.h"
+#include "utils/ImageLib.h"
+#include "Settings.h"
 
 class ImageStatic : public Image
 {
   public:
-    ImageStatic(QString const &path);
-    ImageStatic(std::unique_ptr<DocumentInfo> info);
+    explicit ImageStatic(QString const &path);
+    explicit ImageStatic(std::unique_ptr<DocumentInfo> info);
     ~ImageStatic() override;
 
-    std::unique_ptr<QPixmap>      getPixmap() override;
-    QSharedPointer<QImage const> getSourceImage();
-    QSharedPointer<QImage const> getImage() override;
-
-    int   height() override;
-    int   width() override;
-    QSize size() override;
+    ND auto  getSourceImage() -> QSharedPointer<QImage const>;
+    ND auto  getPixmap() -> std::unique_ptr<QPixmap> override;
+    ND auto  getImage() -> QSharedPointer<QImage const> override;
+    ND int   height() const override;
+    ND int   width() const override;
+    ND QSize size() const override;
 
     bool setEditedImage(std::unique_ptr<QImage const> imageEditedNew);
     bool discardEditedImage();
@@ -39,5 +38,7 @@ class ImageStatic : public Image
     void load() override;
     void loadGeneric();
     void loadICO();
-    static QString generateHash(QString const &str);
+
+    ND static auto readImage(QString const &path, QByteArray const &format) -> std::unique_ptr<QImage const>;
+    ND static auto generateHash(QString const &str) -> QString;
 };

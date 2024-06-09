@@ -6,10 +6,16 @@ ImageInfoOverlayProxy::ImageInfoOverlayProxy(FloatingWidgetContainer *parent)
 {}
 
 ImageInfoOverlayProxy::~ImageInfoOverlayProxy()
+#if 0
 {
     if (overlay)
         overlay->deleteLater();
 }
+#else
+    = default;
+#endif
+
+
 
 void ImageInfoOverlayProxy::show()
 {

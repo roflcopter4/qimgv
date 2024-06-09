@@ -3,14 +3,14 @@
 #include <QThreadPool>
 #include "components/thumbnailer/thumbnailerrunnable.h"
 #include "components/cache/thumbnailcache.h"
-#include "settings.h"
+#include "Settings.h"
 
 class Thumbnailer : public QObject
 {
     Q_OBJECT
 
   public:
-    explicit Thumbnailer();
+    explicit Thumbnailer(QObject *parent);
     ~Thumbnailer() override;
 
     void clearTasks();

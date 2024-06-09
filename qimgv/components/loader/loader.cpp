@@ -1,8 +1,8 @@
 #include "loader.h"
 
 Loader::Loader()
+    : pool(new QThreadPool(this))
 {
-    pool = new QThreadPool(this);
     pool->setMaxThreadCount(2);
 }
 

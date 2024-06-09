@@ -18,8 +18,8 @@ protected:
     void recalculateGeometry() override;
 
 private:
-    QFontMetrics *fm;
-    QHBoxLayout layout;
+    std::unique_ptr<QFontMetrics> fm;
+    QHBoxLayout *layout;
     QLabel label;
     QTimer visibilityTimer;
     int hideDelay;
