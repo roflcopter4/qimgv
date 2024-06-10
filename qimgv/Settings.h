@@ -16,8 +16,8 @@
 #include <QFontMetrics>
 #include <QVersionNumber>
 #include <QThread>
-#include "utils/script.h"
-#include "themestore.h"
+#include "utils/Script.h"
+#include "ThemeStore.h"
 
 #include "Common.h"
 

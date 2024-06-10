@@ -7,105 +7,105 @@ target_sources(qimgv PRIVATE
     IDirectoryView.cpp
     MainWindow.cpp
 
-    customwidgets/actionbutton.cpp
-    customwidgets/clickablelabel.cpp
-    customwidgets/contextmenuitem.cpp
-    customwidgets/floatingwidget.cpp
-    customwidgets/floatingwidgetcontainer.cpp
-    customwidgets/iconbutton.cpp
-    customwidgets/iconwidget.cpp
-    customwidgets/keysequenceedit.cpp
-    customwidgets/menuitem.cpp
-    customwidgets/overlaywidget.cpp
-    customwidgets/pathselectormenuitem.cpp
-    customwidgets/sidepanelwidget.cpp
-    customwidgets/slidepanel.cpp
-    customwidgets/spinboxinputfix.cpp
-    customwidgets/thumbnailview.cpp
-    customwidgets/thumbnailwidget.cpp
-    customwidgets/videoslider.cpp
-    customwidgets/pushbuttonfocusind.cpp
-    customwidgets/styledcombobox.cpp
-    customwidgets/colorselectorbutton.cpp
-    customwidgets/entryinfoitem.cpp
-    customwidgets/ssidebar.cpp
+    customWidgets/ActionButton.cpp
+    customWidgets/ClickableLabel.cpp
+    customWidgets/ContextMenuItem.cpp
+    customWidgets/FloatingWidget.cpp
+    customWidgets/FloatingWidgetContainer.cpp
+    customWidgets/IconButton.cpp
+    customWidgets/IconWidget.cpp
+    customWidgets/KeySequenceEdit.cpp
+    customWidgets/MenuItem.cpp
+    customWidgets/OverlayWidget.cpp
+    customWidgets/PathSelectorMenuItem.cpp
+    customWidgets/SidePanelWidget.cpp
+    customWidgets/SlidePanel.cpp
+    customWidgets/SpinBoxInputFix.cpp
+    customWidgets/ThumbnailView.cpp
+    customWidgets/ThumbnailWidget.cpp
+    customWidgets/VideoSlider.cpp
+    customWidgets/PushButtonFocusInd.cpp
+    customWidgets/StyledComboBox.cpp
+    customWidgets/ColorSelectorButton.cpp
+    customWidgets/EntryInfoItem.cpp
+    customWidgets/SsideBar.cpp
 
-    dialogs/filereplacedialog.cpp
-    dialogs/resizedialog.cpp
-    dialogs/scripteditordialog.cpp
-    dialogs/settingsdialog.cpp
-    dialogs/shortcutcreatordialog.cpp
-    dialogs/printdialog.cpp
+    dialogs/FileReplaceDialog.cpp
+    dialogs/ResizeDialog.cpp
+    dialogs/ScriptEditorDialog.cpp
+    dialogs/SettingsDialog.cpp
+    dialogs/ShortcutCreatorDialog.cpp
+    dialogs/PrintDialog.cpp
 
-    overlays/changelogwindow.cpp
-    overlays/controlsoverlay.cpp
-    overlays/copyoverlay.cpp
-    overlays/cropoverlay.cpp
-    overlays/floatingmessage.cpp
-    overlays/floatingmessageproxy.cpp
-    overlays/fullscreeninfooverlay.cpp
-    overlays/fullscreeninfooverlayproxy.cpp
-    overlays/imageinfooverlay.cpp
-    overlays/imageinfooverlayproxy.cpp
-    overlays/mapoverlay.cpp
-    overlays/renameoverlay.cpp
-    overlays/saveconfirmoverlay.cpp
-    overlays/videocontrols.cpp
-    overlays/videocontrolsproxy.cpp
-    overlays/zoomindicatoroverlay.cpp
-    overlays/zoomindicatoroverlayproxy.cpp
+    overlays/ChangeLogWindow.cpp
+    overlays/ControlsOverlay.cpp
+    overlays/CopyOverlay.cpp
+    overlays/CropOverlay.cpp
+    overlays/FloatingMessage.cpp
+    overlays/FloatingMessageProxy.cpp
+    overlays/FullscreenInfoOverlay.cpp
+    overlays/FullscreenInfoOverlayProxy.cpp
+    overlays/ImageInfoOverlay.cpp
+    overlays/ImageInfoOverlayProxy.cpp
+    overlays/MapOverlay.cpp
+    overlays/RenameOverlay.cpp
+    overlays/SaveConfirmOverlay.cpp
+    overlays/VideoControls.cpp
+    overlays/VideoControlsProxy.cpp
+    overlays/ZoomIndicatorOverlay.cpp
+    overlays/ZoomIndicatorOverlayProxy.cpp
 
-    panels/croppanel/croppanel.cpp
-    panels/mainpanel/mainpanel.cpp
-    panels/mainpanel/thumbnailstrip.cpp
-    panels/mainpanel/thumbnailstripproxy.cpp
-    panels/sidepanel/sidepanel.cpp
+    panels/cropPanel/CropPanel.cpp
+    panels/mainPanel/MainPanel.cpp
+    panels/mainPanel/ThumbnailStrip.cpp
+    panels/mainPanel/ThumbnailStripProxy.cpp
+    panels/sidePanel/SidePanel.cpp
 
-    panels/infobar/infobar.cpp
-    panels/infobar/infobarproxy.cpp
+    panels/infoBar/InfoBar.cpp
+    panels/infoBar/InfoBarProxy.cpp
 
-    viewers/documentwidget.cpp
-    viewers/imageviewerv2.cpp
-    viewers/videoplayer.cpp
-    viewers/videoplayerinitproxy.cpp
-    viewers/viewerwidget.cpp
+    viewers/DocumentWidget.cpp
+    viewers/ImageViewerV2.cpp
+    viewers/VideoPlayer.cpp
+    viewers/VideoPlayerInitProxy.cpp
+    viewers/ViewerWidget.cpp
 
-    folderview/foldergridview.cpp
-    folderview/folderview.cpp
-    folderview/folderviewproxy.cpp
-    folderview/FileSystemModelCustom.cpp
-    folderview/treeviewcustom.cpp
-    folderview/bookmarkswidget.cpp
-    folderview/bookmarksitem.cpp
-    folderview/fvoptionspopup.cpp
+    folderView/FolderGridView.cpp
+    folderView/FolderView.cpp
+    folderView/FolderViewProxy.cpp
+    folderView/FilesystemModelCustom.cpp
+    folderView/TreeViewCustom.cpp
+    folderView/BookmarksWidget.cpp
+    folderView/BookmarksItem.cpp
+    folderView/FVOptionsPopup.cpp
 )
 
 # UI Files
 
 target_sources(qimgv PRIVATE
-    contextmenu.ui
+    ContextMenu.ui
 
-    dialogs/filereplacedialog.ui
-    dialogs/resizedialog.ui
-    dialogs/scripteditordialog.ui
-    dialogs/settingsdialog.ui
-    dialogs/shortcutcreatordialog.ui
-    dialogs/printdialog.ui
+    dialogs/FileReplaceDialog.ui
+    dialogs/ResizeDialog.ui
+    dialogs/ScriptEditorDialog.ui
+    dialogs/SettingsDialog.ui
+    dialogs/ShortcutCreatorDialog.ui
+    dialogs/PrintDialog.ui
 
-    overlays/changelogwindow.ui
-    overlays/copyoverlay.ui
-    overlays/floatingmessage.ui
-    overlays/fullscreeninfooverlay.ui
-    overlays/imageinfooverlay.ui
-    overlays/renameoverlay.ui
-    overlays/saveconfirmoverlay.ui
-    overlays/videocontrols.ui
+    overlays/ChangeLogWindow.ui
+    overlays/CopyOverlay.ui
+    overlays/FloatingMessage.ui
+    overlays/FullscreenInfoOverlay.ui
+    overlays/ImageInfoOverlay.ui
+    overlays/RenameOverlay.ui
+    overlays/SaveConfirmOverlay.ui
+    overlays/VideoControls.ui
 
-    panels/croppanel/croppanel.ui
-    panels/sidepanel/sidepanel.ui
+    panels/cropPanel/CropPanel.ui
+    panels/sidePanel/SidePanel.ui
 
-    panels/infobar/infobar.ui
+    panels/infoBar/InfoBar.ui
 
-    folderview/folderview.ui
-    folderview/fvoptionspopup.ui
+    folderView/FolderView.ui
+    folderView/FVOptionsPopup.ui
 )

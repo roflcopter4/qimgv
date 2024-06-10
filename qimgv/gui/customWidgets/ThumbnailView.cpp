@@ -626,8 +626,8 @@ void ThumbnailView::scrollSmooth(int delta, qreal multiplier, qreal acceleration
     int  oldEndFrame = scrollTimeLine->endFrame();
     auto state       = scrollTimeLine->state();
     int  newEndFrame = center - static_cast<int>(delta * multiplier);
-    bool redirect    = newEndFrame < center && center < oldEndFrame ||
-                       newEndFrame > center && center > oldEndFrame;
+    bool redirect    = (newEndFrame < center && center < oldEndFrame) ||
+                       (newEndFrame > center && center > oldEndFrame);
     bool accelerate  = false;
 
     if (state == QTimeLine::Running || state == QTimeLine::Paused)

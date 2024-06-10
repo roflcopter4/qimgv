@@ -11,13 +11,13 @@
 #include <QObject>
 #include <QTranslator>
 
-#include "appversion.h"
+#include "AppVersion.h"
 #include "Settings.h"
-#include "components/directorymodel.h"
-#include "components/directorypresenter.h"
-#include "components/scriptmanager/scriptmanager.h"
-#include "gui/mainwindow.h"
-#include "utils/randomizer.h"
+#include "components/DirectoryModel.h"
+#include "components/DirectoryPresenter.h"
+#include "components/scriptManager/ScriptManager.h"
+#include "gui/MainWindow.h"
+#include "utils/Randomizer.h"
 #include "gui/dialogs/printdialog.h"
 
 #ifdef __GLIBC__

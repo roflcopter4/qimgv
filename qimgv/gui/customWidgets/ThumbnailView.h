@@ -19,7 +19,7 @@
 #include <QScreen>
 
 #include "gui/customwidgets/thumbnailwidget.h"
-#include "gui/idirectoryview.h"
+#include "gui/IDirectoryView.h"
 #include "shortcutbuilder.h"
 
 #include "Common.h"
