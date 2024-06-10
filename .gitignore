@@ -30,3 +30,6 @@ bak/
 /.clang-format
 /external/mpv-x64
 /MSVC.bak3
+/CMakePresets.json
+/CMakeUserPresets.json
+/cpp.hint
