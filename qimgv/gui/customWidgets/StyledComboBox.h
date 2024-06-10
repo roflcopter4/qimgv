@@ -1,11 +1,10 @@
-#ifndef STYLEDCOMBOBOX_H
-#define STYLEDCOMBOBOX_H
+#pragma once
 
-#include <QComboBox>
-#include <QPainter>
-#include <QKeyEvent>
 #include "Settings.h"
-#include "utils/imagelib.h"
+#include "utils/ImageLib.h"
+#include <QComboBox>
+#include <QKeyEvent>
+#include <QPainter>
 
 class StyledComboBox : public QComboBox
 {
@@ -23,5 +22,3 @@ class StyledComboBox : public QComboBox
     qreal   dpr;
     qreal   pixmapDrawScale;
 };
-
-#endif // STYLEDCOMBOBOX_H

@@ -6,7 +6,7 @@
 #ifdef Q_OS_WIN32
 # include <Windows.h>
 #endif
-#include "utils/stuff.h"
+#include "utils/Stuff.h"
 
 class WallpaperSetter
 {

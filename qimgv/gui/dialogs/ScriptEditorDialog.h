@@ -1,12 +1,12 @@
 #pragma once
 
+#include "components/scriptManager/ScriptManager.h"
+#include "utils/Script.h"
+#include <QCheckBox>
 #include <QFileDialog>
 #include <QLabel>
-#include <QPushButton>
 #include <QLineEdit>
-#include <QCheckBox>
-#include "components/scriptmanager/scriptmanager.h"
-#include "utils/script.h"
+#include <QPushButton>
 
 namespace Ui {
 class ScriptEditorDialog;

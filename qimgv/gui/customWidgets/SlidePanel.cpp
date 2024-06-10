@@ -1,4 +1,4 @@
-#include "slidepanel.h"
+#include "SlidePanel.h"
 
 SlidePanel::SlidePanel(FloatingWidgetContainer *parent)
     : FloatingWidget(parent),

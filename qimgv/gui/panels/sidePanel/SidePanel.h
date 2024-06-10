@@ -1,11 +1,11 @@
 #pragma once
 
+#include "gui/customwidgets/sidepanelwidget.h"
 #include <QDebug>
 #include <QPainter>
 #include <QStyleOption>
 #include <QVBoxLayout>
 #include <QWidget>
-#include "gui/customwidgets/sidepanelwidget.h"
 
 namespace Ui {
 class SidePanel;

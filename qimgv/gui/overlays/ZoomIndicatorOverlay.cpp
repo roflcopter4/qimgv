@@ -1,4 +1,4 @@
-#include "zoomindicatoroverlay.h"
+#include "ZoomIndicatorOverlay.h"
 
 ZoomIndicatorOverlay::ZoomIndicatorOverlay(FloatingWidgetContainer *parent)
     : OverlayWidget(parent),

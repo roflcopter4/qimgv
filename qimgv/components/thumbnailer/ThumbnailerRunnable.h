@@ -5,8 +5,8 @@
 #include <QThread>
 #include <QCryptographicHash>
 #include <ctime>
-#include "sourcecontainers/thumbnail.h"
-#include "components/cache/thumbnailcache.h"
+#include "sourcecontainers/Thumbnail.h"
+#include "components/cache/ThumbnailCache.h"
 #include "utils/ImageFactory.h"
 #include "utils/ImageLib.h"
 #include "Settings.h"

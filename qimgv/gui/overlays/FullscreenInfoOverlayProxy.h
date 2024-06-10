@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/overlays/fullscreeninfooverlay.h"
+#include "gui/overlays/FullscreenInfoOverlay.h"
 
 class FullscreenInfoOverlayProxy
 {

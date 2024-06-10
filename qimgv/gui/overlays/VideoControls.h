@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/customwidgets/overlaywidget.h"
+#include "gui/customWidgets/OverlayWidget.h"
 #include "Settings.h"
 #include <QPushButton>
 
@@ -21,19 +21,19 @@ class VideoControls : public OverlayWidget
     explicit VideoControls(FloatingWidgetContainer *parent = nullptr);
     ~VideoControls() override;
 
-  public slots:
+  public Q_SLOTS:
     void setPlaybackDuration(int);
     void setPlaybackPosition(int);
     void onPlaybackPaused(bool);
     void onVideoMuted(bool);
     void setMode(PlaybackMode _mode);
 
-  signals:
+  Q_SIGNALS:
     void seek(int pos);
     void seekForward();
     void seekBackward();
 
-  private slots:
+  private Q_SLOTS:
     void readSettings();
 
   private:

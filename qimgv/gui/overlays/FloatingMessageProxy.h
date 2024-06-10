@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/overlays/floatingmessage.h"
+#include "gui/overlays/FloatingMessage.h"
 
 class FloatingMessageProxy
 {

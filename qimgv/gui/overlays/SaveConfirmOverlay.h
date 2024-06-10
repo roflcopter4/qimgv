@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/customwidgets/overlaywidget.h"
+#include "gui/customWidgets/OverlayWidget.h"
 #include "Settings.h"
 #include <QPushButton>
 
@@ -11,17 +11,19 @@ class SaveConfirmOverlay;
 class SaveConfirmOverlay : public OverlayWidget
 {
     Q_OBJECT
-public:
+
+  public:
     explicit SaveConfirmOverlay(FloatingWidgetContainer *parent = nullptr);
     ~SaveConfirmOverlay() override;
 
-signals:
+  Q_SIGNALS:
     void saveClicked();
     void saveAsClicked();
     void discardClicked();
 
-private slots:
+  private Q_SLOTS:
     void readSettings();
-private:
+
+  private:
     Ui::SaveConfirmOverlay *ui;
 };

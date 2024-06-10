@@ -1,4 +1,4 @@
-#include "videoslider.h"
+#include "VideoSlider.h"
 
 VideoSlider::VideoSlider(QWidget *parent) : QSlider(parent) {
 }

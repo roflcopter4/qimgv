@@ -1,5 +1,5 @@
-#include "shortcutcreatordialog.h"
-#include "ui_shortcutcreatordialog.h"
+#include "ShortcutCreatorDialog.h"
+#include "ui_ShortcutCreatorDialog.h"
 
 ShortcutCreatorDialog::ShortcutCreatorDialog(QWidget *parent) :
     QDialog(parent),

@@ -4,9 +4,9 @@
 #include <QThreadPool>
 #include <QThread>
 #include <QMutex>
-#include "components/cache/cache.h"
-#include "scalerrequest.h"
-#include "scalerrunnable.h"
+#include "components/cache/Cache.h"
+#include "ScalerRequest.h"
+#include "ScalerRunnable.h"
 
 class Scaler : public QObject {
     Q_OBJECT

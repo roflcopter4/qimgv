@@ -1,12 +1,12 @@
 #pragma once
 
-#include <QWidget>
-#include <QStyleOption>
-#include <QPainter>
+#include "Settings.h"
+#include "utils/ImageLib.h"
 #include <QDebug>
 #include <QMouseEvent>
-#include "Settings.h"
-#include "utils/imagelib.h"
+#include <QPainter>
+#include <QStyleOption>
+#include <QWidget>
 
 class IconWidget : public QWidget
 {

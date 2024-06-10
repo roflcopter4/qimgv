@@ -2,18 +2,18 @@
 #include "DirectoryWatcher_p.h"
 
 #if defined __linux__
-# include "linux/linuxwatcher.h"
+# include "linux/LinuxDirectoryWatcher.h"
 #elif defined Q_OS_WIN32
 # include "windows/WindowsDirectoryWatcher.h"
 #elif defined Q_OS_APPLE
   // TODO: implement this
-# include "dummywatcher.h"
+# include "DummyDirectoryWatcher.h"
 #elif defined Q_OS_UNIX
   // TODO: implement this
-# include "dummywatcher.h"
+# include "DummyDirectoryWatcher.h"
 #else
   // TODO: implement this
-# include "dummywatcher.h"
+# include "DummyDirectoryWatcher.h"
 #endif
 
 /****************************************************************************************/

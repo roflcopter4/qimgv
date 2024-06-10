@@ -1,9 +1,9 @@
 #pragma once
 
+#include "gui/customWidgets/ActionButton.h"
+#include "gui/customWidgets/SlidePanel.h"
+#include "gui/panels/mainPanel/ThumbnailStripProxy.h"
 #include <QVBoxLayout>
-#include "gui/customwidgets/slidepanel.h"
-#include "gui/customwidgets/actionbutton.h"
-#include "gui/panels/mainpanel/thumbnailstripproxy.h"
 
 class MainPanel : public SlidePanel {
     Q_OBJECT

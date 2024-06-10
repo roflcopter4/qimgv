@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "gui/panels/mainpanel/thumbnailstrip.h"
+#include "gui/panels/mainPanel/ThumbnailStrip.h"
 #include <QMutexLocker>
-#include "Common.h"
 
 class ThumbnailStripProxy : public QWidget, public IDirectoryView
 {

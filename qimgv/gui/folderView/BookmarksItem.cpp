@@ -1,4 +1,4 @@
-#include "bookmarksitem.h"
+#include "BookmarksItem.h"
 
 BookmarksItem::BookmarksItem(QString const &dirName, QString const &dirPath, QWidget *parent)
     : QWidget(parent),

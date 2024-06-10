@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QTimer>
-#include <QLabel>
-#include "gui/customwidgets/overlaywidget.h"
 #include "Settings.h"
+#include "gui/customWidgets/OverlayWidget.h"
+#include <QLabel>
+#include <QTimer>
 
 #ifdef ERROR
 # undef ERROR
@@ -34,7 +34,7 @@ class FloatingMessage Q_DECL_FINAL : public OverlayWidget
     void showMessage(QString const &text, FloatingMessageIcon icon, int fadeDuration);
     void showMessage(QString const &text, FloatingWidgetPosition Position, FloatingMessageIcon icon, int duration);
 
-  public slots:
+  public Q_SLOTS:
     void show();
     void setText(QString text);
 
@@ -50,6 +50,6 @@ class FloatingMessage Q_DECL_FINAL : public OverlayWidget
   protected:
     void mousePressEvent(QMouseEvent *event) override;
 
-  private slots:
+  private Q_SLOTS:
     void readSettings();
 };

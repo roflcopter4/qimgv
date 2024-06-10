@@ -1,7 +1,7 @@
 #pragma once
 
-#include "floatingwidget.h"
 #include "Settings.h"
+#include "FloatingWidget.h"
 #include <QBoxLayout>
 #include <QDebug>
 #include <QGraphicsOpacityEffect>
@@ -11,8 +11,6 @@
 #include <QtGlobal>
 #include <ctime>
 #include <memory>
-
-#include "Common.h"
 
 
 class SlidePanel : public FloatingWidget

@@ -4,9 +4,9 @@
 #include <QMap>
 #include <QSemaphore>
 #include <QMutexLocker>
-#include "sourcecontainers/image.h"
-#include "components/cache/cacheitem.h"
-#include "utils/imagefactory.h"
+#include "sourcecontainers/Image.h"
+#include "components/cache/CacheItem.h"
+#include "utils/ImageFactory.h"
 
 class Cache
 {

@@ -1,12 +1,11 @@
 #pragma once
 
-#include <QGraphicsWidget>
-
-#include "gui/customwidgets/thumbnailview.h"
-#include "gui/customwidgets/thumbnailwidget.h"
-#include "gui/flowlayout.h"
-#include "utils/stuff.h"
 #include "components/actionManager/ActionManager.h"
+#include "gui/customWidgets/ThumbnailView.h"
+#include "gui/customWidgets/ThumbnailWidget.h"
+#include "gui/FlowLayout.h"
+#include "utils/Stuff.h"
+#include <QGraphicsWidget>
 
 class FolderGridView : public ThumbnailView
 {

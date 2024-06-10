@@ -1,4 +1,4 @@
-#include "directorymodel.h"
+#include "DirectoryModel.h"
 
 DirectoryModel::DirectoryModel(QObject *parent)
     : QObject(parent),

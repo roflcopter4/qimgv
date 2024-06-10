@@ -1,4 +1,4 @@
-#include "overlaywidget.h"
+#include "OverlayWidget.h"
 
 OverlayWidget::OverlayWidget(FloatingWidgetContainer *parent)
     : FloatingWidget(parent),

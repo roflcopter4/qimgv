@@ -1,4 +1,4 @@
-#include "cacheitem.h"
+#include "CacheItem.h"
 
 CacheItem::CacheItem()
     : sem(new QSemaphore(1))

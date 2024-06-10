@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/panels/infobar/infobar.h"
+#include "gui/panels/infoBar/InfoBar.h"
 #include <QVBoxLayout>
 
 struct InfoBarStateBuffer {

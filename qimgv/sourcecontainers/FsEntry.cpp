@@ -1,4 +1,4 @@
-#include "fsentry.h"
+#include "FsEntry.h"
 #include <QDebug>
 
 FSEntry::FSEntry(QString const &filePath)

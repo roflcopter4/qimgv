@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include <QSpinBox>
-#include <QKeyEvent>
-#include <QDebug>
 #include "components/actionManager/ActionManager.h"
+#include <QDebug>
+#include <QKeyEvent>
+#include <QSpinBox>
 
 class SpinBoxInputFix : public QSpinBox
 {

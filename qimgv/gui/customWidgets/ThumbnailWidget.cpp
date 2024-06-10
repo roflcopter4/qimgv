@@ -1,4 +1,4 @@
-#include "thumbnailwidget.h"
+#include "ThumbnailWidget.h"
 
 ThumbnailWidget::ThumbnailWidget(QGraphicsItem *parent)
     : QGraphicsWidget(parent),

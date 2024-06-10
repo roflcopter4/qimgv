@@ -3,9 +3,6 @@
 #include <QString>
 #include <QPixmap>
 #include <memory>
-
-#include "Common.h"
-
 #include <QSharedPointer>
 
 class Thumbnail

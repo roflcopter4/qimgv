@@ -9,7 +9,7 @@
 #include <QDateTime>
 #include <cmath>
 #include <cstring>
-#include "utils/stuff.h"
+#include "utils/Stuff.h"
 #include "Settings.h"
 
 #ifdef USE_EXIV2
@@ -22,8 +22,6 @@
 #endif
 
 #include <QImageReader>
-
-#include "Common.h"
 
 
 enum class DocumentType : uint8_t {

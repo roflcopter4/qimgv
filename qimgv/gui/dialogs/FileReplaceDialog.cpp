@@ -1,5 +1,5 @@
-#include "filereplacedialog.h"
-#include "ui_filereplacedialog.h"
+#include "FileReplaceDialog.h"
+#include "ui_FileReplaceDialog.h"
 
 FileReplaceDialog::FileReplaceDialog(QWidget *parent) : QDialog(parent), ui(new Ui::FileReplaceDialog) {
     ui->setupUi(this);

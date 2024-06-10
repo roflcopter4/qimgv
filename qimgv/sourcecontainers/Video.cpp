@@ -1,4 +1,4 @@
-#include "video.h"
+#include "Video.h"
 #include <time.h>
 
 Video::Video(QString const &path)

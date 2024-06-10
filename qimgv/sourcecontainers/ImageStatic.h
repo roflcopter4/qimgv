@@ -5,7 +5,7 @@
 #include <QSemaphore>
 #include <QCryptographicHash>
 #include <QIcon>
-#include "image.h"
+#include "Image.h"
 #include "utils/ImageLib.h"
 #include "Settings.h"
 

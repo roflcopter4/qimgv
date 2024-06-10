@@ -1,4 +1,4 @@
-#include "clickablelabel.h"
+#include "ClickableLabel.h"
 
 ClickableLabel::ClickableLabel() = default;
 

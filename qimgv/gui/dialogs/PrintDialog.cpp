@@ -1,6 +1,5 @@
-#include "Common.h"
-#include "printdialog.h"
-#include "ui_printdialog.h"
+#include "PrintDialog.h"
+#include "ui_PrintDialog.h"
 
 PrintDialog::PrintDialog(QWidget *parent)
     : QDialog(parent), ui(new Ui::PrintDialog)

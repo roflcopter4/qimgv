@@ -1,13 +1,13 @@
 #pragma once
 
-#include <QGridLayout>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QKeyEvent>
-#include "gui/customwidgets/overlaywidget.h"
-#include "gui/customwidgets/pathselectormenuitem.h"
 #include "Settings.h"
 #include "components/actionManager/ActionManager.h"
+#include "gui/customWidgets/OverlayWidget.h"
+#include "gui/customWidgets/PathSelectorMenuItem.h"
+#include <QGridLayout>
+#include <QKeyEvent>
+#include <QLineEdit>
+#include <QPushButton>
 
 enum class CopyOverlayMode {
     COPY,

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "components/scriptManager/scriptmanager.h"
+#include "components/scriptManager/ScriptManager.h"
 #include "Settings.h"
-#include "shortcutbuilder.h"
+#include "ShortcutBuilder.h"
 #include "utils/Actions.h"
 #include <QDebug>
 #include <QKeyEvent>
@@ -11,8 +11,6 @@
 #include <QObject>
 #include <QStringList>
 #include <QWheelEvent>
-
-#include "Common.h"
 
 enum class ActionType {
     INVALID,

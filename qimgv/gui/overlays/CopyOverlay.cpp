@@ -1,5 +1,5 @@
-#include "copyoverlay.h"
-#include "ui_copyoverlay.h"
+#include "CopyOverlay.h"
+#include "ui_CopyOverlay.h"
 
 CopyOverlay::CopyOverlay(FloatingWidgetContainer *parent) :
     OverlayWidget(parent),

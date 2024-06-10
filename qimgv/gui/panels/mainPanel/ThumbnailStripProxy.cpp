@@ -1,4 +1,4 @@
-#include "thumbnailstripproxy.h"
+#include "ThumbnailStripProxy.h"
 
 ThumbnailStripProxy::ThumbnailStripProxy(QWidget *parent)
     : QWidget(parent),

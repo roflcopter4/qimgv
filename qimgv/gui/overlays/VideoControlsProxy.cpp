@@ -1,4 +1,4 @@
-#include "videocontrolsproxy.h"
+#include "VideoControlsProxy.h"
 
 VideoControlsProxyWrapper::VideoControlsProxyWrapper(FloatingWidgetContainer *parent)
     : container(parent),

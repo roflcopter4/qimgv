@@ -1,11 +1,11 @@
 #pragma once
 
 #include "utils/ImageLib.h"
-#include "sourcecontainers/documentinfo.h"
-#include "sourcecontainers/image.h"
-#include "sourcecontainers/imageanimated.h"
-#include "sourcecontainers/imagestatic.h"
-#include "sourcecontainers/video.h"
+#include "sourcecontainers/DocumentInfo.h"
+#include "sourcecontainers/Image.h"
+#include "sourcecontainers/ImageAnimated.h"
+#include "sourcecontainers/ImageStatic.h"
+#include "sourcecontainers/Video.h"
 
 class ImageFactory
 {

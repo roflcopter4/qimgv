@@ -1,20 +1,25 @@
 #pragma once
 
-#include <QSlider>
+#include <QDebug>
 #include <QMouseEvent>
+#include <QSlider>
 #include <QStyle>
 #include <QStyleOptionSlider>
-#include <QDebug>
 
-class VideoSlider : public QSlider {
+class VideoSlider : public QSlider
+{
     Q_OBJECT
-public:
-    VideoSlider(QWidget *parent = nullptr);
-protected:
+
+  public:
+    explicit VideoSlider(QWidget *parent = nullptr);
+
+  protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
-signals:
+
+  Q_SIGNALS:
     void sliderMovedX(int);
-private:
+
+  private:
     void setValueAtCursor(QPoint pos);
 };

@@ -8,21 +8,18 @@
  * Usage: subclass, implement layout-related stuff
  */
 
+#include "gui/IDirectoryView.h"
+#include "gui/customWidgets/ThumbnailWidget.h"
+#include "ShortcutBuilder.h"
+#include <QElapsedTimer>
 #include <QGraphicsView>
-#include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QScreen>
 #include <QScrollBar>
-#include <QWheelEvent>
 #include <QTimeLine>
 #include <QTimer>
-#include <QElapsedTimer>
-#include <QScreen>
-
-#include "gui/customwidgets/thumbnailwidget.h"
-#include "gui/IDirectoryView.h"
-#include "shortcutbuilder.h"
-
-#include "Common.h"
+#include <QVBoxLayout>
+#include <QWheelEvent>
 
 class ThumbnailView : public QGraphicsView, public IDirectoryView
 {

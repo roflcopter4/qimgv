@@ -1,6 +1,5 @@
-// ReSharper disable CppClangTidyReadabilityStaticAccessedThroughInstance
-#include "folderview.h"
-#include "ui_folderview.h"
+#include "FolderView.h"
+#include "ui_FolderView.h"
 
 FolderView::FolderView(QWidget *parent)
     : FloatingWidgetContainer(parent),

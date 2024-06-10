@@ -1,4 +1,4 @@
-#include "fullscreeninfooverlayproxy.h"
+#include "FullscreenInfoOverlayProxy.h"
 
 FullscreenInfoOverlayProxy::FullscreenInfoOverlayProxy(FloatingWidgetContainer *parent)
     : container(parent),

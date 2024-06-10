@@ -4,7 +4,7 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QDebug>
-#include "utils/inputmap.h"
+#include "utils/InputMap.h"
 
 class ShortcutBuilder
 {

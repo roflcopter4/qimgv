@@ -1,25 +1,23 @@
 #pragma once
 
-#include <QObject>
-#include <QSettings>
+#include "ThemeStore.h"
+#include "utils/Script.h"
 #include <QApplication>
-#include <QStandardPaths>
-#include <QDebug>
-#include <QImageReader>
-#include <QStringList>
 #include <QColor>
-#include <QPalette>
+#include <QDebug>
 #include <QDir>
-#include <QKeySequence>
-#include <QMap>
 #include <QFont>
 #include <QFontMetrics>
-#include <QVersionNumber>
+#include <QImageReader>
+#include <QKeySequence>
+#include <QMap>
+#include <QObject>
+#include <QPalette>
+#include <QSettings>
+#include <QStandardPaths>
+#include <QStringList>
 #include <QThread>
-#include "utils/Script.h"
-#include "ThemeStore.h"
-
-#include "Common.h"
+#include <QVersionNumber>
 
 enum class SortingMode : uint8_t {
     NAME,

@@ -1,4 +1,4 @@
-#include "scaler.h"
+#include "Scaler.h"
 
 /* What this should do in theory:
  * 1 request comes

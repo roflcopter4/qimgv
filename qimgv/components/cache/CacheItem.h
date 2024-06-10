@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QSemaphore>
-#include "sourcecontainers/image.h"
+#include "sourcecontainers/Image.h"
 
 class CacheItem
 {

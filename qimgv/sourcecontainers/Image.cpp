@@ -1,4 +1,4 @@
-#include "image.h"
+#include "Image.h"
 
 Image::Image(QString const &path)
     : mDocInfo(new DocumentInfo(path)),

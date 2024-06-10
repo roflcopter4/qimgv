@@ -1,4 +1,4 @@
-#include "colorselectorbutton.h"
+#include "ColorSelectorButton.h"
 
 ColorSelectorButton::ColorSelectorButton(QWidget *parent) : ClickableLabel(parent) {
     connect(this, &ColorSelectorButton::clicked, this, &ColorSelectorButton::showColorSelector);

@@ -1,4 +1,4 @@
-#include "styledcombobox.h"
+#include "styledComboBox.h"
 
 StyledComboBox::StyledComboBox(QWidget *parent)
     : QComboBox(parent),

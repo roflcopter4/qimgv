@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/customwidgets/floatingwidget.h"
+#include "gui/customWidgets/FloatingWidget.h"
 #include <QDebug>
 #include <QPainter>
 #include <QPaintEvent>

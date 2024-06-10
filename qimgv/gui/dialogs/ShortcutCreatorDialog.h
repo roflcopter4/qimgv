@@ -1,12 +1,13 @@
 #pragma once
 
-#include <QDialog>
-#include <QComboBox>
-#include <QRadioButton>
-#include "shortcutbuilder.h"
-#include "utils/actions.h"
 #include "components/actionManager/ActionManager.h"
-#include "components/scriptmanager/scriptmanager.h"
+#include "components/scriptManager/ScriptManager.h"
+#include "ShortcutBuilder.h"
+#include "utils/Actions.h"
+#include <QComboBox>
+#include <QDialog>
+#include <QRadioButton>
+
 // TODO: separate gui from components
 // OR move script & action stuff to project root?
 

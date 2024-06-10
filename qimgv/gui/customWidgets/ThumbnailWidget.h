@@ -1,17 +1,17 @@
 #pragma once
 
-#include <QGraphicsWidget>
-#include <QGraphicsItem>
-#include <QGraphicsLayoutItem>
-#include <QMouseEvent>
-#include <QPainter>
-#include <QGraphicsSceneHoverEvent>
-#include <QPaintEngine>
-#include <cmath>
-#include "sourcecontainers/thumbnail.h"
-#include "utils/ImageLib.h"
 #include "Settings.h"
 #include "SharedResources.h"
+#include "sourcecontainers/Thumbnail.h"
+#include "utils/ImageLib.h"
+#include <QGraphicsItem>
+#include <QGraphicsLayoutItem>
+#include <QGraphicsSceneHoverEvent>
+#include <QGraphicsWidget>
+#include <QMouseEvent>
+#include <QPaintEngine>
+#include <QPainter>
+#include <cmath>
 
 enum class ThumbnailStyle : uint8_t {
     SIMPLE,

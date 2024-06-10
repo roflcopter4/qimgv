@@ -1,4 +1,4 @@
-#include "thumbnailcache.h"
+#include "ThumbnailCache.h"
 
 ThumbnailCache::ThumbnailCache(QObject *parent)
     : QObject(parent),

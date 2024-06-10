@@ -1,7 +1,7 @@
 #pragma once
 
-#include "gui/customwidgets/overlaywidget.h"
-#include "gui/customwidgets/entryinfoitem.h"
+#include "gui/customWidgets/OverlayWidget.h"
+#include "gui/customWidgets/EntryInfoItem.h"
 #include <QWheelEvent>
 
 namespace Ui {
@@ -12,18 +12,19 @@ class ImageInfoOverlay : public OverlayWidget
 {
     Q_OBJECT
 
-public:
+  public:
     explicit ImageInfoOverlay(FloatingWidgetContainer *parent = nullptr);
     ~ImageInfoOverlay() override;
     void setExifInfo(QMap<QString, QString> const &);
 
-public slots:
+  public Q_SLOTS:
     void show();
 
-protected:
+  protected:
     void wheelEvent(QWheelEvent *event) override;
-private:
-    Ui::ImageInfoOverlay *ui;
-    QList<EntryInfoItem*> entries;
-    QLabel entryStub;
+
+  private:
+    Ui::ImageInfoOverlay  *ui;
+    QList<EntryInfoItem *> entries;
+    QLabel                 entryStub;
 };

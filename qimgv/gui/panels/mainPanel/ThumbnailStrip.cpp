@@ -1,4 +1,4 @@
-#include "thumbnailstrip.h"
+#include "ThumbnailStrip.h"
 
 // TODO: move item highlight logic to base class
 

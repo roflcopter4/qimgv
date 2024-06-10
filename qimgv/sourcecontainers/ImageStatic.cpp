@@ -1,4 +1,4 @@
-#include "imagestatic.h"
+#include "ImageStatic.h"
 #include <time.h>
 
 ImageStatic::ImageStatic(QString const &path)

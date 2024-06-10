@@ -1,9 +1,7 @@
 #pragma once
 
 #include "components/actionManager/ActionManager.h"
-#include "gui/customwidgets/iconbutton.h"
-
-#include "Common.h"
+#include "gui/customWidgets/IconButton.h"
 
 enum class TriggerMode {
     Press,

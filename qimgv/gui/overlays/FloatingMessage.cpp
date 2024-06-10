@@ -1,5 +1,5 @@
-#include "floatingmessage.h"
-#include "ui_floatingmessage.h"
+#include "FloatingMessage.h"
+#include "ui_FloatingMessage.h"
 
 FloatingMessage::FloatingMessage(FloatingWidgetContainer *parent)
     : OverlayWidget(parent),

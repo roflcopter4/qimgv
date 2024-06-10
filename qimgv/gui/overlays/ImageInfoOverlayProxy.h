@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/overlays/imageinfooverlay.h"
+#include "gui/overlays/ImageInfoOverlay.h"
 
 class ImageInfoOverlayProxy
 {

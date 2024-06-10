@@ -1,11 +1,10 @@
-#ifndef FILESYSTEMMODELCUSTOM_H
-#define FILESYSTEMMODELCUSTOM_H
+#pragma once
 
+#include "Settings.h"
+#include "utils/ImageLib.h"
 #include <QApplication>
 #include <QFileSystemModel>
 #include <QPainter>
-#include "Settings.h"
-#include "utils/imagelib.h"
 
 class FileSystemModelCustom final : public QFileSystemModel
 {
@@ -28,5 +27,3 @@ class FileSystemModelCustom final : public QFileSystemModel
     QPixmap folderIcon;
     std::unique_ptr<FileIconProvider> iconProvider;
 };
-
-#endif // FILESYSTEMMODELCUSTOM_H

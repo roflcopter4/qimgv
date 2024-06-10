@@ -13,35 +13,33 @@
 #include <QDesktopWidget>
 #endif
 
-#include "gui/customwidgets/floatingwidgetcontainer.h"
-#include "gui/viewers/viewerwidget.h"
-#include "gui/overlays/controlsoverlay.h"
-#include "gui/overlays/fullscreeninfooverlayproxy.h"
-#include "gui/overlays/floatingmessageproxy.h"
-#include "gui/overlays/saveconfirmoverlay.h"
-#include "gui/panels/mainpanel/thumbnailstrip.h"
-#include "gui/panels/sidepanel/sidepanel.h"
-#include "gui/panels/croppanel/croppanel.h"
-#include "gui/overlays/cropoverlay.h"
-#include "gui/overlays/copyoverlay.h"
-#include "gui/overlays/changelogwindow.h"
-#include "gui/overlays/imageinfooverlayproxy.h"
-#include "gui/overlays/renameoverlay.h"
-#include "gui/dialogs/resizedialog.h"
-#include "gui/centralwidget.h"
-#include "gui/dialogs/filereplacedialog.h"
-#include "components/actionManager/ActionManager.h"
 #include "Settings.h"
-#include "gui/dialogs/settingsdialog.h"
-#include "gui/viewers/documentwidget.h"
-#include "gui/folderview/folderviewproxy.h"
-#include "gui/panels/infobar/infobarproxy.h"
+#include "components/actionManager/ActionManager.h"
+#include "gui/CentralWidget.h"
+#include "gui/customWidgets/FloatingWidgetContainer.h"
+#include "gui/dialogs/FileReplaceDialog.h"
+#include "gui/dialogs/ResizeDialog.h"
+#include "gui/dialogs/SettingsDialog.h"
+#include "gui/folderView/FolderViewProxy.h"
+#include "gui/overlays/ChangeLogWindow.h"
+#include "gui/overlays/ControlsOverlay.h"
+#include "gui/overlays/CopyOverlay.h"
+#include "gui/overlays/CropOverlay.h"
+#include "gui/overlays/FloatingMessageProxy.h"
+#include "gui/overlays/FullscreenInfoOverlayProxy.h"
+#include "gui/overlays/ImageInfoOverlayProxy.h"
+#include "gui/overlays/RenameOverlay.h"
+#include "gui/overlays/SaveConfirmOverlay.h"
+#include "gui/panels/cropPanel/CropPanel.h"
+#include "gui/panels/infoBar/InfoBarProxy.h"
+#include "gui/panels/mainPanel/ThumbnailStrip.h"
+#include "gui/panels/sidePanel/SidePanel.h"
+#include "gui/viewers/DocumentWidget.h"
+#include "gui/viewers/ViewerWidget.h"
 
 #ifdef USE_KDE_BLUR
 #include <KWindowEffects>
 #endif
-
-#include "Common.h"
 
 struct CurrentInfo {
     qsizetype index;

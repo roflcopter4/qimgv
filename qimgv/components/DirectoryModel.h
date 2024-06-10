@@ -1,11 +1,11 @@
 #pragma once
 
 #include <QObject>
-#include "cache/cache.h"
-#include "directorymanager/directorymanager.h"
-#include "scaler/scaler.h"
-#include "loader/loader.h"
-#include "utils/fileoperations.h"
+#include "cache/Cache.h"
+#include "directoryManager/DirectoryManager.h"
+#include "scaler/Scaler.h"
+#include "loader/Loader.h"
+#include "utils/FileOperations.h"
 
 class DirectoryModel final : public QObject
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/overlays/videocontrols.h"
+#include "gui/overlays/VideoControls.h"
 
 struct VideoControlsStateBuffer {
     int duration = 0;

@@ -1,15 +1,12 @@
 #pragma once
 
+#include <QDebug>
+#include <QString>
 #include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <random>
 #include <vector>
-
-#include <QDebug>
-#include <QString>
-
-#include "Common.h"
 
 class Randomizer
 {

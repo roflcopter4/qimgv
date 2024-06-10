@@ -1,38 +1,40 @@
 #pragma once
 
-#include <QWidget>
+#include "Settings.h"
+#include "components/actionManager/ActionManager.h"
+#include "gui/customWidgets/OverlayWidget.h"
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QWheelEvent>
 #include <QTextBrowser>
-#include "gui/customwidgets/overlaywidget.h"
-#include "Settings.h"
-#include "components/actionManager/ActionManager.h"
+#include <QWheelEvent>
+#include <QWidget>
 
 namespace Ui {
-    class ChangelogWindow;
+class ChangelogWindow;
 }
 
-class ChangelogWindow : public OverlayWidget {
+class ChangelogWindow : public OverlayWidget
+{
     Q_OBJECT
-public:
+
+  public:
     explicit ChangelogWindow(FloatingWidgetContainer *parent);
     ~ChangelogWindow() override;
     void setText(QString const &text);
 
-public slots:
+  public Q_SLOTS:
     void show();
     void hide();
 
-protected:
+  protected:
     void paintEvent(QPaintEvent *) override;
     void wheelEvent(QWheelEvent *) override;
     void keyPressEvent(QKeyEvent *) override;
 
-private:
+  private:
     Ui::ChangelogWindow *ui;
 
-private slots:
+  private Q_SLOTS:
     void hideAndShutUp();
 };

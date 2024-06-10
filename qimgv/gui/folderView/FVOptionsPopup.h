@@ -1,11 +1,11 @@
 #pragma once
 
-#include <QWidget>
-#include <QStyleOption>
-#include <QPainter>
 #include "components/actionManager/ActionManager.h"
-#include "gui/customwidgets/floatingwidget.h"
+#include "gui/customWidgets/FloatingWidget.h"
 #include <QDebug>
+#include <QPainter>
+#include <QStyleOption>
+#include <QWidget>
 
 namespace Ui {
 class FVOptionsPopup;

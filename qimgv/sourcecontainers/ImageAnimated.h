@@ -1,10 +1,8 @@
 #pragma once
 
-#include "image.h"
+#include "Image.h"
 #include <QMovie>
 #include <QTimer>
-
-#include "Common.h"
 
 class ImageAnimated : public Image
 {

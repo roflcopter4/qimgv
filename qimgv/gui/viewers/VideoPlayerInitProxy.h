@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Settings.h"
-#include "videoplayer.h"
+#include "VideoPlayer.h"
 #include <QDebug>
 #include <QFileInfo>
 #include <QLabel>

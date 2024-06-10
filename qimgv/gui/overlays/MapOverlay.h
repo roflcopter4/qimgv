@@ -6,8 +6,6 @@
 #include <QPen>
 #include <QWidget>
 
-#include "Common.h"
-
 class MapOverlay : public QWidget
 {
     Q_OBJECT

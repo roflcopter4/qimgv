@@ -1,4 +1,4 @@
-#include "loader.h"
+#include "Loader.h"
 
 Loader::Loader()
     : pool(new QThreadPool(this))

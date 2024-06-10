@@ -1,5 +1,4 @@
-#include "Common.h"
-#include "mainpanel.h"
+#include "MainPanel.h"
 
 MainPanel::MainPanel(FloatingWidgetContainer *parent) : SlidePanel(parent)
 {

@@ -1,5 +1,5 @@
-#include "saveconfirmoverlay.h"
-#include "ui_saveconfirmoverlay.h"
+#include "SaveconfirmOverlay.h"
+#include "ui_SaveConfirmOverlay.h"
 
 SaveConfirmOverlay::SaveConfirmOverlay(FloatingWidgetContainer *parent) :
     OverlayWidget(parent),

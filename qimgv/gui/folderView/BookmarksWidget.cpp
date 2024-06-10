@@ -1,4 +1,4 @@
-#include "bookmarkswidget.h"
+#include "BookmarksWidget.h"
 
 BookmarksWidget::BookmarksWidget(QWidget *parent)
     : QWidget(parent),

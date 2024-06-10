@@ -4,8 +4,6 @@
 #include <QString>
 #include <QVersionNumber>
 
-#include "Common.h"
-
 class Actions
 {
   public:

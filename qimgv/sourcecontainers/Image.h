@@ -1,14 +1,12 @@
 #pragma once
 
-#include "sourcecontainers/documentinfo.h"
+#include "sourcecontainers/DocumentInfo.h"
 #include "utils/ImageLib.h"
 #include "utils/Stuff.h"
 #include <QDebug>
 #include <QPixmap>
 #include <QString>
 #include <memory>
-
-#include "Common.h"
 
 class Image
 {

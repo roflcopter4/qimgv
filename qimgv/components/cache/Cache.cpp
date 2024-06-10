@@ -1,4 +1,4 @@
-#include "cache.h"
+#include "Cache.h"
 
 bool Cache::contains(QString const &path) const
 {

@@ -1,28 +1,27 @@
-#ifndef COLORSELECTORBUTTON_H
-#define COLORSELECTORBUTTON_H
+#pragma once
 
-#include <QPainter>
+#include "gui/customWidgets/ClickableLabel.h"
 #include <QColorDialog>
-#include "gui/customwidgets/clickablelabel.h"
+#include <QPainter>
 
-class ColorSelectorButton : public ClickableLabel {
+class ColorSelectorButton : public ClickableLabel
+{
     Q_OBJECT
-public:
+
+  public:
     explicit ColorSelectorButton(QWidget *parent = nullptr);
 
     void   setColor(QColor const &newColor);
     QColor color() const;
     void   setDescription(QString const &text);
 
-protected:
+  protected:
     void paintEvent(QPaintEvent *e) override;
 
-private slots:
+  private Q_SLOTS:
     void showColorSelector();
 
-private:
-    QColor mColor;
+  private:
+    QColor  mColor;
     QString mDescription;
 };
-
-#endif // COLORSELECTORBUTTON_H

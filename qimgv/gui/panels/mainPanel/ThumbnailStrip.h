@@ -11,9 +11,9 @@
 #include <QResizeEvent>
 #include <cmath>
 
-#include "gui/customwidgets/thumbnailview.h"
-#include "gui/customwidgets/thumbnailwidget.h"
-#include "sourcecontainers/thumbnail.h"
+#include "gui/customWidgets/ThumbnailView.h"
+#include "gui/customWidgets/ThumbnailWidget.h"
+#include "sourcecontainers/Thumbnail.h"
 
 class ThumbnailStrip final : public ThumbnailView
 {

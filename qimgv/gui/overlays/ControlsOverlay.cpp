@@ -1,4 +1,4 @@
-#include "controlsoverlay.h"
+#include "ControlsOverlay.h"
 
 ControlsOverlay::ControlsOverlay(FloatingWidgetContainer *parent)
     : FloatingWidget(parent),

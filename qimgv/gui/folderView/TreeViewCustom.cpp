@@ -1,4 +1,4 @@
-#include "treeviewcustom.h"
+#include "treeViewCustom.h"
 
 TreeViewCustom::TreeViewCustom(QWidget *parent) : QTreeView(parent)
 {

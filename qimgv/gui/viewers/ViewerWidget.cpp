@@ -3,7 +3,7 @@
  * Only one is displayed at a time.
  */
 
-#include "viewerwidget.h"
+#include "ViewerWidget.h"
 
 ViewerWidget::ViewerWidget(QWidget *parent)
     : FloatingWidgetContainer(parent),

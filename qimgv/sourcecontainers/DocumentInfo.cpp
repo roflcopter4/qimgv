@@ -1,4 +1,4 @@
-#include "documentinfo.h"
+#include "DocumentInfo.h"
 
 DocumentInfo::DocumentInfo(QString const &path)
     : mDocumentType(DocumentType::NONE),

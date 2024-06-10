@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/customwidgets/iconwidget.h"
+#include "gui/customWidgets/IconWidget.h"
 #include <QMouseEvent>
 
 class IconButton : public IconWidget {

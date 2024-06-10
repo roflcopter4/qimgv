@@ -1,5 +1,5 @@
-#include "scripteditordialog.h"
-#include "ui_scripteditordialog.h"
+#include "ScriptEditorDialog.h"
+#include "ui_ScriptEditorDialog.h"
 
 ScriptEditorDialog::ScriptEditorDialog(QWidget *parent)
     : QDialog(parent),

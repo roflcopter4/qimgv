@@ -16,8 +16,8 @@
 #include <vector>
 
 #include "Settings.h"
-#include "sourcecontainers/fsentry.h"
-#include "utils/stuff.h"
+#include "sourcecontainers/FSEntry.h"
+#include "utils/Stuff.h"
 #include "watchers/DirectoryWatcher.h"
 
 enum class FileListSource { // rename? wip

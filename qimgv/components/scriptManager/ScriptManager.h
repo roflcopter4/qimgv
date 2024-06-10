@@ -8,8 +8,8 @@
 #include <QDebug>
 #include <QStringList>
 #include <QProcess>
-#include "utils/script.h"
-#include "sourcecontainers/image.h"
+#include "utils/Script.h"
+#include "sourcecontainers/Image.h"
 #include "Settings.h"
 
 class ScriptManager : public QObject

@@ -1,11 +1,10 @@
 #pragma once
 
-#include <QWidget>
-#include <QWheelEvent>
 #include <QDebug>
-
 #include <QPainter>
 #include <QStyleOption>
+#include <QWheelEvent>
+#include <QWidget>
 
 namespace Ui {
 class InfoBar;

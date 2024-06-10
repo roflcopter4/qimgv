@@ -1,17 +1,16 @@
-#ifndef BOOKMARKSITEM_H
-#define BOOKMARKSITEM_H
+#pragma once
 
-#include <QObject>
-#include <QWidget>
-#include <QStyleOption>
-#include <QHBoxLayout>
-#include <QSpacerItem>
-#include <QMimeData>
-#include <QLabel>
-#include "gui/customwidgets/iconbutton.h"
-#include "gui/customwidgets/clickablelabel.h"
 #include "Settings.h"
+#include "gui/customWidgets/ClickableLabel.h"
+#include "gui/customWidgets/IconButton.h"
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QMimeData>
 #include <QMouseEvent>
+#include <QObject>
+#include <QSpacerItem>
+#include <QStyleOption>
+#include <QWidget>
 
 class BookmarksItem : public QWidget
 {
@@ -39,11 +38,12 @@ class BookmarksItem : public QWidget
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragLeaveEvent(QDragLeaveEvent *event) override;
 
-  private slots:
+  private Q_SLOTS:
     void onRemoveClicked();
 
   private:
-    QString dirName, dirPath;
+    QString dirName;
+    QString dirPath;
 
     IconWidget   folderIconWidget;
     IconButton   removeItemButton;
@@ -52,5 +52,3 @@ class BookmarksItem : public QWidget
     QHBoxLayout *layout;
     bool         mHighlighted;
 };
-
-#endif // BOOKMARKSITEM_H

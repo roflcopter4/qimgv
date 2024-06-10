@@ -1,10 +1,10 @@
 #pragma once
 
-#include "components/actionManager/ActionManager.h"
-#include "gui/customwidgets/colorselectorbutton.h"
-#include "gui/dialogs/scripteditordialog.h"
-#include "gui/dialogs/shortcutcreatordialog.h"
 #include "Settings.h"
+#include "components/actionManager/ActionManager.h"
+#include "gui/customWidgets/ColorSelectorButton.h"
+#include "gui/dialogs/ScriptEditorDialog.h"
+#include "gui/dialogs/ShortcutCreatorDialog.h"
 #include <QApplication>
 #include <QButtonGroup>
 #include <QColorDialog>
@@ -27,12 +27,12 @@ class SettingsDialog : public QDialog
     Q_OBJECT
 
   public:
-    explicit SettingsDialog(QWidget *parent = nullptr);
+    explicit SettingsDialog(QWidget *parent);
     ~SettingsDialog() override;
 
     void switchToPage(int number) const;
 
-  public slots:
+  public Q_SLOTS:
     int exec() override;
 
   private:
@@ -56,16 +56,14 @@ class SettingsDialog : public QDialog
     QButtonGroup           folderEndGrp;
     QButtonGroup           zoomIndGrp;
 
-  private slots:
+  private Q_SLOTS:
     void saveSettings();
     void saveSettingsAndClose();
-
     void addScript();
     void editScript();
     void editScript(QListWidgetItem *item);
     void editScript(QString const &name);
     void removeScript();
-
     void addShortcut();
     void editShortcut();
     void editShortcut(int row) const;
@@ -79,9 +77,8 @@ class SettingsDialog : public QDialog
     void onJPEGQualitySliderChanged(int value) const;
     void resetToDesktopTheme();
     void onAutoResizeLimitSliderChanged(int value) const;
-
     void resetZoomLevels() const;
 
-  signals:
+  Q_SIGNALS:
     void settingsChanged();
 };

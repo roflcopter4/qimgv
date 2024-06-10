@@ -1,4 +1,4 @@
-#include "foldergridview.h"
+#include "FolderGridView.h"
 
 // TODO: create a base class for this and the one on panel
 

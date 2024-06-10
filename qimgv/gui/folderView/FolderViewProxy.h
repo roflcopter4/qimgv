@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/folderview/folderview.h"
+#include "gui/folderView/FolderView.h"
 #include <QMutexLocker>
 
 class FolderViewProxy : public QWidget, public IDirectoryView

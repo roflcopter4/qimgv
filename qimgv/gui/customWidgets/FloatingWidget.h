@@ -7,12 +7,11 @@
 
 #pragma once
 
-#include "gui/customwidgets/floatingwidgetcontainer.h"
-#include <QStyleOption>
-#include <QPainter>
+#include "gui/customWidgets/FloatingWidgetContainer.h"
 #include <QApplication>
 #include <QDebug>
-
+#include <QPainter>
+#include <QStyleOption>
 #include <QWheelEvent>
 
 class FloatingWidget : public QWidget

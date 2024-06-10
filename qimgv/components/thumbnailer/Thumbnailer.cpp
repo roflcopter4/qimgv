@@ -1,4 +1,4 @@
-#include "thumbnailer.h"
+#include "Thumbnailer.h"
 
 Thumbnailer::Thumbnailer(QObject *parent)
     : QObject(parent),

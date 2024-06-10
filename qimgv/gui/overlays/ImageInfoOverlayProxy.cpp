@@ -1,4 +1,4 @@
-#include "imageinfooverlayproxy.h"
+#include "ImageInfoOverlayProxy.h"
 
 ImageInfoOverlayProxy::ImageInfoOverlayProxy(FloatingWidgetContainer *parent)
     : container(parent),

@@ -1,4 +1,4 @@
-#include "scriptmanager.h"
+#include "ScriptManager.h"
 
 ScriptManager *scriptManager = nullptr;
 

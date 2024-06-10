@@ -1,12 +1,11 @@
-#ifndef BOOKMARKSWIDGET_H
-#define BOOKMARKSWIDGET_H
+#pragma once
 
-#include <QWidget>
-#include "gui/folderview/bookmarksitem.h"
-#include <QLabel>
-#include <QVBoxLayout>
-#include <QMimeData>
 #include "Settings.h"
+#include "gui/folderView/BookmarksItem.h"
+#include <QLabel>
+#include <QMimeData>
+#include <QVBoxLayout>
+#include <QWidget>
 
 class BookmarksWidget : public QWidget
 {
@@ -38,5 +37,3 @@ class BookmarksWidget : public QWidget
     QStringList  paths;
     QString      highlightedPath;
 };
-
-#endif // BOOKMARKSWIDGET_H

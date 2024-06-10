@@ -1,4 +1,4 @@
-#include "imageanimated.h"
+#include "ImageAnimated.h"
 #include <QMessageBox>
 
 // TODO: this class is kinda useless now. redesign?

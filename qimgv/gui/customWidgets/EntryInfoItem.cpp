@@ -1,4 +1,4 @@
-#include "entryinfoitem.h"
+#include "EntryInfoItem.h"
 
 EntryInfoItem::EntryInfoItem(QWidget *parent)
     : QWidget(parent),

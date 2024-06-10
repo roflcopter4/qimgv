@@ -1,4 +1,4 @@
-#include "imageviewerv2.h"
+#include "ImageViewerV2.h"
 
 ImageViewerV2::ImageViewerV2(QWidget *parent)
     : QGraphicsView(parent),

@@ -1,4 +1,4 @@
-#include "documentwidget.h"
+#include "DocumentWidget.h"
 
 DocumentWidget::DocumentWidget(ViewerWidget *viewWidget, InfoBarProxy *infoBar, QWidget *parent)
     : FloatingWidgetContainer(parent),

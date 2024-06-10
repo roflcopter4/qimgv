@@ -1,4 +1,4 @@
-#include "centralwidget.h"
+#include "CentralWidget.h"
 
 CentralWidget::CentralWidget(DocumentWidget *aDocWidget,
                              FolderViewProxy *aFolderView,

@@ -1,5 +1,4 @@
-#ifndef ENTRYINFOITEM_H
-#define ENTRYINFOITEM_H
+#pragma once
 
 #include <QWidget>
 #include <QLabel>
@@ -26,5 +25,3 @@ class EntryInfoItem final : public QWidget
     QLabel      nameLabel;
     QLabel      valueLabel;
 };
-
-#endif // ENTRYINFOITEM_H

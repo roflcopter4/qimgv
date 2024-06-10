@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/overlays/zoomindicatoroverlay.h"
+#include "gui/overlays/ZoomIndicatorOverlay.h"
 
 struct ZoomIndicatorOverlayStateBuffer {
     qreal scale;

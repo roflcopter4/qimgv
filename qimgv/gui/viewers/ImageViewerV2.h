@@ -1,21 +1,19 @@
 #pragma once
 
-#include <QGraphicsView>
-#include <QGraphicsScene>
-#include <QGraphicsPixmapItem>
-#include <QElapsedTimer>
-#include <QWheelEvent>
-#include <QTimeLine>
-#include <QScrollBar>
-#include <QMovie>
-#include <QColor>
-#include <QTimer>
-#include <QDebug>
-#include <memory>
-#include <cmath>
 #include "Settings.h"
-
-#include "Common.h"
+#include <QColor>
+#include <QDebug>
+#include <QElapsedTimer>
+#include <QGraphicsPixmapItem>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QMovie>
+#include <QScrollBar>
+#include <QTimeLine>
+#include <QTimer>
+#include <QWheelEvent>
+#include <cmath>
+#include <memory>
 
 class ImageViewerV2 Q_DECL_FINAL : public QGraphicsView
 {

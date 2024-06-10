@@ -1,5 +1,5 @@
-#include "renameoverlay.h"
-#include "ui_renameoverlay.h"
+#include "RenameOverlay.h"
+#include "ui_RenameOverlay.h"
 
 RenameOverlay::RenameOverlay(FloatingWidgetContainer *parent)
     : OverlayWidget(parent),

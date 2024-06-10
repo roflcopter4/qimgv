@@ -4,8 +4,8 @@
 #include <QStyleOption>
 #include <QTimer>
 #include <QPainter>
-#include "components/actionmanager/actionmanager.h"
-#include "components/scriptManager/scriptmanager.h"
+#include "components/actionManager/ActionManager.h"
+#include "components/scriptManager/ScriptManager.h"
 
 namespace Ui {
 class ContextMenu;

@@ -1,18 +1,18 @@
 #pragma once
 
-#include <QWidget>
+#include "gui/customWidgets/IconWidget.h"
+#include "gui/customWidgets/SidePanelWidget.h"
+#include "gui/customWidgets/SpinBoxInputFix.h"
+#include "gui/overlays/CropOverlay.h"
+#include <QAbstractItemView>
+#include <QDebug>
+#include <QPainter>
 #include <QScreen>
 #include <QStyleOption>
 #include <QStyledItemDelegate>
-#include <QAbstractItemView>
-#include <QPainter>
-#include <QtGlobal>
-#include "gui/customwidgets/sidepanelwidget.h"
-#include "gui/customwidgets/iconwidget.h"
-#include "gui/customwidgets/spinboxinputfix.h"
-#include "gui/overlays/cropoverlay.h"
 #include <QTimer>
-#include <QDebug>
+#include <QWidget>
+#include <QtGlobal>
 
 namespace Ui {
 class CropPanel;

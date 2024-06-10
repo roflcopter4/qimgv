@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QStackedWidget>
-#include "gui/folderview/folderviewproxy.h"
-#include "gui/viewers/documentwidget.h"
+#include "gui/folderView/FolderViewProxy.h"
+#include "gui/viewers/DocumentWidget.h"
 #include "Settings.h"
 
 

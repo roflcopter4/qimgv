@@ -1,5 +1,5 @@
-#include "fvoptionspopup.h"
-#include "ui_fvoptionspopup.h"
+#include "FVOptionsPopup.h"
+#include "ui_FVOptionsPopup.h"
 
 FVOptionsPopup::FVOptionsPopup(QWidget *parent) :
     QWidget(parent),

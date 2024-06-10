@@ -1,14 +1,12 @@
 #pragma once
 
-#include "Common.h"
-
-#include "gui/customwidgets/floatingwidgetcontainer.h"
+#include "gui/ContextMenu.h"
+#include "gui/customWidgets/FloatingWidgetContainer.h"
+#include "gui/overlays/VideoControlsProxy.h"
+#include "gui/overlays/ZoomIndicatorOverlayProxy.h"
+#include "gui/viewers/ImageViewerV2.h"
+#include "gui/viewers/VideoPlayerInitProxy.h"
 #include <QVBoxLayout>
-#include "gui/viewers/imageviewerv2.h"
-#include "gui/viewers/videoplayerinitproxy.h"
-#include "gui/overlays/videocontrolsproxy.h"
-#include "gui/overlays/zoomindicatoroverlayproxy.h"
-#include "gui/contextmenu.h"
 
 class ViewerWidget Q_DECL_FINAL : public FloatingWidgetContainer
 {

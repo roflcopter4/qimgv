@@ -1,4 +1,4 @@
-#include "pathselectormenuitem.h"
+#include "PathSelectorMenuItem.h"
 
 PathSelectorMenuItem::PathSelectorMenuItem(QWidget *parent)
     : MenuItem(parent)

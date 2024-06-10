@@ -1,4 +1,4 @@
-#include "ssidebar.h"
+#include "SsideBar.h"
 
 SSideBar::SSideBar(QWidget *parent) : QWidget{parent} {
     layout = new QBoxLayout(QBoxLayout::TopToBottom);

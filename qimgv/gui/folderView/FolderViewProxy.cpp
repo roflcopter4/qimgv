@@ -1,4 +1,4 @@
-#include "folderviewproxy.h"
+#include "FolderViewProxy.h"
 
 FolderViewProxy::FolderViewProxy(QWidget *parent)
     : QWidget(parent),

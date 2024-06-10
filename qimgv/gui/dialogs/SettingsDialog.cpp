@@ -1,6 +1,5 @@
-// ReSharper disable CppClangTidyReadabilityStaticAccessedThroughInstance
-#include "settingsdialog.h"
-#include "ui_settingsdialog.h"
+#include "SettingsDialog.h"
+#include "ui_SettingsDialog.h"
 
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent),

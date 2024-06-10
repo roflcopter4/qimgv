@@ -2,7 +2,7 @@
 #define SCALERREQUEST_H
 
 #include <QPixmap>
-#include "sourcecontainers/image.h"
+#include "sourcecontainers/Image.h"
 #include "Settings.h" // move enums somewhere else?
 
 class ScalerRequest {

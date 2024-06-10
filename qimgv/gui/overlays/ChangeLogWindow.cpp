@@ -1,5 +1,5 @@
-#include "changelogwindow.h"
-#include "ui_changelogwindow.h"
+#include "ChangeLogWindow.h"
+#include "ui_ChangeLogWindow.h"
 
 ChangelogWindow::ChangelogWindow(FloatingWidgetContainer *parent)
     : OverlayWidget(parent),

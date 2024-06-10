@@ -13,7 +13,7 @@
 #include <QSpinBox>
 #include <QVBoxLayout>
 
-#include "ui_resizedialog.h"
+#include "ui_ResizeDialog.h"
 
 class ResizeDialog : public QDialog
 {

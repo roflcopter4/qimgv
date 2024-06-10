@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utils/imagefactory.h"
+#include "utils/ImageFactory.h"
 #include <QObject>
 #include <QRunnable>
 

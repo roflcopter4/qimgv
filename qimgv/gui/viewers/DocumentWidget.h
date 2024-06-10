@@ -1,36 +1,37 @@
 #pragma once
 
-#include <memory>
+#include "gui/customWidgets/FloatingWidgetContainer.h"
+#include "gui/panels/infoBar/InfoBarProxy.h"
+#include "gui/panels/mainPanel/MainPanel.h"
+#include "gui/viewers/ViewerWidget.h"
 #include <QBoxLayout>
-#include "gui/customwidgets/floatingwidgetcontainer.h"
-#include "gui/viewers/viewerwidget.h"
-#include "gui/panels/mainpanel/mainpanel.h"
-#include "gui/panels/infobar/infobarproxy.h"
+#include <memory>
 
 // TODO: use a template here?
 
 class DocumentWidget : public FloatingWidgetContainer
 {
   public:
-    DocumentWidget(ViewerWidget *viewWidget, InfoBarProxy *infoBar, QWidget *parent = nullptr);
+    DocumentWidget(ViewerWidget *viewWidget, InfoBarProxy *infoBar, QWidget *parent);
     ~DocumentWidget() override;
 
-    ViewerWidget        *viewWidget();
-    ThumbnailStripProxy *thumbPanel() const;
+    ND ViewerWidget        *viewWidget();
+    ND ThumbnailStripProxy *thumbPanel() const;
+
+    ND bool panelEnabled() const;
 
     void setFocus();
     void hideFloatingPanel();
     void hideFloatingPanel(bool animated);
     void setPanelEnabled(bool mode);
-    bool panelEnabled() const;
     void setupMainPanel();
     void setInteractionEnabled(bool mode);
     void allowPanelInit();
 
-  public slots:
+  public Q_SLOTS:
     void onFullscreenModeChanged(bool mode);
 
-  private slots:
+  private Q_SLOTS:
     void setPanelPinned(bool mode);
     bool panelPinned() const;
     void readSettings();
@@ -41,7 +42,8 @@ class DocumentWidget : public FloatingWidgetContainer
     void mouseMoveEvent(QMouseEvent *event) override;
 
   private:
-    QBoxLayout   *layout, *layoutRoot;
+    QBoxLayout   *layout;
+    QBoxLayout   *layoutRoot;
     ViewerWidget *mViewWidget;
     InfoBarProxy *mInfoBar;
     MainPanel    *mainPanel;

@@ -1,4 +1,4 @@
-#include "videoplayer.h"
+#include "VideoPlayer.h"
 
 VideoPlayer::VideoPlayer(QWidget *parent)
     : QWidget(parent)

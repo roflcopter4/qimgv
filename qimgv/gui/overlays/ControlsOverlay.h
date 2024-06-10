@@ -1,11 +1,11 @@
 #pragma once
 
-#include <QHBoxLayout>
-#include <QGraphicsOpacityEffect>
-#include <QPropertyAnimation>
+#include "gui/customWidgets/ActionButton.h"
+#include "gui/customWidgets/FloatingWidget.h"
 #include <QDebug>
-#include "gui/customwidgets/floatingwidget.h"
-#include "gui/customwidgets/actionbutton.h"
+#include <QGraphicsOpacityEffect>
+#include <QHBoxLayout>
+#include <QPropertyAnimation>
 
 class ControlsOverlay : public FloatingWidget
 {

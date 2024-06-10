@@ -1,4 +1,4 @@
-#include "thumbnailview.h"
+#include "ThumbnailView.h"
 
 ThumbnailView::ThumbnailView(Qt::Orientation orientation, QWidget *parent)
     : QGraphicsView(parent),

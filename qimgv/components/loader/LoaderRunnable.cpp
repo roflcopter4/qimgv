@@ -1,4 +1,4 @@
-#include "loaderrunnable.h"
+#include "LoaderRunnable.h"
 
 #include <QElapsedTimer>
 

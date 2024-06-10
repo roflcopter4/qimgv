@@ -1,5 +1,5 @@
-#include "videocontrols.h"
-#include "ui_videocontrols.h"
+#include "VideoControls.h"
+#include "ui_VideoControls.h"
 
 VideoControls::VideoControls(FloatingWidgetContainer *parent) :
     OverlayWidget(parent),

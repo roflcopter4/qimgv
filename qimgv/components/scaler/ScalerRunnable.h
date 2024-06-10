@@ -4,9 +4,9 @@
 #include <QRunnable>
 #include <QThread>
 #include <QDebug>
-#include "components/cache/cache.h"
-#include "scalerrequest.h"
-#include "utils/imagelib.h"
+#include "components/cache/Cache.h"
+#include "ScalerRequest.h"
+#include "utils/ImageLib.h"
 #include "Settings.h"
 
 class ScalerRunnable : public QObject, public QRunnable

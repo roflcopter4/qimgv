@@ -18,13 +18,11 @@
 #include "components/scriptManager/ScriptManager.h"
 #include "gui/MainWindow.h"
 #include "utils/Randomizer.h"
-#include "gui/dialogs/printdialog.h"
+#include "gui/dialogs/PrintDialog.h"
 
 #ifdef __GLIBC__
 # include <malloc.h>
 #endif
-#include "Common.h"
-
 
 class Core final : public QObject
 {

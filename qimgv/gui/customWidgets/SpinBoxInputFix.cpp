@@ -1,4 +1,4 @@
-#include "spinboxinputfix.h"
+#include "SpinBoxInputFix.h"
 
 SpinBoxInputFix::SpinBoxInputFix(QWidget *parent)
     : QSpinBox(parent)

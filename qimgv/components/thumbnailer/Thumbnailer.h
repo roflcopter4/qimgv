@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QThreadPool>
-#include "components/thumbnailer/thumbnailerrunnable.h"
-#include "components/cache/thumbnailcache.h"
+#include "components/thumbnailer/ThumbnailerRunnable.h"
+#include "components/cache/ThumbnailCache.h"
 #include "Settings.h"
 
 class Thumbnailer : public QObject

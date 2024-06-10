@@ -1,4 +1,4 @@
-#include "pushbuttonfocusind.h"
+#include "PushButtonFocusInd.h"
 
 PushButtonFocusInd::PushButtonFocusInd(QWidget *parent)
     : QPushButton(parent),

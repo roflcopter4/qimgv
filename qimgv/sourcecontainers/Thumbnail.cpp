@@ -1,4 +1,4 @@
-#include "thumbnail.h"
+#include "Thumbnail.h"
 
 Thumbnail::Thumbnail(QString name, QString info, int size, QSharedPointer<QPixmap> pixmap)
     : mPixmap(pixmap),

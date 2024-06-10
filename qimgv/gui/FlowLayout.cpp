@@ -48,7 +48,7 @@
  **
  ****************************************************************************/
 
-#include "flowlayout.h"
+#include "FlowLayout.h"
 #include <qmath.h>
 #include <QWidget>
 

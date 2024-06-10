@@ -1,5 +1,5 @@
-#include "croppanel.h"
-#include "ui_croppanel.h"
+#include "CropPanel.h"
+#include "ui_CropPanel.h"
 
 CropPanel::CropPanel(CropOverlay *_overlay, QWidget *parent)
     : SidePanelWidget(parent),

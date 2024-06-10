@@ -1,5 +1,4 @@
-#include "Common.h"
-#include "infobarproxy.h"
+#include "InfoBarProxy.h"
 
 InfoBarProxy::InfoBarProxy(QWidget *parent)
     : QWidget(parent),

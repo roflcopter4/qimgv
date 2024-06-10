@@ -4,7 +4,7 @@
  * Most of the communication between components goes through here.
  */
 
-#include "core.h"
+#include "Core.h"
 #include <stdexcept>
 
 #ifdef Q_OS_WINDOWS

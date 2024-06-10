@@ -1,4 +1,4 @@
-#include "floatingmessageproxy.h"
+#include "FloatingMessageProxy.h"
 
 FloatingMessageProxy::FloatingMessageProxy(FloatingWidgetContainer *parent)
     : container(parent),

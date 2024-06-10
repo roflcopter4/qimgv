@@ -1,12 +1,11 @@
-#ifndef SSIDEBAR_H
-#define SSIDEBAR_H
+#pragma once
 
-#include <QWidget>
+#include "gui/customWidgets/IconWidget.h"
+#include <QBoxLayout>
 #include <QLabel>
 #include <QPainter>
 #include <QStyleOption>
-#include <QBoxLayout>
-#include "gui/customwidgets/iconwidget.h"
+#include <QWidget>
 
 class SSideBarItem;
 
@@ -26,7 +25,7 @@ class SSideBar : public QWidget
 
     void selectEntryAt(QPoint pos);
 
-  signals:
+  Q_SIGNALS:
     void entrySelected(int);
 
   protected:
@@ -54,5 +53,3 @@ class SSideBarItem : public QWidget
   protected:
     void paintEvent(QPaintEvent *event) override;
 };
-
-#endif // SSIDEBAR_H

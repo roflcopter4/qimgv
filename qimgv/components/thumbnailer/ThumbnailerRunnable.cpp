@@ -1,4 +1,4 @@
-#include "thumbnailerrunnable.h"
+#include "ThumbnailerRunnable.h"
 
 ThumbnailerRunnable::ThumbnailerRunnable(ThumbnailCache *cache, QString path, int size, bool crop, bool force)
     : cache(cache),

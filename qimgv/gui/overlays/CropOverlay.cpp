@@ -1,4 +1,4 @@
-#include "cropoverlay.h"
+#include "CropOverlay.h"
 
 // TODO: this is pretty old. Clean up
 

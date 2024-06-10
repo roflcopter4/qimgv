@@ -1,13 +1,12 @@
 #pragma once
 
-#include <QPushButton>
-#include <QLineEdit>
-#include <QKeyEvent>
-#include <QTimer>
-
-#include "gui/customwidgets/overlaywidget.h"
-#include "components/actionManager/ActionManager.h"
 #include "Settings.h"
+#include "components/actionManager/ActionManager.h"
+#include "gui/customWidgets/OverlayWidget.h"
+#include <QKeyEvent>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QTimer>
 
 namespace Ui {
 class RenameOverlay;

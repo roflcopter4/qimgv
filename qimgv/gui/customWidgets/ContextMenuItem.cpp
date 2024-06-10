@@ -1,4 +1,4 @@
-#include "contextmenuitem.h"
+#include "ContextMenuItem.h"
 
 ContextMenuItem::ContextMenuItem(QWidget *parent)
     : MenuItem(parent)

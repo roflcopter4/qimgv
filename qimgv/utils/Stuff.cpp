@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QString>
-#include <qcoreapplication.h>
+#include <QCoreapplication>
 #include <atomic>
 #include <iostream>
 #include <mutex>

@@ -1,5 +1,4 @@
-#include "floatingwidget.h"
-
+#include "FloatingWidget.h"
 #include <iostream>
 
 FloatingWidget::FloatingWidget(FloatingWidgetContainer *parent) : QWidget(parent), mAcceptKeyboardFocus(false)

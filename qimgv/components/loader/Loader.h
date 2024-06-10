@@ -1,7 +1,7 @@
 #pragma once
 
-#include "components/cache/thumbnailcache.h"
-#include "loaderrunnable.h"
+#include "components/cache/ThumbnailCache.h"
+#include "LoaderRunnable.h"
 #include <QThreadPool>
 
 class Loader : public QObject

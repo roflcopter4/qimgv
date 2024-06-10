@@ -1,6 +1,5 @@
-#include "Common.h"
-#include "sidepanel.h"
-#include "ui_sidepanel.h"
+#include "SidePanel.h"
+#include "ui_SidePanel.h"
 
 SidePanel::SidePanel(QWidget *parent)
     : QWidget(parent),

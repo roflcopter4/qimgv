@@ -1,5 +1,5 @@
-#include "floatingwidgetcontainer.h"
-#include "gui/customwidgets/floatingwidget.h"
+#include "FloatingWidgetContainer.h"
+#include "gui/customWidgets/FloatingWidget.h"
 
 FloatingWidgetContainer::FloatingWidgetContainer(QWidget *parent)
     : QWidget(parent)

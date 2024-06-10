@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/customwidgets/menuitem.h"
+#include "gui/customWidgets/MenuItem.h"
 #include "Settings.h"
 #include <QFileDialog>
 

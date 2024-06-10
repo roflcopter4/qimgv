@@ -3,7 +3,7 @@
 #pragma once
 
 #include "components/actionManager/ActionManager.h"
-#include "gui/customwidgets/menuitem.h"
+#include "gui/customWidgets/MenuItem.h"
 
 class ContextMenuItem : public MenuItem
 {

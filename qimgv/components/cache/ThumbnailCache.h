@@ -5,7 +5,7 @@
 #include <QMutex>
 #include <QDebug>
 #include "Settings.h"
-#include "sourcecontainers/thumbnail.h"
+#include "sourcecontainers/Thumbnail.h"
 
 class ThumbnailCache : public QObject
 {

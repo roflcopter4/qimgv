@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/customwidgets/overlaywidget.h"
+#include "gui/customWidgets/OverlayWidget.h"
 #include <QApplication>
 #include <QLabel>
 #include <QTimer>

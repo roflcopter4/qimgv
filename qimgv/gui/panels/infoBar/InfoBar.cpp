@@ -1,6 +1,5 @@
-#include "Common.h"
-#include "infobar.h"
-#include "ui_infobar.h"
+#include "InfoBar.h"
+#include "ui_InfoBar.h"
 
 
 InfoBar::InfoBar(QWidget *parent) :

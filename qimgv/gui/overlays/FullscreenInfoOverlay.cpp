@@ -1,7 +1,5 @@
-#include "fullscreeninfooverlay.h"
-#include "ui_fullscreeninfooverlay.h"
-
-#include "Common.h"
+#include "FullscreenInfoOverlay.h"
+#include "ui_FullscreenInfoOverlay.h"
 
 FullscreenInfoOverlay::FullscreenInfoOverlay(FloatingWidgetContainer *parent)
     : OverlayWidget(parent),

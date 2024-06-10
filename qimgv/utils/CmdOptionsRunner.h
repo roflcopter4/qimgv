@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QDebug>
 #include <QString>
-#include "core.h"
+#include "Core.h"
 
 class CmdOptionsRunner : public QObject
 {

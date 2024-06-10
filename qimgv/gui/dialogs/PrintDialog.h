@@ -1,15 +1,15 @@
 #ifndef PRINTDIALOG_H
 #define PRINTDIALOG_H
 
+#include "Settings.h"
+#include "components/thumbnailer/Thumbnailer.h"
+#include <QDebug>
 #include <QDialog>
+#include <QFileDialog>
+#include <QGraphicsColorizeEffect>
+#include <QPainter>
 #include <QtPrintSupport/QPrinter>
 #include <QtPrintSupport/QPrinterInfo>
-#include <QFileDialog>
-#include <QPainter>
-#include <QGraphicsColorizeEffect>
-#include <QDebug>
-#include "components/thumbnailer/thumbnailer.h"
-#include "Settings.h"
 
 namespace Ui {
 class PrintDialog;

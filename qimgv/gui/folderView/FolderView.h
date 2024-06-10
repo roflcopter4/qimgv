@@ -1,19 +1,19 @@
 #pragma once
 
+#include "gui/customWidgets/ActionButton.h"
+#include "gui/customWidgets/FloatingWidgetContainer.h"
+#include "gui/customWidgets/StyledComboBox.h"
+#include "gui/folderView/FileSystemModelCustom.h"
+#include "gui/folderView/BookmarksWidget.h"
+#include "gui/folderView/FolderGridView.h"
+#include "gui/folderView/FVOptionsPopup.h"
+#include "gui/IDirectoryView.h"
 #include <QAbstractItemView>
 #include <QElapsedTimer>
 #include <QFileDialog>
 #include <QFileSystemModel>
 #include <QStyledItemDelegate>
 #include <QWidget>
-#include "gui/customwidgets/actionbutton.h"
-#include "gui/customwidgets/floatingwidgetcontainer.h"
-#include "gui/customwidgets/styledcombobox.h"
-#include "gui/folderview/bookmarkswidget.h"
-#include "gui/folderview/FileSystemModelCustom.h"
-#include "gui/folderview/foldergridview.h"
-#include "gui/folderview/fvoptionspopup.h"
-#include "gui/idirectoryview.h"
 
 namespace Ui {
 class FolderView;
