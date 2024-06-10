@@ -1,5 +1,5 @@
 #include "ImageInfoOverlay.h"
-#include "ui_ImageinfoOverlay.h"
+#include "ui_ImageInfoOverlay.h"
 
 ImageInfoOverlay::ImageInfoOverlay(FloatingWidgetContainer *parent)
     : OverlayWidget(parent),

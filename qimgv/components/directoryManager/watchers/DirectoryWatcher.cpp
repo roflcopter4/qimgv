@@ -58,7 +58,7 @@ DirectoryWatcher *DirectoryWatcher::newInstance(DirectoryManager *parent)
     DirectoryWatcher *watcher;
 
 #if defined Q_OS_LINUX
-    watcher = new LinuxWatcher(parent);
+    watcher = new LinuxDirectoryWatcher(parent);
 #elif defined Q_OS_WIN32
     watcher = new WindowsDirectoryWatcher(parent);
 #elif defined Q_OS_APPLE

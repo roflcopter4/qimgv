@@ -16,13 +16,14 @@ void WallpaperSetter::setWallpaper(QString const &path)
         u"qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \'var allDesktops = desktops(); print "
         u"(allDesktops); for (i = 0; i < allDesktops.length; i++) { d = allDesktops[i]; d.wallpaperPlugin = \"org.kde.image\"; "
         u"d.currentConfigGroup = Array(\"Wallpaper\", \"org.kde.image\", \"General\"); d.writeConfig(\"Image\", \"" +
-        path + "\") } \'";
+        path +
+        u"\") } \'";
     QProcess process;
     //process.setProcessChannelMode(QProcess::ForwardedChannels);
-    process.start("sh", QStringList() << "-c" << command);
+    process.start(QS("sh"), QStringList() << QS("-c") << command);
     process.waitForFinished();
     process.close();
 
-    qDebug() << ("In case that didnt work your cropped wallpaper is saved at:" << path;
+    qDebug() << u"In case that didnt work your cropped wallpaper is saved at:" << path;
 #endif
 }

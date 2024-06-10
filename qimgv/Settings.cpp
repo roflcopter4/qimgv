@@ -16,6 +16,8 @@ Settings::Settings(QObject *parent)
 {
     // config files
 #ifdef Q_OS_LINUX
+      qDebug() << stateConf.fileName();
+      qDebug() << themeConf.fileName();
 #else
     mConfDir.mkpath(QApplication::applicationDirPath() + QSV("/conf"));
 #endif

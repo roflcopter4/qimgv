@@ -218,7 +218,7 @@ void Core::loadTranslation()
         translator = new QTranslator;
     QString trPathFallback = QCoreApplication::applicationDirPath() + QSV("/translations");
 #ifdef TRANSLATIONS_PATH
-    QString trPath = QString(TRANSLATIONS_PATH);
+    QString trPath = QStringLiteral(TRANSLATIONS_PATH);
 #else
     QString const &trPath = trPathFallback;
 #endif
@@ -841,11 +841,11 @@ void Core::showInDirectory()
         return;
     }
 #if defined Q_OS_LINUX
-    QString fm = ScriptManager::runCommand("xdg-mime query default inode/directory");
-    if (fm.contains("dolphin"))
-        ScriptManager::runCommandDetached("dolphin --select " + selectedPath());
-    else if (fm.contains("nautilus"))
-        ScriptManager::runCommandDetached("nautilus --select " + selectedPath());
+    QString fm = ScriptManager::runCommand(QS("xdg-mime query default inode/directory"));
+    if (fm.contains(QSV("dolphin")))
+        ScriptManager::runCommandDetached(QSV("dolphin --select ") + selectedPath());
+    else if (fm.contains(QSV("nautilus")))
+        ScriptManager::runCommandDetached(QSV("nautilus --select ") + selectedPath());
     else
         QDesktopServices::openUrl(QUrl::fromLocalFile(model->directoryPath()));
 #elif defined Q_OS_WIN32
@@ -1312,7 +1312,7 @@ void Core::setWallpaper()
     else if (session.contains("gnome"))
         ScriptManager::runCommand(QSV("gsettings set org.gnome.desktop.background picture-uri \"") + selectedPath() + QSV("\""));
     else
-        mw->showMessage(QSV("Action is not supported in your desktop session (\"") + session + QSV("\")"), 3000);
+        mw->showMessage(QSV("Action is not supported in your desktop session (\"") + QString::fromUtf8(session) + QSV("\")"), 3000);
 #endif
 }
 

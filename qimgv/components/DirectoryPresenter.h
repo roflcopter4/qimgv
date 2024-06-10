@@ -1,9 +1,9 @@
 #pragma once
 
-#include "components/thumbnailer/thumbnailer.h"
-#include "directorymodel.h"
-#include "gui/idirectoryview.h"
-#include "sharedresources.h"
+#include "DirectoryModel.h"
+#include "SharedResources.h"
+#include "components/thumbnailer/Thumbnailer.h"
+#include "gui/IDirectoryView.h"
 #include <QMimeData>
 #include <QObject>
 #include <memory>

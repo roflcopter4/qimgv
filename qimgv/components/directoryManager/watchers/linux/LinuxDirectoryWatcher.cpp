@@ -23,15 +23,13 @@ static constexpr int EVENT_MODIFY_TIMEOUT = 150; // ms;
 
 LinuxDirectoryWatcherPrivate::LinuxDirectoryWatcherPrivate(LinuxDirectoryWatcher *qq)
     : DirectoryWatcherPrivate(qq, new LinuxDirectoryWorker()),
-      watcher(-1),
+      watcher(inotify_init()),
       watchObject(-1)
 {
-    watcher = inotify_init();
-
     connect(workerThread.get(), &QThread::started, worker.get(), &DirectoryWatcherWorker::run);
     worker->moveToThread(workerThread.get());
 
-    auto linuxWorker = static_cast<LinuxDirectoryWorker *>(worker.get());
+    auto *linuxWorker = static_cast<LinuxDirectoryWorker *>(worker.get());
     linuxWorker->setDescriptor(watcher);
     connect(linuxWorker, &LinuxDirectoryWorker::fileEvent, this, &LinuxDirectoryWatcherPrivate::dispatchFilesystemEvent);
 
@@ -70,9 +68,9 @@ void LinuxDirectoryWatcherPrivate::setWatchPath(QString path)
     DirectoryWatcherPrivate::setWatchPath(std::move(path));
 }
 
-int LinuxDirectoryWatcherPrivate::indexOfWatcherEvent(uint cookie) const
+qsizetype LinuxDirectoryWatcherPrivate::indexOfWatcherEvent(uint cookie) const
 {
-    for (int i = 0; i < watcherEvents.size(); ++i) {
+    for (qsizetype i = 0; i < watcherEvents.size(); ++i) {
         auto event = watcherEvents.at(i);
         if (event->cookie() == cookie)
             return i;
@@ -80,9 +78,9 @@ int LinuxDirectoryWatcherPrivate::indexOfWatcherEvent(uint cookie) const
     return -1;
 }
 
-int LinuxDirectoryWatcherPrivate::indexOfWatcherEvent(QString const &name) const
+qsizetype LinuxDirectoryWatcherPrivate::indexOfWatcherEvent(QString const &name) const
 {
-    for (int i = 0; i < watcherEvents.size(); ++i) {
+    for (qsizetype i = 0; i < watcherEvents.size(); ++i) {
         auto event = watcherEvents.at(i);
         if (event->name() == name)
             return i;
@@ -92,19 +90,19 @@ int LinuxDirectoryWatcherPrivate::indexOfWatcherEvent(QString const &name) const
 
 void LinuxDirectoryWatcherPrivate::dispatchFilesystemEvent(LinuxFsEvent *e)
 {
-    Q_Q(LinuxWatcher);
+    Q_Q(LinuxDirectoryWatcher);
 
-    uint                         dataOffset = 0;
+    uint dataOffset = 0;
     QScopedPointer<LinuxFsEvent> event(e);
 
     while (dataOffset < event->dataSize()) {
-        inotify_event *notify_event = (inotify_event *)(event->data() + dataOffset);
+        auto *notify_event = reinterpret_cast<inotify_event *>(event->data() + dataOffset);
         dataOffset += sizeof(inotify_event) + notify_event->len;
 
-        int     mask       = notify_event->mask;
-        QString name       = notify_event->name;
-        uint    cookie     = notify_event->cookie;
-        bool    isDirEvent = mask & IN_ISDIR;
+        uint32_t mask       = notify_event->mask;
+        QString  name       = QString::fromUtf8(notify_event->name);
+        uint     cookie     = notify_event->cookie;
+        bool     isDirEvent = mask & IN_ISDIR;
 
         // Skip events for directories and files that isn't in filter range
         /*if((isDirEvent) && !(mask & IN_MOVED_TO) ) {
@@ -127,11 +125,11 @@ void LinuxDirectoryWatcherPrivate::dispatchFilesystemEvent(LinuxFsEvent *e)
 void LinuxDirectoryWatcherPrivate::handleModifyEvent(QString const &name)
 {
     // Find the same event in the list by file name
-    int eventIndex = indexOfWatcherEvent(name);
+    qsizetype eventIndex = indexOfWatcherEvent(name);
     if (eventIndex == -1) {
         // This is this first modify event for the current file
-        int  timerId = startTimer(EVENT_MODIFY_TIMEOUT);
-        auto event   = new WatcherEvent(name, timerId, WatcherEvent::Type::Modify);
+        int   timerId = startTimer(EVENT_MODIFY_TIMEOUT);
+        auto *event   = new WatcherEvent(name, timerId, WatcherEvent::Type::Modify);
         watcherEvents.append(QSharedPointer<WatcherEvent>(event));
     } else {
         auto event = watcherEvents.at(eventIndex);
@@ -144,13 +142,13 @@ void LinuxDirectoryWatcherPrivate::handleModifyEvent(QString const &name)
 
 void LinuxDirectoryWatcherPrivate::handleDeleteEvent(QString const &name)
 {
-    Q_Q(LinuxWatcher);
+    Q_Q(LinuxDirectoryWatcher);
     emit q->fileDeleted(name);
 }
 
 void LinuxDirectoryWatcherPrivate::handleCreateEvent(QString const &name)
 {
-    Q_Q(LinuxWatcher);
+    Q_Q(LinuxDirectoryWatcher);
     emit q->fileCreated(name);
 }
 
@@ -158,16 +156,16 @@ void LinuxDirectoryWatcherPrivate::handleMovedFromEvent(QString const &name, uin
 {
     int timerId = startTimer(EVENT_MOVE_TIMEOUT);
     // Save timer id to find out later which event timer is running
-    auto event = new WatcherEvent(name, cookie, timerId, WatcherEvent::Type::MovedFrom);
+    auto *event = new WatcherEvent(name, cookie, timerId, WatcherEvent::Type::MovedFrom);
     watcherEvents.append(QSharedPointer<WatcherEvent>(event));
 }
 
 void LinuxDirectoryWatcherPrivate::handleMovedToEvent(QString const &name, uint cookie)
 {
-    Q_Q(LinuxWatcher);
+    Q_Q(LinuxDirectoryWatcher);
 
     // Check if file waiting to be renamed
-    int eventIndex = indexOfWatcherEvent(cookie);
+    qsizetype eventIndex = indexOfWatcherEvent(cookie);
     if (eventIndex == -1) {
         // No one event waiting for rename so this is a new file
         emit q->fileCreated(name);
@@ -182,19 +180,19 @@ void LinuxDirectoryWatcherPrivate::handleMovedToEvent(QString const &name, uint 
 
 void LinuxDirectoryWatcherPrivate::timerEvent(QTimerEvent *timerEvent)
 {
-    Q_Q(LinuxWatcher);
+    Q_Q(LinuxDirectoryWatcher);
 
     // Loop through waiting move events
-    int lastIndex = watcherEvents.size() - 1;
-    for (int i = lastIndex; i >= 0; --i) {
+    qsizetype lastIndex = watcherEvents.size() - 1;
+    for (qsizetype i = lastIndex; i >= 0; --i) {
         auto watcherEvent = watcherEvents.at(i);
 
         if (watcherEvent->timerId() == timerEvent->timerId()) {
-            int type = watcherEvent->type();
-            if (type == WatcherEvent::MovedFrom) {
+            auto type = watcherEvent->type();
+            if (type == WatcherEvent::Type::MovedFrom) {
                 // Rename event didn't happen so treat this event as remove event
                 emit q->fileDeleted(watcherEvent->name());
-            } else if (type == WatcherEvent::Modify) {
+            } else if (type == WatcherEvent::Type::Modify) {
                 emit q->fileModified(watcherEvent->name());
             }
 

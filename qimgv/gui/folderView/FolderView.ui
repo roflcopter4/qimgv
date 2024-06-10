@@ -763,7 +763,7 @@
   <customwidget>
    <class>ClickableLabel</class>
    <extends>QLabel</extends>
-   <header>gui/customwidgets/clickablelabel.h</header>
+   <header>gui/customWidgets/ClickableLabel.h</header>
    <slots>
     <signal>clicked()</signal>
    </slots>
@@ -771,34 +771,34 @@
   <customwidget>
    <class>StyledComboBox</class>
    <extends>QComboBox</extends>
-   <header>gui/customwidgets/styledcombobox.h</header>
+   <header>gui/customWidgets/StyledComboBox.h</header>
   </customwidget>
   <customwidget>
    <class>ActionButton</class>
    <extends>QWidget</extends>
-   <header>gui/customwidgets/actionbutton.h</header>
+   <header>gui/customWidgets/ActionButton.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>FolderGridView</class>
    <extends>QGraphicsView</extends>
-   <header>gui/folderview/foldergridview.h</header>
+   <header>gui/folderView/FolderGridView.h</header>
   </customwidget>
   <customwidget>
    <class>TreeViewCustom</class>
    <extends>QTreeView</extends>
-   <header>gui/folderview/treeviewcustom.h</header>
+   <header>gui/folderView/TreeViewCustom.h</header>
   </customwidget>
   <customwidget>
    <class>BookmarksWidget</class>
    <extends>QWidget</extends>
-   <header>gui/folderview/bookmarkswidget.h</header>
+   <header>gui/folderView/BookmarksWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>IconButton</class>
    <extends>QWidget</extends>
-   <header>gui/customwidgets/iconbutton.h</header>
+   <header>gui/customWidgets/IconButton.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

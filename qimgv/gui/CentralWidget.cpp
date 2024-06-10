@@ -5,7 +5,8 @@ CentralWidget::CentralWidget(DocumentWidget *aDocWidget,
                              QWidget          *parent)
     : QStackedWidget(parent),
       documentView(aDocWidget),
-      folderView(aFolderView)
+      folderView(aFolderView),
+      mode(ViewMode::INVALID)
 {
     setMouseTracking(true);
     if (!documentView || !folderView)

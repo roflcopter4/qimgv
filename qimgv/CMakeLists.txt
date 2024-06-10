@@ -78,7 +78,7 @@ endif()
 
 # OPTION DEFINITIONS, LINKING
 if(EXIV2)
-    target_link_libraries(qimgv PRIVATE PkgConfig::Exiv2)
+    target_link_libraries(qimgv PRIVATE exiv2)
     target_compile_definitions(qimgv PRIVATE USE_EXIV2)
 endif()
 if(KDE_SUPPORT)

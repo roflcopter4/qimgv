@@ -18,8 +18,8 @@ class LinuxDirectoryWatcherPrivate : public DirectoryWatcherPrivate
     explicit LinuxDirectoryWatcherPrivate(LinuxDirectoryWatcher *qq);
     ~LinuxDirectoryWatcherPrivate() override;
 
-    ND int indexOfWatcherEvent(uint cookie) const;
-    ND int indexOfWatcherEvent(const QString &name) const;
+    ND qsizetype indexOfWatcherEvent(uint cookie) const;
+    ND qsizetype indexOfWatcherEvent(const QString &name) const;
 
     void handleModifyEvent(const QString &name);
     void handleDeleteEvent(const QString &name);

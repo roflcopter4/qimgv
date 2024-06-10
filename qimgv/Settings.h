@@ -74,6 +74,7 @@ enum class ImageScrolling : uint8_t {
 };
 
 enum class ViewMode : uint8_t {
+    INVALID,
     DOCUMENT,
     FOLDERVIEW,
 };
