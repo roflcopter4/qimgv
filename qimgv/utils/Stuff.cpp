@@ -2,10 +2,10 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QString>
-#include <QCoreapplication>
 #include <atomic>
 #include <iostream>
 #include <mutex>
+#include <qcoreapplication.h>
 
 #ifdef Q_OS_WIN32
 # ifndef WIN32_LEAN_AND_MEAN
@@ -81,7 +81,7 @@ QStringToStdPath(QString const &filePath)
     return {std::basic_string_view{tmp.data_ptr().data(),
                                    static_cast<size_t>(tmp.size())}};
 #else
-    return absolute({filePath.toStdString()});
+    return absolute(std::filesystem::path{filePath.toStdString()});
 #endif
 }
 
@@ -145,7 +145,7 @@ static void demangle_setup()
     demangle_setup();
     wchar_t const *name;
 
-#if defined _MSC_VER || defined __clang__
+#if defined _WIN32 && defined _MSC_VER
     wchar_t buf[4096];
     ::UnDecorateSymbolNameW(raw_name, buf, static_cast<DWORD>(std::size(buf)), UNDNAME_COMPLETE);
     name = buf;
@@ -204,7 +204,7 @@ QString GetBacktrace()
                     *end = '+';
             }
 
-            buf += ptr;
+            buf += QString::fromUtf8(ptr);
         } else if (ptr[0] != '+') {
             char *end = ::strchr(ptr, '+');
             if (end) {
@@ -213,7 +213,7 @@ QString GetBacktrace()
                                    i, std::string_view(symbols[i], len), std::string_view(ptr, end - ptr));
                 ptr = end + 1;
             }
-            buf += ptr;
+            buf += QString::fromUtf8(ptr);
         } else {
             buf += std::format("\n{:3}: {}", i, symbols[i]);
         }
@@ -284,7 +284,7 @@ QString GetErrorMessage(unsigned errVal)
 #else
     char buf[512];
     strerror_r(errno, buf, std::size(buf));
-    return QString::fromUtf8(buf) QSV(" (") + QString::number(errVal) + u')';
+    return QString::fromUtf8(buf) + QSV(" (") + QString::number(errVal) + u')';
 #endif
 }
 

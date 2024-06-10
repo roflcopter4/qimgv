@@ -4878,7 +4878,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
   <customwidget>
    <class>ClickableLabel</class>
    <extends>QLabel</extends>
-   <header>gui/customwidgets/clickablelabel.h</header>
+   <header>gui/customWidgets/ClickableLabel.h</header>
    <slots>
     <signal>clicked()</signal>
    </slots>
@@ -4886,12 +4886,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
   <customwidget>
    <class>ColorSelectorButton</class>
    <extends>QLabel</extends>
-   <header>gui/customwidgets/colorselectorbutton.h</header>
+   <header>gui/customWidgets/ColorSelectorButton.h</header>
   </customwidget>
   <customwidget>
    <class>SSideBar</class>
    <extends>QWidget</extends>
-   <header>gui/customwidgets/ssidebar.h</header>
+   <header>gui/customWidgets/SsideBar.h</header>
    <container>1</container>
    <slots>
     <signal>entrySelected(int)</signal>

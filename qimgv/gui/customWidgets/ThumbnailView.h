@@ -64,7 +64,7 @@ class ThumbnailView : public QGraphicsView, public IDirectoryView
     void loadVisibleThumbnailsDelayed();
     void addItem();
 
-    ND int thumbnailSize() const;
+    int thumbnailSize() const;
 
     void showEvent(QShowEvent *event) override;
     void focusOnSelection() override = 0;

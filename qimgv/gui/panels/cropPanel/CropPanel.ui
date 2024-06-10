@@ -563,23 +563,23 @@
   <customwidget>
    <class>IconWidget</class>
    <extends>QWidget</extends>
-   <header>gui/customwidgets/iconwidget.h</header>
+   <header>gui/customWidgets/IconWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PushButtonFocusInd</class>
    <extends>QPushButton</extends>
-   <header>gui/customwidgets/pushbuttonfocusind.h</header>
+   <header>gui/customWidgets/PushButtonFocusInd.h</header>
   </customwidget>
   <customwidget>
    <class>StyledComboBox</class>
    <extends>QComboBox</extends>
-   <header>gui/customwidgets/styledcombobox.h</header>
+   <header>gui/customWidgets/StyledComboBox.h</header>
   </customwidget>
   <customwidget>
    <class>SpinBoxInputFix</class>
    <extends>QSpinBox</extends>
-   <header>gui/customwidgets/spinboxinputfix.h</header>
+   <header>gui/customWidgets/SpinBoxInputFix.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

@@ -1,4 +1,4 @@
-#include "KeysEquenceEdit.h"
+#include "KeySequenceEdit.h"
 
 KeySequenceEdit::KeySequenceEdit(QWidget *parent) : QPushButton(parent) {
     QPushButton::setText(tr("[Enter sequence]"));

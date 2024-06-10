@@ -278,13 +278,13 @@
   <customwidget>
    <class>ActionButton</class>
    <extends>QWidget</extends>
-   <header>gui/customwidgets/actionbutton.h</header>
+   <header>gui/customWidgets/ActionButton.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>VideoSlider</class>
    <extends>QSlider</extends>
-   <header>gui/customwidgets/videoslider.h</header>
+   <header>gui/customWidgets/VideoSlider.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

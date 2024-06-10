@@ -1,9 +1,8 @@
-#include <sys/poll.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-
-#include <QThread>
 #include <QDebug>
+#include <QThread>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+#include <unistd.h>
 
 #include "LinuxDirectoryWorker.h"
 #include "utils/Stuff.h"
@@ -11,7 +10,7 @@
 #define TAG "[LinuxWatcherWorker]"
 static constexpr int TIMEOUT = 300; // ms
 
-LinuxDirectoryWorker::LinuxWorker()
+LinuxDirectoryWorker::LinuxDirectoryWorker()
     : fd(-1)
 {
 }
@@ -27,7 +26,7 @@ void LinuxDirectoryWorker::run()
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     isRunning.store(true);
 #else
-    isRunning.storeRelaxed(true);
+    isRunning.store(true, std::memory_order::relaxed);
 #endif
 
     if (fd == -1) {
@@ -37,8 +36,8 @@ void LinuxDirectoryWorker::run()
     }
 
     while (isRunning) {
-        int  errorCode      = 0;
-        uint bytesAvailable = 0;
+        ssize_t errorCode      = 0;
+        uint    bytesAvailable = 0;
 
         // File descriptor event struct for polling service
         pollfd pollDescriptor = {fd, POLLIN, 0};
@@ -64,7 +63,7 @@ void LinuxDirectoryWorker::run()
     emit finished();
 }
 
-void LinuxDirectoryWorker::handleErrorCode(int code)
+void LinuxDirectoryWorker::handleErrorCode(ssize_t code)
 {
     if (code == -1) {
         QString err = util::GetErrorMessage(errno);

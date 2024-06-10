@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Settings.h"
+#include "sourcecontainers/FsEntry.h"
+#include "utils/Stuff.h"
+#include "watchers/DirectoryWatcher.h"
 #include <QCollator>
 #include <QDateTime>
 #include <QDebug>
@@ -8,17 +12,11 @@
 #include <QRegularExpression>
 #include <QSize>
 #include <QString>
-
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include "Settings.h"
-#include "sourcecontainers/FSEntry.h"
-#include "utils/Stuff.h"
-#include "watchers/DirectoryWatcher.h"
 
 enum class FileListSource { // rename? wip
     DIRECTORY,

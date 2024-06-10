@@ -1,6 +1,6 @@
 #pragma once
 #include "Settings.h"
-#include "sourcecontainers/documentinfo.h"
+#include "sourcecontainers/DocumentInfo.h"
 
 #include <QDebug>
 #include <QElapsedTimer>

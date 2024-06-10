@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/customwidgets/sidepanelwidget.h"
+#include "gui/customWidgets/SidePanelWidget.h"
 #include <QDebug>
 #include <QPainter>
 #include <QStyleOption>

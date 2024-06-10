@@ -170,7 +170,7 @@
   <customwidget>
    <class>KeySequenceEdit</class>
    <extends>QPushButton</extends>
-   <header>gui/customwidgets/keysequenceedit.h</header>
+   <header>gui/customWidgets/KeySequenceEdit.h</header>
    <slots>
     <signal>edited()</signal>
    </slots>

@@ -11,7 +11,7 @@ class LinuxDirectoryWorker : public DirectoryWatcherWorker
     LinuxDirectoryWorker();
 
     void setDescriptor(int desc);
-    void handleErrorCode(int code);
+    void handleErrorCode(ssize_t code);
 
     virtual void run() override;
 
