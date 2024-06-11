@@ -4,6 +4,8 @@ project(player_mpv
     LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 # only export CreatePlayerWidget function
 ADD_DEFINITIONS(-DQIMGV_PLAYER_MPV_LIBRARY)

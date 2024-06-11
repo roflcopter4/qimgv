@@ -14,7 +14,8 @@ class ScalerRunnable : public QObject, public QRunnable
     Q_OBJECT
 
   public:
-    explicit ScalerRunnable();
+    explicit ScalerRunnable(QObject *parent);
+
     void setRequest(ScalerRequest const &r);
     void run() override;
 

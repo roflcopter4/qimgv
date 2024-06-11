@@ -1,9 +1,15 @@
 #include "Loader.h"
 
-Loader::Loader()
-    : pool(new QThreadPool(this))
+Loader::Loader(QObject *parent)
+    : QObject(parent),
+      pool(new QThreadPool(this))
 {
     pool->setMaxThreadCount(2);
+}
+
+Loader::~Loader()
+{
+    clearTasks();
 }
 
 void Loader::clearTasks()

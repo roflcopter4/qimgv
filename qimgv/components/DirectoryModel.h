@@ -12,6 +12,7 @@ class DirectoryModel final : public QObject
     Q_OBJECT
 
   public:
+    explicit DirectoryModel(QSharedPointer<Cache> cache, QObject *parent);
     explicit DirectoryModel(QObject *parent);
     ~DirectoryModel() override;
 
@@ -64,11 +65,13 @@ class DirectoryModel final : public QObject
     ND auto sortingMode() const -> SortingMode;
        void setSortingMode(SortingMode mode);
 
+    ND Scaler       *scaler()       { return scaler_; }
+    ND Scaler const *scaler() const { return scaler_; }
+
     static void copyFileTo(QString const &srcFile, QString const &destDirPath, bool force, FileOpResult &result);
 
     Q_DISABLE_COPY_MOVE(DirectoryModel)
 
-    Scaler *scaler;
 
   Q_SIGNALS:
     void fileRemoved(QString filePath, qsizetype index);
@@ -86,11 +89,11 @@ class DirectoryModel final : public QObject
     void imageUpdated(QString filePath);
 
   private:
-    DirectoryManager *dirManager;
-
-    Loader         loader;
-    Cache          cache;
-    FileListSource fileListSource;
+    DirectoryManager     *dirManager;
+    Loader               *loader;
+    Scaler               *scaler_;
+    QSharedPointer<Cache> cache;
+    FileListSource        fileListSource;
 
   private Q_SLOTS:
     void onImageReady(QSharedPointer<Image> const &img, QString const &path);

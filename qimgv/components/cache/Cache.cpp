@@ -1,5 +1,9 @@
 #include "Cache.h"
 
+Cache::Cache(QObject *parent)
+    : QObject(parent)
+{}
+
 Cache::~Cache()
 {
     clear();

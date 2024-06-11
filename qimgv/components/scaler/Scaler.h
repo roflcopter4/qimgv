@@ -13,7 +13,7 @@ class Scaler : public QObject
     Q_OBJECT
 
   public:
-    explicit Scaler(Cache *_cache, QObject *parent);
+    explicit Scaler(QSharedPointer<Cache> cache, QObject *parent);
     ~Scaler() override;
 
   Q_SIGNALS:
@@ -31,15 +31,16 @@ class Scaler : public QObject
     void slotForwardScaledResult(QImage *image, ScalerRequest const &req);
 
   private:
-    QThreadPool    *pool;
-    ScalerRunnable *runnable;
-    QSemaphore     *sem;
-    Cache          *cache;
-    ScalerRequest   bufferedRequest;
-    ScalerRequest   startedRequest;
-    clock_t         currentRequestTimestamp;
-    bool            buffered;
-    bool            running;
+    QSharedPointer<Cache> cache;
+    QThreadPool          *pool;
+    ScalerRunnable       *runnable;
+    QSemaphore           *sem;
+
+    ScalerRequest bufferedRequest;
+    ScalerRequest startedRequest;
+    clock_t       currentRequestTimestamp;
+    bool          buffered;
+    bool          running;
 
     void startRequest(ScalerRequest const &req);
 };

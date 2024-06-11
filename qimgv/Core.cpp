@@ -125,7 +125,7 @@ void Core::connectComponents()
     connect(mw, &MW::playbackFinished,      this, &Core::onPlaybackFinished);
     connect(mw, &MW::scalingRequested,      this, &Core::scalingRequest);
 
-    connect(model->scaler, &Scaler::scalingFinished, this, &Core::onScalingFinished);
+    connect(model->scaler(), &Scaler::scalingFinished, this, &Core::onScalingFinished);
     connect(model.get(), &DirectoryModel::fileAdded,       this, &Core::onFileAdded);
     connect(model.get(), &DirectoryModel::fileRemoved,     this, &Core::onFileRemoved);
     connect(model.get(), &DirectoryModel::fileRenamed,     this, &Core::onFileRenamed);
@@ -1342,7 +1342,7 @@ void Core::scalingRequest(QSize size, ScalingFilter filter) const
     if (mw->isVisible() && state.hasActiveImage) {
         QSharedPointer<Image> forScale = model->getImage(state.currentFilePath);
         if (forScale)
-            model->scaler->requestScaled(ScalerRequest(forScale, size, state.currentFilePath, filter));
+            model->scaler()->requestScaled(ScalerRequest(forScale, size, state.currentFilePath, filter));
     }
 }
 

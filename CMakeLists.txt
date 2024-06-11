@@ -52,7 +52,7 @@ endif()
 
 if(EXIV2)
     if (MSVC)
-        find_package(exiv2 REQUIRED)
+        find_package(exiv2 CONFIG REQUIRED)
         add_library(PkgConfig::Exiv2 ALIAS Exiv2::exiv2lib)
     else()
         find_package(exiv2)

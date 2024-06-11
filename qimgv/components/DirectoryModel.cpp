@@ -1,9 +1,11 @@
 #include "DirectoryModel.h"
 
-DirectoryModel::DirectoryModel(QObject *parent)
+DirectoryModel::DirectoryModel(QSharedPointer<Cache> cache, QObject *parent)
     : QObject(parent),
-      scaler(new Scaler(&cache, this)),
       dirManager(new DirectoryManager(this)),
+      loader(new Loader(this)),
+      scaler_(new Scaler(cache, this)),
+      cache(std::move(cache)),
       fileListSource(FileListSource::DIRECTORY)
 {
     connect(dirManager, &DirectoryManager::fileRemoved, this, &DirectoryModel::onFileRemoved);
@@ -16,14 +18,16 @@ DirectoryModel::DirectoryModel(QObject *parent)
 
     connect(dirManager, &DirectoryManager::loaded, this, &DirectoryModel::loaded);
     connect(dirManager, &DirectoryManager::sortingChanged, this, &DirectoryModel::onSortingChanged);
-    connect(&loader, &Loader::loadFinished, this, &DirectoryModel::onImageReady);
-    connect(&loader, &Loader::loadFailed, this, &DirectoryModel::loadFailed);
+    connect(loader, &Loader::loadFinished, this, &DirectoryModel::onImageReady);
+    connect(loader, &Loader::loadFailed, this, &DirectoryModel::loadFailed);
 }
+
+DirectoryModel::DirectoryModel(QObject *parent)
+    : DirectoryModel(QSharedPointer<Cache>(new Cache()), parent)
+{}
 
 DirectoryModel::~DirectoryModel()
 {
-    loader.clearTasks();
-    //delete scaler;
 }
 
 qsizetype DirectoryModel::totalCount() const
@@ -202,19 +206,19 @@ void DirectoryModel::moveFileTo(QString const &srcFile, QString const &destDirPa
 // -----------------------------------------------------------------------------
 bool DirectoryModel::setDirectory(QString const &path)
 {
-    cache.clear();
+    cache->clear();
     return dirManager->setDirectory(path);
 }
 
 void DirectoryModel::unload(qsizetype index)
 {
     QString filePath = this->filePathAt(index);
-    cache.remove(filePath);
+    cache->remove(filePath);
 }
 
 void DirectoryModel::unload(QString const &filePath)
 {
-    cache.remove(filePath);
+    cache->remove(filePath);
 }
 
 void DirectoryModel::unloadExcept(QString const &filePath, bool keepNearby)
@@ -225,12 +229,12 @@ void DirectoryModel::unloadExcept(QString const &filePath, bool keepNearby)
         list << prevOf(filePath);
         list << nextOf(filePath);
     }
-    cache.trimTo(list);
+    cache->trimTo(list);
 }
 
 bool DirectoryModel::loaderBusy() const
 {
-    return loader.isBusy();
+    return loader->isBusy();
 }
 
 void DirectoryModel::onImageReady(QSharedPointer<Image> const &img, QString const &path)
@@ -239,8 +243,8 @@ void DirectoryModel::onImageReady(QSharedPointer<Image> const &img, QString cons
         emit loadFailed(path);
         return;
     }
-    cache.remove(path);
-    cache.insert(img);
+    cache->remove(path);
+    cache->insert(img);
     emit imageReady(img, path);
 }
 
@@ -251,9 +255,9 @@ bool DirectoryModel::saveFile(QString const &filePath)
 
 bool DirectoryModel::saveFile(QString const &filePath, QString const &destPath)
 {
-    if (!containsFile(filePath) || !cache.contains(filePath))
+    if (!containsFile(filePath) || !cache->contains(filePath))
         return false;
-    auto img = cache.get(filePath);
+    auto img = cache->get(filePath);
     if (img->save(destPath)) {
         if (filePath == destPath) { // replace
             dirManager->updateFileEntry(destPath);
@@ -289,7 +293,7 @@ void DirectoryModel::onFileModified(QString const &filePath)
 {
     QDateTime modTime = lastModified(filePath);
     if (modTime.isValid()) {
-        if (auto const &img = cache.get(filePath)) {
+        if (auto const &img = cache->get(filePath)) {
             // check if file on disk is different
             if (modTime != img->lastModified())
                 reload(filePath);
@@ -312,12 +316,12 @@ void DirectoryModel::onFileRenamed(QString const &fromPath, qsizetype indexFrom,
 
 bool DirectoryModel::isLoaded(qsizetype index) const
 {
-    return cache.contains(filePathAt(index));
+    return cache->contains(filePathAt(index));
 }
 
 bool DirectoryModel::isLoaded(QString const &filePath) const
 {
-    return cache.contains(filePath);
+    return cache->contains(filePath);
 }
 
 QSharedPointer<Image> DirectoryModel::getImageAt(qsizetype index) const
@@ -330,7 +334,7 @@ QSharedPointer<Image> DirectoryModel::getImageAt(qsizetype index) const
 // for async access use loadAsync(), then catch onImageReady()
 QSharedPointer<Image> DirectoryModel::getImage(QString const &filePath) const
 {
-    QSharedPointer<Image> img = cache.get(filePath);
+    QSharedPointer<Image> img = cache->get(filePath);
     if (!img)
         img = Loader::load(filePath);
     return img;
@@ -338,11 +342,11 @@ QSharedPointer<Image> DirectoryModel::getImage(QString const &filePath) const
 
 void DirectoryModel::updateImage(QString const &filePath, QSharedPointer<Image> const &img)
 {
-    if (containsFile(filePath) /*& cache.contains(filePath)*/) {
-        if (!cache.contains(filePath)) {
-            cache.insert(img);
+    if (containsFile(filePath) /*& cache->contains(filePath)*/) {
+        if (!cache->contains(filePath)) {
+            cache->insert(img);
         } else {
-            cache.insert(img);
+            cache->insert(img);
             emit imageUpdated(filePath);
         }
     }
@@ -350,26 +354,26 @@ void DirectoryModel::updateImage(QString const &filePath, QSharedPointer<Image> 
 
 void DirectoryModel::load(QString const &filePath, bool asyncHint)
 {
-    if (!containsFile(filePath) || loader.isLoading(filePath))
+    if (!containsFile(filePath) || loader->isLoading(filePath))
         return;
-    if (!cache.contains(filePath)) {
+    if (!cache->contains(filePath)) {
         if (asyncHint) {
-            loader.loadAsyncPriority(filePath);
-        } else if (auto img = loader.load(filePath)) {
-            cache.insert(img);
+            loader->loadAsyncPriority(filePath);
+        } else if (auto img = loader->load(filePath)) {
+            cache->insert(img);
             emit imageReady(img, filePath);
         } else {
             emit loadFailed(filePath);
         }
     } else {
-        emit imageReady(cache.get(filePath), filePath);
+        emit imageReady(cache->get(filePath), filePath);
     }
 }
 
 void DirectoryModel::reload(QString const &filePath)
 {
-    if (cache.contains(filePath)) {
-        cache.remove(filePath);
+    if (cache->contains(filePath)) {
+        cache->remove(filePath);
         dirManager->updateFileEntry(filePath);
         load(filePath, false);
     }
@@ -377,6 +381,6 @@ void DirectoryModel::reload(QString const &filePath)
 
 void DirectoryModel::preload(QString const &filePath)
 {
-    if (containsFile(filePath) && !cache.contains(filePath))
-        loader.loadAsync(filePath);
+    if (containsFile(filePath) && !cache->contains(filePath))
+        loader->loadAsync(filePath);
 }

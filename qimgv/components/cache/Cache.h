@@ -2,17 +2,20 @@
 
 #include <QDebug>
 #include <QMap>
+#include <QObject>
 #include <QSemaphore>
 #include <QMutexLocker>
 #include "sourcecontainers/Image.h"
 #include "components/cache/CacheItem.h"
 #include "utils/ImageFactory.h"
 
-class Cache
+class Cache : public QObject
 {
+    Q_OBJECT
+
   public:
-    explicit Cache() = default;
-    ~Cache();
+    explicit Cache(QObject *parent = nullptr);
+    ~Cache() override;
 
     void remove(QString const &path);
     bool insert(QSharedPointer<Image> const &img);

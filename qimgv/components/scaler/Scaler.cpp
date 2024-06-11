@@ -8,12 +8,12 @@
  *    start the last task that came and ignore the middle ones.
  */
 
-Scaler::Scaler(Cache *cache, QObject *parent)
+Scaler::Scaler(QSharedPointer<Cache> cache, QObject *parent)
     : QObject(parent),
+      cache(std::move(cache)),
       pool(new QThreadPool(this)),
-      runnable(new ScalerRunnable()),
+      runnable(new ScalerRunnable(this)),
       sem(new QSemaphore(1)),
-      cache(cache),
       currentRequestTimestamp(0),
       buffered(false),
       running(false)
@@ -28,7 +28,6 @@ Scaler::Scaler(Cache *cache, QObject *parent)
 
 Scaler::~Scaler()
 {
-    delete runnable;
     delete sem;
 }
 

@@ -9,7 +9,8 @@ class Loader : public QObject
     Q_OBJECT
 
   public:
-    explicit Loader();
+    explicit Loader(QObject *parent);
+    ~Loader() override;
 
     static QSharedPointer<Image> load(QString const &path);
 
@@ -27,10 +28,10 @@ class Loader : public QObject
     void clearPool();
     void doLoadAsync(QString const &path, int priority);
 
-  signals:
-    void loadFinished(QSharedPointer<Image>, const QString &path);
-    void loadFailed(const QString &path);
+  Q_SIGNALS:
+    void loadFinished(QSharedPointer<Image>, QString const &path);
+    void loadFailed(QString const &path);
 
-  private slots:
-    void onLoadFinished(QSharedPointer<Image> const &, const QString &);
+  private Q_SLOTS:
+    void onLoadFinished(QSharedPointer<Image> const &, QString const &);
 };
