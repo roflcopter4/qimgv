@@ -1,9 +1,8 @@
 #include "DirectoryWatcherWorker.h"
-#include <QDebug>
 
 DirectoryWatcherWorker::DirectoryWatcherWorker() = default;
 
-bool DirectoryWatcherWorker::setRunning(bool running)
+void DirectoryWatcherWorker::setRunning(bool running)
 {
-    return isRunning.exchange(running, std::memory_order::seq_cst);
+    isRunning.store(running, std::memory_order::release);
 }

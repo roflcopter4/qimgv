@@ -5,20 +5,35 @@
 
 void WindowsDirectoryWorker::setDirectoryHandle(HANDLE handle)
 {
-    // qDebug() << "setHandle" << this->handle << " -> " << handle;
     freeHandle();
     hDir = handle;
 }
 
 void WindowsDirectoryWorker::freeHandle()
 {
-    if (hDir == INVALID_HANDLE_VALUE)
+    if (!hDir || hDir == INVALID_HANDLE_VALUE)
         return;
-    CancelIoEx(hDir, nullptr);
-    CloseHandle(hDir);
+    ::CancelIoEx(hDir, nullptr);
+    ::CloseHandle(hDir);
     hDir = INVALID_HANDLE_VALUE;
 }
 
+
+void WindowsDirectoryWorker::iterateDirectoryEvents(PCBYTE buffer)
+{
+    auto fni = reinterpret_cast<PCFILE_NOTIFY_INFORMATION>(buffer);
+    for (;;) {
+        if (fni->Action != 0) {
+            size_t size  = sizeof(FILE_NOTIFY_INFORMATION) + fni->FileNameLength * sizeof(wchar_t);
+            auto   event = std::make_unique<BYTE[]>(size);
+            memcpy(event.get(), fni, size);
+            emit notifyEvent(event.release());
+        }
+        if (fni->NextEntryOffset == 0)
+            break;
+        fni = reinterpret_cast<PCFILE_NOTIFY_INFORMATION>(reinterpret_cast<PCBYTE>(fni) + fni->NextEntryOffset);
+    }
+}
 
 void WindowsDirectoryWorker::run()
 {
@@ -29,17 +44,16 @@ void WindowsDirectoryWorker::run()
         qDebug() << u"[WindowsWorker] CreateEvent failed?";
         QMessageBox::warning(
             nullptr, QS("Error"),
-            QS("CreateEvent failed in ") + QString::fromLatin1(PRETTY_FUNCTION_SIG) + QS(". \n"
-               "This probably means everything will break catastrophically. Fairly warned, be thee, says I.")
+            QSV("CreateEvent failed in ") + QString::fromLatin1(PRETTY_FUNCTION_SIG) +
+            QSV(". \nThis probably means everything will break catastrophically. Fairly warned, be thee, says I.")
         );
     }
 
-    static constexpr size_t BUFFER_SIZE = 1024ULL * 64ULL;
     auto buffer = std::make_unique<BYTE[]>(BUFFER_SIZE);
 
-    while (isRunning.load(std::memory_order::relaxed))
+    while (isRunning.load(std::memory_order::acquire))
     {
-        bool bPending = ReadDirectoryChangesW(
+        bool bPending = ::ReadDirectoryChangesW(
             hDir,
             buffer.get(),
             BUFFER_SIZE,
@@ -51,28 +65,21 @@ void WindowsDirectoryWorker::run()
         );
 
         if (!bPending) {
-            DWORD error = GetLastError();
+            DWORD error = ::GetLastError();
             if (error == ERROR_IO_INCOMPLETE)
                 qDebug() << u"ERROR_IO_INCOMPLETE";
         }
         else if (::GetOverlappedResult(hDir, &ovl, &dwBytes, false)) {
-            if(dwBytes != 0) {
-                auto *fni = reinterpret_cast<FILE_NOTIFY_INFORMATION *>(buffer.get());
-                do {
-                    if(fni->Action != 0) {
-                        emit notifyEvent(fni);
-                    }
-                    if(fni->NextEntryOffset == 0)
-                        break;
-                    fni = reinterpret_cast<FILE_NOTIFY_INFORMATION *>(reinterpret_cast<PCHAR>(fni) + fni->NextEntryOffset);
-                } while (true);
-            }
+            if (dwBytes != 0)
+                iterateDirectoryEvents(buffer.get());
         }
 
         ::Sleep(POLL_RATE_MS);
     }
 
-    if (hDir == INVALID_HANDLE_VALUE)
-        CloseHandle(hDir);
+    if (hDir && hDir != INVALID_HANDLE_VALUE) {
+        ::CloseHandle(hDir);
+        hDir = INVALID_HANDLE_VALUE;
+    }
     QThread::currentThread()->exit();
 }
