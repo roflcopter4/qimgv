@@ -16,6 +16,9 @@ class WindowsDirectoryWorker : public DirectoryWatcherWorker
 {
     Q_OBJECT
 
+    using PCBYTE = BYTE const *;
+    using PCFILE_NOTIFY_INFORMATION = FILE_NOTIFY_INFORMATION const *;
+
   public:
     WindowsDirectoryWorker() = default;
     ~WindowsDirectoryWorker() override = default;
@@ -24,15 +27,17 @@ class WindowsDirectoryWorker : public DirectoryWatcherWorker
     void run() override;
 
   Q_SIGNALS:
-    void notifyEvent(PFILE_NOTIFY_INFORMATION);
+    void notifyEvent(LPBYTE);
 
   private:
     static constexpr DWORD POLL_RATE_MS = 100;
+    static constexpr DWORD BUFFER_SIZE  = 65536;
 
     HANDLE hDir          = INVALID_HANDLE_VALUE;
     DWORD  bytesReturned = 0;
 
     void freeHandle();
+    void iterateDirectoryEvents(PCBYTE buffer);
 };
 
 #endif // WINDOWSWATCHERWORKER_H

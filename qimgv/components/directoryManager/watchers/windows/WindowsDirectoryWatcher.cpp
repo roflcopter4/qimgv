@@ -8,15 +8,17 @@
 WindowsDirectoryWatcherPrivate::WindowsDirectoryWatcherPrivate(DirectoryWatcher *qq)
     : DirectoryWatcherPrivate(qq, new WindowsDirectoryWorker())
 {
-    auto *windowsWorker = reinterpret_cast<WindowsDirectoryWorker*>(worker.get());
-    qRegisterMetaType<PFILE_NOTIFY_INFORMATION>("PFILE_NOTIFY_INFORMATION");
+    auto *workerPtr = reinterpret_cast<WindowsDirectoryWorker *>(worker.get());
+    auto *threadPtr = workerThread.get();
 
-    connect(windowsWorker, SIGNAL(notifyEvent(PFILE_NOTIFY_INFORMATION)), this, SLOT(dispatchNotify(PFILE_NOTIFY_INFORMATION)));
+    //qRegisterMetaType<PFILE_NOTIFY_INFORMATION>("PFILE_NOTIFY_INFORMATION");
+    //connect(windowsWorker, SIGNAL(notifyEvent(PFILE_NOTIFY_INFORMATION)), this, SLOT(dispatchNotify(PFILE_NOTIFY_INFORMATION)));
 
-    connect(workerThread.get(), &QThread::started, worker.get(), &DirectoryWatcherWorker::run);
-    worker->moveToThread(workerThread.get());
-    connect(worker.get(), &DirectoryWatcherWorker::finished, workerThread.get(), &QThread::quit);
+    connect(threadPtr, &QThread::started,                    workerPtr, &DirectoryWatcherWorker::run);
+    connect(workerPtr, &WindowsDirectoryWorker::notifyEvent, this,      &WindowsDirectoryWatcherPrivate::dispatchNotify);
+    connect(workerPtr, &DirectoryWatcherWorker::finished,    threadPtr, &QThread::quit);
 
+    workerPtr->moveToThread(threadPtr);
 }
 
 void WindowsDirectoryWatcherPrivate::setWatchPath(QString path)
@@ -70,45 +72,23 @@ HANDLE WindowsDirectoryWatcherPrivate::requestDirectoryHandle(QString const &pat
     return hDirectory;
 }
 
-void WindowsDirectoryWatcherPrivate::dispatchNotify(PFILE_NOTIFY_INFORMATION notify)
+void WindowsDirectoryWatcherPrivate::dispatchNotify(LPBYTE ptr)
 {
+    auto    sptr  = std::unique_ptr<BYTE[]>(ptr);
+    auto   *event = reinterpret_cast<FILE_NOTIFY_INFORMATION *>(ptr);
+    DWORD   len   = event->FileNameLength / sizeof(WCHAR);
+    QString name  = QString::fromWCharArray(event->FileName, len);
+
     Q_Q(WindowsDirectoryWatcher);
 
-    DWORD   len  = notify->FileNameLength / sizeof(WCHAR);
-    QString name = QString::fromWCharArray(notify->FileName, len);
-
-    switch (notify->Action) {
-    case FILE_ACTION_ADDED:
-        emit q->fileCreated(name);
-        break;
-
-    case FILE_ACTION_MODIFIED:
-        emit q->fileModified(name);
-#if 0
-        // ??
-        WatcherEvent* event;
-        if (findEventIndexByName(name) != -1)
-            return;
-        event = new WatcherEvent(name, WatcherEvent::MODIFIED);
-        event->mTimerId = startTimer(500);
-        directoryEvents.push_back(event);
-#endif
-        break;
-
-    case FILE_ACTION_REMOVED:
-        emit q->fileDeleted(name);
-        break;
-
-    case FILE_ACTION_RENAMED_NEW_NAME:
-        emit q->fileRenamed(oldFileName, name);
-        break;
-
-    case FILE_ACTION_RENAMED_OLD_NAME:
-        oldFileName = name;
-        break;
-
+    switch (event->Action) {
+    case FILE_ACTION_ADDED:            emit q->fileCreated(name);              break;
+    case FILE_ACTION_MODIFIED:         emit q->fileModified(name);             break;
+    case FILE_ACTION_REMOVED:          emit q->fileDeleted(name);              break;
+    case FILE_ACTION_RENAMED_NEW_NAME: emit q->fileRenamed(oldFileName, name); break;
+    case FILE_ACTION_RENAMED_OLD_NAME: oldFileName = std::move(name);          break;
     default:
-        qDebug() << u"Some error, notify->Action" << notify->Action;
+        qDebug() << u"Some error, notify->Action" << event->Action;
         break;
     }
 }

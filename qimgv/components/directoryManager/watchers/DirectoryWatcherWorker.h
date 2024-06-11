@@ -12,7 +12,7 @@ class DirectoryWatcherWorker : public QObject
     virtual void run() = 0;
 
   public Q_SLOTS:
-    bool setRunning(bool running);
+    void setRunning(bool running);
 
   Q_SIGNALS:
     void error(QString const &errorMessage);

@@ -28,5 +28,5 @@ class WindowsDirectoryWatcherPrivate final : public DirectoryWatcherPrivate
     static HANDLE requestDirectoryHandle(QString const &path);
 
   public Q_SLOTS:
-    void dispatchNotify(PFILE_NOTIFY_INFORMATION notify);
+    void dispatchNotify(LPBYTE ptr);
 };
