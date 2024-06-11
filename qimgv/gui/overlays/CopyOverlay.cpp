@@ -136,21 +136,22 @@ void CopyOverlay::createDefaultPaths() {
                 continue;
             } 
             else {
-                if(mfi.fileName() == QSV(".")  
-                || mfi.fileName() == QSV("..")
+                QString name = mfi.fileName();
+                if (name == QSV(".")
+                || name == QSV("..")
                 // hide directory
-                || mfi.fileName()[0] ==  u'.' 
+                || name[0] ==  u'.'
                 // windows system directory
-                || mfi.fileName() ==  QSV("3D Objects")
-                || mfi.fileName() ==  QSV("Contacts")
-                || mfi.fileName() ==  QSV("Favorites")
-                || mfi.fileName() ==  QSV("Links")
-                || mfi.fileName() ==  QSV("Saved Games")
-                || mfi.fileName() ==  QSV("Searches")
+                || name ==  QSV("3D Objects")
+                || name ==  QSV("Contacts")
+                || name ==  QSV("Favorites")
+                || name ==  QSV("Links")
+                || name ==  QSV("Saved Games")
+                || name ==  QSV("Searches")
                 ) {
                     continue;
                 }
-                QString qpath(home + u'/' + mfi.fileName());
+                QString qpath(home + u'/' + name);
                 QFileInfo qinfo(qpath);
                 if (qinfo.permission(QFile::WriteUser | QFile::ReadGroup)) {
                     paths << qpath;

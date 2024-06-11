@@ -33,7 +33,7 @@ SlidePanel::SlidePanel(FloatingWidgetContainer *parent)
 
     setAttribute(Qt::WA_NoMousePropagation, true);
     setFocusPolicy(Qt::NoFocus);
-    setPosition(PanelPosition::TOP);
+    SlidePanel::setPosition(PanelPosition::TOP);
 
     QWidget::hide();
 }

@@ -6,7 +6,6 @@ LinuxFsEvent::LinuxFsEvent(std::unique_ptr<char[]> data, uint dataSize)
     : mData(std::move(data)),
       mDataSize(dataSize)
 {
-
 }
 
 LinuxFsEvent::~LinuxFsEvent()

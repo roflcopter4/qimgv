@@ -12,9 +12,9 @@ class LinuxFsEvent : public QObject
     ND char *data() const;
 
     void setDataSize(uint dataSize);
-    [[deprecated("Do not use")]]
-    void setData(char *newData);
     void setData(std::unique_ptr<char[]> newData);
+    [[deprecated("Prefer providing an std::unique_ptr")]]
+    void setData(char *newData);
 
   private:
     std::unique_ptr<char[]> mData;
