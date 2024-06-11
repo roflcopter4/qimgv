@@ -30,12 +30,15 @@ void LinuxDirectoryWorker::run()
 #endif
 
     if (fd == -1) {
-        qDebug() << TAG << u"File descriptor isn't set! Stopping";
+        qDebug() << TAG << u"File descriptor isn't set! Stopping.";
         emit finished();
         return;
     }
-
-    while (isRunning) {
+    if (!isRunning.load(std::memory_order::relaxed)) {
+        emit finished();
+        return;
+    }
+    while (true) {
         ssize_t errorCode      = 0;
         uint    bytesAvailable = 0;
 
@@ -53,12 +56,14 @@ void LinuxDirectoryWorker::run()
         if (bytesAvailable == 0)
             continue;
 
-        char *eventData = new char[bytesAvailable + 1];
-        errorCode       = read(fd, eventData, bytesAvailable);
+        auto eventData = std::unique_ptr<char[]>(new char[bytesAvailable + 1]);
+        errorCode      = read(fd, eventData.get(), bytesAvailable);
         handleErrorCode(errorCode);
         eventData[bytesAvailable] = '\0';
 
-        emit fileEvent(new LinuxFsEvent(eventData, bytesAvailable));
+        if (!isRunning.load(std::memory_order::relaxed))
+            break;
+        emit fileEvent(new LinuxFsEvent(std::move(eventData), bytesAvailable));
     }
 
     emit finished();

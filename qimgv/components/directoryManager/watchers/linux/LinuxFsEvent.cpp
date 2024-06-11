@@ -2,14 +2,15 @@
 
 #include "LinuxFsEvent.h"
 
-LinuxFsEvent::LinuxFsEvent(char *data, uint dataSize)
-    : mData(data),
+LinuxFsEvent::LinuxFsEvent(std::unique_ptr<char[]> data, uint dataSize)
+    : mData(std::move(data)),
       mDataSize(dataSize)
-{}
+{
+
+}
 
 LinuxFsEvent::~LinuxFsEvent()
 {
-    delete[] mData;
 }
 
 uint LinuxFsEvent::dataSize() const
@@ -24,10 +25,15 @@ void LinuxFsEvent::setDataSize(uint dataSize)
 
 char *LinuxFsEvent::data() const
 {
-    return mData;
+    return mData.get();
 }
 
-void LinuxFsEvent::setData(char *data)
+void LinuxFsEvent::setData(char *newData)
 {
-    mData = data;
+    mData = std::unique_ptr<char[]>(newData);
+}
+
+void LinuxFsEvent::setData(std::unique_ptr<char[]> newData)
+{
+    mData = std::move(newData);
 }

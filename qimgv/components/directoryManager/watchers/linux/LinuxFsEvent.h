@@ -5,15 +5,18 @@
 class LinuxFsEvent : public QObject
 {
   public:
-    LinuxFsEvent(char *data, uint dataSize);
+    LinuxFsEvent(std::unique_ptr<char[]> data, uint dataSize);
     ~LinuxFsEvent() override;
 
-    ND uint  dataSize() const;
-       void  setDataSize(uint dataSize);
+    ND uint dataSize() const;
     ND char *data() const;
-       void  setData(char *data);
+
+    void setDataSize(uint dataSize);
+    [[deprecated("Do not use")]]
+    void setData(char *newData);
+    void setData(std::unique_ptr<char[]> newData);
 
   private:
-    char *mData;
-    uint  mDataSize;
+    std::unique_ptr<char[]> mData;
+    uint mDataSize;
 };

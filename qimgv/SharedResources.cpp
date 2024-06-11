@@ -8,6 +8,8 @@ SharedResources::SharedResources() = default;
 
 SharedResources::~SharedResources()
 {
+    delete mLoadingErrorIcon72;
+    delete mLoadingIcon72;
 }
 
 QPixmap *SharedResources::getPixmap(ShrIcon icon, qreal dpr)

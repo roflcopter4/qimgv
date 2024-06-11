@@ -33,9 +33,8 @@ LinuxDirectoryWatcherPrivate::LinuxDirectoryWatcherPrivate(LinuxDirectoryWatcher
     linuxWorker->setDescriptor(watcher);
     connect(linuxWorker, &LinuxDirectoryWorker::fileEvent, this, &LinuxDirectoryWatcherPrivate::dispatchFilesystemEvent);
 
-    // Here's no need to destroy thread and worker. They're will be removed automatically
+    // There's no need to destroy thread and worker. They're will be removed automatically
     connect(worker.get(), &LinuxDirectoryWorker::finished, workerThread.get(), &QThread::quit);
-
 }
 
 LinuxDirectoryWatcherPrivate::~LinuxDirectoryWatcherPrivate()
@@ -92,9 +91,9 @@ qsizetype LinuxDirectoryWatcherPrivate::indexOfWatcherEvent(QString const &name)
 void LinuxDirectoryWatcherPrivate::dispatchFilesystemEvent(LinuxFsEvent *e)
 {
     Q_Q(LinuxDirectoryWatcher);
+    std::unique_ptr<LinuxFsEvent> event(e);
 
     uint dataOffset = 0;
-    auto event = std::unique_ptr<LinuxFsEvent>(e);
 
     while (dataOffset < event->dataSize()) {
         auto *notify_event = reinterpret_cast<inotify_event *>(event->data() + dataOffset);
