@@ -7,14 +7,13 @@ TreeViewCustom::TreeViewCustom(QWidget *parent) : QTreeView(parent)
     setDragEnabled(true);
 
     // proxy scrollbar
-    this->verticalScrollBar()->setStyleSheet(QS("max-width: 0px;"));
+    verticalScrollBar()->setStyleSheet(QS("max-width: 0px;"));
     overlayScrollbar.setParent(this);
     overlayScrollbar.setStyleSheet(QS("background-color: transparent;"));
 
     connect(verticalScrollBar(), &QScrollBar::rangeChanged, &overlayScrollbar, &QScrollBar::setRange);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, &overlayScrollbar, &QScrollBar::setValue);
-    connect(&overlayScrollbar, &QScrollBar::valueChanged,
-            [this] { verticalScrollBar()->setValue(overlayScrollbar.value()); });
+    connect(&overlayScrollbar, &QScrollBar::valueChanged, this, &TreeViewCustom::onValueChanged);
 }
 
 void TreeViewCustom::dropEvent(QDropEvent *event)
@@ -76,7 +75,12 @@ void TreeViewCustom::updateScrollbarStyle()
         handle + QS(" } QScrollBar::handle:vertical:hover { background-color: ") +
         hover + QS(" }"));
 
-    overlayScrollbar.setVisible((this->verticalScrollBar()->maximum()));
+    overlayScrollbar.setVisible(verticalScrollBar()->maximum());
+}
+
+void TreeViewCustom::onValueChanged()
+{
+    verticalScrollBar()->setValue(overlayScrollbar.value());
 }
 
 void TreeViewCustom::keyPressEvent(QKeyEvent *event)

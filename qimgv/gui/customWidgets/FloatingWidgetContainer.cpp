@@ -8,9 +8,7 @@ FloatingWidgetContainer::FloatingWidgetContainer(QWidget *parent)
     setFocusPolicy(Qt::FocusPolicy::StrongFocus);
 }
 
-FloatingWidgetContainer::~FloatingWidgetContainer()
-{
-}
+FloatingWidgetContainer::~FloatingWidgetContainer() = default;
 
 void FloatingWidgetContainer::resizeEvent(QResizeEvent *event)
 {

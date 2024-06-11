@@ -30,15 +30,19 @@ class IconWidget : public QWidget
   protected:
     void paintEvent(QPaintEvent *event) override;
 
+  private Q_SLOTS:
+    void onSettingsChanged();
+
   private:
     void loadIcon();
     void applyColor();
 
-    QString       iconPath;
-    QColor        color;
-    IconColorMode colorMode = IconColorMode::THEME;
-    bool          hiResPixmap;
-    QPoint        iconOffset;
     QPixmap      *pixmap;
-    qreal         dpr, pixmapDrawScale;
+    QString       iconPath;
+    QPoint        iconOffset;
+    QColor        color;
+    qreal         dpr;
+    qreal         pixmapDrawScale = 0.0;
+    IconColorMode colorMode       = IconColorMode::THEME;
+    bool          hiResPixmap     = false;
 };

@@ -75,6 +75,9 @@ class ThumbnailView : public QGraphicsView, public IDirectoryView
     void reloadItem(qsizetype index) override;
     void setDragHover(qsizetype index) override;
 
+  private Q_SLOTS:
+    void onValueChanged();
+
   Q_SIGNALS:
     void itemActivated(qsizetype) override;
     void thumbnailsRequested(SelectionList, int, bool, bool) override;

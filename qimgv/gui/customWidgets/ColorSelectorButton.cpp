@@ -1,16 +1,20 @@
 #include "ColorSelectorButton.h"
 
-ColorSelectorButton::ColorSelectorButton(QWidget *parent) : ClickableLabel(parent) {
+ColorSelectorButton::ColorSelectorButton(QWidget *parent)
+    : ClickableLabel(parent)
+{
     connect(this, &ColorSelectorButton::clicked, this, &ColorSelectorButton::showColorSelector);
 }
 
-void ColorSelectorButton::setColor(QColor const &newColor) {
+void ColorSelectorButton::setColor(QColor const &newColor)
+{
     mColor = newColor;
     update();
 }
 
-void ColorSelectorButton::setDescription(QString const &text) {
-    this->mDescription = text;
+void ColorSelectorButton::setDescription(QString const &text)
+{
+    mDescription = text;
 }
 
 QColor ColorSelectorButton::color() const
@@ -18,22 +22,24 @@ QColor ColorSelectorButton::color() const
     return mColor;
 }
 
-void ColorSelectorButton::showColorSelector() {
+void ColorSelectorButton::showColorSelector()
+{
     QColor newColor = QColorDialog::getColor(mColor, this, mDescription);
-    if(newColor.isValid()) {
+    if (newColor.isValid()) {
         mColor = newColor;
         update();
     }
 }
 
-void ColorSelectorButton::paintEvent(QPaintEvent *e) {
+void ColorSelectorButton::paintEvent(QPaintEvent *e)
+{
     Q_UNUSED(e)
 
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
-    if(!this->isEnabled())
+    if (!isEnabled())
         p.setOpacity(0.5f);
-    p.setPen(QColor(40,40,40));
+    p.setPen(QColor(40, 40, 40));
     p.drawRect(QRectF(0.5f, 0.5f, width() - 1.0f, height() - 1.0f));
-    p.fillRect(rect().adjusted(2,2,-2,-2), mColor);
+    p.fillRect(rect().adjusted(2, 2, -2, -2), mColor);
 }

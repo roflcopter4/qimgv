@@ -87,7 +87,7 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
 
     connect(animationTimer, &QTimer::timeout, this, &ImageViewerV2::onAnimationTimer, Qt::UniqueConnection);
 
-    connect(scaleTimer, &QTimer::timeout, [this]() { this->requestScaling(); });
+    connect(scaleTimer, &QTimer::timeout, this, &ImageViewerV2::requestScaling);
 
     readSettings();
     connect(settings, &Settings::settingsChanged, this, &ImageViewerV2::readSettings);
@@ -184,7 +184,7 @@ void ImageViewerV2::onAnimationTimer()
         movie->jumpToFrame(0);
     } else if (!movie->jumpToNextFrame()) {
         qDebug() << QSV("[Error] QMovie:") << movie->lastErrorString();
-        this->stopAnimation();
+        stopAnimation();
         return;
     }
 
@@ -586,7 +586,7 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event)
              << event->pixelDelta()
              << event->angleDelta()
              << lastTouchpadScroll.elapsed()
-             << this->trackpadDetection;
+             << trackpadDetection;
 
 #ifdef Q_OS_APPLE
     // this event goes off during force touch with Qt::ScrollPhase being set to begin/end

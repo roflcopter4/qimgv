@@ -23,6 +23,9 @@ class FileSystemModelCustom final : public QFileSystemModel
     bool event(QEvent *event) override;
 #endif
 
+  private Q_SLOTS:
+    void onSettingsChanged();
+
   private:
     QPixmap folderIcon;
     std::unique_ptr<FileIconProvider> iconProvider;

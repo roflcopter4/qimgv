@@ -2,7 +2,7 @@
 #include <QFileIconProvider>
 #include <QFileSystemModel>
 
-class FileSystemModelCustom::FileIconProvider : public QAbstractFileIconProvider
+class FileSystemModelCustom::FileIconProvider final : public QAbstractFileIconProvider
 {
     static QString getFileType(const QFileInfo &info)
     {
@@ -29,22 +29,28 @@ class FileSystemModelCustom::FileIconProvider : public QAbstractFileIconProvider
     FileIconProvider()           = default;
     ~FileIconProvider() override = default;
 
-    QString type(QFileInfo const &info) const override
+    FileIconProvider(FileIconProvider const &)                = delete;
+    FileIconProvider(FileIconProvider &&) noexcept            = delete;
+    FileIconProvider &operator=(FileIconProvider const &)     = delete;
+    FileIconProvider &operator=(FileIconProvider &&) noexcept = delete;
+
+    ND QString type(QFileInfo const &info) const override
     {
         return getFileType(info);
     }
 
-    QIcon icon(IconType) const override
+    ND QIcon icon(IconType) const override
     {
         return {};
     }
 
-    QIcon icon(const QFileInfo &) const override
+    ND QIcon icon(const QFileInfo &) const override
     {
         return {};
     }
 };
 
+/****************************************************************************************/
 
 FileSystemModelCustom::FileSystemModelCustom(QObject *parent)
     : QFileSystemModel(parent),
@@ -59,10 +65,14 @@ FileSystemModelCustom::FileSystemModelCustom(QObject *parent)
     if (dpr >= 1.0 + 0.001)
         iconPath.replace(QS("."), QS("@2x."));
     folderIcon.load(iconPath);
-    ImageLib::recolor(this->folderIcon, settings->colorScheme().icons);
+    ImageLib::recolor(folderIcon, settings->colorScheme().icons);
 
-    connect(settings, &Settings::settingsChanged,
-            [this]() { ImageLib::recolor(this->folderIcon, settings->colorScheme().icons); });
+    connect(settings, &Settings::settingsChanged, this, &FileSystemModelCustom::onSettingsChanged);
+}
+
+void FileSystemModelCustom::onSettingsChanged()
+{
+    ImageLib::recolor(this->folderIcon, settings->colorScheme().icons);
 }
 
 FileSystemModelCustom::~FileSystemModelCustom()

@@ -52,6 +52,7 @@ class FolderGridView : public ThumbnailView
 
   private Q_SLOTS:
     void onitemSelected();
+    void onSettingsChanged();
 
   protected:
     void resizeEvent(QResizeEvent *event) override;

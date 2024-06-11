@@ -18,15 +18,12 @@ FolderGridView::FolderGridView(QWidget *parent)
     setDrawScrollbarIndicator(false);
     setSelectMode(ThumbnailSelectMode::ACTIVATE_BY_DOUBLECLICK);
 
-    connect(settings, &Settings::settingsChanged, [this]() { this->scene->setBackgroundBrush(settings->colorScheme().folderview); });
-
+    connect(settings, &Settings::settingsChanged, this, &FolderGridView::onSettingsChanged);
     setupLayout();
     connect(this, &ThumbnailView::itemActivated, this, &FolderGridView::onitemSelected);
 }
 
-FolderGridView::~FolderGridView()
-{
-}
+FolderGridView::~FolderGridView() = default;
 
 void FolderGridView::dropEvent(QDropEvent *event)
 {
@@ -78,6 +75,11 @@ void FolderGridView::setDragHover(qsizetype index)
 void FolderGridView::onitemSelected()
 {
     shiftedCol = -1;
+}
+
+void FolderGridView::onSettingsChanged()
+{
+    scene->setBackgroundBrush(settings->colorScheme().folderview);
 }
 
 void FolderGridView::updateScrollbarIndicator()
@@ -290,7 +292,7 @@ void FolderGridView::focusOn(qsizetype index)
 
 void FolderGridView::setupLayout()
 {
-    this->setAlignment(Qt::AlignHCenter);
+    setAlignment(Qt::AlignHCenter);
 
     flowLayout = new FlowLayout();
     flowLayout->setContentsMargins(9, 6, 9, 0);
@@ -310,7 +312,7 @@ ThumbnailWidget *FolderGridView::createThumbnailWidget()
                             : ThumbnailStyle::NORMAL;
 
     widget->setThumbStyle(style);
-    widget->setThumbnailSize(this->mThumbnailSize); // TODO: constructor
+    widget->setThumbnailSize(mThumbnailSize); // TODO: constructor
     return widget;
 }
 
@@ -398,12 +400,12 @@ void FolderGridView::wheelEvent(QWheelEvent *event)
 
 void FolderGridView::zoomIn()
 {
-    setThumbnailSize(this->mThumbnailSize + ZOOM_STEP);
+    setThumbnailSize(mThumbnailSize + ZOOM_STEP);
 }
 
 void FolderGridView::zoomOut()
 {
-    setThumbnailSize(this->mThumbnailSize - ZOOM_STEP);
+    setThumbnailSize(mThumbnailSize - ZOOM_STEP);
 }
 
 void FolderGridView::setThumbnailSize(int newSize)
@@ -431,7 +433,7 @@ void FolderGridView::fitSceneToContents()
 
 void FolderGridView::resizeEvent(QResizeEvent *event)
 {
-    if (this->isVisible()) {
+    if (isVisible()) {
         ThumbnailView::resizeEvent(event);
         fitSceneToContents();
         // focusOn(selectedIndex());

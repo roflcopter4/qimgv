@@ -41,10 +41,11 @@ ThumbnailView::ThumbnailView(Qt::Orientation orientation, QWidget *parent)
 
     horizontalScrollBar()->setContextMenuPolicy(Qt::NoContextMenu);
     horizontalScrollBar()->installEventFilter(this);
-    connect(horizontalScrollBar(), &QScrollBar::valueChanged, [this]() { loadVisibleThumbnails(); });
+    connect(horizontalScrollBar(), &QScrollBar::valueChanged, this, &ThumbnailView::onValueChanged);
+
     verticalScrollBar()->setContextMenuPolicy(Qt::NoContextMenu);
     verticalScrollBar()->installEventFilter(this);
-    connect(verticalScrollBar(), &QScrollBar::valueChanged, [this]() { loadVisibleThumbnails(); });
+    connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &ThumbnailView::onValueChanged);
 }
 
 ThumbnailView::~ThumbnailView()
@@ -451,6 +452,11 @@ void ThumbnailView::loadVisibleThumbnailsDelayed()
 {
     loadTimer.stop();
     loadTimer.start();
+}
+
+void ThumbnailView::onValueChanged()
+{
+    loadVisibleThumbnails();
 }
 
 void ThumbnailView::resetViewport()

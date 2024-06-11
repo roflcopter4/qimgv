@@ -2,11 +2,15 @@
 
 StyledComboBox::StyledComboBox(QWidget *parent)
     : QComboBox(parent),
-      hiResPixmap(false)
+      hiResPixmap(false),
+      dpr(devicePixelRatioF())
 {
-    dpr = this->devicePixelRatioF();
-    connect(settings, &Settings::settingsChanged,
-            [this]() { ImageLib::recolor(this->downArrow, settings->colorScheme().icons); });
+    connect(settings, &Settings::settingsChanged, this, &StyledComboBox::onSettingsChanged);
+}
+
+void StyledComboBox::onSettingsChanged()
+{
+    ImageLib::recolor(downArrow, settings->colorScheme().icons);
 }
 
 void StyledComboBox::setIconPath(QString path)

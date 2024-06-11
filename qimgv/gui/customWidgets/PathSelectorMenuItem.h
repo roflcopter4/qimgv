@@ -16,6 +16,7 @@ class PathSelectorMenuItem : public MenuItem
 
   public Q_SLOTS:
     void setDirectory(QString const &path);
+    void onClicked();
 
   protected:
     void onPress() override;

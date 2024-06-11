@@ -32,6 +32,7 @@ class TreeViewCustom : public QTreeView
 
   private Q_SLOTS:
     void updateScrollbarStyle();
+    void onValueChanged();
 
   private:
     QScrollBar overlayScrollbar;

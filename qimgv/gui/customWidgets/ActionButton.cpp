@@ -4,8 +4,8 @@ ActionButton::ActionButton(QWidget *parent)
     : IconButton(parent),
       mTriggerMode(TriggerMode::Click)
 {
-    this->setFocusPolicy(Qt::NoFocus);
-    this->setProperty("checked", false);
+    setFocusPolicy(Qt::NoFocus);
+    setProperty("checked", false);
 }
 
 ActionButton::ActionButton(QString const &actionName, QString const &iconPath, QWidget *parent) : ActionButton(parent)
@@ -23,7 +23,7 @@ ActionButton::ActionButton(QString const &actionName, QString const &iconPath, i
 
 void ActionButton::setAction(QString const &newActionName)
 {
-    this->actionName = newActionName;
+    actionName = newActionName;
 }
 
 void ActionButton::setTriggerMode(TriggerMode mode)
