@@ -28,6 +28,9 @@ class FolderView : public FloatingWidgetContainer, public IDirectoryView
     explicit FolderView(QWidget *parent);
     ~FolderView() override;
 
+    SelectionList       &selection() final;
+    SelectionList const &selection() const final;
+
   public Q_SLOTS:
     // ReSharper disable CppHidingFunction
     void show();
@@ -48,9 +51,6 @@ class FolderView : public FloatingWidgetContainer, public IDirectoryView
     void addItem() const;
     void onFullscreenModeChanged(bool mode) const;
     void onSortingChanged(SortingMode mode) const;
-
-    SelectionList       &selection() final;
-    SelectionList const &selection() const final;
 
   protected:
     void wheelEvent(QWheelEvent *event) override;

@@ -55,17 +55,17 @@ void DirectoryPresenter::setView(IDirectoryView *newView)
     connect(dynamic_cast<QObject *>(view), SIGNAL(itemActivated(qsizetype)), this, SLOT(onItemActivated(qsizetype)));
     connect(dynamic_cast<QObject *>(view), SIGNAL(draggedOut()), this, SLOT(onDraggedOut()));
     connect(dynamic_cast<QObject *>(view), SIGNAL(draggedOver(qsizetype)), this, SLOT(onDraggedOver(qsizetype)));
-    connect(dynamic_cast<QObject *>(view), SIGNAL(droppedInto(const QMimeData*, QObject*, qsizetype)), this, SLOT(onDroppedInto(const QMimeData*, QObject*, qsizetype)));
+    connect(dynamic_cast<QObject *>(view), SIGNAL(droppedInto(const QMimeData*,QObject*,qsizetype)), this, SLOT(onDroppedInto(const QMimeData*,QObject*,qsizetype)));
 
 #if 0
     connect(view, &IDirectoryView::thumbnailsRequested, this, &DirectoryPresenter::generateThumbnails);
 #else
     if constexpr (std::is_same_v<qsizetype, long long>)
-        connect(dynamic_cast<QObject *>(view), SIGNAL(thumbnailsRequested(QList<long long>, int, bool, bool)), this, SLOT(generateThumbnails(QList<long long>, int, bool, bool)));
+        connect(dynamic_cast<QObject *>(view), SIGNAL(thumbnailsRequested(QList<long long>,int,bool,bool)), this, SLOT(generateThumbnails(QList<long long>,int,bool,bool)));
     else if constexpr (std::is_same_v<qsizetype, long>)
-        connect(dynamic_cast<QObject *>(view), SIGNAL(thumbnailsRequested(QList<long>, int, bool, bool)), this, SLOT(generateThumbnails(QList<long>, int, bool, bool)));
+        connect(dynamic_cast<QObject *>(view), SIGNAL(thumbnailsRequested(QList<long>,int,bool,bool)), this, SLOT(generateThumbnails(QList<long>,int,bool,bool)));
     else if constexpr (std::is_same_v<qsizetype, int>)
-        connect(dynamic_cast<QObject *>(view), SIGNAL(thumbnailsRequested(QList<int>, int, bool, bool)), this, SLOT(generateThumbnails(QList<int>, int, bool, bool)));
+        connect(dynamic_cast<QObject *>(view), SIGNAL(thumbnailsRequested(QList<int>,int,bool,bool)), this, SLOT(generateThumbnails(QList<int>,int,bool,bool)));
     else
         StaticAssertHack::InvalidQSizeType();
 #endif

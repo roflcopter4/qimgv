@@ -90,7 +90,7 @@ void TreeViewCustom::keyPressEvent(QKeyEvent *event)
     if (currentIndex.isValid()) {
         switch (event->key()) {
         case Qt::Key_Space:
-            emit expandRecursively(currentIndex);
+            expandRecursively(currentIndex);
             //expand(currentIndex);
             break;
             //[[fallthrough]];
