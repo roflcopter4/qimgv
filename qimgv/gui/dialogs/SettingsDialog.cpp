@@ -15,57 +15,9 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     ui->appIconLabel->setPixmap(QIcon(QS(":/res/icons/common/logo/app/22.png")).pixmap(22, 22));
     ui->qtIconLabel->setPixmap(QIcon(QS(":/res/icons/common/logo/3rdparty/qt22.png")).pixmap(22, 16));
 
-    // fake combobox that acts as a menu button
-    // less code than using pushbutton with menu
-    // will be replaced with something custom later
-    connect(
-        ui->themeSelectorComboBox,
-        qOverload<int>(&QComboBox::currentIndexChanged),
-        [this](int index) {
-            ui->themeSelectorComboBox->blockSignals(true);
-            ui->themeSelectorComboBox->setCurrentIndex(index);
-            ui->themeSelectorComboBox->blockSignals(false);
-            switch (index) {
-            case 0:
-                setColorScheme(ThemeStore::colorScheme(ColorSchemes::BLACK));
-                settings->setColorTid(ColorSchemes::BLACK);
-                break;
-            case 1:
-                setColorScheme(ThemeStore::colorScheme(ColorSchemes::DARK));
-                settings->setColorTid(ColorSchemes::DARK);
-                break;
-            case 2:
-                setColorScheme(ThemeStore::colorScheme(ColorSchemes::DARKBLUE));
-                settings->setColorTid(ColorSchemes::DARKBLUE);
-                break;
-            case 3:
-                setColorScheme(ThemeStore::colorScheme(ColorSchemes::LIGHT));
-                settings->setColorTid(ColorSchemes::LIGHT);
-                break;
-            default:;
-            }
-        }
-    );
-
-    connect(ui->useSystemColorsCheckBox, &QCheckBox::toggled, [this](bool useSystemTheme) {
-        if (useSystemTheme) {
-            ui->themeSelectorComboBox->setCurrentIndex(-1);
-            setColorScheme(ThemeStore::colorScheme(ColorSchemes::SYSTEM));
-            settings->setColorTid(ColorSchemes::SYSTEM);
-        } else {
-            readColorScheme();
-            settings->setColorTid(ColorSchemes::CUSTOMIZED);
-        }
-        ui->themeSelectorComboBox->setEnabled(!useSystemTheme);
-        ui->colorConfigSubgroup->setEnabled(!useSystemTheme);
-        ui->modifySystemSchemeLabel->setVisible(useSystemTheme);
-    });
-
-    connect(ui->modifySystemSchemeLabel, &ClickableLabel::clicked, [this]() {
-        ui->useSystemColorsCheckBox->setChecked(false);
-        setColorScheme(ThemeStore::colorScheme(ColorSchemes::CUSTOMIZED));
-        settings->setColorTid(ColorSchemes::CUSTOMIZED);
-    });
+    connect(ui->themeSelectorComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &SettingsDialog::onThemeSelectorComboBoxIndexChanged);
+    connect(ui->useSystemColorsCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onSystemColorsCheckBoxToggled);
+    connect(ui->modifySystemSchemeLabel, &ClickableLabel::clicked, this, &SettingsDialog::onModifySystemSchemeLabelClicked);
 
     ui->colorSelectorAccent->setDescription(tr("Accent color"));
     ui->colorSelectorBackground->setDescription(tr("Windowed mode background"));
@@ -714,3 +666,57 @@ void SettingsDialog::switchToPage(int number) const
 {
     ui->sideBar2->selectEntry(number);
 }
+
+void SettingsDialog::onThemeSelectorComboBoxIndexChanged(int index)
+{
+    // Fake combobox that acts as a menu button.
+    // Less code than using pushbutton with menu.
+    // Will be replaced with something custom later.
+
+    ui->themeSelectorComboBox->blockSignals(true);
+    ui->themeSelectorComboBox->setCurrentIndex(index);
+    ui->themeSelectorComboBox->blockSignals(false);
+
+    switch (index) {
+    case 0:
+        setColorScheme(ThemeStore::colorScheme(ColorSchemes::BLACK));
+        settings->setColorTid(ColorSchemes::BLACK);
+        break;
+    case 1:
+        setColorScheme(ThemeStore::colorScheme(ColorSchemes::DARK));
+        settings->setColorTid(ColorSchemes::DARK);
+        break;
+    case 2:
+        setColorScheme(ThemeStore::colorScheme(ColorSchemes::DARKBLUE));
+        settings->setColorTid(ColorSchemes::DARKBLUE);
+        break;
+    case 3:
+        setColorScheme(ThemeStore::colorScheme(ColorSchemes::LIGHT));
+        settings->setColorTid(ColorSchemes::LIGHT);
+        break;
+    default:;
+    }
+}
+
+void SettingsDialog::onSystemColorsCheckBoxToggled(bool useSystemTheme)
+{
+    if (useSystemTheme) {
+        ui->themeSelectorComboBox->setCurrentIndex(-1);
+        setColorScheme(ThemeStore::colorScheme(ColorSchemes::SYSTEM));
+        settings->setColorTid(ColorSchemes::SYSTEM);
+    } else {
+        readColorScheme();
+        settings->setColorTid(ColorSchemes::CUSTOMIZED);
+    }
+    ui->themeSelectorComboBox->setEnabled(!useSystemTheme);
+    ui->colorConfigSubgroup->setEnabled(!useSystemTheme);
+    ui->modifySystemSchemeLabel->setVisible(useSystemTheme);
+}
+
+void SettingsDialog::onModifySystemSchemeLabelClicked()
+{
+    ui->useSystemColorsCheckBox->setChecked(false);
+    setColorScheme(ThemeStore::colorScheme(ColorSchemes::CUSTOMIZED));
+    settings->setColorTid(ColorSchemes::CUSTOMIZED);
+}
+

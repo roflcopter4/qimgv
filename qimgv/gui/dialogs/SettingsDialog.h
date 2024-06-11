@@ -78,6 +78,9 @@ class SettingsDialog : public QDialog
     void resetToDesktopTheme();
     void onAutoResizeLimitSliderChanged(int value) const;
     void resetZoomLevels() const;
+    void onThemeSelectorComboBoxIndexChanged(int index);
+    void onSystemColorsCheckBoxToggled(bool useSystemTheme);
+    void onModifySystemSchemeLabelClicked();
 
   Q_SIGNALS:
     void settingsChanged();

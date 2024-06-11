@@ -1,8 +1,8 @@
 #pragma once
 
+#include "ShortcutBuilder.h"
 #include "components/actionManager/ActionManager.h"
 #include "components/scriptManager/ScriptManager.h"
-#include "ShortcutBuilder.h"
 #include "utils/Actions.h"
 #include <QComboBox>
 #include <QDialog>
@@ -19,18 +19,22 @@ class ShortcutCreatorDialog : public QDialog
 {
     Q_OBJECT
 
-public:
+  public:
     explicit ShortcutCreatorDialog(QWidget *parent = nullptr);
     ~ShortcutCreatorDialog() override;
-    QString selectedAction();
-    QString selectedShortcut();
-    void setAction(QString);
-    void setShortcut(QString);
 
-private slots:
+    ND QString selectedAction() const;
+    ND QString selectedShortcut() const;
+
+    void setAction(QString action);
+    void setShortcut(QString const &shortcut);
+
+  private Q_SLOTS:
     void onShortcutEdited();
 
-private:
+  private:
     Ui::ShortcutCreatorDialog *ui;
-    QList<QString> actionList, scriptList;
+
+    QList<QString> actionList;
+    QList<QString> scriptList;
 };
