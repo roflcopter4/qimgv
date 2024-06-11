@@ -282,9 +282,9 @@ QString GetErrorMessage(unsigned errVal)
     return (res == 0 ? QString::fromWCharArray(buf, res) : QS(u"Unknown error")) +
            QSV(" (") + QString::number(errVal, 16) + u')';
 #else
-    char buf[512];
-    strerror_r(errno, buf, std::size(buf));
-    return QString::fromUtf8(buf) + QSV(" (") + QString::number(errVal) + u')';
+    char  buf[512]{};
+    char *msg = strerror_r(errVal, buf, std::size(buf));
+    return QString::fromUtf8(msg) + QSV(" (") + QString::number(errVal) + u')';
 #endif
 }
 

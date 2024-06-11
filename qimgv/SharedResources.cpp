@@ -25,8 +25,8 @@ QPixmap *SharedResources::getPixmap(ShrIcon icon, qreal dpr)
         return pixmap;
 
     if (dpr >= (1.0 + 0.001)) {
-        path.replace(QS("."), QS("@2x."));
-        pixmap                = new QPixmap(path);
+        path.replace(u'.', QS("@2x."));
+        pixmap = new QPixmap(path);
         qreal pixmapDrawScale = dpr >= 2.0 - 0.001 ? dpr : 2.0;
         pixmap->setDevicePixelRatio(pixmapDrawScale);
     } else {

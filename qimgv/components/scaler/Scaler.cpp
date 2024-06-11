@@ -8,22 +8,28 @@
  *    start the last task that came and ignore the middle ones.
  */
 
-Scaler::Scaler(Cache *_cache, QObject *parent)
+Scaler::Scaler(Cache *cache, QObject *parent)
     : QObject(parent),
-      buffered(false),
-      running(false),
+      pool(new QThreadPool(this)),
+      runnable(new ScalerRunnable()),
+      sem(new QSemaphore(1)),
+      cache(cache),
       currentRequestTimestamp(0),
-      cache(_cache)
+      buffered(false),
+      running(false)
 {
-    sem  = new QSemaphore(1);
-    pool = new QThreadPool(this);
     pool->setMaxThreadCount(1);
-    runnable = new ScalerRunnable();
     runnable->setAutoDelete(false);
     connect(this, &Scaler::startBufferedRequest, this, &Scaler::slotStartBufferedRequest, Qt::DirectConnection);
     connect(runnable, &ScalerRunnable::started, this, &Scaler::onTaskStart, Qt::DirectConnection);
     connect(runnable, &ScalerRunnable::finished, this, &Scaler::onTaskFinish, Qt::DirectConnection);
     connect(this, &Scaler::acceptScalingResult, this, &Scaler::slotForwardScaledResult, Qt::QueuedConnection);
+}
+
+Scaler::~Scaler()
+{
+    delete runnable;
+    delete sem;
 }
 
 void Scaler::requestScaled(ScalerRequest const &req)

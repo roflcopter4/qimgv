@@ -1,5 +1,10 @@
 #include "Cache.h"
 
+Cache::~Cache()
+{
+    clear();
+}
+
 bool Cache::contains(QString const &path) const
 {
     return items.contains(path);

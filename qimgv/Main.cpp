@@ -115,13 +115,9 @@ int main(int argc, char *argv[])
     if (QStyleFactory::keys().contains("Fusion"))
         a.setStyle(QStyleFactory::create("Fusion"));
 #else
-    auto app   = QApplication(argc, argv);
-    auto style = new ProxyStyle(nullptr);
+    auto  app   = QApplication(argc, argv);
+    auto *style = new ProxyStyle(nullptr);
     QApplication::setStyle(style);
-
-    //QApplication app(argc, argv);
-    // use some style workarounds
-    //QApplication::setStyle(new ProxyStyle);
 #endif
 
     QCoreApplication::setOrganizationName(QS("qimgv"));

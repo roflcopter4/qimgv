@@ -8,8 +8,8 @@ class LinuxFsEvent : public QObject
     LinuxFsEvent(char *data, uint dataSize);
     ~LinuxFsEvent() override;
 
-    ND uint dataSize() const;
-       void setDataSize(uint dataSize);
+    ND uint  dataSize() const;
+       void  setDataSize(uint dataSize);
     ND char *data() const;
        void  setData(char *data);
 

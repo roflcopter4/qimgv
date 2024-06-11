@@ -9,7 +9,8 @@ using util::pathsep;
 DirectoryManager::DirectoryManager(QObject *parent)
     : QObject(parent),
       watcher(nullptr),
-      mSortingMode(SortingMode::NAME)
+      mSortingMode(SortingMode::NAME),
+      mListSource(FileListSource::INVALID)
 {
     regex.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
     collator.setNumericMode(true);

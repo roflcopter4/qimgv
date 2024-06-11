@@ -19,6 +19,7 @@
 #include <vector>
 
 enum class FileListSource { // rename? wip
+    INVALID,
     DIRECTORY,
     DIRECTORY_RECURSIVE,
     LIST

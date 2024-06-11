@@ -47,6 +47,7 @@ LinuxDirectoryWatcherPrivate::~LinuxDirectoryWatcherPrivate()
         else
             qDebug() << TAG << "Cannot remove inotify watcher instance:" << util::GetErrorMessage(errno);
     }
+    workerThread->quit();
 }
 
 void LinuxDirectoryWatcherPrivate::setWatchPath(QString path)
@@ -93,7 +94,7 @@ void LinuxDirectoryWatcherPrivate::dispatchFilesystemEvent(LinuxFsEvent *e)
     Q_Q(LinuxDirectoryWatcher);
 
     uint dataOffset = 0;
-    QScopedPointer<LinuxFsEvent> event(e);
+    auto event = std::unique_ptr<LinuxFsEvent>(e);
 
     while (dataOffset < event->dataSize()) {
         auto *notify_event = reinterpret_cast<inotify_event *>(event->data() + dataOffset);

@@ -17,9 +17,9 @@ uint LinuxFsEvent::dataSize() const
     return mDataSize;
 }
 
-void LinuxFsEvent::setDataSize(uint bufferSize)
+void LinuxFsEvent::setDataSize(uint dataSize)
 {
-    mDataSize = bufferSize;
+    mDataSize = dataSize;
 }
 
 char *LinuxFsEvent::data() const
@@ -27,7 +27,7 @@ char *LinuxFsEvent::data() const
     return mData;
 }
 
-void LinuxFsEvent::setData(char *buffer)
+void LinuxFsEvent::setData(char *data)
 {
-    mData = buffer;
+    mData = data;
 }

@@ -215,7 +215,7 @@ void Core::initActions()
 void Core::loadTranslation()
 {
     if (!translator)
-        translator = new QTranslator;
+        translator = new QTranslator(this);
     QString trPathFallback = QCoreApplication::applicationDirPath() + QSV("/translations");
 #ifdef TRANSLATIONS_PATH
     QString trPath = QStringLiteral(TRANSLATIONS_PATH);
@@ -1414,7 +1414,7 @@ bool Core::loadPath(QString path)
 bool Core::setDirectory(QString const &path)
 {
     if (model->directoryPath() != path) {
-        this->reset();
+        reset();
         if (!model->setDirectory(path)) {
             mw->showError(tr("Could not load folder: ") + path);
             return false;
@@ -1638,7 +1638,7 @@ void Core::onModelItemReady(QSharedPointer<Image> const &img, QString const &pat
         guiSetImage(img);
         updateInfoString();
         if (state.delayModel) {
-            this->showGui();
+            showGui();
             state.delayModel = false;
             QTimer::singleShot(40, this, SLOT(modelDelayLoad()));
         }

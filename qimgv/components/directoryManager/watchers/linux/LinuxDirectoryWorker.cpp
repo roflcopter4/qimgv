@@ -53,9 +53,10 @@ void LinuxDirectoryWorker::run()
         if (bytesAvailable == 0)
             continue;
 
-        char *eventData = new char[bytesAvailable];
+        char *eventData = new char[bytesAvailable + 1];
         errorCode       = read(fd, eventData, bytesAvailable);
         handleErrorCode(errorCode);
+        eventData[bytesAvailable] = '\0';
 
         emit fileEvent(new LinuxFsEvent(eventData, bytesAvailable));
     }

@@ -141,7 +141,9 @@ if (MSVC)
     target_compile_options(qimgv PRIVATE
           $<$<COMPILE_LANGUAGE:CXX>:/FI Common.h>)
 else ()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include Common.h")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include Common.h")
+    target_compile_options(qimgv PRIVATE
+          $<$<COMPILE_LANGUAGE:CXX>:-include Common.h>)
 endif()
 
 ## INSTALLATION

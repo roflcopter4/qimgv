@@ -1,9 +1,13 @@
 #include "MainPanel.h"
 
-MainPanel::MainPanel(FloatingWidgetContainer *parent) : SlidePanel(parent)
+MainPanel::MainPanel(FloatingWidgetContainer *parent)
+    : SlidePanel(parent),
+      buttonsLayout(new QVBoxLayout()),
+      buttonsWidget(new QWidget()),
+      thumbnailStrip(new ThumbnailStripProxy(this))
 {
     // buttons stuff
-    buttonsWidget = new QWidget();
+    
     buttonsWidget->setAccessibleName(QS("panelButtonsWidget"));
     openButton = new ActionButton(QS("open"), QS(":res/icons/common/buttons/panel/open20.png"), 30, this);
     openButton->setAccessibleName(QS("ButtonSmall"));
@@ -23,7 +27,7 @@ MainPanel::MainPanel(FloatingWidgetContainer *parent) : SlidePanel(parent)
     pinButton->setCheckable(true);
     connect(pinButton, &ActionButton::toggled, this, &MainPanel::onPinClicked);
 
-    buttonsLayout = new QVBoxLayout();
+    
     buttonsLayout->setDirection(QBoxLayout::BottomToTop);
     buttonsLayout->setSpacing(0);
     buttonsLayout->addWidget(settingsButton);
@@ -36,7 +40,7 @@ MainPanel::MainPanel(FloatingWidgetContainer *parent) : SlidePanel(parent)
     buttonsWidget->setLayout(buttonsLayout);
     layout()->addWidget(buttonsWidget);
 
-    thumbnailStrip = new ThumbnailStripProxy(this);
+    
     setWidget(thumbnailStrip);
 
     readSettings();

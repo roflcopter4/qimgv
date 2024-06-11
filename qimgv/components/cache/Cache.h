@@ -12,6 +12,7 @@ class Cache
 {
   public:
     explicit Cache() = default;
+    ~Cache();
 
     void remove(QString const &path);
     bool insert(QSharedPointer<Image> const &img);

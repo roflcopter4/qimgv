@@ -4,7 +4,8 @@ OverlayWidget::OverlayWidget(FloatingWidgetContainer *parent)
     : FloatingWidget(parent),
       mHorizontalMargin(20),
       mVerticalMargin(35),
-      fadeEnabled(false)
+      fadeEnabled(false),
+      position(FloatingWidgetPosition::BOTTOM)
 {
     opacityEffect = new QGraphicsOpacityEffect(this);
     opacityEffect->setOpacity(1.0);
