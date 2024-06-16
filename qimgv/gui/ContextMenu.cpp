@@ -92,7 +92,7 @@ ContextMenu::ContextMenu(QWidget *parent)
     ui->showLocation->setIconPath(QS(":/res/icons/common/menuitem/folder16.png"));
     // -------------------------------------------------------------------------
     // force resize to fit new menuitem width
-    this->adjustSize();
+    adjustSize();
 
     // Scripts page
     // -------------------------------------------------------------------------
@@ -204,19 +204,30 @@ void ContextMenu::paintEvent(QPaintEvent *event)
 
 void ContextMenu::keyPressEvent(QKeyEvent *event)
 {
-    quint32 nativeScanCode = event->nativeScanCode();
-    QString key            = actionManager->keyForNativeScancode(nativeScanCode);
+    QString key = ActionManager::keyForNativeScancode(event->nativeScanCode());
 
-    // todo: keyboard navigation
-    if (key == QSV("Up")) {
-    }
-    if (key == QSV("Down")) {
-    }
-    if (key == QSV("Esc")) {
+    switch (event->key()) {
+    case Qt::Key_Escape:
         hide();
+        break;
+    case Qt::Key_Up:
+    case Qt::Key_Down:
+        // TODO: keyboard navigation
+        break;
+    default:
+        actionManager->processEvent(event);
+        break;
     }
-    if (key == QSV("Enter")) {
+
+#if 0
+    // todo: keyboard navigation
+    if (key == u"Up"_sv) {
+    } else if (key == u"Down"_sv) {
+    } else if (key == u"Esc"_sv) {
+        hide();
+    } else if (key == u"Enter"_sv) {
     } else {
         actionManager->processEvent(event);
     }
+#endif
 }

@@ -24,7 +24,7 @@ void CmdOptionsRunner::generateThumbs(QString const &dirPath, int size)
 
     auto dm = DirectoryManager(nullptr);
     if (!dm.setDirectoryRecursive(dirPath)) {
-        QString out = QSV("Error: Invalid path \"") + dirPath + QSV("\".\n");
+        QString out = u"Error: Invalid path \"" + dirPath + u"\".\n";
         std::cout << out.toStdString();
         Win32WaitForKey();
         QCoreApplication::exit(1);
@@ -32,10 +32,10 @@ void CmdOptionsRunner::generateThumbs(QString const &dirPath, int size)
     }
 
     auto list = dm.fileList();
-    QString out = QSV("Directory: ") + dirPath +
-                  QSV("\nFile count: ") + QString::number(list.size()) +
-                  QSV("\nSize limit:") + QString::number(size) + u'x' + QString::number(size) + QSV("px")+
-                  QSV("\nGenerating thumbnails...\n");
+    QString out = u"Directory: " + dirPath + "\n"
+                  u"File count: " + QString::number(list.size()) + "\n"
+                  u"Size limit:" + QString::number(size) + u'x' + QString::number(size) + u"px\n"
+                  u"Generating thumbnails...\n";
     std::cout << out.toStdString();
 
     Thumbnailer th(nullptr);
@@ -67,12 +67,12 @@ void CmdOptionsRunner::showBuildOptions()
 #endif
 
     QString out;
-    out += QSV(u"Enabled build options:");
+    out += u"Enabled build options:"_sv;
     if (!features.isEmpty()) {
         for (auto const &s : features)
-            out += QSV("   ") + s;
+            out += u"   " + s;
     } else {
-        out += QSV("   --");
+        out += u"   --"_sv;
     }
     std::cout << out.toStdString() << '\n';
 

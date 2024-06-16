@@ -2,19 +2,14 @@
 
 DocumentWidget::DocumentWidget(ViewerWidget *viewWidget, InfoBarProxy *infoBar, QWidget *parent)
     : FloatingWidgetContainer(parent),
-      mainPanel(nullptr),
-      avoidPanelFlag(false),
-      mPanelEnabled(false),
-      mPanelFullscreenOnly(false),
-      mIsFullscreen(false),
-      mPanelPinned(false),
-      mInteractionEnabled(false),
-      mAllowPanelInit(false)
+      layout(new QBoxLayout(QBoxLayout::LeftToRight)),
+      layoutRoot(new QVBoxLayout()),
+      mViewWidget(viewWidget),
+      mInfoBar(infoBar),
+      mainPanel(new MainPanel(this))
 {
-    layoutRoot = new QVBoxLayout();
     layoutRoot->setContentsMargins(0, 0, 0, 0);
     layoutRoot->setSpacing(0);
-    layout = new QBoxLayout(QBoxLayout::LeftToRight);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     layoutRoot->addLayout(layout);
@@ -22,28 +17,21 @@ DocumentWidget::DocumentWidget(ViewerWidget *viewWidget, InfoBarProxy *infoBar, 
     setAttribute(Qt::WA_TranslucentBackground, true);
     setMouseTracking(true);
 
-    mViewWidget = viewWidget;
-    //mViewWidget->setParent(this);
     layout->addWidget(mViewWidget);
     mViewWidget->show();
 
-    mInfoBar = infoBar;
-    //mInfoBar->setParent(this);
     layoutRoot->addWidget(mInfoBar);
     setFocusProxy(mViewWidget);
 
     setInteractionEnabled(true);
 
-    mainPanel = new MainPanel(this);
     connect(mainPanel, &MainPanel::pinned, this, &DocumentWidget::setPanelPinned);
 
     connect(settings, &Settings::settingsChanged, this, &DocumentWidget::readSettings);
     readSettings();
 }
 
-DocumentWidget::~DocumentWidget()
-{
-}
+DocumentWidget::~DocumentWidget() = default;
 
 ViewerWidget *DocumentWidget::viewWidget()
 {
@@ -196,7 +184,7 @@ void DocumentWidget::enterEvent(QEnterEvent *event)
 void DocumentWidget::leaveEvent(QEvent *event)
 {
     QWidget::leaveEvent(event);
-    // qDebug() << cursor().pos() << this->rect();
+    // qDebug() << cursor().pos() << rect();
     //  this misfires on hidpi.
     // instead do the panel hiding in MW::leaveEvent  (it works properly in root window)
     // mainPanel->hide();

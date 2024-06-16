@@ -27,11 +27,11 @@ void IconWidget::loadIcon()
     auto path = iconPath;
     delete pixmap;
     pixmap = nullptr;
-    if (dpr >= (1.0 + 0.001)) {
-        path.replace(u'.', QS("@2x."));
+    if (dpr >= 1.0 + 0.001) {
+        path.replace(u'.', u"@2x."_s);
         hiResPixmap = true;
         pixmap      = new QPixmap(path);
-        if (dpr >= (2.0 - 0.001))
+        if (dpr >= 2.0 - 0.001)
             pixmapDrawScale = dpr;
         else
             pixmapDrawScale = 2.0;
@@ -51,10 +51,9 @@ void IconWidget::loadIcon()
 
 QSize IconWidget::minimumSizeHint() const
 {
-    if (pixmap && !pixmap->isNull())
-        return pixmap->size() / dpr;
-    else
-        return QWidget::minimumSizeHint();
+    return pixmap && !pixmap->isNull()
+        ? pixmap->size() / dpr
+        : QWidget::minimumSizeHint();
 }
 
 void IconWidget::setIconOffset(int x, int y)

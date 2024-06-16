@@ -11,7 +11,7 @@ ThumbnailView::ThumbnailView(Qt::Orientation orientation, QWidget *parent)
       rangeSelection(false),
       scrollTimeLine(nullptr)
 {
-    setAccessibleName(QS("thumbnailView"));
+    setAccessibleName(u"thumbnailView"_s);
     setMouseTracking(true);
     setAcceptDrops(false);
     scene = new QGraphicsScene(this);
@@ -32,7 +32,7 @@ ThumbnailView::ThumbnailView(Qt::Orientation orientation, QWidget *parent)
     loadTimer.setSingleShot(true);
 
     qreal screenMaxRefreshRate = 60;
-    for (auto screen : qApp->screens())
+    for (auto *screen : qApp->screens())
         if (screen->refreshRate() > screenMaxRefreshRate)
             screenMaxRefreshRate = screen->refreshRate();
     scrollRefreshRate = static_cast<int>(1000.0 / screenMaxRefreshRate);
@@ -261,7 +261,7 @@ void ThumbnailView::populate(qsizetype newCount)
         // reuse existing items
         auto currentCount = thumbnails.count();
         if(currentCount > newCount) {
-            qDebug() << this << QSV("removing");
+            qDebug() << this << u"removing";
             for(auto i = currentCount - 1; i >= newCount; i--) {
                 //removeItemFromLayout(i); // slow. is this needed?
                 delete thumbnails.takeLast();
@@ -275,7 +275,7 @@ void ThumbnailView::populate(qsizetype newCount)
             QList<ThumbnailWidget*>::iterator i;
             for(i = thumbnails.begin(); i != thumbnails.end(); ++i)
                 (*i)->reset();
-            qDebug() << this << QSV("adding");
+            qDebug() << this << u"adding";
             for(auto i = currentCount; i < newCount; i++) {
                 ThumbnailWidget *widget = createThumbnailWidget();
                 widget->setThumbnailSize(mThumbnailSize);
@@ -525,13 +525,16 @@ void ThumbnailView::wheelEvent(QWheelEvent *event)
     bool isWheel    = angleDelta && !(angleDelta % 120) && lastTouchpadScroll.elapsed() > 100;
 
     if (isWheel) {
-        if (!settings->enableSmoothScroll()) {
+        if (settings->enableSmoothScroll()) {
+            if (angleDelta) {
+                // what about pixelDelta?
+                scrollSmooth(angleDelta, SCROLL_MULTIPLIER, SCROLL_ACCELERATION, true);
+            }
+        } else {
             if (pixelDelta)
                 scrollByItem(pixelDelta);
             else if (angleDelta)
                 scrollByItem(angleDelta);
-        } else if (angleDelta) { // what about pixelDelta?
-            scrollSmooth(angleDelta, SCROLL_MULTIPLIER, SCROLL_ACCELERATION, true);
         }
     } else {
         lastTouchpadScroll.restart();

@@ -206,7 +206,7 @@ FlowLayout::GridInfo FlowLayout::doLayout(QRectF const &geom, bool applyNewGeome
             y += itemSize.height() + spacing(Qt::Vertical);
         }
         if (applyNewGeometry)
-            m_items.at(i)->setGeometry(QRectF(QPointF(leftMargin + x + static_cast<qreal>(centerOffset), topMargin + y), itemSize));
+            m_items[i]->setGeometry(QRectF(QPointF(leftMargin + x + static_cast<qreal>(centerOffset), topMargin + y), itemSize));
         x = next_x + spacing(Qt::Horizontal);
     }
 
@@ -225,8 +225,7 @@ QSizeF FlowLayout::minSize(QSizeF const &constraint) const
     } else if (constraint.height() >= 0) { // width for height?
         // not supported
     } else {
-        QGraphicsLayoutItem *item;
-        Q_FOREACH (item, m_items)
+        for (auto *item : m_items)
             size = size.expandedTo(item->effectiveSizeHint(Qt::MinimumSize));
         size += QSize(static_cast<int>(left + right), static_cast<int>(top + bottom));
     }
@@ -238,11 +237,10 @@ QSizeF FlowLayout::prefSize() const
     qreal left, right;
     getContentsMargins(&left, nullptr, &right, nullptr);
 
-    QGraphicsLayoutItem *item;
     qreal maxh       = 0;
     qreal totalWidth = 0;
 
-    Q_FOREACH (item, m_items) {
+    for (auto *item : m_items) {
         if (totalWidth > 0)
             totalWidth += spacing(Qt::Horizontal);
         QSizeF pref = item->effectiveSizeHint(Qt::PreferredSize);
@@ -251,7 +249,7 @@ QSizeF FlowLayout::prefSize() const
     }
     maxh += spacing(Qt::Vertical);
 
-    static constexpr qreal goldenAspectRatio = 1.61803399;
+    static constexpr qreal goldenAspectRatio = 1.6180339887498948482;
 
     qreal w = qSqrt(totalWidth * maxh * goldenAspectRatio) + left + right;
     return minSize(QSizeF(w, -1));
@@ -259,11 +257,11 @@ QSizeF FlowLayout::prefSize() const
 
 QSizeF FlowLayout::maxSize() const
 {
-    QGraphicsLayoutItem *item;
+    //QGraphicsLayoutItem *item;
     qreal totalWidth  = 0;
     qreal totalHeight = 0;
 
-    Q_FOREACH (item, m_items) {
+    for (auto *item : m_items) {
         if (totalWidth > 0)
             totalWidth += spacing(Qt::Horizontal);
         if (totalHeight > 0)
@@ -281,12 +279,10 @@ QSizeF FlowLayout::maxSize() const
 
 QSizeF FlowLayout::sizeHint(Qt::SizeHint which, QSizeF const &constraint) const
 {
-    QSizeF sh;
     switch (which) {
-    case Qt::PreferredSize: sh = prefSize();          break;
-    case Qt::MinimumSize:   sh = minSize(constraint); break;
-    case Qt::MaximumSize:   sh = maxSize();           break;
-    default:                sh = constraint;          break;
+    case Qt::PreferredSize: return prefSize();
+    case Qt::MinimumSize:   return minSize(constraint);
+    case Qt::MaximumSize:   return maxSize();
+    default:                return constraint;
     }
-    return sh;
 }

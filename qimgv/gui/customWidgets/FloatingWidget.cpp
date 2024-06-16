@@ -3,7 +3,7 @@
 
 FloatingWidget::FloatingWidget(FloatingWidgetContainer *parent) : QWidget(parent), mAcceptKeyboardFocus(false)
 {
-    setAccessibleName(QS("OverlayWidget"));
+    setAccessibleName(u"OverlayWidget"_s);
     connect(parent, &FloatingWidgetContainer::resized, this, &FloatingWidget::onContainerResized);
     hide();
 }
@@ -68,6 +68,6 @@ void FloatingWidget::wheelEvent(QWheelEvent *event)
 void FloatingWidget::hide()
 {
     QWidget::hide();
-    if (this->hasFocus() || isAncestorOf(qApp->focusWidget()))
+    if (hasFocus() || isAncestorOf(qApp->focusWidget()))
         parentWidget()->setFocus();
 }

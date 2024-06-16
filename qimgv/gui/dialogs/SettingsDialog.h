@@ -37,7 +37,7 @@ class SettingsDialog : public QDialog
 
   private:
     void readColorScheme();
-    void setColorScheme(ColorScheme colors) const;
+    void setColorScheme(ColorScheme colors);
     void saveColorScheme() const;
     void readSettings();
     void readShortcuts() const;

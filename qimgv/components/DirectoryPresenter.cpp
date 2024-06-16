@@ -244,7 +244,7 @@ void DirectoryPresenter::generateThumbnails(IDirectoryView::SelectionList const 
             // TODO: optimize & move dir icon loading to shared res; then overlay
             // the mini-thumbs on top (similar to dolphin)
             QSvgRenderer svgRenderer;
-            svgRenderer.load(QS(":/res/icons/common/other/folder32-scalable.svg"));
+            svgRenderer.load(u":/res/icons/common/other/folder32-scalable.svg"_s);
             qreal factor = size * 0.90 / svgRenderer.defaultSize().width();
             auto *pixmap = new QPixmap(svgRenderer.defaultSize() * factor);
             pixmap->fill(Qt::transparent);
@@ -254,9 +254,9 @@ void DirectoryPresenter::generateThumbnails(IDirectoryView::SelectionList const 
 
             ImageLib::recolor(*pixmap, settings->colorScheme().icons);
 
-            auto thumb = QSharedPointer<Thumbnail>(new Thumbnail(model->dirNameAt(i), QS("Folder"), size, QSharedPointer<QPixmap>(pixmap)));
             // ^----------------------------------------------------------------
-            view->setThumbnail(i, std::move(thumb));
+
+            view->setThumbnail(i, QSharedPointer<Thumbnail>(new Thumbnail(model->dirNameAt(i), u"Folder"_s, size, QSharedPointer<QPixmap>(pixmap))));
         } else {
             QString path = model->filePathAt(i - model->dirCount());
             thumbnailer->getThumbnailAsync(path, size, crop, force);

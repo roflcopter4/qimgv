@@ -5,13 +5,13 @@ Settings *settings = nullptr;
 Settings::Settings(QObject *parent)
     : QObject(parent),
 #ifdef Q_OS_LINUX
-      stateConf(QCoreApplication::organizationName(), QS("savedState")),
-      themeConf(QCoreApplication::organizationName(), QS("theme"))
+      stateConf(QCoreApplication::organizationName(), u"savedState"_s),
+      themeConf(QCoreApplication::organizationName(), u"theme"_s)
 #else
-      mConfDir(QApplication::applicationDirPath() + QSV("/conf")),
-      settingsConf(mConfDir.absolutePath() + u'/' + qApp->applicationName() + QSV(".ini"), QSettings::IniFormat),
-      stateConf   (mConfDir.absolutePath() + QSV("/savedState.ini"), QSettings::IniFormat),
-      themeConf   (mConfDir.absolutePath() + QSV("/theme.ini"), QSettings::IniFormat)
+      mConfDir(QApplication::applicationDirPath() + u"/conf"),
+      settingsConf(mConfDir.absolutePath() + u'/' + qApp->applicationName() + u".ini", QSettings::IniFormat),
+      stateConf   (mConfDir.absolutePath() + u"/savedState.ini", QSettings::IniFormat),
+      themeConf   (mConfDir.absolutePath() + u"/theme.ini", QSettings::IniFormat)
 #endif
 {
     // config files
@@ -19,17 +19,19 @@ Settings::Settings(QObject *parent)
       qDebug() << stateConf.fileName();
       qDebug() << themeConf.fileName();
 #else
-    mConfDir.mkpath(QApplication::applicationDirPath() + QSV("/conf"));
+    mConfDir.mkpath(QApplication::applicationDirPath() + u"/conf");
 #endif
 
     fillVideoFormats();
 }
-//------------------------------------------------------------------------------
+
 Settings::~Settings()
 {
     saveTheme();
 }
+
 //------------------------------------------------------------------------------
+
 Settings *Settings::getInstance()
 {
     static std::mutex mtx;
@@ -42,15 +44,15 @@ Settings *Settings::getInstance()
     }
     return settings;
 }
-//------------------------------------------------------------------------------
+
 void Settings::setupCache()
 {
 #ifdef Q_OS_LINUX
     QString genericCacheLocation = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation);
     if (genericCacheLocation.isEmpty())
-        genericCacheLocation = QDir::homePath() + QS("/.cache");
-    genericCacheLocation.append(QS("/") + QApplication::applicationName());
-    mTmpDir = QDir(settingsConf.value(QSV("cacheDir"), genericCacheLocation).toString());
+        genericCacheLocation = QDir::homePath() + u"/.cache"_s;
+    genericCacheLocation.append(u"/"_s + QApplication::applicationName());
+    mTmpDir = QDir(settingsConf.value(u"cacheDir", genericCacheLocation).toString());
     mTmpDir.mkpath(mTmpDir.absolutePath());
 
     QFileInfo dirTest(mTmpDir.absolutePath());
@@ -61,198 +63,207 @@ void Settings::setupCache()
         mTmpDir.setPath(genericCacheLocation);
         mTmpDir.mkpath(mTmpDir.absolutePath());
     }
-    mThumbCacheDir = QDir(mTmpDir.absolutePath() + QS("/thumbnails"));
+    mThumbCacheDir = QDir(mTmpDir.absolutePath() + u"/thumbnails"_s);
     mThumbCacheDir.mkpath(mThumbCacheDir.absolutePath());
 #else
-    mTmpDir = QDir(QApplication::applicationDirPath() + QSV("/cache"));
+    mTmpDir = QDir(QApplication::applicationDirPath() + u"/cache");
     mTmpDir.mkpath(mTmpDir.absolutePath());
-    mThumbCacheDir = QDir(QApplication::applicationDirPath() + QSV("/thumbnails"));
+    mThumbCacheDir = QDir(QApplication::applicationDirPath() + u"/thumbnails");
     mThumbCacheDir.mkpath(mThumbCacheDir.absolutePath());
 #endif
 }
+
 //------------------------------------------------------------------------------
+
 void Settings::sync()
 {
     settingsConf.sync();
     stateConf.sync();
 }
-//------------------------------------------------------------------------------
+
 QString Settings::thumbnailCacheDir() const
 {
     return mThumbCacheDir.path() + u'/';
 }
-//------------------------------------------------------------------------------
+
 QString Settings::tmpDir() const
 {
     return mTmpDir.path() + u'/';
 }
+
 //------------------------------------------------------------------------------
+
 // This here is temporarily, will be moved to some sort of theme manager class.
 void Settings::loadStylesheet()
 {
     // stylesheet template file
-    QFile file(QS(":/res/styles/style-template.qss"));
-    if (file.open(QFile::ReadOnly)) {
-        QString styleSheet = QLatin1String(file.readAll());
+    QFile file(u":/res/styles/style-template.qss"_s);
+    if (!file.open(QFile::ReadOnly))
+        return;
+    QString styleSheet = QLatin1String(file.readAll());
 
-        // --- Color Scheme ---------------------------------------------
-        auto colors = colorScheme();
-        // tint color for system windows
-        QPalette p;
-        QColor   sys_text   = p.text().color();
-        QColor   sys_window = p.window().color();
-        QColor   sys_window_tinted, sys_window_tinted_lc, sys_window_tinted_lc2, sys_window_tinted_hc, sys_window_tinted_hc2;
-        if (sys_window.valueF() <= 0.45f) {
-            // dark system theme
-            sys_window_tinted_lc2.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() + 6);
-            sys_window_tinted_lc.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() + 14);
-            sys_window_tinted.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() + 20);
-            sys_window_tinted_hc.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() + 35);
-            sys_window_tinted_hc2.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() + 50);
-        } else {
-            // light system theme
-            sys_window_tinted_lc2.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() - 6);
-            sys_window_tinted_lc.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() - 14);
-            sys_window_tinted.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() - 20);
-            sys_window_tinted_hc.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() - 35);
-            sys_window_tinted_hc2.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() - 50);
-        }
-
-        // --- widget sizes ---------------------------------------------
-        QFont        fnt = QGuiApplication::font();
-        QFontMetrics fm(fnt);
-
-        // todo: use precise values for ~9-11 point sizes
-        unsigned font_small         = std::max(static_cast<unsigned>(fnt.pointSize() * 0.9), 8U);
-        unsigned font_large         = static_cast<unsigned>(fnt.pointSize() * 1.8);
-        unsigned text_height        = fm.height();
-        unsigned text_padding       = static_cast<unsigned>(text_height * 0.10);
-        unsigned text_padding_small = static_cast<unsigned>(text_height * 0.05);
-        unsigned text_padding_large = static_cast<unsigned>(text_height * 0.25);
-
-        // folderview top panel item sizes.
-        unsigned top_panel_v_margin = 4;
-        // Ensure at least 4px so it's not too thin.
-        unsigned top_panel_text_padding = std::max(text_padding, 4U);
-        // Scale with font, 38px base size.
-        unsigned top_panel_height = std::max((text_height + top_panel_text_padding * 2 + top_panel_v_margin * 2), 38U);
-
-        // Overlay headers.
-        unsigned overlay_header_margin = 2;
-        // 32px base size.
-        unsigned overlay_header_size = std::max(text_height + text_padding * 2, 30U);
-
-        // todo
-        unsigned button_height = text_height + text_padding_large * 2;
-
-        // Pseudo-dpi to scale some widget widths.
-        unsigned text_height_base = 22;
-
-        qreal pDpr = std::max((static_cast<qreal>(text_height) / text_height_base), 1.0);
-
-        unsigned context_menu_width         = static_cast<unsigned>(212.0 * pDpr);
-        unsigned context_menu_button_height = static_cast<unsigned>(32.0 * pDpr);
-        unsigned rename_overlay_width       = static_cast<unsigned>(380.0 * pDpr);
-
-        qDebug() << u"dpr=" << qApp->devicePixelRatio() << u"pDpr=" << pDpr;
-
-        // --- write variables into stylesheet --------------------------
-        styleSheet.replace(QS("%font_small%"), QString::number(font_small) + QSV("pt"));
-        styleSheet.replace(QS("%font_large%"), QString::number(font_large) + QSV("pt"));
-        styleSheet.replace(QS("%button_height%"), QString::number(button_height) + QSV("px"));
-        styleSheet.replace(QS("%top_panel_height%"), QString::number(top_panel_height) + QSV("px"));
-        styleSheet.replace(QS("%overlay_header_size%"), QString::number(overlay_header_size) + QSV("px"));
-        styleSheet.replace(QS("%context_menu_width%"), QString::number(context_menu_width) + QSV("px"));
-        styleSheet.replace(QS("%context_menu_button_height%"), QString::number(context_menu_button_height) + QSV("px"));
-        styleSheet.replace(QS("%rename_overlay_width%"), QString::number(rename_overlay_width) + QSV("px"));
-
-        styleSheet.replace(QS("%icontheme%"), QS("light"));
-        // Qt::Popup can't do transparency under windows, use square window
-#ifdef Q_OS_WIN32
-        styleSheet.replace(QS("%contextmenu_border_radius%"), QS("0px"));
-#else
-        styleSheet.replace(QS("%contextmenu_border_radius%"), QS("3px"));
-#endif
-        styleSheet.replace(QS("%sys_window%"), sys_window.name());
-        styleSheet.replace(QS("%sys_window_tinted%"), sys_window_tinted.name());
-        styleSheet.replace(QS("%sys_window_tinted_lc%"), sys_window_tinted_lc.name());
-        styleSheet.replace(QS("%sys_window_tinted_lc2%"), sys_window_tinted_lc2.name());
-        styleSheet.replace(QS("%sys_window_tinted_hc%"), sys_window_tinted_hc.name());
-        styleSheet.replace(QS("%sys_window_tinted_hc2%"), sys_window_tinted_hc2.name());
-        styleSheet.replace(QS("%sys_text_secondary_rgba%"), QSV("rgba(") + QString::number(sys_text.red()) + u',' +
-                                                            QString::number(sys_text.green()) + u',' +
-                                                            QString::number(sys_text.blue()) + QSV(",50%)"));
-
-        styleSheet.replace(QS("%button%"), colors.button.name());
-        styleSheet.replace(QS("%button_hover%"), colors.button_hover.name());
-        styleSheet.replace(QS("%button_pressed%"), colors.button_pressed.name());
-        styleSheet.replace(QS("%panel_button%"), colors.panel_button.name());
-        styleSheet.replace(QS("%panel_button_hover%"), colors.panel_button_hover.name());
-        styleSheet.replace(QS("%panel_button_pressed%"), colors.panel_button_pressed.name());
-        styleSheet.replace(QS("%widget%"), colors.widget.name());
-        styleSheet.replace(QS("%widget_border%"), colors.widget_border.name());
-        styleSheet.replace(QS("%folderview%"), colors.folderview.name());
-        styleSheet.replace(QS("%folderview_topbar%"), colors.folderview_topbar.name());
-        styleSheet.replace(QS("%folderview_hc%"), colors.folderview_hc.name());
-        styleSheet.replace(QS("%folderview_hc2%"), colors.folderview_hc2.name());
-        styleSheet.replace(QS("%accent%"), colors.accent.name());
-        styleSheet.replace(QS("%input_field_focus%"), colors.input_field_focus.name());
-        styleSheet.replace(QS("%overlay%"), colors.overlay.name());
-        styleSheet.replace(QS("%icons%"), colors.icons.name());
-        styleSheet.replace(QS("%text_hc2%"), colors.text_hc2.name());
-        styleSheet.replace(QS("%text_hc%"), colors.text_hc.name());
-        styleSheet.replace(QS("%text%"), colors.text.name());
-        styleSheet.replace(QS("%overlay_text%"), colors.overlay_text.name());
-        styleSheet.replace(QS("%text_lc%"), colors.text_lc.name());
-        styleSheet.replace(QS("%text_lc2%"), colors.text_lc2.name());
-        styleSheet.replace(QS("%scrollbar%"), colors.scrollbar.name());
-        styleSheet.replace(QS("%scrollbar_hover%"), colors.scrollbar_hover.name());
-        styleSheet.replace(QS("%folderview_button_hover%"), colors.folderview_button_hover.name());
-        styleSheet.replace(QS("%folderview_button_pressed%"), colors.folderview_button_pressed.name());
-
-        styleSheet.replace(QS("%text_secondary_rgba%"), QSV("rgba(") + QString::number(colors.text.red()) + u',' +
-                                                        QString::number(colors.text.green()) + u',' +
-                                                        QString::number(colors.text.blue()) + QSV(",62%)"));
-        styleSheet.replace(QS("%accent_hover_rgba%"), QSV("rgba(") + QString::number(colors.accent.red()) + u',' +
-                                                      QString::number(colors.accent.green()) + u',' +
-                                                      QString::number(colors.accent.blue()) + QSV(",65%)"));
-        styleSheet.replace(QS("%overlay_rgba%"), QSV("rgba(") + QString::number(colors.overlay.red()) + u',' +
-                                                 QString::number(colors.overlay.green()) + u',' +
-                                                 QString::number(colors.overlay.blue()) + QSV(",90%)"));
-        styleSheet.replace(QS("%fv_backdrop_rgba%"), QSV("rgba(") + QString::number(colors.folderview_hc2.red()) + u',' +
-                                                     QString::number(colors.folderview_hc2.green()) + u',' +
-                                                     QString::number(colors.folderview_hc2.blue()) + QSV(",80%)"));
-        // do not show separator line if topbar color matches folderview
-        if (colors.folderview != colors.folderview_topbar)
-            styleSheet.replace(QS("%topbar_border_rgba%"), QS("rgba(0,0,0,14%)"));
-        else
-            styleSheet.replace(QS("%topbar_border_rgba%"), colors.folderview.name());
-
-        // --- apply -------------------------------------------------
-        qApp->setStyleSheet(styleSheet);
+    // --- Color Scheme ---------------------------------------------
+    auto colors = colorScheme();
+    // tint color for system windows
+    QPalette p;
+    QColor   sys_text   = p.text().color();
+    QColor   sys_window = p.window().color();
+    QColor   sys_window_tinted, sys_window_tinted_lc, sys_window_tinted_lc2, sys_window_tinted_hc, sys_window_tinted_hc2;
+    if (sys_window.valueF() <= 0.45f) {
+        // dark system theme
+        sys_window_tinted_lc2.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() + 6);
+        sys_window_tinted_lc.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() + 14);
+        sys_window_tinted.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() + 20);
+        sys_window_tinted_hc.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() + 35);
+        sys_window_tinted_hc2.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() + 50);
+    } else {
+        // light system theme
+        sys_window_tinted_lc2.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() - 6);
+        sys_window_tinted_lc.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() - 14);
+        sys_window_tinted.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() - 20);
+        sys_window_tinted_hc.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() - 35);
+        sys_window_tinted_hc2.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() - 50);
     }
+
+    // --- widget sizes ---------------------------------------------
+    QFont fnt = QGuiApplication::font();
+    auto  fm  = QFontMetrics(fnt);
+
+    // todo: use precise values for ~9-11 point sizes
+    unsigned font_small         = std::max(static_cast<unsigned>(fnt.pointSize() * 0.9), 8U);
+    unsigned font_large         = static_cast<unsigned>(fnt.pointSize() * 1.8);
+    unsigned text_height        = fm.height();
+    unsigned text_padding       = static_cast<unsigned>(text_height * 0.10);
+    unsigned text_padding_small = static_cast<unsigned>(text_height * 0.05);
+    unsigned text_padding_large = static_cast<unsigned>(text_height * 0.25);
+
+    // folderview top panel item sizes.
+    unsigned top_panel_v_margin = 4;
+    // Ensure at least 4px so it's not too thin.
+    unsigned top_panel_text_padding = std::max(text_padding, 4U);
+    // Scale with font, 38px base size.
+    unsigned top_panel_height = std::max((text_height + top_panel_text_padding * 2 + top_panel_v_margin * 2), 38U);
+    // Overlay headers.
+    unsigned overlay_header_margin = 2;
+    // 32px base size.
+    unsigned overlay_header_size = std::max(text_height + text_padding * 2, 30U);
+    // todo
+    unsigned button_height = text_height + text_padding_large * 2;
+    // Pseudo-dpi to scale some widget widths.
+    unsigned text_height_base = 22;
+
+    qreal pDpr = std::max((static_cast<qreal>(text_height) / text_height_base), 1.0);
+
+    unsigned context_menu_width         = static_cast<unsigned>(212.0 * pDpr);
+    unsigned context_menu_button_height = static_cast<unsigned>(32.0 * pDpr);
+    unsigned rename_overlay_width       = static_cast<unsigned>(380.0 * pDpr);
+
+    qDebug() << u"dpr=" << qApp->devicePixelRatio() << u"pDpr=" << pDpr;
+
+    // --- write variables into stylesheet --------------------------
+    styleSheet.replace(u"%font_small%"_s,                 QString::number(font_small) + u"pt");
+    styleSheet.replace(u"%font_large%"_s,                 QString::number(font_large) + u"pt");
+    styleSheet.replace(u"%button_height%"_s,              QString::number(button_height) + u"px");
+    styleSheet.replace(u"%top_panel_height%"_s,           QString::number(top_panel_height) + u"px");
+    styleSheet.replace(u"%overlay_header_size%"_s,        QString::number(overlay_header_size) + u"px");
+    styleSheet.replace(u"%context_menu_width%"_s,         QString::number(context_menu_width) + u"px");
+    styleSheet.replace(u"%context_menu_button_height%"_s, QString::number(context_menu_button_height) + u"px");
+    styleSheet.replace(u"%rename_overlay_width%"_s,       QString::number(rename_overlay_width) + u"px");
+    styleSheet.replace(u"%icontheme%"_s, u"light"_s);
+
+    // Qt::Popup can't do transparency under windows, use square window
+#ifdef Q_OS_WIN32
+    styleSheet.replace(u"%contextmenu_border_radius%"_s, u"0px"_s);
+#else
+        styleSheet.replace(u"%contextmenu_border_radius%"_s, u"3px"_s);
+#endif
+    styleSheet.replace(u"%sys_window%"_s,            sys_window.name());
+    styleSheet.replace(u"%sys_window_tinted%"_s,     sys_window_tinted.name());
+    styleSheet.replace(u"%sys_window_tinted_lc%"_s,  sys_window_tinted_lc.name());
+    styleSheet.replace(u"%sys_window_tinted_lc2%"_s, sys_window_tinted_lc2.name());
+    styleSheet.replace(u"%sys_window_tinted_hc%"_s,  sys_window_tinted_hc.name());
+    styleSheet.replace(u"%sys_window_tinted_hc2%"_s, sys_window_tinted_hc2.name());
+
+    styleSheet.replace(u"%sys_text_secondary_rgba%"_s,
+                       u"rgba(" + QString::number(sys_text.red()) + u',' +
+                       QString::number(sys_text.green()) + u',' +
+                       QString::number(sys_text.blue()) + u",50%)");
+
+    styleSheet.replace(u"%button%"_s,                    colors.button.name());
+    styleSheet.replace(u"%button_hover%"_s,              colors.button_hover.name());
+    styleSheet.replace(u"%button_pressed%"_s,            colors.button_pressed.name());
+    styleSheet.replace(u"%panel_button%"_s,              colors.panel_button.name());
+    styleSheet.replace(u"%panel_button_hover%"_s,        colors.panel_button_hover.name());
+    styleSheet.replace(u"%panel_button_pressed%"_s,      colors.panel_button_pressed.name());
+    styleSheet.replace(u"%widget%"_s,                    colors.widget.name());
+    styleSheet.replace(u"%widget_border%"_s,             colors.widget_border.name());
+    styleSheet.replace(u"%folderview%"_s,                colors.folderview.name());
+    styleSheet.replace(u"%folderview_topbar%"_s,         colors.folderview_topbar.name());
+    styleSheet.replace(u"%folderview_hc%"_s,             colors.folderview_hc.name());
+    styleSheet.replace(u"%folderview_hc2%"_s,            colors.folderview_hc2.name());
+    styleSheet.replace(u"%accent%"_s,                    colors.accent.name());
+    styleSheet.replace(u"%input_field_focus%"_s,         colors.input_field_focus.name());
+    styleSheet.replace(u"%overlay%"_s,                   colors.overlay.name());
+    styleSheet.replace(u"%icons%"_s,                     colors.icons.name());
+    styleSheet.replace(u"%text_hc2%"_s,                  colors.text_hc2.name());
+    styleSheet.replace(u"%text_hc%"_s,                   colors.text_hc.name());
+    styleSheet.replace(u"%text%"_s,                      colors.text.name());
+    styleSheet.replace(u"%overlay_text%"_s,              colors.overlay_text.name());
+    styleSheet.replace(u"%text_lc%"_s,                   colors.text_lc.name());
+    styleSheet.replace(u"%text_lc2%"_s,                  colors.text_lc2.name());
+    styleSheet.replace(u"%scrollbar%"_s,                 colors.scrollbar.name());
+    styleSheet.replace(u"%scrollbar_hover%"_s,           colors.scrollbar_hover.name());
+    styleSheet.replace(u"%folderview_button_hover%"_s,   colors.folderview_button_hover.name());
+    styleSheet.replace(u"%folderview_button_pressed%"_s, colors.folderview_button_pressed.name());
+
+    styleSheet.replace(u"%text_secondary_rgba%"_s,
+                       u"rgba(" + QString::number(colors.text.red()) + u',' +
+                       QString::number(colors.text.green()) + u',' +
+                       QString::number(colors.text.blue()) + u",62%)");
+    styleSheet.replace(u"%accent_hover_rgba%"_s,
+                       u"rgba(" + QString::number(colors.accent.red()) + u',' +
+                       QString::number(colors.accent.green()) + u',' +
+                       QString::number(colors.accent.blue()) + u",65%)");
+    styleSheet.replace(u"%overlay_rgba%"_s,
+                       u"rgba(" + QString::number(colors.overlay.red()) + u',' +
+                       QString::number(colors.overlay.green()) + u',' +
+                       QString::number(colors.overlay.blue()) + u",90%)");
+    styleSheet.replace(u"%fv_backdrop_rgba%"_s,
+                       u"rgba(" + QString::number(colors.folderview_hc2.red()) + u',' +
+                       QString::number(colors.folderview_hc2.green()) + u',' +
+                       QString::number(colors.folderview_hc2.blue()) + u",80%)");
+
+    // do not show separator line if topbar color matches folderview
+    styleSheet.replace(u"%topbar_border_rgba%"_s,
+                       colors.folderview == colors.folderview_topbar ? colors.folderview.name()
+                           : u"rgba(0,0,0,14%)"_s);
+
+    // --- apply -------------------------------------------------
+    qApp->setStyleSheet(styleSheet);
 }
+
 //------------------------------------------------------------------------------
+
 void Settings::loadTheme()
 {
     if (useSystemColorScheme()) {
         setColorScheme(ThemeStore::colorScheme(ColorSchemes::SYSTEM));
     } else {
         BaseColorScheme base;
-        themeConf.beginGroup(QSV("Colors"));
-        base.background            = QColor(themeConf.value(QSV("background"), QS("#1a1a1a")).toString());
-        base.background_fullscreen = QColor(themeConf.value(QSV("background_fullscreen"), QS("#1a1a1a")).toString());
-        base.text                  = QColor(themeConf.value(QSV("text"), QS("#b6b6b6")).toString());
-        base.icons                 = QColor(themeConf.value(QSV("icons"), QS("#a4a4a4")).toString());
-        base.widget                = QColor(themeConf.value(QSV("widget"), QS("#252525")).toString());
-        base.widget_border         = QColor(themeConf.value(QSV("widget_border"), QS("#2c2c2c")).toString());
-        base.accent                = QColor(themeConf.value(QSV("accent"), QS("#8c9b81")).toString());
-        base.folderview            = QColor(themeConf.value(QSV("folderview"), QS("#242424")).toString());
-        base.folderview_topbar     = QColor(themeConf.value(QSV("folderview_topbar"), QS("#383838")).toString());
-        base.scrollbar             = QColor(themeConf.value(QSV("scrollbar"), QS("#5a5a5a")).toString());
-        base.overlay_text          = QColor(themeConf.value(QSV("overlay_text"), QS("#d2d2d2")).toString());
-        base.overlay               = QColor(themeConf.value(QSV("overlay"), QS("#1a1a1a")).toString());
-        base.tid                   = themeConf.value(QSV("tid"), QS("-1")).toInt();
+        themeConf.beginGroup(u"Colors"_sv);
+        base.background            = QColor(themeConf.value(u"background"_sv, u"#1a1a1a"_s).toString());
+        base.background_fullscreen = QColor(themeConf.value(u"background_fullscreen"_sv, u"#1a1a1a"_s).toString());
+        base.text                  = QColor(themeConf.value(u"text"_sv, u"#b6b6b6"_s).toString());
+        base.icons                 = QColor(themeConf.value(u"icons"_sv, u"#a4a4a4"_s).toString());
+        base.widget                = QColor(themeConf.value(u"widget"_sv, u"#252525"_s).toString());
+        base.widget_border         = QColor(themeConf.value(u"widget_border"_sv, u"#2c2c2c"_s).toString());
+        base.accent                = QColor(themeConf.value(u"accent"_sv, u"#8c9b81"_s).toString());
+        base.folderview            = QColor(themeConf.value(u"folderview"_sv, u"#242424"_s).toString());
+        base.folderview_topbar     = QColor(themeConf.value(u"folderview_topbar"_sv, u"#383838"_s).toString());
+        base.scrollbar             = QColor(themeConf.value(u"scrollbar"_sv, u"#5a5a5a"_s).toString());
+        base.overlay_text          = QColor(themeConf.value(u"overlay_text"_sv, u"#d2d2d2"_s).toString());
+        base.overlay               = QColor(themeConf.value(u"overlay"_sv, u"#1a1a1a"_s).toString());
+        base.tid                   = themeConf.value(u"tid"_sv, u"-1"_s).toInt();
         themeConf.endGroup();
         setColorScheme(ColorScheme(base));
     }
@@ -261,28 +272,30 @@ void Settings::saveTheme()
 {
     if (useSystemColorScheme())
         return;
-    themeConf.beginGroup(QSV("Colors"));
-    themeConf.setValue(QSV("background"), mColorScheme.background.name());
-    themeConf.setValue(QSV("background_fullscreen"), mColorScheme.background_fullscreen.name());
-    themeConf.setValue(QSV("text"), mColorScheme.text.name());
-    themeConf.setValue(QSV("icons"), mColorScheme.icons.name());
-    themeConf.setValue(QSV("widget"), mColorScheme.widget.name());
-    themeConf.setValue(QSV("widget_border"), mColorScheme.widget_border.name());
-    themeConf.setValue(QSV("accent"), mColorScheme.accent.name());
-    themeConf.setValue(QSV("folderview"), mColorScheme.folderview.name());
-    themeConf.setValue(QSV("folderview_topbar"), mColorScheme.folderview_topbar.name());
-    themeConf.setValue(QSV("scrollbar"), mColorScheme.scrollbar.name());
-    themeConf.setValue(QSV("overlay_text"), mColorScheme.overlay_text.name());
-    themeConf.setValue(QSV("overlay"), mColorScheme.overlay.name());
-    themeConf.setValue(QSV("tid"), mColorScheme.tid);
+    themeConf.beginGroup(u"Colors");
+    themeConf.setValue(u"background"_sv,            mColorScheme.background.name());
+    themeConf.setValue(u"background_fullscreen"_sv, mColorScheme.background_fullscreen.name());
+    themeConf.setValue(u"text"_sv,                  mColorScheme.text.name());
+    themeConf.setValue(u"icons"_sv,                 mColorScheme.icons.name());
+    themeConf.setValue(u"widget"_sv,                mColorScheme.widget.name());
+    themeConf.setValue(u"widget_border"_sv,         mColorScheme.widget_border.name());
+    themeConf.setValue(u"accent"_sv,                mColorScheme.accent.name());
+    themeConf.setValue(u"folderview"_sv,            mColorScheme.folderview.name());
+    themeConf.setValue(u"folderview_topbar"_sv,     mColorScheme.folderview_topbar.name());
+    themeConf.setValue(u"scrollbar"_sv,             mColorScheme.scrollbar.name());
+    themeConf.setValue(u"overlay_text"_sv,          mColorScheme.overlay_text.name());
+    themeConf.setValue(u"overlay"_sv,               mColorScheme.overlay.name());
+    themeConf.setValue(u"tid"_sv,                   mColorScheme.tid);
     themeConf.endGroup();
 }
+
 //------------------------------------------------------------------------------
 
 ColorScheme const &Settings::colorScheme() const
 {
     return mColorScheme;
 }
+
 void Settings::setColorScheme(ColorScheme const &scheme)
 {
     mColorScheme = scheme;
@@ -303,29 +316,31 @@ void Settings::setColorTid(ColorSchemes tid)
 
 //------------------------------------------------------------------------------
 void Settings::fillVideoFormats() {
-    mVideoFormatsMap.insert("video/webm",       "webm");
-    mVideoFormatsMap.insert("video/mp4",        "mp4");
-    mVideoFormatsMap.insert("video/mp4",        "m4v");
-    mVideoFormatsMap.insert("video/mpeg",       "mpg");
-    mVideoFormatsMap.insert("video/mpeg",       "mpeg");
-    mVideoFormatsMap.insert("video/x-matroska", "mkv");
-    mVideoFormatsMap.insert("video/x-ms-wmv", "wmv");
-    mVideoFormatsMap.insert("video/x-msvideo", "avi");
-    mVideoFormatsMap.insert("video/quicktime", "mov");
-    mVideoFormatsMap.insert("video/x-flv", "flv");
+    mVideoFormatsMap.insert("video/webm"_ba,       "webm"_ba);
+    mVideoFormatsMap.insert("video/mp4"_ba,        "mp4"_ba);
+    mVideoFormatsMap.insert("video/mp4"_ba,        "m4v"_ba);
+    mVideoFormatsMap.insert("video/mpeg"_ba,       "mpg"_ba);
+    mVideoFormatsMap.insert("video/mpeg"_ba,       "mpeg"_ba);
+    mVideoFormatsMap.insert("video/x-matroska"_ba, "mkv"_ba);
+    mVideoFormatsMap.insert("video/x-ms-wmv"_ba,   "wmv"_ba);
+    mVideoFormatsMap.insert("video/x-msvideo"_ba,  "avi"_ba);
+    mVideoFormatsMap.insert("video/quicktime"_ba,  "mov"_ba);
+    mVideoFormatsMap.insert("video/x-flv"_ba,      "flv"_ba);
 }
+
 //------------------------------------------------------------------------------
+
 QString Settings::mpvBinary() const
 {
-    QString mpvPath = settingsConf.value(QSV("mpvBinary"), QS("")).toString();
+    QString mpvPath = settingsConf.value(u"mpvBinary"_sv, u""_s).toString();
     if (!QFile::exists(mpvPath)) {
 #ifdef Q_OS_WIN32
-        mpvPath = QCoreApplication::applicationDirPath() + QSV("/mpv.exe");
+        mpvPath = QCoreApplication::applicationDirPath() + u"/mpv.exe";
 #elif defined __linux__
-        mpvPath = QS("/usr/bin/mpv");
+        mpvPath = u"/usr/bin/mpv"_s;
 #endif
         if (!QFile::exists(mpvPath))
-            mpvPath = QS("");
+            mpvPath = u""_s;
     }
     return mpvPath;
 }
@@ -333,44 +348,46 @@ QString Settings::mpvBinary() const
 void Settings::setMpvBinary(QString const &path)
 {
     if (QFile::exists(path))
-        settingsConf.setValue(QSV("mpvBinary"), path);
+        settingsConf.setValue(u"mpvBinary"_sv, path);
 }
+
 //------------------------------------------------------------------------------
+
 QList<QByteArray> Settings::supportedFormats() const
 {
     auto formats = QImageReader::supportedImageFormats();
-    formats << "jfif";
+    formats << "jfif"_ba;
     if (videoPlayback())
         formats << mVideoFormatsMap.values();
     formats.removeAll("pdf");
     return formats;
 }
-//------------------------------------------------------------------------------
+
 // (for open/save dialogs, as a single string)
-// example:  QS("Images (*.jpg, *.png)")
+// example:  u"Images (*.jpg, *.png)"_s
 QString Settings::supportedFormatsFilter() const
 {
     QString filters;
     auto    formats = supportedFormats();
-    filters.append(QSV("Supported files ("));
+    filters.append(u"Supported files ("_sv);
     for (auto &fmt : formats)
-        filters.append(QSV("*.") + QString::fromUtf8(fmt) + u' ');
+        filters.append(u"*." + QString::fromUtf8(fmt) + u' ');
     filters.append(u')');
     return filters;
 }
-//------------------------------------------------------------------------------
+
 QString Settings::supportedFormatsRegex() const
 {
     QString           filter;
     QList<QByteArray> formats = supportedFormats();
-    filter.append(QSV(".*\\.("));
+    filter.append(u".*\\.("_sv);
     for (auto &fmt : formats)
         filter.append(QString::fromUtf8(fmt) + u'|');
     filter.chop(1);
-    filter.append(QSV(")$"));
+    filter.append(u")$"_sv);
     return filter;
 }
-//------------------------------------------------------------------------------
+
 // returns list of mime types
 QStringList Settings::supportedMimeTypes() const
 {
@@ -378,15 +395,17 @@ QStringList Settings::supportedMimeTypes() const
     QList<QByteArray> mimeTypes = QImageReader::supportedMimeTypes();
     if (videoPlayback())
         mimeTypes << mVideoFormatsMap.keys();
-    for (int i = 0; i < mimeTypes.count(); i++)
-        filters << QString::fromLatin1(mimeTypes.at(i));
+    for (auto const &type : mimeTypes)
+        filters << QString::fromLatin1(type);
     return filters;
 }
+
 //------------------------------------------------------------------------------
+
 bool Settings::videoPlayback() const
 {
 #ifdef USE_MPV
-    return settingsConf.value(QSV("videoPlayback"), true).toBool();
+    return settingsConf.value(u"videoPlayback"_sv, true).toBool();
 #else
     return false;
 #endif
@@ -394,48 +413,56 @@ bool Settings::videoPlayback() const
 
 void Settings::setVideoPlayback(bool mode)
 {
-    settingsConf.setValue(QSV("videoPlayback"), mode);
+    settingsConf.setValue(u"videoPlayback"_sv, mode);
 }
+
 //------------------------------------------------------------------------------
+
 bool Settings::useSystemColorScheme() const
 {
-    return settingsConf.value(QSV("useSystemColorScheme"), false).toBool();
+    return settingsConf.value(u"useSystemColorScheme", false).toBool();
 }
 
 void Settings::setUseSystemColorScheme(bool mode)
 {
-    settingsConf.setValue(QSV("useSystemColorScheme"), mode);
+    settingsConf.setValue(u"useSystemColorScheme"_sv, mode);
 }
+
 //------------------------------------------------------------------------------
+
 QVersionNumber Settings::lastVersion() const
 {
-    int vmajor = settingsConf.value(QSV("lastVerMajor"), 0).toInt();
-    int vminor = settingsConf.value(QSV("lastVerMinor"), 0).toInt();
-    int vmicro = settingsConf.value(QSV("lastVerMicro"), 0).toInt();
+    int vmajor = settingsConf.value(u"lastVerMajor"_sv, 0).toInt();
+    int vminor = settingsConf.value(u"lastVerMinor"_sv, 0).toInt();
+    int vmicro = settingsConf.value(u"lastVerMicro"_sv, 0).toInt();
     return QVersionNumber(vmajor, vminor, vmicro);
 }
 
 void Settings::setLastVersion(QVersionNumber const &ver)
 {
-    settingsConf.setValue(QSV("lastVerMajor"), ver.majorVersion());
-    settingsConf.setValue(QSV("lastVerMinor"), ver.minorVersion());
-    settingsConf.setValue(QSV("lastVerMicro"), ver.microVersion());
+    settingsConf.setValue(u"lastVerMajor"_sv, ver.majorVersion());
+    settingsConf.setValue(u"lastVerMinor"_sv, ver.minorVersion());
+    settingsConf.setValue(u"lastVerMicro"_sv, ver.microVersion());
 }
+
 //------------------------------------------------------------------------------
+
 void Settings::setShowChangelogs(bool mode)
 {
-    settingsConf.setValue(QSV("showChangelogs"), mode);
+    settingsConf.setValue(u"showChangelogs"_sv, mode);
 }
 
 bool Settings::showChangelogs() const
 {
-    return settingsConf.value(QSV("showChangelogs"), true).toBool();
+    return settingsConf.value(u"showChangelogs"_sv, true).toBool();
 }
+
 //------------------------------------------------------------------------------
+
 qreal Settings::backgroundOpacity() const
 {
     bool  ok    = false;
-    qreal value = settingsConf.value(QSV("backgroundOpacity"), 1.0).toReal(&ok);
+    qreal value = settingsConf.value(u"backgroundOpacity"_sv, 1.0).toReal(&ok);
     if (!ok)
         return 0.0;
     if (value > 1.0)
@@ -451,13 +478,15 @@ void Settings::setBackgroundOpacity(qreal value)
         value = 1.0;
     else if (value < 0.0)
         value = 0.0;
-    settingsConf.setValue(QSV("backgroundOpacity"), value);
+    settingsConf.setValue(u"backgroundOpacity"_sv, value);
 }
+
 //------------------------------------------------------------------------------
+
 bool Settings::blurBackground() const
 {
 #ifdef USE_KDE_BLUR
-    return settingsConf.value(QSV("blurBackground"), true).toBool();
+    return settingsConf.value(u"blurBackground"_sv, true).toBool();
 #else
     return false;
 #endif
@@ -465,19 +494,19 @@ bool Settings::blurBackground() const
 
 void Settings::setBlurBackground(bool mode)
 {
-    settingsConf.setValue(QSV("blurBackground"), mode);
+    settingsConf.setValue(u"blurBackground"_sv, mode);
 }
 //------------------------------------------------------------------------------
 void Settings::setSortingMode(SortingMode mode)
 {
     if (mode > SortingMode::TIME_DESC)
         mode = SortingMode::NAME;
-    settingsConf.setValue(QSV("sortingMode"), static_cast<int>(mode));
+    settingsConf.setValue(u"sortingMode"_sv, static_cast<int>(mode));
 }
 
 SortingMode Settings::sortingMode() const
 {
-    int mode = settingsConf.value(QSV("sortingMode"), 0).toInt();
+    int mode = settingsConf.value(u"sortingMode"_sv, 0).toInt();
     if (mode < 0 || mode >= 6)
         mode = 0;
     return static_cast<SortingMode>(mode);
@@ -485,27 +514,27 @@ SortingMode Settings::sortingMode() const
 //------------------------------------------------------------------------------
 bool Settings::playVideoSounds() const
 {
-    return settingsConf.value(QSV("playVideoSounds"), false).toBool();
+    return settingsConf.value(u"playVideoSounds"_sv, false).toBool();
 }
 
 void Settings::setPlayVideoSounds(bool mode)
 {
-    settingsConf.setValue(QSV("playVideoSounds"), mode);
+    settingsConf.setValue(u"playVideoSounds"_sv, mode);
 }
 //------------------------------------------------------------------------------
 void Settings::setVolume(int vol)
 {
-    stateConf.setValue(QSV("volume"), vol);
+    stateConf.setValue(u"volume"_sv, vol);
 }
 
 int Settings::volume() const
 {
-    return stateConf.value(QSV("volume"), 100).toInt();
+    return stateConf.value(u"volume"_sv, 100).toInt();
 }
 //------------------------------------------------------------------------------
 FolderViewMode Settings::folderViewMode() const
 {
-    int mode = settingsConf.value(QSV("folderViewMode"), 2).toInt();
+    int mode = settingsConf.value(u"folderViewMode"_sv, 2).toInt();
     if (mode < 0 || mode >= 3)
         mode = 2;
     return static_cast<FolderViewMode>(mode);
@@ -513,12 +542,12 @@ FolderViewMode Settings::folderViewMode() const
 
 void Settings::setFolderViewMode(FolderViewMode mode)
 {
-    settingsConf.setValue(QSV("folderViewMode"), static_cast<int>(mode));
+    settingsConf.setValue(u"folderViewMode"_sv, static_cast<int>(mode));
 }
 //------------------------------------------------------------------------------
 ThumbPanelStyle Settings::thumbPanelStyle() const
 {
-    int mode = settingsConf.value(QSV("thumbPanelStyle"), 1).toInt();
+    int mode = settingsConf.value(u"thumbPanelStyle"_sv, 1).toInt();
     if (mode < 0 || mode > 1)
         mode = 1;
     return static_cast<ThumbPanelStyle>(mode);
@@ -526,7 +555,7 @@ ThumbPanelStyle Settings::thumbPanelStyle() const
 
 void Settings::setThumbPanelStyle(ThumbPanelStyle mode)
 {
-    settingsConf.setValue(QSV("thumbPanelStyle"), static_cast<int>(mode));
+    settingsConf.setValue(u"thumbPanelStyle"_sv, static_cast<int>(mode));
 }
 //------------------------------------------------------------------------------
 QMultiMap<QByteArray, QByteArray> const &Settings::videoFormats() const
@@ -537,7 +566,7 @@ QMultiMap<QByteArray, QByteArray> const &Settings::videoFormats() const
 int Settings::panelPreviewsSize() const
 {
     bool ok   = true;
-    int  size = settingsConf.value(QSV("panelPreviewsSize"), 140).toInt(&ok);
+    int  size = settingsConf.value(u"panelPreviewsSize"_sv, 140).toInt(&ok);
     if (!ok)
         size = 140;
     size = qBound(100, size, 250);
@@ -546,120 +575,111 @@ int Settings::panelPreviewsSize() const
 
 void Settings::setPanelPreviewsSize(int size)
 {
-    settingsConf.setValue(QSV("panelPreviewsSize"), size);
+    settingsConf.setValue(u"panelPreviewsSize"_sv, size);
 }
 //------------------------------------------------------------------------------
 bool Settings::usePreloader() const
 {
-    return settingsConf.value(QSV("usePreloader"), true).toBool();
+    return settingsConf.value(u"usePreloader"_sv, true).toBool();
 }
 
 void Settings::setUsePreloader(bool mode)
 {
-    settingsConf.setValue(QSV("usePreloader"), mode);
+    settingsConf.setValue(u"usePreloader"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::keepFitMode() const
 {
-    return settingsConf.value(QSV("keepFitMode"), false).toBool();
+    return settingsConf.value(u"keepFitMode"_sv, false).toBool();
 }
 
 void Settings::setKeepFitMode(bool mode)
 {
-    settingsConf.setValue(QSV("keepFitMode"), mode);
+    settingsConf.setValue(u"keepFitMode"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::fullscreenMode() const
 {
-    return settingsConf.value(QSV("openInFullscreen"), false).toBool();
+    return settingsConf.value(u"openInFullscreen"_sv, false).toBool();
 }
 
 void Settings::setFullscreenMode(bool mode)
 {
-    settingsConf.setValue(QSV("openInFullscreen"), mode);
+    settingsConf.setValue(u"openInFullscreen"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::maximizedWindow() const
 {
-    return stateConf.value(QSV("maximizedWindow"), false).toBool();
+    return stateConf.value(u"maximizedWindow"_sv, false).toBool();
 }
 
 void Settings::setMaximizedWindow(bool mode)
 {
-    stateConf.setValue(QSV("maximizedWindow"), mode);
+    stateConf.setValue(u"maximizedWindow"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::panelEnabled() const
 {
-    return settingsConf.value(QSV("panelEnabled"), true).toBool();
+    return settingsConf.value(u"panelEnabled"_sv, true).toBool();
 }
 
 void Settings::setPanelEnabled(bool mode)
 {
-    settingsConf.setValue(QSV("panelEnabled"), mode);
+    settingsConf.setValue(u"panelEnabled"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::panelFullscreenOnly() const
 {
-    return settingsConf.value(QSV("panelFullscreenOnly"), true).toBool();
+    return settingsConf.value(u"panelFullscreenOnly"_sv, true).toBool();
 }
 
 void Settings::setPanelFullscreenOnly(bool mode)
 {
-    settingsConf.setValue(QSV("panelFullscreenOnly"), mode);
+    settingsConf.setValue(u"panelFullscreenOnly"_sv, mode);
 }
 //------------------------------------------------------------------------------
 int Settings::lastDisplay() const
 {
-    return stateConf.value(QSV("lastDisplay"), 0).toInt();
+    return stateConf.value(u"lastDisplay"_sv, 0).toInt();
 }
 
 void Settings::setLastDisplay(int display)
 {
-    stateConf.setValue(QSV("lastDisplay"), display);
+    stateConf.setValue(u"lastDisplay"_sv, display);
 }
 //------------------------------------------------------------------------------
 PanelPosition Settings::panelPosition() const
 {
-    QString posString = settingsConf.value(QSV("panelPosition"), QS("top")).toString();
-    if (posString == QSV("top"))
+    QString posString = settingsConf.value(u"panelPosition"_sv, u"top"_s).toString();
+    if (posString == u"top"_sv)
         return PanelPosition::TOP;
-    else if (posString == QSV("bottom"))
+    if (posString == u"bottom"_sv)
         return PanelPosition::BOTTOM;
-    else if (posString == QSV("left"))
+    if (posString == u"left"_sv)
         return PanelPosition::LEFT;
-    else
-        return PanelPosition::RIGHT;
+    return PanelPosition::RIGHT;
 }
 
 void Settings::setPanelPosition(PanelPosition pos)
 {
     QString posString;
     switch (pos) {
-    case PanelPosition::TOP:
-        posString = QS("top");
-        break;
-    case PanelPosition::BOTTOM:
-        posString = QS("bottom");
-        break;
-    case PanelPosition::LEFT:
-        posString = QS("left");
-        break;
-    case PanelPosition::RIGHT:
-        posString = QS("right");
-        break;
+    case PanelPosition::TOP:    posString = u"top"_s;    break;
+    case PanelPosition::BOTTOM: posString = u"bottom"_s; break;
+    case PanelPosition::LEFT:   posString = u"left"_s;   break;
+    case PanelPosition::RIGHT:  posString = u"right"_s;  break;
     }
-    settingsConf.setValue(QSV("panelPosition"), posString);
+    settingsConf.setValue(u"panelPosition", std::move(posString));
 }
 //------------------------------------------------------------------------------
 bool Settings::panelPinned() const
 {
-    return settingsConf.value(QSV("panelPinned"), false).toBool();
+    return settingsConf.value(u"panelPinned"_sv, false).toBool();
 }
 
 void Settings::setPanelPinned(bool mode)
 {
-    settingsConf.setValue(QSV("panelPinned"), mode);
+    settingsConf.setValue(u"panelPinned"_sv, mode);
 }
 //------------------------------------------------------------------------------
 /*
@@ -669,7 +689,7 @@ void Settings::setPanelPinned(bool mode)
  */
 ImageFitMode Settings::imageFitMode() const
 {
-    int mode = settingsConf.value(QSV("defaultFitMode"), 0).toInt();
+    int mode = settingsConf.value(u"defaultFitMode"_sv, 0).toInt();
     if (mode < 0 || mode > 2) {
         qDebug() << u"Settings: Invalid fit mode ( " << QString::number(mode) << u" ). Resetting to default.";
         mode = 0;
@@ -684,12 +704,12 @@ void Settings::setImageFitMode(ImageFitMode mode)
         qDebug() << u"Settings: Invalid fit mode ( " << QString::number(modeInt) << u" ). Resetting to default.";
         modeInt = 0;
     }
-    settingsConf.setValue(QSV("defaultFitMode"), modeInt);
+    settingsConf.setValue(u"defaultFitMode", modeInt);
 }
 //------------------------------------------------------------------------------
 QRect Settings::windowGeometry() const
 {
-    QRect savedRect = stateConf.value(QSV("windowGeometry")).toRect();
+    QRect savedRect = stateConf.value(u"windowGeometry"_sv).toRect();
     if (savedRect.size().isEmpty())
         savedRect.setRect(100, 100, 900, 600);
     return savedRect;
@@ -697,17 +717,17 @@ QRect Settings::windowGeometry() const
 
 void Settings::setWindowGeometry(QRect geometry)
 {
-    stateConf.setValue(QSV("windowGeometry"), geometry);
+    stateConf.setValue(u"windowGeometry"_sv, geometry);
 }
 //------------------------------------------------------------------------------
 bool Settings::loopSlideshow() const
 {
-    return settingsConf.value(QSV("loopSlideshow"), false).toBool();
+    return settingsConf.value(u"loopSlideshow"_sv, false).toBool();
 }
 
 void Settings::setLoopSlideshow(bool mode)
 {
-    settingsConf.setValue(QSV("loopSlideshow"), mode);
+    settingsConf.setValue(u"loopSlideshow"_sv, mode);
 }
 //------------------------------------------------------------------------------
 void Settings::sendChangeNotification()
@@ -717,45 +737,46 @@ void Settings::sendChangeNotification()
 //------------------------------------------------------------------------------
 void Settings::readShortcuts(QMap<QString, QString> &shortcuts)
 {
-    settingsConf.beginGroup(QS("Controls"));
-    QStringList in, pair;
-    in = settingsConf.value(QSV("shortcuts")).toStringList();
-    for (int i = 0; i < in.count(); i++) {
-        pair = in[i].split(u'=');
+    settingsConf.beginGroup(u"Controls"_s);
+    QStringList in = settingsConf.value(u"shortcuts"_sv).toStringList();
+
+    for (auto &item : in) {
+        QStringList pair = item.split(u'=');
         if (!pair[0].isEmpty() && !pair[1].isEmpty()) {
-            if (pair[1] == QSV("eq"))
+            if (pair[1] == u"eq"_sv)
                 pair[1] = u'=';
             shortcuts.insert(pair[1], pair[0]);
         }
     }
+
     settingsConf.endGroup();
 }
 
 void Settings::saveShortcuts(QMap<QString, QString> const &shortcuts)
 {
-    settingsConf.beginGroup(QSV("Controls"));
-    QMapIterator<QString, QString> i(shortcuts);
-    QStringList                    out;
+    settingsConf.beginGroup(u"Controls"_sv);
+    QMapIterator i(shortcuts);
+    QStringList  out;
     while (i.hasNext()) {
         i.next();
-        if (i.key() == u'=')
-            out << i.value() + u'=' + QS("eq");
+        if (i.key() == u"="_sv)
+            out << i.value() + u'=' + u"eq";
         else
             out << i.value() + u'=' + i.key();
     }
-    settingsConf.setValue(QSV("shortcuts"), out);
+    settingsConf.setValue(u"shortcuts"_sv, out);
     settingsConf.endGroup();
 }
 //------------------------------------------------------------------------------
 void Settings::readScripts(QMap<QString, Script> &scripts)
 {
     scripts.clear();
-    settingsConf.beginGroup(QSV("Scripts"));
-    int size = settingsConf.beginReadArray(QSV("script"));
-    for (int i = 0; i < size; i++) {
+    settingsConf.beginGroup(u"Scripts"_sv);
+    int size = settingsConf.beginReadArray(u"script"_sv);
+    for (int i = 0; i < size; ++i) {
         settingsConf.setArrayIndex(i);
-        QString  name  = settingsConf.value(QSV("name")).toString();
-        QVariant value = settingsConf.value(QSV("value"));
+        QString  name  = settingsConf.value(u"name"_sv).toString();
+        QVariant value = settingsConf.value(u"value"_sv);
         Script   scr   = value.value<Script>();
         scripts.insert(name, scr);
     }
@@ -765,15 +786,15 @@ void Settings::readScripts(QMap<QString, Script> &scripts)
 
 void Settings::saveScripts(QMap<QString, Script> const &scripts)
 {
-    settingsConf.beginGroup(QSV("Scripts"));
-    settingsConf.beginWriteArray(QSV("script"));
+    settingsConf.beginGroup(u"Scripts"_sv);
+    settingsConf.beginWriteArray(u"script"_sv);
     QMapIterator i(scripts);
     unsigned     counter = 0;
     while (i.hasNext()) {
         i.next();
         settingsConf.setArrayIndex(counter);
-        settingsConf.setValue(QSV("name"), i.key());
-        settingsConf.setValue(QSV("value"), QVariant::fromValue(i.value()));
+        settingsConf.setValue(u"name"_sv, i.key());
+        settingsConf.setValue(u"value"_sv, QVariant::fromValue(i.value()));
         counter++;
     }
     settingsConf.endArray();
@@ -782,112 +803,112 @@ void Settings::saveScripts(QMap<QString, Script> const &scripts)
 //------------------------------------------------------------------------------
 bool Settings::squareThumbnails() const
 {
-    return settingsConf.value(QSV("squareThumbnails"), false).toBool();
+    return settingsConf.value(u"squareThumbnails"_sv, false).toBool();
 }
 
 void Settings::setSquareThumbnails(bool mode)
 {
-    settingsConf.setValue(QSV("squareThumbnails"), mode);
+    settingsConf.setValue(u"squareThumbnails"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::transparencyGrid() const
 {
-    return settingsConf.value(QSV("drawTransparencyGrid"), false).toBool();
+    return settingsConf.value(u"drawTransparencyGrid"_sv, false).toBool();
 }
 
 void Settings::setTransparencyGrid(bool mode)
 {
-    settingsConf.setValue(QSV("drawTransparencyGrid"), mode);
+    settingsConf.setValue(u"drawTransparencyGrid"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::enableSmoothScroll() const
 {
-    return settingsConf.value(QSV("enableSmoothScroll"), true).toBool();
+    return settingsConf.value(u"enableSmoothScroll"_sv, true).toBool();
 }
 
 void Settings::setEnableSmoothScroll(bool mode)
 {
-    settingsConf.setValue(QSV("enableSmoothScroll"), mode);
+    settingsConf.setValue(u"enableSmoothScroll"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::useThumbnailCache() const
 {
-    return settingsConf.value(QSV("thumbnailCache"), true).toBool();
+    return settingsConf.value(u"thumbnailCache"_sv, true).toBool();
 }
 
 void Settings::setUseThumbnailCache(bool mode)
 {
-    settingsConf.setValue(QSV("thumbnailCache"), mode);
+    settingsConf.setValue(u"thumbnailCache"_sv, mode);
 }
 //------------------------------------------------------------------------------
 QStringList Settings::savedPaths() const
 {
-    return stateConf.value(QSV("savedPaths"), QDir::homePath()).toStringList();
+    return stateConf.value(u"savedPaths"_sv, QDir::homePath()).toStringList();
 }
 
 void Settings::setSavedPaths(QStringList const &paths)
 {
-    stateConf.setValue(QSV("savedPaths"), paths);
+    stateConf.setValue(u"savedPaths"_sv, paths);
 }
 //------------------------------------------------------------------------------
 QStringList Settings::bookmarks() const
 {
-    return stateConf.value(QSV("bookmarks")).toStringList();
+    return stateConf.value(u"bookmarks").toStringList();
 }
 
 void Settings::setBookmarks(QStringList const &paths)
 {
-    stateConf.setValue(QSV("bookmarks"), paths);
+    stateConf.setValue(u"bookmarks"_sv, paths);
 }
 //------------------------------------------------------------------------------
 bool Settings::placesPanel() const
 {
-    return stateConf.value(QSV("placesPanel"), true).toBool();
+    return stateConf.value(u"placesPanel"_sv, true).toBool();
 }
 
 void Settings::setPlacesPanel(bool mode)
 {
-    stateConf.setValue(QSV("placesPanel"), mode);
+    stateConf.setValue(u"placesPanel"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::placesPanelBookmarksExpanded() const
 {
-    return stateConf.value(QSV("placesPanelBookmarksExpanded"), true).toBool();
+    return stateConf.value(u"placesPanelBookmarksExpanded"_sv, true).toBool();
 }
 
 void Settings::setPlacesPanelBookmarksExpanded(bool mode)
 {
-    stateConf.setValue(QSV("placesPanelBookmarksExpanded"), mode);
+    stateConf.setValue(u"placesPanelBookmarksExpanded"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::placesPanelTreeExpanded() const
 {
-    return stateConf.value(QSV("placesPanelTreeExpanded"), true).toBool();
+    return stateConf.value(u"placesPanelTreeExpanded"_sv, true).toBool();
 }
 
 void Settings::setPlacesPanelTreeExpanded(bool mode)
 {
-    stateConf.setValue(QSV("placesPanelTreeExpanded"), mode);
+    stateConf.setValue(u"placesPanelTreeExpanded"_sv, mode);
 }
 //------------------------------------------------------------------------------
 int Settings::placesPanelWidth() const
 {
-    return stateConf.value(QSV("placesPanelWidth"), 260).toInt();
+    return stateConf.value(u"placesPanelWidth"_sv, 260).toInt();
 }
 
 void Settings::setPlacesPanelWidth(int width)
 {
-    stateConf.setValue(QSV("placesPanelWidth"), width);
+    stateConf.setValue(u"placesPanelWidth"_sv, width);
 }
 //------------------------------------------------------------------------------
 void Settings::setSlideshowInterval(int ms)
 {
-    settingsConf.setValue(QSV("slideshowInterval"), ms);
+    settingsConf.setValue(u"slideshowInterval"_sv, ms);
 }
 
 int Settings::slideshowInterval() const
 {
-    int interval = settingsConf.value(QSV("slideshowInterval"), 3000).toInt();
+    int interval = settingsConf.value(u"slideshowInterval"_sv, 3000).toInt();
     if (interval <= 0)
         interval = 3000;
     return interval;
@@ -895,7 +916,7 @@ int Settings::slideshowInterval() const
 //------------------------------------------------------------------------------
 int Settings::thumbnailerThreadCount() const
 {
-    int count = settingsConf.value(QSV("thumbnailerThreads"), 4).toInt();
+    int count = settingsConf.value(u"thumbnailerThreads"_sv, 4).toInt();
     if (count < 1)
         count = 4;
     return count;
@@ -903,58 +924,58 @@ int Settings::thumbnailerThreadCount() const
 
 void Settings::setThumbnailerThreadCount(int count)
 {
-    settingsConf.setValue(QSV("thumbnailerThreads"), count);
+    settingsConf.setValue(u"thumbnailerThreads"_sv, count);
 }
 //------------------------------------------------------------------------------
 bool Settings::smoothUpscaling() const
 {
-    return settingsConf.value(QSV("smoothUpscaling"), true).toBool();
+    return settingsConf.value(u"smoothUpscaling"_sv, true).toBool();
 }
 
 void Settings::setSmoothUpscaling(bool mode)
 {
-    settingsConf.setValue(QSV("smoothUpscaling"), mode);
+    settingsConf.setValue(u"smoothUpscaling"_sv, mode);
 }
 //------------------------------------------------------------------------------
 int Settings::folderViewIconSize() const
 {
-    return settingsConf.value(QSV("folderViewIconSize"), 120).toInt();
+    return settingsConf.value(u"folderViewIconSize"_sv, 120).toInt();
 }
 
 void Settings::setFolderViewIconSize(int value)
 {
-    settingsConf.setValue(QSV("folderViewIconSize"), value);
+    settingsConf.setValue(u"folderViewIconSize"_sv, value);
 }
 //------------------------------------------------------------------------------
 bool Settings::expandImage() const
 {
-    return settingsConf.value(QSV("expandImage"), false).toBool();
+    return settingsConf.value(u"expandImage"_sv, false).toBool();
 }
 
 void Settings::setExpandImage(bool mode)
 {
-    settingsConf.setValue(QSV("expandImage"), mode);
+    settingsConf.setValue(u"expandImage"_sv, mode);
 }
 //------------------------------------------------------------------------------
 int Settings::expandLimit() const
 {
-    return settingsConf.value(QSV("expandLimit"), 2).toInt();
+    return settingsConf.value(u"expandLimit"_sv, 2).toInt();
 }
 
 void Settings::setExpandLimit(int value)
 {
-    settingsConf.setValue(QSV("expandLimit"), value);
+    settingsConf.setValue(u"expandLimit"_sv, value);
 }
 //------------------------------------------------------------------------------
 int Settings::JPEGSaveQuality() const
 {
-    int quality = std::clamp(settingsConf.value(QSV("JPEGSaveQuality"), 95).toInt(), 0, 100);
+    int quality = std::clamp(settingsConf.value(u"JPEGSaveQuality"_sv, 95).toInt(), 0, 100);
     return quality;
 }
 
 void Settings::setJPEGSaveQuality(int value)
 {
-    settingsConf.setValue(QSV("JPEGSaveQuality"), value);
+    settingsConf.setValue(u"JPEGSaveQuality"_sv, value);
 }
 //------------------------------------------------------------------------------
 ScalingFilter Settings::scalingFilter() const
@@ -964,7 +985,7 @@ ScalingFilter Settings::scalingFilter() const
     // default to a nicer CV_CUBIC
     defaultFilter = 3;
 #endif
-    int mode = settingsConf.value(QSV("scalingFilter"), defaultFilter).toInt();
+    int mode = settingsConf.value(u"scalingFilter"_sv, defaultFilter).toInt();
 #ifndef USE_OPENCV
     if (mode > 2)
         mode = 1;
@@ -976,114 +997,114 @@ ScalingFilter Settings::scalingFilter() const
 
 void Settings::setScalingFilter(ScalingFilter mode)
 {
-    settingsConf.setValue(QSV("scalingFilter"), static_cast<int>(mode));
+    settingsConf.setValue(u"scalingFilter"_sv, static_cast<int>(mode));
 }
 //------------------------------------------------------------------------------
 bool Settings::smoothAnimatedImages() const
 {
-    return settingsConf.value(QSV("smoothAnimatedImages"), true).toBool();
+    return settingsConf.value(u"smoothAnimatedImages"_sv, true).toBool();
 }
 
 void Settings::setSmoothAnimatedImages(bool mode)
 {
-    settingsConf.setValue(QSV("smoothAnimatedImages"), mode);
+    settingsConf.setValue(u"smoothAnimatedImages"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::infoBarFullscreen() const
 {
-    return settingsConf.value(QSV("infoBarFullscreen"), true).toBool();
+    return settingsConf.value(u"infoBarFullscreen"_sv, true).toBool();
 }
 
 void Settings::setInfoBarFullscreen(bool mode)
 {
-    settingsConf.setValue(QSV("infoBarFullscreen"), mode);
+    settingsConf.setValue(u"infoBarFullscreen"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::infoBarWindowed() const
 {
-    return settingsConf.value(QSV("infoBarWindowed"), false).toBool();
+    return settingsConf.value(u"infoBarWindowed"_sv, false).toBool();
 }
 
 void Settings::setInfoBarWindowed(bool mode)
 {
-    settingsConf.setValue(QSV("infoBarWindowed"), mode);
+    settingsConf.setValue(u"infoBarWindowed"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::windowTitleExtendedInfo() const
 {
-    return settingsConf.value(QSV("windowTitleExtendedInfo"), true).toBool();
+    return settingsConf.value(u"windowTitleExtendedInfo"_sv, true).toBool();
 }
 
 void Settings::setWindowTitleExtendedInfo(bool mode)
 {
-    settingsConf.setValue(QSV("windowTitleExtendedInfo"), mode);
+    settingsConf.setValue(u"windowTitleExtendedInfo"_sv, mode);
 }
 
 //------------------------------------------------------------------------------
 bool Settings::cursorAutohide() const
 {
-    return settingsConf.value(QSV("cursorAutohiding"), true).toBool();
+    return settingsConf.value(u"cursorAutohiding"_sv, true).toBool();
 }
 
 void Settings::setCursorAutohide(bool mode)
 {
-    settingsConf.setValue(QSV("cursorAutohiding"), mode);
+    settingsConf.setValue(u"cursorAutohiding"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::firstRun() const
 {
-    return settingsConf.value(QSV("firstRun"), true).toBool();
+    return settingsConf.value(u"firstRun"_sv, true).toBool();
 }
 
 void Settings::setFirstRun(bool mode)
 {
-    settingsConf.setValue(QSV("firstRun"), mode);
+    settingsConf.setValue(u"firstRun"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::showSaveOverlay() const
 {
-    return settingsConf.value(QSV("showSaveOverlay"), true).toBool();
+    return settingsConf.value(u"showSaveOverlay"_sv, true).toBool();
 }
 
 void Settings::setShowSaveOverlay(bool mode)
 {
-    settingsConf.setValue(QSV("showSaveOverlay"), mode);
+    settingsConf.setValue(u"showSaveOverlay"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::confirmDelete() const
 {
-    return settingsConf.value(QSV("confirmDelete"), true).toBool();
+    return settingsConf.value(u"confirmDelete"_sv, true).toBool();
 }
 
 void Settings::setConfirmDelete(bool mode)
 {
-    settingsConf.setValue(QSV("confirmDelete"), mode);
+    settingsConf.setValue(u"confirmDelete"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::confirmTrash() const
 {
-    return settingsConf.value(QSV("confirmTrash"), true).toBool();
+    return settingsConf.value(u"confirmTrash"_sv, true).toBool();
 }
 
 void Settings::setConfirmTrash(bool mode)
 {
-    settingsConf.setValue(QSV("confirmTrash"), mode);
+    settingsConf.setValue(u"confirmTrash"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::unloadThumbs() const
 {
-    return settingsConf.value(QSV("unloadThumbs"), true).toBool();
+    return settingsConf.value(u"unloadThumbs"_sv, true).toBool();
 }
 
 void Settings::setUnloadThumbs(bool mode)
 {
-    settingsConf.setValue(QSV("unloadThumbs"), mode);
+    settingsConf.setValue(u"unloadThumbs"_sv, mode);
 }
 //------------------------------------------------------------------------------
 float Settings::zoomStep() const
 {
     bool  ok    = false;
-    float value = settingsConf.value(QSV("zoomStep"), 0.2f).toFloat(&ok);
+    float value = settingsConf.value(u"zoomStep"_sv, 0.2f).toFloat(&ok);
     if (!ok)
         return 0.2f;
     value = qBound(0.01f, value, 0.5f);
@@ -1093,17 +1114,17 @@ float Settings::zoomStep() const
 void Settings::setZoomStep(float value)
 {
     value = qBound(0.01f, value, 0.5f);
-    settingsConf.setValue(QSV("zoomStep"), value);
+    settingsConf.setValue(u"zoomStep"_sv, value);
 }
 //------------------------------------------------------------------------------
 void Settings::setZoomIndicatorMode(ZoomIndicatorMode mode)
 {
-    settingsConf.setValue(QSV("zoomIndicatorMode"), static_cast<int>(mode));
+    settingsConf.setValue(u"zoomIndicatorMode"_sv, static_cast<int>(mode));
 }
 
 ZoomIndicatorMode Settings::zoomIndicatorMode() const
 {
-    int mode = settingsConf.value(QSV("zoomIndicatorMode"), 0).toInt();
+    int mode = settingsConf.value(u"zoomIndicatorMode"_sv, 0).toInt();
     if (mode < 0 || mode > 2)
         mode = 0;
     return static_cast<ZoomIndicatorMode>(mode);
@@ -1111,12 +1132,12 @@ ZoomIndicatorMode Settings::zoomIndicatorMode() const
 //------------------------------------------------------------------------------
 void Settings::setFocusPointIn1to1Mode(ImageFocusPoint mode)
 {
-    settingsConf.setValue(QSV("focusPointIn1to1Mode"), static_cast<int>(mode));
+    settingsConf.setValue(u"focusPointIn1to1Mode"_sv, static_cast<int>(mode));
 }
 
 ImageFocusPoint Settings::focusPointIn1to1Mode() const
 {
-    int mode = settingsConf.value(QSV("focusPointIn1to1Mode"), 1).toInt();
+    int mode = settingsConf.value(u"focusPointIn1to1Mode"_sv, 1).toInt();
     if (mode < 0 || mode > 2)
         mode = 1;
     return static_cast<ImageFocusPoint>(mode);
@@ -1124,12 +1145,12 @@ ImageFocusPoint Settings::focusPointIn1to1Mode() const
 
 void Settings::setDefaultCropAction(DefaultCropAction mode)
 {
-    settingsConf.setValue(QSV("defaultCropAction"), static_cast<int>(mode));
+    settingsConf.setValue(u"defaultCropAction"_sv, static_cast<int>(mode));
 }
 
 DefaultCropAction Settings::defaultCropAction() const
 {
-    int mode = settingsConf.value(QSV("defaultCropAction"), 0).toInt();
+    int mode = settingsConf.value(u"defaultCropAction"_sv, 0).toInt();
     if (mode < 0 || mode > 1)
         mode = 0;
     return static_cast<DefaultCropAction>(mode);
@@ -1137,7 +1158,7 @@ DefaultCropAction Settings::defaultCropAction() const
 
 ImageScrolling Settings::imageScrolling() const
 {
-    int mode = settingsConf.value(QSV("imageScrolling"), 1).toInt();
+    int mode = settingsConf.value(u"imageScrolling"_sv, 1).toInt();
     if (mode < 0 || mode > 2)
         mode = 0;
     return static_cast<ImageScrolling>(mode);
@@ -1145,12 +1166,12 @@ ImageScrolling Settings::imageScrolling() const
 
 void Settings::setImageScrolling(ImageScrolling mode)
 {
-    settingsConf.setValue(QSV("imageScrolling"), static_cast<int>(mode));
+    settingsConf.setValue(u"imageScrolling"_sv, static_cast<int>(mode));
 }
 //------------------------------------------------------------------------------
 ViewMode Settings::defaultViewMode() const
 {
-    int mode = settingsConf.value(QSV("defaultViewMode"), 0).toInt();
+    int mode = settingsConf.value(u"defaultViewMode"_sv, 0).toInt();
     if (mode < 0 || mode > 1)
         mode = 0;
     return static_cast<ViewMode>(mode);
@@ -1158,12 +1179,12 @@ ViewMode Settings::defaultViewMode() const
 
 void Settings::setDefaultViewMode(ViewMode mode)
 {
-    settingsConf.setValue(QSV("defaultViewMode"), static_cast<int>(mode));
+    settingsConf.setValue(u"defaultViewMode"_sv, static_cast<int>(mode));
 }
 //------------------------------------------------------------------------------
 FolderEndAction Settings::folderEndAction() const
 {
-    int mode = settingsConf.value(QSV("folderEndAction"), 0).toInt();
+    int mode = settingsConf.value(u"folderEndAction"_sv, 0).toInt();
     if (mode < 0 || mode > 2)
         mode = 0;
     return static_cast<FolderEndAction>(mode);
@@ -1171,82 +1192,82 @@ FolderEndAction Settings::folderEndAction() const
 
 void Settings::setFolderEndAction(FolderEndAction mode)
 {
-    settingsConf.setValue(QSV("folderEndAction"), static_cast<int>(mode));
+    settingsConf.setValue(u"folderEndAction"_sv, static_cast<int>(mode));
 }
 //------------------------------------------------------------------------------
 bool Settings::printLandscape() const
 {
-    return stateConf.value(QSV("printLandscape"), false).toBool();
+    return stateConf.value(u"printLandscape"_sv, false).toBool();
 }
 
 void Settings::setPrintLandscape(bool mode)
 {
-    stateConf.setValue(QSV("printLandscape"), mode);
+    stateConf.setValue(u"printLandscape"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::printPdfDefault() const
 {
-    return stateConf.value(QSV("printPdfDefault"), false).toBool();
+    return stateConf.value(u"printPdfDefault"_sv, false).toBool();
 }
 
 void Settings::setPrintPdfDefault(bool mode)
 {
-    stateConf.setValue(QSV("printPdfDefault"), mode);
+    stateConf.setValue(u"printPdfDefault"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::printColor() const
 {
-    return stateConf.value(QSV("printColor"), false).toBool();
+    return stateConf.value(u"printColor"_sv, false).toBool();
 }
 
 void Settings::setPrintColor(bool mode)
 {
-    stateConf.setValue(QSV("printColor"), mode);
+    stateConf.setValue(u"printColor"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::printFitToPage() const
 {
-    return stateConf.value(QSV("printFitToPage"), true).toBool();
+    return stateConf.value(u"printFitToPage"_sv, true).toBool();
 }
 
 void Settings::setPrintFitToPage(bool mode)
 {
-    stateConf.setValue(QSV("printFitToPage"), mode);
+    stateConf.setValue(u"printFitToPage"_sv, mode);
 }
 //------------------------------------------------------------------------------
 QString Settings::lastPrinter() const
 {
-    return stateConf.value(QSV("lastPrinter"), QS("")).toString();
+    return stateConf.value(u"lastPrinter"_sv, u""_s).toString();
 }
 
 void Settings::setLastPrinter(QString const &name)
 {
-    stateConf.setValue(QSV("lastPrinter"), name);
+    stateConf.setValue(u"lastPrinter"_sv, name);
 }
 //------------------------------------------------------------------------------
 bool Settings::jxlAnimation() const
 {
-    return settingsConf.value(QSV("jxlAnimation"), false).toBool();
+    return settingsConf.value(u"jxlAnimation"_sv, false).toBool();
 }
 
 void Settings::setJxlAnimation(bool mode)
 {
-    settingsConf.setValue(QSV("jxlAnimation"), mode);
+    settingsConf.setValue(u"jxlAnimation"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::autoResizeWindow() const
 {
-    return settingsConf.value(QSV("autoResizeWindow"), false).toBool();
+    return settingsConf.value(u"autoResizeWindow"_sv, false).toBool();
 }
 
 void Settings::setAutoResizeWindow(bool mode)
 {
-    settingsConf.setValue(QSV("autoResizeWindow"), mode);
+    settingsConf.setValue(u"autoResizeWindow"_sv, mode);
 }
 //------------------------------------------------------------------------------
 int Settings::autoResizeLimit() const
 {
-    int limit = settingsConf.value(QSV("autoResizeLimit"), 90).toInt();
+    int limit = settingsConf.value(u"autoResizeLimit"_sv, 90).toInt();
     if (limit < 30 || limit > 100)
         limit = 90;
     return limit;
@@ -1254,12 +1275,12 @@ int Settings::autoResizeLimit() const
 
 void Settings::setAutoResizeLimit(int percent)
 {
-    settingsConf.setValue(QSV("autoResizeLimit"), percent);
+    settingsConf.setValue(u"autoResizeLimit"_sv, percent);
 }
 //------------------------------------------------------------------------------
 int Settings::memoryAllocationLimit() const
 {
-    int limit = settingsConf.value(QSV("memoryAllocationLimit"), 1024).toInt();
+    int limit = settingsConf.value(u"memoryAllocationLimit"_sv, 1024).toInt();
     if (limit < 512)
         limit = 512;
     else if (limit > 8192)
@@ -1269,79 +1290,79 @@ int Settings::memoryAllocationLimit() const
 
 void Settings::setMemoryAllocationLimit(int limitMB)
 {
-    settingsConf.setValue(QSV("memoryAllocationLimit"), limitMB);
+    settingsConf.setValue(u"memoryAllocationLimit"_sv, limitMB);
 }
 //------------------------------------------------------------------------------
 bool Settings::panelCenterSelection() const
 {
-    return settingsConf.value(QSV("panelCenterSelection"), false).toBool();
+    return settingsConf.value(u"panelCenterSelection"_sv, false).toBool();
 }
 
 void Settings::setPanelCenterSelection(bool mode)
 {
-    settingsConf.setValue(QSV("panelCenterSelection"), mode);
+    settingsConf.setValue(u"panelCenterSelection"_sv, mode);
 }
 //------------------------------------------------------------------------------
 QString Settings::language() const
 {
-    return settingsConf.value(QSV("language"), QS("en_US")).toString();
+    return settingsConf.value(u"language"_sv, u"en_US"_s).toString();
 }
 
 void Settings::setLanguage(QString const &lang)
 {
-    settingsConf.setValue(QSV("language"), lang);
+    settingsConf.setValue(u"language"_sv, lang);
 }
 //------------------------------------------------------------------------------
 bool Settings::useFixedZoomLevels() const
 {
-    return settingsConf.value(QSV("useFixedZoomLevels"), false).toBool();
+    return settingsConf.value(u"useFixedZoomLevels"_sv, false).toBool();
 }
 
 void Settings::setUseFixedZoomLevels(bool mode)
 {
-    settingsConf.setValue(QSV("useFixedZoomLevels"), mode);
+    settingsConf.setValue(u"useFixedZoomLevels"_sv, mode);
 }
 //------------------------------------------------------------------------------
 QString Settings::defaultZoomLevels()
 {
-    return QS("0.05,0.1,0.125,0.166,0.25,0.333,0.5,0.66,1,1.5,2,3,4,5,6,7,8");
+    return u"0.05,0.1,0.125,0.166,0.25,0.333,0.5,0.66,1,1.5,2,3,4,5,6,7,8"_s;
 }
 QString Settings::zoomLevels() const
 {
-    return settingsConf.value(QSV("fixedZoomLevels"), defaultZoomLevels()).toString();
+    return settingsConf.value(u"fixedZoomLevels"_sv, defaultZoomLevels()).toString();
 }
 
 void Settings::setZoomLevels(QString const &levels)
 {
-    settingsConf.setValue(QSV("fixedZoomLevels"), levels);
+    settingsConf.setValue(u"fixedZoomLevels"_sv, levels);
 }
 //------------------------------------------------------------------------------
 bool Settings::unlockMinZoom() const
 {
-    return settingsConf.value(QSV("unlockMinZoom"), true).toBool();
+    return settingsConf.value(u"unlockMinZoom"_sv, true).toBool();
 }
 
 void Settings::setUnlockMinZoom(bool mode)
 {
-    settingsConf.setValue(QSV("unlockMinZoom"), mode);
+    settingsConf.setValue(u"unlockMinZoom"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::sortFolders() const
 {
-    return settingsConf.value(QSV("sortFolders"), true).toBool();
+    return settingsConf.value(u"sortFolders"_sv, true).toBool();
 }
 
 void Settings::setSortFolders(bool mode)
 {
-    settingsConf.setValue(QSV("sortFolders"), mode);
+    settingsConf.setValue(u"sortFolders"_sv, mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::trackpadDetection() const
 {
-    return settingsConf.value(QSV("trackpadDetection"), true).toBool();
+    return settingsConf.value(u"trackpadDetection"_sv, true).toBool();
 }
 
 void Settings::setTrackpadDetection(bool mode)
 {
-    settingsConf.setValue(QSV("trackpadDetection"), mode);
+    settingsConf.setValue(u"trackpadDetection"_sv, mode);
 }

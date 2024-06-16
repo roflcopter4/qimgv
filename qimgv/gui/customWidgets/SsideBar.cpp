@@ -90,7 +90,7 @@ SSideBarItem::SSideBarItem(QString const &icon, QString const &name, QWidget *pa
 
 void SSideBarItem::setHighlighted(bool mode) {
     mHighlighted = mode;
-    this->setProperty("checked", mHighlighted);
+    setProperty("checked", mHighlighted);
     style()->unpolish(this);
     style()->polish(this);
 }

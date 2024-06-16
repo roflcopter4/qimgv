@@ -60,29 +60,29 @@ enum class ActiveSidePanel : uint8_t {
     CROP,
 };
 
-class MW Q_DECL_FINAL : public FloatingWidgetContainer
+class MW final : public FloatingWidgetContainer
 {
     Q_OBJECT
 
   public:
     explicit MW(QWidget *parent = nullptr);
     ~MW() override;
+    DELETE_COPY_MOVE_ROUTINES(MW);
 
-    bool isCropPanelActive() const;
     void onScalingFinished(std::unique_ptr<QPixmap> scaled);
     void showImage(std::unique_ptr<QPixmap> pixmap);
     void showAnimation(QSharedPointer<QMovie> const &movie);
     void showVideo(QString const &file);
-
     void setExifInfo(QMap<QString, QString> const &);
     void setCurrentInfo(qsizetype fileIndex, qsizetype fileCount,
                         QString const &filePath, QString const &fileName,
                         QSize imageSize, qint64 fileSize,
                         bool slideshow, bool shuffle, bool edited);
 
-    FolderViewProxy *getFolderView();
-    ThumbnailStripProxy *getThumbnailPanel();
+    FolderViewProxy     *getFolderView() const;
+    ThumbnailStripProxy *getThumbnailPanel() const;
 
+    ND bool     isCropPanelActive() const;
     ND ViewMode currentViewMode() const;
 
     bool showConfirmation(QString const &title, QString const &msg);
@@ -91,14 +91,15 @@ class MW Q_DECL_FINAL : public FloatingWidgetContainer
                                    FileReplaceMode mode, bool multiple);
 
   private:
-    bool cropPanelActive       = false;
-    bool showInfoBarFullscreen = false;
-    bool showInfoBarWindowed   = false;
-    bool maximized             = false;
+    bool cropPanelActive       : 1 = false;
+    bool showInfoBarFullscreen : 1 = false;
+    bool showInfoBarWindowed   : 1 = false;
+    bool maximized             : 1 = false;
+    bool unused_               : 4 = false;
 
     PanelPosition   panelPosition   = PanelPosition::TOP;
     ActiveSidePanel activeSidePanel = ActiveSidePanel::NONE;
-    qsizetype       currentDisplay  = 0;
+    int             currentDisplay  = 0;
 
     QHBoxLayout                *layout; // Initialized in constructor
     QTimer                     *windowGeometryChangeTimer = nullptr;

@@ -25,8 +25,7 @@ class ActionManager final : public QObject
   public:
     static ActionManager *getInstance();
     ~ActionManager() override;
-
-    DELETE_COPY_MOVE_CONSTRUCTORS(ActionManager);
+    DELETE_COPY_MOVE_ROUTINES(ActionManager);
 
     static auto actionList() -> QStringList;
     static auto keyForNativeScancode(quint32 scanCode) -> QString;
@@ -55,7 +54,7 @@ class ActionManager final : public QObject
     QMap<QString, QString> shortcuts; // <shortcut, action>
 
     void initDefaults();
-    void initActions();
+    void connectActions();
     void initShortcuts();
 
     QString modifierKeys(QEvent *event);

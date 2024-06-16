@@ -481,11 +481,11 @@ bool DirectoryManager::insertFileEntry(QString const &filePath)
 // skips filename regex check
 bool DirectoryManager::forceInsertFileEntry(QString const &filePath)
 {
-    if (!this->isFile(filePath) || containsFile(filePath))
+    if (!isFile(filePath) || containsFile(filePath))
         return false;
 
     auto    stdEntry = std::filesystem::directory_entry(util::QStringToStdPath(filePath));
-    QString fileName = util::StdStringToQString(stdEntry.path().filename().native());
+    QString fileName = util::StdPathToQString(stdEntry.path().filename());
     auto    fsEntry  = FSEntry(filePath, fileName, stdEntry.file_size(), stdEntry.last_write_time(), stdEntry.is_directory());
 
     insert_sorted(fileEntryVec, fsEntry, std::bind(compareFunction(), this, std::placeholders::_1, std::placeholders::_2));
@@ -558,7 +558,7 @@ bool DirectoryManager::insertDirEntry(QString const &dirPath)
     if (containsDir(dirPath))
         return false;
     auto stdEntry = std::filesystem::directory_entry(util::QStringToStdPath(dirPath));
-    QString dirName = util::StdStringToQString(stdEntry.path().filename().native());
+    QString dirName = util::StdPathToQString(stdEntry.path().filename());
 
     FSEntry fsEntry;
     fsEntry.name        = dirName;

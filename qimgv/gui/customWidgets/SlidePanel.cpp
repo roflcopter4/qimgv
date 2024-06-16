@@ -109,7 +109,7 @@ QRect SlidePanel::staticGeometry() const
 void SlidePanel::animationUpdate(int frame)
 {
     // Calculate local cursor position; correct for the current pos() animation
-    QPoint adjustedPos = mapFromGlobal(QCursor::pos()) + this->pos();
+    QPoint adjustedPos = mapFromGlobal(QCursor::pos()) + pos();
 
     if (triggerRect().contains(adjustedPos, true)) {
         // Cancel the animation if cursor is back at the panel

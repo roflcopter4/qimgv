@@ -23,7 +23,7 @@ enum class FloatingMessageIcon : uint8_t {
     ERROR,
 };
 
-class FloatingMessage Q_DECL_FINAL : public OverlayWidget
+class FloatingMessage : public OverlayWidget
 {
     Q_OBJECT
 
@@ -31,25 +31,25 @@ class FloatingMessage Q_DECL_FINAL : public OverlayWidget
     explicit FloatingMessage(FloatingWidgetContainer *parent);
     ~FloatingMessage() override;
 
-    void showMessage(QString const &text, FloatingMessageIcon icon, int fadeDuration);
+    void showMessage(QString const &text, FloatingMessageIcon icon, int duration);
     void showMessage(QString const &text, FloatingWidgetPosition Position, FloatingMessageIcon icon, int duration);
-
-  public Q_SLOTS:
-    void show();
-    void setText(QString text);
-
-  private:
-    QTimer                 visibilityTimer;
-    Ui::FloatingMessage   *ui;
-    int                    hideDelay;
-    FloatingWidgetPosition preferredPosition;
-
-    void doShowMessage(QString const &text, FloatingMessageIcon icon, int duration);
-    void setIcon(FloatingMessageIcon icon);
 
   protected:
     void mousePressEvent(QMouseEvent *event) override;
 
+  public Q_SLOTS:
+    void show();
+    void setText(QString const &text);
+
   private Q_SLOTS:
     void readSettings();
+
+  private:
+    void doShowMessage(QString const &text, FloatingMessageIcon icon, int duration);
+    void setIcon(FloatingMessageIcon icon);
+
+    Ui::FloatingMessage   *ui;
+    FloatingWidgetPosition preferredPosition;
+    int                    hideDelay;
+    QTimer                 visibilityTimer;
 };

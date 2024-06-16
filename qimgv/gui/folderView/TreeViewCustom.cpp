@@ -1,15 +1,16 @@
 #include "TreeViewCustom.h"
 
-TreeViewCustom::TreeViewCustom(QWidget *parent) : QTreeView(parent)
+TreeViewCustom::TreeViewCustom(QWidget *parent)
+    : QTreeView(parent)
 {
     setAcceptDrops(true);
     setDropIndicatorShown(true);
     setDragEnabled(true);
 
     // proxy scrollbar
-    verticalScrollBar()->setStyleSheet(QS("max-width: 0px;"));
+    verticalScrollBar()->setStyleSheet(u"max-width: 0px;"_s);
     overlayScrollbar.setParent(this);
-    overlayScrollbar.setStyleSheet(QS("background-color: transparent;"));
+    overlayScrollbar.setStyleSheet(u"background-color: transparent;"_s);
 
     connect(verticalScrollBar(), &QScrollBar::rangeChanged, &overlayScrollbar, &QScrollBar::setRange);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, &overlayScrollbar, &QScrollBar::setValue);
@@ -64,16 +65,18 @@ void TreeViewCustom::resizeEvent(QResizeEvent *event)
 
 void TreeViewCustom::updateScrollbarStyle()
 {
-    QString handle, hover = settings->colorScheme().scrollbar_hover.name();
+    QString handle;
+    QString hover = settings->colorScheme().scrollbar_hover.name();
+
     if (rect().contains(mapFromGlobal(QCursor::pos())))
         handle = settings->colorScheme().scrollbar.name();
     else
         handle = settings->colorScheme().folderview_hc.name();
+
     overlayScrollbar.setGeometry(width() - SCROLLBAR_WIDTH, 0, SCROLLBAR_WIDTH, height());
     overlayScrollbar.setStyleSheet(
-        QS("QScrollBar { background-color: transparent; } QScrollBar::handle:vertical { background-color: ") +
-        handle + QS(" } QScrollBar::handle:vertical:hover { background-color: ") +
-        hover + QS(" }"));
+        u"QScrollBar { background-color: transparent; } QScrollBar::handle:vertical { background-color: " +
+        handle + u" } QScrollBar::handle:vertical:hover { background-color: " + hover + u" }");
 
     overlayScrollbar.setVisible(verticalScrollBar()->maximum());
 }
@@ -85,18 +88,16 @@ void TreeViewCustom::onValueChanged()
 
 void TreeViewCustom::keyPressEvent(QKeyEvent *event)
 {
-    QModelIndex currentIndex = this->currentIndex();
+    QModelIndex index = currentIndex();
 
-    if (currentIndex.isValid()) {
+    if (index.isValid()) {
         switch (event->key()) {
         case Qt::Key_Space:
-            expandRecursively(currentIndex);
-            //expand(currentIndex);
+            expandRecursively(index);
             break;
-            //[[fallthrough]];
-        case Qt::Key_Enter:
         case Qt::Key_Return:
-            emit clicked(currentIndex);
+        case Qt::Key_Enter:
+            emit clicked(index);
             break;
         default:
             QTreeView::keyPressEvent(event);
@@ -105,10 +106,4 @@ void TreeViewCustom::keyPressEvent(QKeyEvent *event)
     } else {
             QTreeView::keyPressEvent(event);
     }
-#if 0
-    if ((event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) && currentIndex.isValid())
-        emit clicked(currentIndex);
-    else
-        QTreeView::keyPressEvent(event);
-#endif
 }

@@ -2,29 +2,19 @@
 
 ImageViewerV2::ImageViewerV2(QWidget *parent)
     : QGraphicsView(parent),
-      scene(nullptr),
+      movie(nullptr),
       pixmap(nullptr),
       pixmapScaled(nullptr),
-      movie(nullptr),
-      transparencyGrid(false),
-      expandImage(false),
-      smoothAnimatedImages(true),
-      smoothUpscaling(true),
-      forceFastScale(false),
-      keepFitMode(false),
-      loopPlayback(true),
-      mIsFullscreen(false),
-      scrollBarWorkaround(true),
-      useFixedZoomLevels(false),
-      trackpadDetection(true),
-      mouseInteraction(MouseInteractionState::NONE),
-      imageFitMode(ImageFitMode::WINDOW),
-      imageFitModeDefault(ImageFitMode::WINDOW),
-      mScalingFilter(ScalingFilter::BILINEAR),
-      mViewLock(ViewLockMode::NONE),
-      minScale(0.01),
-      maxScale(500.0),
-      fitWindowScale(0.125)
+      scene(new QGraphicsScene(this)),
+      checkboard(new QPixmap(u":res/icons/common/other/checkerboard.png"_s)),
+      animationTimer(new QTimer(this)),
+      scaleTimer(new QTimer(this)),
+      scrollTimeLineX(new QTimeLine(1000, this)),
+      scrollTimeLineY(new QTimeLine(1000, this)),
+      hs(horizontalScrollBar()),
+      vs(verticalScrollBar()),
+      dpr(devicePixelRatioF()),
+      zoomThreshold(static_cast<int>(devicePixelRatioF() * 4.0))
 {
     setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
     viewport()->setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -32,15 +22,10 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setAcceptDrops(false);
 
-    dpr = devicePixelRatioF();
-    hs  = horizontalScrollBar();
-    vs  = verticalScrollBar();
-
-    scrollTimeLineY = new QTimeLine(1000, this);
     scrollTimeLineY->setEasingCurve(QEasingCurve::Type::OutSine);
     scrollTimeLineY->setDuration(ANIMATION_SPEED);
     scrollTimeLineY->setUpdateInterval(SCROLL_UPDATE_RATE);
-    scrollTimeLineX = new QTimeLine(1000, this);
+
     scrollTimeLineX->setEasingCurve(QEasingCurve::Type::OutSine);
     scrollTimeLineX->setDuration(ANIMATION_SPEED);
     scrollTimeLineX->setUpdateInterval(SCROLL_UPDATE_RATE);
@@ -48,18 +33,10 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
     connect(scrollTimeLineX, &QTimeLine::finished, this, &ImageViewerV2::onScrollTimelineFinished);
     connect(scrollTimeLineY, &QTimeLine::finished, this, &ImageViewerV2::onScrollTimelineFinished);
 
-    animationTimer = new QTimer(this);
     animationTimer->setSingleShot(true);
-
-    scaleTimer = new QTimer(this);
     scaleTimer->setSingleShot(true);
     scaleTimer->setInterval(80);
-
-    checkboard = new QPixmap(QS(":res/icons/common/other/checkerboard.png"));
-
     lastTouchpadScroll.start();
-
-    zoomThreshold = static_cast<int>(devicePixelRatioF() * 4.);
 
     pixmapItem.setTransformationMode(Qt::TransformationMode::SmoothTransformation);
     pixmapItem.setScale(1.0);
@@ -72,7 +49,6 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
     setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
 
-    scene = new QGraphicsScene(this);
     scene->setSceneRect(0.0, 0.0, 200000.0, 200000.0);
     scene->setBackgroundBrush(QColor(60, 60, 103));
     scene->addItem(&pixmapItem);
@@ -84,9 +60,7 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
 
     connect(scrollTimeLineX, &QTimeLine::frameChanged, this, &ImageViewerV2::scrollToX);
     connect(scrollTimeLineY, &QTimeLine::frameChanged, this, &ImageViewerV2::scrollToY);
-
     connect(animationTimer, &QTimer::timeout, this, &ImageViewerV2::onAnimationTimer, Qt::UniqueConnection);
-
     connect(scaleTimer, &QTimer::timeout, this, &ImageViewerV2::requestScaling);
 
     readSettings();
@@ -183,7 +157,7 @@ void ImageViewerV2::onAnimationTimer()
         }
         movie->jumpToFrame(0);
     } else if (!movie->jumpToNextFrame()) {
-        qDebug() << QSV("[Error] QMovie:") << movie->lastErrorString();
+        qDebug() << u"[Error] QMovie:" << movie->lastErrorString();
         stopAnimation();
         return;
     }
@@ -227,7 +201,7 @@ bool ImageViewerV2::showAnimationFrame(int frame)
         movie->jumpToFrame(0);
     while (frame != movie->currentFrameNumber()) {
         if (!movie->jumpToNextFrame()) {
-            qDebug() << QSV("[Error] QMovie:") << movie->lastErrorString();
+            qDebug() << u"[Error] QMovie:" << movie->lastErrorString();
             break;
         }
     }
@@ -578,8 +552,8 @@ void ImageViewerV2::mouseReleaseEvent(QMouseEvent *event)
     mouseInteraction = MouseInteractionState::NONE;
 }
 
-// warning for future me:
-// for some reason in qgraphicsview wheelEvent is followed by moveEvent (wtf?)
+// Warning for future me:
+// For some reason in qgraphicsview wheelEvent is followed by moveEvent (wtf?)
 void ImageViewerV2::wheelEvent(QWheelEvent *event)
 {
     qDebug() << event->modifiers()
@@ -649,7 +623,7 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event)
                 centerIfNecessary();
                 snapToEdges();
             }
-            qDebug() << QSV("trackpad");
+            qDebug() << u"trackpad";
         } else if (isWheel && settings->imageScrolling() == ImageScrolling::BY_TRACKPAD_AND_WHEEL) {
             // scroll by interval
             QRect imgRect = scaledRectR();
@@ -660,17 +634,17 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event)
                 event->accept();
                 scroll(0, -angleDelta.y(), true);
             } else {
-                qDebug() << QSV("pass1");
+                qDebug() << u"pass1";
                 event->ignore(); // not scrollable; passthrough event
             }
         } else {
-            qDebug() << QSV("pass2");
+            qDebug() << u"pass2";
             event->ignore();
             QWidget::wheelEvent(event);
         }
         saveViewportPos();
     } else {
-        qDebug() << QSV("pass3");
+        qDebug() << u"pass3";
         event->ignore();
         QWidget::wheelEvent(event);
     }
@@ -743,7 +717,7 @@ void ImageViewerV2::updateMinScale()
     updateFitWindowScale();
     if (settings->unlockMinZoom())
         if (!pixmap->isNull())
-            minScale = qMax(10. / pixmap->width(), 10. / pixmap->height());
+            minScale = qMax(10.0 / pixmap->width(), 10.0 / pixmap->height());
         else
             minScale = 1.0;
     else if (imageFits())
@@ -917,6 +891,11 @@ inline void ImageViewerV2::scroll(int dx, int dy, bool smooth)
         scrollSmooth(dx, dy);
     else
         scrollPrecise(dx, dy);
+}
+
+void ImageViewerV2::mousePanWrapping(QMouseEvent *event)
+{
+    (void)this;
 }
 
 void ImageViewerV2::scrollSmooth(int dx, int dy)

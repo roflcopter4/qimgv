@@ -7,13 +7,12 @@ class MapOverlay::MapOverlayPrivate final : public QObject
   public:
     explicit MapOverlayPrivate(MapOverlay *qq);
     ~MapOverlayPrivate() override;
+    DELETE_COPY_MOVE_ROUTINES(MapOverlayPrivate);
 
     void moveInnerWidget(qreal x, qreal y);
     void moveMainImage(qreal xPos, qreal yPos);
 
     friend class MapOverlay;
-
-    DELETE_COPY_MOVE_CONSTRUCTORS(MapOverlayPrivate);
 
   private:
     MapOverlay *q;
@@ -145,9 +144,9 @@ void MapOverlay::setOpacity(qreal opacity)
 
 void MapOverlay::animateVisible(bool isVisible)
 {
-    if (isVisible)
-        this->setOpacity(1.0f);
-    else {
+    if (isVisible) {
+        setOpacity(1.0f);
+    } else {
         d->opacityAnimation->setEndValue(1.0f * isVisible);
 
         switch (location()) {
@@ -324,17 +323,17 @@ void MapOverlay::resizeEvent(QResizeEvent *event)
 void MapOverlay::leaveEvent(QEvent *event)
 {
     Q_UNUSED(event)
-    this->enableVisibility(false);
-    this->animateVisible(false);
-    this->update();
+    enableVisibility(false);
+    animateVisible(false);
+    update();
 }
 
 void MapOverlay::enterEvent(QEnterEvent *event)
 {
     Q_UNUSED(event)
-    this->enableVisibility(isVisible());
-    this->animateVisible(visibilityEnabled && imageDoesNotFit);
-    this->update();
+    enableVisibility(isVisible());
+    animateVisible(visibilityEnabled && imageDoesNotFit);
+    update();
 }
 
 int MapOverlay::size() const

@@ -71,7 +71,7 @@ void OverlayWidget::setFadeDuration(int duration)
 
 void OverlayWidget::setFadeEnabled(bool mode)
 {
-    this->fadeEnabled = mode;
+    fadeEnabled = mode;
 }
 
 void OverlayWidget::show()
@@ -83,7 +83,7 @@ void OverlayWidget::show()
 
 void OverlayWidget::hideAnimated()
 {
-    if (fadeEnabled && !this->isHidden()) {
+    if (fadeEnabled && !isHidden()) {
         fadeAnimation->stop();
         fadeAnimation->start(QPropertyAnimation::KeepWhenStopped);
     } else {

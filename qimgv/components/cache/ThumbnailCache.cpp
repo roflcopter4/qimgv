@@ -7,7 +7,7 @@ ThumbnailCache::ThumbnailCache(QObject *parent)
 
 QString ThumbnailCache::thumbnailPath(QString const &id) const
 {
-    return QString(cacheDirPath + id + QSV(".png"));
+    return cacheDirPath + id + u".png";
 }
 
 static bool checkExists(QString const &filePath)

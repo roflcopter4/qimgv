@@ -4,7 +4,7 @@
 FSEntry::FSEntry(QString const &filePath)
 {
     auto    stdEntry = std::filesystem::directory_entry(util::QStringToStdPath(filePath));
-    QString fileName = util::StdStringToQString(stdEntry.path().filename().native());
+    QString fileName = util::StdPathToQString(stdEntry.path().filename());
 
     try {
         name        = std::move(fileName);

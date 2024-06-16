@@ -32,11 +32,8 @@ class FolderView : public FloatingWidgetContainer, public IDirectoryView
     SelectionList const &selection() const final;
 
   public Q_SLOTS:
-    // ReSharper disable CppHidingFunction
     void show();
     void hide();
-    // ReSharper restore CppHidingFunction
-
     void populate(qsizetype) override;
     void setThumbnail(qsizetype pos, QSharedPointer<Thumbnail> thumb) override;
     void select(SelectionList) override;

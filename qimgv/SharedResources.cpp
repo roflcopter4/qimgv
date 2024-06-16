@@ -17,17 +17,17 @@ QPixmap *SharedResources::getPixmap(ShrIcon icon, qreal dpr)
     QPixmap *pixmap;
     QString  path;
     if (icon == ShrIcon::Error) {
-        path   = QS(":/res/icons/common/other/loading-error72.png");
+        path   = u":/res/icons/common/other/loading-error72.png"_s;
         pixmap = mLoadingErrorIcon72;
     } else {
-        path   = QS(":/res/icons/common/other/loading72.png");
+        path   = u":/res/icons/common/other/loading72.png"_s;
         pixmap = mLoadingIcon72;
     }
     if (pixmap)
         return pixmap;
 
-    if (dpr >= (1.0 + 0.001)) {
-        path.replace(u'.', QS("@2x."));
+    if (dpr >= 1.0 + 0.001) {
+        path.replace(u'.', u"@2x."_s);
         pixmap = new QPixmap(path);
         qreal pixmapDrawScale = dpr >= 2.0 - 0.001 ? dpr : 2.0;
         pixmap->setDevicePixelRatio(pixmapDrawScale);

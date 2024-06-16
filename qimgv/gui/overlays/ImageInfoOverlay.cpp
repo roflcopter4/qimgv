@@ -11,7 +11,7 @@ ImageInfoOverlay::ImageInfoOverlay(FloatingWidgetContainer *parent)
     entryStub.setFixedSize(280, 48);
     entryStub.setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     connect(ui->closeButton, &IconButton::clicked, this, &ImageInfoOverlay::hide);
-    this->setPosition(FloatingWidgetPosition::RIGHT);
+    setPosition(FloatingWidgetPosition::RIGHT);
 
     if (parent)
         setContainerSize(parent->size());

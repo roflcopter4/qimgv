@@ -1,7 +1,4 @@
 #pragma once
-#ifndef ZRfgG2QRefoVCpmgePTbJ2myqZLSCuRy4bbOv1kitYBTRTrgHx7oh4xfsymuq5S
-#define ZRfgG2QRefoVCpmgePTbJ2myqZLSCuRy4bbOv1kitYBTRTrgHx7oh4xfsymuq5S
-
 #include <QClipboard>
 #include <QDebug>
 #include <QDesktopServices>
@@ -17,8 +14,8 @@
 #include "components/DirectoryPresenter.h"
 #include "components/scriptManager/ScriptManager.h"
 #include "gui/MainWindow.h"
-#include "utils/Randomizer.h"
 #include "gui/dialogs/PrintDialog.h"
+#include "utils/Randomizer.h"
 
 #ifdef __GLIBC__
 # include <malloc.h>
@@ -37,77 +34,76 @@ class Core final : public QObject
     };
 
   public:
-    enum class MimeDataTarget { TARGET_CLIPBOARD, TARGET_DROP };
+    enum class MimeDataTarget {
+        TARGET_CLIPBOARD,
+        TARGET_DROP,
+    };
 
     explicit Core(QObject *parent);
     ~Core() override;
+    DELETE_COPY_MOVE_ROUTINES(Core);
+
     void showGui() const;
 
-    Q_DISABLE_COPY_MOVE(Core)
+  private:
+    void connectComponents();
+    void connectActions();
+    void loadTranslation();
+    void onUpdate();
+    void onFirstRun();
+    void rotateByDegrees(int degrees);
+    void reset();
+    bool setDirectory(QString const &path);
+    void syncRandomizer();
+    void guiSetImage(QSharedPointer<Image> const &img);
+    void startSlideshowTimer();
+    void startSlideshow();
+    void stopSlideshow();
+    bool saveFile(QString const &filePath, QString const &newPath);
+    bool saveFile(QString const &filePath);
+
+    void doInteractiveCopy(QString const &path, QString const &destDirectory, DialogResult &overwriteFiles);
+    void doInteractiveMove(QString const &path, QString const &destDirectory, DialogResult &overwriteFiles);
+
+    ND auto selectedPath() const -> QString;
+    ND auto getEditableImage(QString const &filePath) const -> QSharedPointer<ImageStatic>;
+    ND auto currentSelection() const -> QList<QString>;
+
+    template <typename... Args>
+    void edit_template(bool save,
+                       QString const &actionName,
+                       std::function<QImage *(QSharedPointer<QImage const>, Args...)> const &editFunc,
+                       Args &&...as);
+
+    static QMimeData *getMimeDataForImage(QSharedPointer<Image> const &img, MimeDataTarget target);
+
+    // The entire UI.
+    std::unique_ptr<MW> mw;
+
+    // components
+    QSharedPointer<DirectoryModel> model;
+    DirectoryPresenter *thumbPanelPresenter;
+    DirectoryPresenter *folderViewPresenter;
+
+    QTranslator  *translator;
+    QDrag        *mDrag;
+    Randomizer    randomizer;
+    QTimer        slideshowTimer;
+    QElapsedTimer t;
+
+    State state;
+    FolderEndAction folderEndAction;
+    bool  loopSlideshow;
+    bool  slideshow;
+    bool  shuffle;
 
   public Q_SLOTS:
     void updateInfoString();
     bool loadPath(QString);
 
-  private:
-    QElapsedTimer t;
-
-    void initGui();
-    void initComponents();
-    void connectComponents();
-    void initActions();
-    void loadTranslation();
-    void onUpdate();
-    void onFirstRun();
-
-    // ui stuff
-    MW   *mw = nullptr;
-    State state;
-    bool  loopSlideshow;
-    bool  slideshow;
-    bool  shuffle;
-
-    FolderEndAction folderEndAction;
-
-    // components
-    QSharedPointer<DirectoryModel> model;
-
-    DirectoryPresenter *thumbPanelPresenter;
-    DirectoryPresenter *folderViewPresenter;
-
-    void rotateByDegrees(int degrees);
-    void reset();
-    bool setDirectory(QString const &path);
-
-    QDrag       *mDrag;
-    QTranslator *translator;
-    Randomizer   randomizer;
-    QTimer       slideshowTimer;
-
-    void    syncRandomizer();
-    void    attachModel(DirectoryModel *newModel);
-    QString selectedPath();
-    void    guiSetImage(QSharedPointer<Image> const &img);
-    void    startSlideshowTimer();
-    void    startSlideshow();
-    void    stopSlideshow();
-    bool    saveFile(QString const &filePath, QString const &newPath);
-    bool    saveFile(QString const &filePath);
-
-    ND auto getEditableImage(QString const &filePath) const -> QSharedPointer<ImageStatic>;
-    ND auto currentSelection() const -> QList<QString>;
-
-    template <typename... Args>
-    void edit_template(bool save, QString const &actionName, std::function<QImage *(QSharedPointer<QImage const>, Args...)> const &editFunc, Args &&...as);
-
-    void doInteractiveCopy(QString const &path, QString const &destDirectory, DialogResult &overwriteFiles);
-    void doInteractiveMove(QString const &path, QString const &destDirectory, DialogResult &overwriteFiles);
-
-    static QMimeData *getMimeDataForImage(QSharedPointer<Image> const &img, MimeDataTarget target);
-
   private Q_SLOTS:
     auto removeFile(QString const &filePath, bool trash) -> FileOpResult;
-    void readSettings();
+    void updateSettings();
     void nextImage();
     void prevImage();
     void nextImageSlideshow();
@@ -128,8 +124,8 @@ class Core final : public QObject
     void interactiveCopy(QList<QString> const &paths, QString const &destDirectory);
     void interactiveMove(QList<QString> const &paths, QString const &destDirectory);
     void movePathsTo(QList<QString> const &paths, QString const &destDirectory);
-    void onFileRemoved(QString const &filePath, int index);
-    void onFileRenamed(QString const &fromPath, int indexFrom, const QString &toPath, int indexTo);
+    void onFileRemoved(QString const &filePath, qsizetype index);
+    void onFileRenamed(QString const &fromPath, qsizetype indexFrom, QString const &toPath, qsizetype indexTo);
     void onFileAdded(QString const &filePath);
     void onFileModified(QString const &filePath);
     void showResizeDialog();
@@ -168,7 +164,7 @@ class Core final : public QObject
     void showOpenDialog() const;
     void showInDirectory();
     void onDirectoryViewFileActivated(QString const &filePath);
-    bool loadFileIndex(int index, bool async, bool preload);
+    bool loadFileIndex(qsizetype index, bool async, bool preload);
     void enableDocumentView();
     void enableFolderView();
     void toggleFolderView();
@@ -182,6 +178,3 @@ class Core final : public QObject
     void print();
     void modelDelayLoad();
 };
-
-
-#endif

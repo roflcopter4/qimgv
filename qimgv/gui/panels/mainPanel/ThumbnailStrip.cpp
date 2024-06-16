@@ -30,7 +30,7 @@ void ThumbnailStrip::updateScrollbarIndicator()
 // Graphical issues otherwise.
 void ThumbnailStrip::setupLayout()
 {
-    this->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    setAlignment(Qt::AlignLeft | Qt::AlignTop);
 }
 
 ThumbnailWidget *ThumbnailStrip::createThumbnailWidget()

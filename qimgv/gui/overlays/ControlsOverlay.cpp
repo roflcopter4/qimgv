@@ -37,7 +37,7 @@ ControlsOverlay::ControlsOverlay(FloatingWidgetContainer *parent)
 
     if (parent)
         setContainerSize(parent->size());
-    // this->show();
+    // show();
 }
 
 void ControlsOverlay::show()
@@ -58,7 +58,7 @@ QSize ControlsOverlay::contentsSize() const
 
 void ControlsOverlay::fitToContents()
 {
-    this->setFixedSize(contentsSize());
+    setFixedSize(contentsSize());
     recalculateGeometry();
 }
 

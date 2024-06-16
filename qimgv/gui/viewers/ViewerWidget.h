@@ -8,7 +8,7 @@
 #include "gui/viewers/VideoPlayerInitProxy.h"
 #include <QVBoxLayout>
 
-class ViewerWidget Q_DECL_FINAL : public FloatingWidgetContainer
+class ViewerWidget final : public FloatingWidgetContainer
 {
     Q_OBJECT
 
@@ -44,8 +44,7 @@ class ViewerWidget Q_DECL_FINAL : public FloatingWidgetContainer
     VideoPlayerInitProxy      *videoPlayer;
     VideoControlsProxyWrapper *videoControls;
     ZoomIndicatorOverlayProxy *zoomIndicator;
-
-    std::unique_ptr<ContextMenu> contextMenu;
+    ContextMenu               *contextMenu;
 
     QTimer cursorTimer;
     CurrentWidget currentWidget;
@@ -60,12 +59,12 @@ class ViewerWidget Q_DECL_FINAL : public FloatingWidgetContainer
 
     ND QRect videoControlsArea() const;
 
-  private slots:
+  private Q_SLOTS:
     void onScaleChanged(qreal);
     void onVideoPlaybackFinished();
     void onAnimationPlaybackFinished();
 
-  signals:
+  Q_SIGNALS:
     void scalingRequested(QSize, ScalingFilter);
     void zoomIn();
     void zoomOut();

@@ -125,13 +125,13 @@ void MainPanel::readSettings()
 {
     auto newPos = settings->panelPosition();
     if (newPos == PanelPosition::TOP || newPos == PanelPosition::BOTTOM) {
-        this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         int h = sizeHint().height();
         if (h)
             setFixedHeight(h);
         setFixedWidth(QWIDGETSIZE_MAX);
     } else {
-        this->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+        setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
         int w = sizeHint().width();
         if (w)
             setFixedWidth(w);

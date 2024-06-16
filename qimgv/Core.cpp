@@ -5,33 +5,39 @@
  */
 
 #include "Core.h"
-#include <stdexcept>
-
 #ifdef Q_OS_WINDOWS
+# include <ShlObj.h>
 # include <Shlwapi.h>
-# include <shlobj.h>
 #endif
 
 Core::Core(QObject *parent)
-    : loopSlideshow(false),
-      slideshow(false),
-      shuffle(false),
-      folderEndAction(FolderEndAction::NOTHING),
+    : QObject(parent),
+      mw(new MW(nullptr)), // Creates the GUI and all widgets.
+      model(QSharedPointer<DirectoryModel>(new DirectoryModel(nullptr))),
       thumbPanelPresenter(new DirectoryPresenter(this)),
       folderViewPresenter(new DirectoryPresenter(this)),
-      mDrag(nullptr),
-      translator(nullptr)
+      translator(new QTranslator(this)),
+      mDrag(new QDrag(this)),
+      folderEndAction(settings->folderEndAction()),
+      loopSlideshow(settings->loopSlideshow()),
+      slideshow(false),
+      shuffle(false)
 {
-    setParent(parent);
+    mw->hide();
     loadTranslation();
-    initGui();
-    initComponents();
-    connectComponents();
-    initActions();
-    readSettings();
-    slideshowTimer.setSingleShot(true);
-    connect(settings, &Settings::settingsChanged, this, &Core::readSettings);
 
+    thumbPanelPresenter->setModel(model);
+    folderViewPresenter->setModel(model);
+    folderViewPresenter->setShowDirs(settings->folderViewMode() == FolderViewMode::EXT_FOLDERS);
+
+    connectComponents();
+    connectActions();
+    connect(settings, &Settings::settingsChanged, this, &Core::updateSettings);
+
+    slideshowTimer.setInterval(settings->slideshowInterval());
+    slideshowTimer.setSingleShot(true);
+
+    // Print a welcome on the first run, or the changelog if we've updated.
     QVersionNumber lastVersion = settings->lastVersion();
     if (settings->firstRun())
         onFirstRun();
@@ -39,56 +45,38 @@ Core::Core(QObject *parent)
         onUpdate();
 }
 
-Core::~Core()
-{
-    delete mw;
-}
+Core::~Core() = default;
 
-void Core::readSettings()
-{
-    loopSlideshow   = settings->loopSlideshow();
-    folderEndAction = settings->folderEndAction();
-    slideshowTimer.setInterval(settings->slideshowInterval());
-    bool showDirs = (settings->folderViewMode() == FolderViewMode::EXT_FOLDERS);
-    if (folderViewPresenter->showDirs() != showDirs)
-        folderViewPresenter->setShowDirs(showDirs);
-    if (shuffle)
-        syncRandomizer();
-}
+/****************************************************************************************/
 
-void Core::showGui() const
+void Core::loadTranslation()
 {
-    if (mw && !mw->isVisible())
-        mw->showDefault();
-    // TODO: this is unreliable.
-    // how to make it wait until a window is shown?
-    qApp->processEvents();
-    QTimer::singleShot(50, mw, SLOT(setupFullUi()));
-}
+    QString trPathFallback = QCoreApplication::applicationDirPath() + u"/translations";
+#ifdef TRANSLATIONS_PATH
+    QString trPath = QStringLiteral(TRANSLATIONS_PATH);
+#else
+    QString const &trPath = trPathFallback;
+#endif
 
-// create MainWindow and all widgets
-void Core::initGui()
-{
-    if (mw)
-        throw std::logic_error("Cannot initialize main window twice.");
-    mw = new MW();
-    mw->hide();
-}
+    QString localeName = settings->language();
+    if (localeName == u"system"_sv)
+        localeName = QLocale::system().name();
+    if (localeName.isEmpty() || localeName == u"en_US"_sv) {
+        QApplication::removeTranslator(translator);
+        return;
+    }
 
-void Core::attachModel(DirectoryModel *newModel)
-{
-    model = QSharedPointer<DirectoryModel>(newModel);
-    thumbPanelPresenter->setModel(model);
-    folderViewPresenter->setModel(model);
-    bool showDirs = settings->folderViewMode() == FolderViewMode::EXT_FOLDERS;
-    folderViewPresenter->setShowDirs(showDirs);
-    if (shuffle)
-        syncRandomizer();
-}
+    QString trFile = trPath + u'/' + localeName;
+    if (!translator->load(trFile)) {
+        qDebug() << u"Could not load translation file: " << trFile;
+        QString trFileFallback = trPathFallback + u'/' + localeName;
+        if (!translator->load(trFileFallback)) {
+            qDebug() << u"Could not load translation file: " << trFileFallback;
+            return;
+        }
+    }
 
-void Core::initComponents()
-{
-    attachModel(new DirectoryModel(nullptr));
+    QCoreApplication::installTranslator(translator);
 }
 
 void Core::connectComponents()
@@ -103,142 +91,138 @@ void Core::connectComponents()
     connect(folderViewPresenter, &DirectoryPresenter::draggedOut,    this, qOverload<QList<QString> const &>(&Core::onDraggedOut));
     connect(folderViewPresenter, &DirectoryPresenter::droppedInto,   this, qOverload<QList<QString> const &, QString const &>(&Core::movePathsTo));
 
-    connect(scriptManager, &ScriptManager::error, mw, &MW::showError);
+    connect(scriptManager, &ScriptManager::error, mw.get(), &MW::showError);
 
-    connect(mw, &MW::opened,                this, &Core::loadPath);
-    connect(mw, &MW::droppedIn,             this, &Core::onDropIn);
-    connect(mw, &MW::copyRequested,         this, &Core::copyCurrentFile);
-    connect(mw, &MW::moveRequested,         this, &Core::moveCurrentFile);
-    connect(mw, &MW::copyUrlsRequested,     this, qOverload<QList<QString> const &, QString const &>(&Core::copyPathsTo));
-    connect(mw, &MW::moveUrlsRequested,     this, &Core::movePathsTo);
-    connect(mw, &MW::cropRequested,         this, &Core::crop);
-    connect(mw, &MW::cropAndSaveRequested,  this, &Core::cropAndSave);
-    connect(mw, &MW::saveAsClicked,         this, &Core::requestSavePath);
-    connect(mw, &MW::saveRequested,         this, &Core::saveCurrentFile);
-    connect(mw, &MW::saveAsRequested,       this, &Core::saveCurrentFileAs);
-    connect(mw, &MW::resizeRequested,       this, &Core::resize);
-    connect(mw, &MW::renameRequested,       this, &Core::renameCurrentSelection);
-    connect(mw, &MW::sortingSelected,       this, &Core::sortBy);
-    connect(mw, &MW::showFoldersChanged,    this, &Core::setFoldersDisplay);
-    connect(mw, &MW::discardEditsRequested, this, &Core::discardEdits);
-    connect(mw, &MW::draggedOut,            this, qOverload<>(&Core::onDraggedOut));
-    connect(mw, &MW::playbackFinished,      this, &Core::onPlaybackFinished);
-    connect(mw, &MW::scalingRequested,      this, &Core::scalingRequest);
+    connect(mw.get(), &MW::copyRequested,         this, &Core::copyCurrentFile);
+    connect(mw.get(), &MW::copyUrlsRequested,     this, qOverload<QList<QString> const &, QString const &>(&Core::copyPathsTo));
+    connect(mw.get(), &MW::cropAndSaveRequested,  this, &Core::cropAndSave);
+    connect(mw.get(), &MW::cropRequested,         this, &Core::crop);
+    connect(mw.get(), &MW::discardEditsRequested, this, &Core::discardEdits);
+    connect(mw.get(), &MW::draggedOut,            this, qOverload<>(&Core::onDraggedOut));
+    connect(mw.get(), &MW::droppedIn,             this, &Core::onDropIn);
+    connect(mw.get(), &MW::moveRequested,         this, &Core::moveCurrentFile);
+    connect(mw.get(), &MW::moveUrlsRequested,     this, &Core::movePathsTo);
+    connect(mw.get(), &MW::opened,                this, &Core::loadPath);
+    connect(mw.get(), &MW::playbackFinished,      this, &Core::onPlaybackFinished);
+    connect(mw.get(), &MW::renameRequested,       this, &Core::renameCurrentSelection);
+    connect(mw.get(), &MW::resizeRequested,       this, &Core::resize);
+    connect(mw.get(), &MW::saveAsClicked,         this, &Core::requestSavePath);
+    connect(mw.get(), &MW::saveAsRequested,       this, &Core::saveCurrentFileAs);
+    connect(mw.get(), &MW::saveRequested,         this, &Core::saveCurrentFile);
+    connect(mw.get(), &MW::scalingRequested,      this, &Core::scalingRequest);
+    connect(mw.get(), &MW::showFoldersChanged,    this, &Core::setFoldersDisplay);
+    connect(mw.get(), &MW::sortingSelected,       this, &Core::sortBy);
+
+    connect(model.get(), &DirectoryModel::fileAdded,      this, &Core::onFileAdded);
+    connect(model.get(), &DirectoryModel::fileRemoved,    this, &Core::onFileRemoved);
+    connect(model.get(), &DirectoryModel::fileRenamed,    this, &Core::onFileRenamed);
+    connect(model.get(), &DirectoryModel::fileModified,   this, &Core::onFileModified);
+    connect(model.get(), &DirectoryModel::loaded,         this, &Core::onModelLoaded);
+    connect(model.get(), &DirectoryModel::imageReady,     this, &Core::onModelItemReady);
+    connect(model.get(), &DirectoryModel::imageUpdated,   this, &Core::onModelItemUpdated);
+    connect(model.get(), &DirectoryModel::sortingChanged, this, &Core::onModelSortingChanged);
+    connect(model.get(), &DirectoryModel::loadFailed,     this, &Core::onLoadFailed);
 
     connect(model->scaler(), &Scaler::scalingFinished, this, &Core::onScalingFinished);
-    connect(model.get(), &DirectoryModel::fileAdded,       this, &Core::onFileAdded);
-    connect(model.get(), &DirectoryModel::fileRemoved,     this, &Core::onFileRemoved);
-    connect(model.get(), &DirectoryModel::fileRenamed,     this, &Core::onFileRenamed);
-    connect(model.get(), &DirectoryModel::fileModified,    this, &Core::onFileModified);
-    connect(model.get(), &DirectoryModel::loaded,          this, &Core::onModelLoaded);
-    connect(model.get(), &DirectoryModel::imageReady,      this, &Core::onModelItemReady);
-    connect(model.get(), &DirectoryModel::imageUpdated,    this, &Core::onModelItemUpdated);
-    connect(model.get(), &DirectoryModel::sortingChanged,  this, &Core::onModelSortingChanged);
-    connect(model.get(), &DirectoryModel::loadFailed,      this, &Core::onLoadFailed);
-
     connect(&slideshowTimer, &QTimer::timeout, this, &Core::nextImageSlideshow);
 }
 
-void Core::initActions()
+void Core::connectActions()
 {
-    connect(actionManager, &ActionManager::nextImage,               this, &Core::nextImage);
-    connect(actionManager, &ActionManager::prevImage,               this, &Core::prevImage);
-    connect(actionManager, &ActionManager::fitWindow,               mw,   &MW::fitWindow);
-    connect(actionManager, &ActionManager::fitWidth,                mw,   &MW::fitWidth);
-    connect(actionManager, &ActionManager::fitNormal,               mw,   &MW::fitOriginal);
-    connect(actionManager, &ActionManager::toggleFitMode,           mw,   &MW::switchFitMode);
-    connect(actionManager, &ActionManager::toggleFullscreen,        mw,   &MW::triggerFullScreen);
-    connect(actionManager, &ActionManager::lockZoom,                mw,   &MW::toggleLockZoom);
-    connect(actionManager, &ActionManager::lockView,                mw,   &MW::toggleLockView);
-    connect(actionManager, &ActionManager::zoomIn,                  mw,   &MW::zoomIn);
-    connect(actionManager, &ActionManager::zoomOut,                 mw,   &MW::zoomOut);
-    connect(actionManager, &ActionManager::zoomInCursor,            mw,   &MW::zoomInCursor);
-    connect(actionManager, &ActionManager::zoomOutCursor,           mw,   &MW::zoomOutCursor);
-    connect(actionManager, &ActionManager::scrollUp,                mw,   &MW::scrollUp);
-    connect(actionManager, &ActionManager::scrollDown,              mw,   &MW::scrollDown);
-    connect(actionManager, &ActionManager::scrollLeft,              mw,   &MW::scrollLeft);
-    connect(actionManager, &ActionManager::scrollRight,             mw,   &MW::scrollRight);
-    connect(actionManager, &ActionManager::resize,                  this, &Core::showResizeDialog);
-    connect(actionManager, &ActionManager::flipH,                   this, &Core::flipH);
-    connect(actionManager, &ActionManager::flipV,                   this, &Core::flipV);
-    connect(actionManager, &ActionManager::rotateLeft,              this, &Core::rotateLeft);
-    connect(actionManager, &ActionManager::rotateRight,             this, &Core::rotateRight);
-    connect(actionManager, &ActionManager::openSettings,            mw,   &MW::showSettings);
-    connect(actionManager, &ActionManager::crop,                    this, &Core::toggleCropPanel);
-    connect(actionManager, &ActionManager::setWallpaper,            this, &Core::setWallpaper);
-    connect(actionManager, &ActionManager::open,                    this, &Core::showOpenDialog);
-    connect(actionManager, &ActionManager::save,                    this, &Core::saveCurrentFile);
-    connect(actionManager, &ActionManager::saveAs,                  this, &Core::requestSavePath);
-    connect(actionManager, &ActionManager::exit,                    this, &Core::close);
-    connect(actionManager, &ActionManager::closeFullScreenOrExit,   mw,   &MW::closeFullScreenOrExit);
-    connect(actionManager, &ActionManager::removeFile,              this, &Core::removePermanent);
-    connect(actionManager, &ActionManager::moveToTrash,             this, &Core::moveToTrash);
-    connect(actionManager, &ActionManager::copyFile,                mw,   &MW::triggerCopyOverlay);
-    connect(actionManager, &ActionManager::moveFile,                mw,   &MW::triggerMoveOverlay);
-    connect(actionManager, &ActionManager::jumpToFirst,             this, &Core::jumpToFirst);
-    connect(actionManager, &ActionManager::jumpToLast,              this, &Core::jumpToLast);
-    connect(actionManager, &ActionManager::runScript,               this, &Core::runScript);
-    connect(actionManager, &ActionManager::pauseVideo,              mw,   &MW::pauseVideo);
-    connect(actionManager, &ActionManager::seekVideoForward,        mw,   &MW::seekVideoForward);
-    connect(actionManager, &ActionManager::seekVideoBackward,       mw,   &MW::seekVideoBackward);
-    connect(actionManager, &ActionManager::frameStep,               mw,   &MW::frameStep);
-    connect(actionManager, &ActionManager::frameStepBack,           mw,   &MW::frameStepBack);
-    connect(actionManager, &ActionManager::folderView,              this, &Core::enableFolderView);
-    connect(actionManager, &ActionManager::documentView,            this, &Core::enableDocumentView);
-    connect(actionManager, &ActionManager::toggleFolderView,        this, &Core::toggleFolderView);
-    connect(actionManager, &ActionManager::reloadImage,             this, qOverload<>(&Core::reloadImage));
     connect(actionManager, &ActionManager::copyFileClipboard,       this, &Core::copyFileClipboard);
     connect(actionManager, &ActionManager::copyPathClipboard,       this, &Core::copyPathClipboard);
-    connect(actionManager, &ActionManager::renameFile,              this, &Core::showRenameDialog);
-    connect(actionManager, &ActionManager::contextMenu,             mw,   &MW::showContextMenu);
-    connect(actionManager, &ActionManager::toggleTransparencyGrid,  mw,   &MW::toggleTransparencyGrid);
-    connect(actionManager, &ActionManager::sortByName,              this, &Core::sortByName);
-    connect(actionManager, &ActionManager::sortByTime,              this, &Core::sortByTime);
-    connect(actionManager, &ActionManager::sortBySize,              this, &Core::sortBySize);
-    connect(actionManager, &ActionManager::toggleImageInfo,         mw,   &MW::toggleImageInfoOverlay);
-    connect(actionManager, &ActionManager::toggleShuffle,           this, &Core::toggleShuffle);
-    connect(actionManager, &ActionManager::toggleScalingFilter,     mw,   &MW::toggleScalingFilter);
-    connect(actionManager, &ActionManager::showInDirectory,         this, &Core::showInDirectory);
-    connect(actionManager, &ActionManager::toggleMute,              mw,   &MW::toggleMute);
-    connect(actionManager, &ActionManager::volumeUp,                mw,   &MW::volumeUp);
-    connect(actionManager, &ActionManager::volumeDown,              mw,   &MW::volumeDown);
-    connect(actionManager, &ActionManager::toggleSlideshow,         this, &Core::toggleSlideshow);
-    connect(actionManager, &ActionManager::goUp,                    this, &Core::loadParentDir);
+    connect(actionManager, &ActionManager::crop,                    this, &Core::toggleCropPanel);
     connect(actionManager, &ActionManager::discardEdits,            this, &Core::discardEdits);
+    connect(actionManager, &ActionManager::documentView,            this, &Core::enableDocumentView);
+    connect(actionManager, &ActionManager::exit,                    this, &Core::close);
+    connect(actionManager, &ActionManager::flipH,                   this, &Core::flipH);
+    connect(actionManager, &ActionManager::flipV,                   this, &Core::flipV);
+    connect(actionManager, &ActionManager::folderView,              this, &Core::enableFolderView);
+    connect(actionManager, &ActionManager::goUp,                    this, &Core::loadParentDir);
+    connect(actionManager, &ActionManager::jumpToFirst,             this, &Core::jumpToFirst);
+    connect(actionManager, &ActionManager::jumpToLast,              this, &Core::jumpToLast);
+    connect(actionManager, &ActionManager::moveToTrash,             this, &Core::moveToTrash);
     connect(actionManager, &ActionManager::nextDirectory,           this, &Core::nextDirectory);
-    connect(actionManager, &ActionManager::prevDirectory,           this, qOverload<>(&Core::prevDirectory));
-    connect(actionManager, &ActionManager::print,                   this, &Core::print);
-    connect(actionManager, &ActionManager::toggleFullscreenInfoBar, this, &Core::toggleFullscreenInfoBar);
+    connect(actionManager, &ActionManager::nextImage,               this, &Core::nextImage);
+    connect(actionManager, &ActionManager::open,                    this, &Core::showOpenDialog);
     connect(actionManager, &ActionManager::pasteFile,               this, &Core::openFromClipboard);
+    connect(actionManager, &ActionManager::prevDirectory,           this, qOverload<>(&Core::prevDirectory));
+    connect(actionManager, &ActionManager::prevImage,               this, &Core::prevImage);
+    connect(actionManager, &ActionManager::print,                   this, &Core::print);
+    connect(actionManager, &ActionManager::reloadImage,             this, qOverload<>(&Core::reloadImage));
+    connect(actionManager, &ActionManager::removeFile,              this, &Core::removePermanent);
+    connect(actionManager, &ActionManager::renameFile,              this, &Core::showRenameDialog);
+    connect(actionManager, &ActionManager::resize,                  this, &Core::showResizeDialog);
+    connect(actionManager, &ActionManager::rotateLeft,              this, &Core::rotateLeft);
+    connect(actionManager, &ActionManager::rotateRight,             this, &Core::rotateRight);
+    connect(actionManager, &ActionManager::runScript,               this, &Core::runScript);
+    connect(actionManager, &ActionManager::save,                    this, &Core::saveCurrentFile);
+    connect(actionManager, &ActionManager::saveAs,                  this, &Core::requestSavePath);
+    connect(actionManager, &ActionManager::setWallpaper,            this, &Core::setWallpaper);
+    connect(actionManager, &ActionManager::showInDirectory,         this, &Core::showInDirectory);
+    connect(actionManager, &ActionManager::sortByName,              this, &Core::sortByName);
+    connect(actionManager, &ActionManager::sortBySize,              this, &Core::sortBySize);
+    connect(actionManager, &ActionManager::sortByTime,              this, &Core::sortByTime);
+    connect(actionManager, &ActionManager::toggleFolderView,        this, &Core::toggleFolderView);
+    connect(actionManager, &ActionManager::toggleFullscreenInfoBar, this, &Core::toggleFullscreenInfoBar);
+    connect(actionManager, &ActionManager::toggleShuffle,           this, &Core::toggleShuffle);
+    connect(actionManager, &ActionManager::toggleSlideshow,         this, &Core::toggleSlideshow);
+
+    connect(actionManager, &ActionManager::closeFullScreenOrExit,  mw.get(), &MW::closeFullScreenOrExit);
+    connect(actionManager, &ActionManager::contextMenu,            mw.get(), &MW::showContextMenu);
+    connect(actionManager, &ActionManager::copyFile,               mw.get(), &MW::triggerCopyOverlay);
+    connect(actionManager, &ActionManager::fitNormal,              mw.get(), &MW::fitOriginal);
+    connect(actionManager, &ActionManager::fitWidth,               mw.get(), &MW::fitWidth);
+    connect(actionManager, &ActionManager::fitWindow,              mw.get(), &MW::fitWindow);
+    connect(actionManager, &ActionManager::frameStep,              mw.get(), &MW::frameStep);
+    connect(actionManager, &ActionManager::frameStepBack,          mw.get(), &MW::frameStepBack);
+    connect(actionManager, &ActionManager::lockView,               mw.get(), &MW::toggleLockView);
+    connect(actionManager, &ActionManager::lockZoom,               mw.get(), &MW::toggleLockZoom);
+    connect(actionManager, &ActionManager::moveFile,               mw.get(), &MW::triggerMoveOverlay);
+    connect(actionManager, &ActionManager::openSettings,           mw.get(), &MW::showSettings);
+    connect(actionManager, &ActionManager::pauseVideo,             mw.get(), &MW::pauseVideo);
+    connect(actionManager, &ActionManager::scrollDown,             mw.get(), &MW::scrollDown);
+    connect(actionManager, &ActionManager::scrollLeft,             mw.get(), &MW::scrollLeft);
+    connect(actionManager, &ActionManager::scrollRight,            mw.get(), &MW::scrollRight);
+    connect(actionManager, &ActionManager::scrollUp,               mw.get(), &MW::scrollUp);
+    connect(actionManager, &ActionManager::seekVideoBackward,      mw.get(), &MW::seekVideoBackward);
+    connect(actionManager, &ActionManager::seekVideoForward,       mw.get(), &MW::seekVideoForward);
+    connect(actionManager, &ActionManager::toggleFitMode,          mw.get(), &MW::switchFitMode);
+    connect(actionManager, &ActionManager::toggleFullscreen,       mw.get(), &MW::triggerFullScreen);
+    connect(actionManager, &ActionManager::toggleImageInfo,        mw.get(), &MW::toggleImageInfoOverlay);
+    connect(actionManager, &ActionManager::toggleMute,             mw.get(), &MW::toggleMute);
+    connect(actionManager, &ActionManager::toggleScalingFilter,    mw.get(), &MW::toggleScalingFilter);
+    connect(actionManager, &ActionManager::toggleTransparencyGrid, mw.get(), &MW::toggleTransparencyGrid);
+    connect(actionManager, &ActionManager::volumeDown,             mw.get(), &MW::volumeDown);
+    connect(actionManager, &ActionManager::volumeUp,               mw.get(), &MW::volumeUp);
+    connect(actionManager, &ActionManager::zoomIn,                 mw.get(), &MW::zoomIn);
+    connect(actionManager, &ActionManager::zoomInCursor,           mw.get(), &MW::zoomInCursor);
+    connect(actionManager, &ActionManager::zoomOut,                mw.get(), &MW::zoomOut);
+    connect(actionManager, &ActionManager::zoomOutCursor,          mw.get(), &MW::zoomOutCursor);
 }
 
-void Core::loadTranslation()
+/****************************************************************************************/
+
+void Core::updateSettings()
 {
-    if (!translator)
-        translator = new QTranslator(this);
-    QString trPathFallback = QCoreApplication::applicationDirPath() + QSV("/translations");
-#ifdef TRANSLATIONS_PATH
-    QString trPath = QStringLiteral(TRANSLATIONS_PATH);
-#else
-    QString const &trPath = trPathFallback;
-#endif
-    QString localeName = settings->language();
-    if (localeName == QSV("system"))
-        localeName = QLocale::system().name();
-    if (localeName.isEmpty() || localeName == QSV("en_US")) {
-        QApplication::removeTranslator(translator);
-        return;
-    }
-    QString trFile         = trPath + u'/' + localeName;
-    QString trFileFallback = trPathFallback + u'/' + localeName;
-    if (!translator->load(trFile)) {
-        qDebug() << u"Could not load translation file: " << trFile;
-        if (!translator->load(trFileFallback)) {
-            qDebug() << u"Could not load translation file: " << trFileFallback;
-            return;
-        }
-    }
-    QApplication::installTranslator(translator);
+    loopSlideshow   = settings->loopSlideshow();
+    folderEndAction = settings->folderEndAction();
+    slideshowTimer.setInterval(settings->slideshowInterval());
+    bool showDirs = settings->folderViewMode() == FolderViewMode::EXT_FOLDERS;
+    if (folderViewPresenter->showDirs() != showDirs)
+        folderViewPresenter->setShowDirs(showDirs);
+    if (shuffle)
+        syncRandomizer();
+}
+
+void Core::showGui() const
+{
+    if (mw && !mw->isVisible())
+        mw->showDefault();
+    // TODO: this is unreliable.
+    // how to make it wait until a window is shown?
+    qApp->processEvents();
+    QTimer::singleShot(50, mw.get(), &MW::setupFullUi);
 }
 
 void Core::onUpdate()
@@ -246,8 +230,8 @@ void Core::onUpdate()
     QVersionNumber lastVer = settings->lastVersion();
 
     if (lastVer < QVersionNumber(0, 9, 2)) {
-        actionManager->resetDefaults(QS("print"));
-        actionManager->resetDefaults(QS("openSettings"));
+        actionManager->resetDefaults(u"print"_s);
+        actionManager->resetDefaults(u"openSettings"_s);
     }
 
 #ifdef USE_OPENCV
@@ -261,17 +245,19 @@ void Core::onUpdate()
     // TODO: finish changelogs
     // if(settings->showChangelogs())
     //    mw->showChangelogWindow();
-    mw->showMessage(tr("Updated: ") + settings->lastVersion().toString() + QSV(" > ") + appVersion.toString(), 4000);
+    mw->showMessage(tr("Updated: ") + settings->lastVersion().toString() + u" > " + appVersion.toString(), 4000);
     settings->setLastVersion(appVersion);
 }
 
 void Core::onFirstRun()
 {
-    // mw->showSomeSortOfWelcomeScreen();
+    //mw->showSomeSortOfWelcomeScreen();
     mw->showMessage(tr("Welcome to ") + qApp->applicationName() + tr(" version ") + appVersion.toString() + u'!', 4000);
     settings->setFirstRun(false);
     settings->setLastVersion(appVersion);
 }
+
+/****************************************************************************************/
 
 void Core::toggleShuffle()
 {
@@ -379,8 +365,9 @@ void Core::removePermanent()
         if (!mw->showConfirmation(tr("Delete permanently"), msg))
             return;
     }
+
     FileOpResult result{};
-    int          successCount = 0;
+    unsigned     successCount = 0;
     for (auto const &path : paths) {
         QFileInfo fi(path);
         if (fi.isDir())
@@ -388,15 +375,17 @@ void Core::removePermanent()
         else
             result = removeFile(path, false);
         if (result == FileOpResult::SUCCESS)
-            successCount++;
+            ++successCount;
     }
-    if (paths.count() == 1)
+
+    if (paths.count() == 1) {
         if (result == FileOpResult::SUCCESS)
             mw->showMessageSuccess(tr("File removed"));
         else
             outputError(result);
-    else if (paths.count() > 1)
+    } else if (paths.count() > 1) {
         mw->showMessageSuccess(tr("Removed: ") + QString::number(successCount) + tr(" files"));
+    }
 }
 
 void Core::moveToTrash()
@@ -414,20 +403,22 @@ void Core::moveToTrash()
             return;
     }
 
-    int          successCount = 0;
     FileOpResult result{};
+    unsigned     successCount = 0;
     for (auto const &path : paths) {
         result = removeFile(path, true);
         if (result == FileOpResult::SUCCESS)
             successCount++;
     }
-    if (paths.count() == 1)
+
+    if (paths.count() == 1) {
         if (result == FileOpResult::SUCCESS)
             mw->showMessageSuccess(tr("Moved to trash"));
         else
             outputError(result);
-    else if (paths.count() > 1)
+    } else if (paths.count() > 1) {
         mw->showMessageSuccess(tr("Moved to trash: ") + QString::number(successCount) + tr(" files"));
+    }
 }
 
 void Core::reloadImage()
@@ -483,8 +474,8 @@ void Core::copyFileClipboard()
 
     // mimeData->text() should already contain an url
     QByteArray gnomeFormat = QByteArray("copy\n").append(QUrl(mimeData->text()).toEncoded());
-    mimeData->setData(QS("x-special/gnome-copied-files"), gnomeFormat);
-    mimeData->setData(QS("application/x-kde-cutselection"), "0");
+    mimeData->setData(u"x-special/gnome-copied-files"_s, gnomeFormat);
+    mimeData->setData(u"application/x-kde-cutselection"_s, "0");
 
     QApplication::clipboard()->setMimeData(mimeData);
     mw->showMessage(tr("File copied"));
@@ -510,7 +501,6 @@ void Core::openFromClipboard()
     qDebug() << u"hasUrls:" << mimeData->hasUrls();
     qDebug() << u"hasImage:" << mimeData->hasImage();
     qDebug() << u"hasText:" << mimeData->hasText();
-
     qDebug() << u"TEXT:" << cb->text();
 
     // try opening url
@@ -542,13 +532,15 @@ void Core::openFromClipboard()
 
         // ------- temporarily copypasted from ImageStatic (needs refactoring)
 
-        QString tmpPath = destPath + u'_' + QString::fromLatin1(QCryptographicHash::hash(destPath.toUtf8(), QCryptographicHash::Md5).toHex());
+        QString tmpPath = destPath + u'_' +
+                          QString::fromLatin1(QCryptographicHash::hash(destPath.toUtf8(), QCryptographicHash::Md5).toHex());
         QFileInfo fi(destPath);
         QString   ext     = fi.suffix();
         int       quality = 95;
-        if (ext.compare(QSV("png"), Qt::CaseInsensitive) == 0)
+
+        if (ext.compare(u"png"_sv, Qt::CaseInsensitive) == 0)
             quality = 30;
-        else if (ext.compare(QSV("jpg"), Qt::CaseInsensitive) == 0 || ext.compare(QSV("jpeg"), Qt::CaseInsensitive) == 0)
+        else if (ext.compare(u"jpg"_sv, Qt::CaseInsensitive) == 0 || ext.compare(u"jpeg"_sv, Qt::CaseInsensitive) == 0)
             quality = settings->JPEGSaveQuality();
 
         bool backupExists = false, success = false, originalExists = false;
@@ -587,18 +579,22 @@ void Core::openFromClipboard()
 }
 
 #ifdef Q_OS_WINDOWS
+# define IsAligned(n) (static_cast<size_t>((reinterpret_cast<uintptr_t>(n) & 1) == 0))
+
 static QString evilWindowsMimeDataHack(QMimeData const *mimeData)
 {
-    QByteArray shIdList = mimeData->data(QS("application/x-qt-windows-mime;value=\"Shell IDList Array\""));
+    QByteArray shIdList = mimeData->data(u"application/x-qt-windows-mime;value=\"Shell IDList Array\""_s);
+    if (shIdList.size() < 8LL + 35LL + 2LL)
+        return {};
 
     char const *data = shIdList.constData();
     char const *end  = data + shIdList.size();
     char const *last = data + *reinterpret_cast<uint32_t const *>(data + 8);
     data += 35;
 
-    // The drive letter is an ASCII string only.
-    //QString str = QSV(R"(\\?\)") + QString::fromLatin1(data);
-    QString str = QSV(R"(\\?\)") + QString::fromLatin1(data, strnlen(data, end - data));
+    // The drive letter is an ASCII string only. Technically a drive letter can be more than
+    // one letter, so we treat it as a string.
+    QString str = uR"(\\?\)" + QString::fromLatin1(data, qsizetype(strnlen(data, end - data)));
 
     // We blindly add path separators later so ensure there isn't one.
     if (str.endsWith(u'\\'))
@@ -606,27 +602,25 @@ static QString evilWindowsMimeDataHack(QMimeData const *mimeData)
     data += str.size() + 1;
     if (data >= end)
         return {};
-    // The data always appears to be aligned to an odd offset. So we make sure.
-    if ((reinterpret_cast<uintptr_t>(data) & 1) == 0)
-        ++data;
-    data += 28; // Skip 32 bytes of data.
+    // Skip 28 bytes of unknown data. The data always appears to be aligned to an odd
+    // offset. If we're at an even offset, skip 29 instead.
+    data += 28 + IsAligned(data);
 
     while (data + 2 < end) {
         // ASCII short name (null-terminated)
         data += strnlen(data, end - data) + 1;
-        if (data + 1 >= end)
+        // Skip 46 bytes of unknown data, or 47 if we're aligned.
+        data += 46 + IsAligned(data);
+        if (data >= end)
             break;
-        if ((reinterpret_cast<uintptr_t>(data) & 1) == 0)
-            ++data;
-        data += 46; // Skip 46 bytes of unknown data
 
         // UTF-16 path segment (null-terminated). Qt won't accept an unaligned string,
-        // so we must copy it ourselves.
-        size_t len = wcslen(reinterpret_cast<wchar_t const *>(data));
-        auto   tmp = std::make_unique<wchar_t[]>(len + 1);
+        // so we must copy it to a buffer first.
+        size_t len = wcsnlen(reinterpret_cast<wchar_t const *>(data), end - data);
+        auto   tmp = std::make_unique<QChar[]>(len + 1);
         memcpy(tmp.get(), data, (len + 1) * sizeof(wchar_t));
         str.append(u'\\');
-        str.append(QStringView(tmp.get(), qsizetype(len)));
+        str.append(tmp.get(), qsizetype(len));
 
         // Skip UTF-16 data and null terminator
         data += (len + 1) * sizeof(wchar_t);
@@ -637,6 +631,8 @@ static QString evilWindowsMimeDataHack(QMimeData const *mimeData)
 
     return str;
 }
+
+# undef IsAligned
 #endif
 
 void Core::onDropIn(QMimeData const *mimeData, QObject const *source)
@@ -694,7 +690,6 @@ void Core::onDraggedOut(QList<QString> const &paths)
         mimeData->setUrls(urlList);
     }
     // auto thumb = Thumbnailer::getThumbnail(paths.last(), 100);
-    mDrag = new QDrag(this);
     mDrag->setMimeData(mimeData);
     // mDrag->setPixmap(*thumb->pixmap().get());
     mDrag->exec(Qt::CopyAction | Qt::MoveAction | Qt::LinkAction, Qt::CopyAction);
@@ -711,7 +706,7 @@ QMimeData *Core::getMimeDataForImage(QSharedPointer<Image> const &img, MimeDataT
             // TODO: cleanup temp files
             // meanwhile use generic name
             // path = settings->cacheDir() + img->baseName() + ".png";
-            path = settings->tmpDir() + QSV("image.png");
+            path = settings->tmpDir() + u"image.png";
             // use faster compression for drag'n'drop
             int pngQuality = (target == MimeDataTarget::TARGET_DROP) ? 80 : 30;
             std::ignore    = img->getImage()->save(path, nullptr, pngQuality);
@@ -776,7 +771,7 @@ FileOpResult Core::removeFile(QString const &filePath, bool trash)
     return result;
 }
 
-void Core::onFileRemoved(QString const &filePath, int index)
+void Core::onFileRemoved(QString const &filePath, qsizetype index)
 {
     // no files left
     if (model->isEmpty()) {
@@ -797,7 +792,7 @@ void Core::onFileRemoved(QString const &filePath, int index)
     updateInfoString();
 }
 
-void Core::onFileRenamed(QString const &fromPath, int /*indexFrom*/, QString const &/*toPath*/, int indexTo)
+void Core::onFileRenamed(QString const &fromPath, qsizetype /*indexFrom*/, QString const &/*toPath*/, qsizetype indexTo)
 {
     if (state.currentFilePath == fromPath)
         loadFileIndex(indexTo, true, settings->usePreloader());
@@ -841,17 +836,16 @@ void Core::showInDirectory()
         return;
     }
 #if defined Q_OS_LINUX
-    QString fm = ScriptManager::runCommand(QS("xdg-mime query default inode/directory"));
-    if (fm.contains(QSV("dolphin")))
-        ScriptManager::runCommandDetached(QSV("dolphin --select ") + selectedPath());
-    else if (fm.contains(QSV("nautilus")))
-        ScriptManager::runCommandDetached(QSV("nautilus --select ") + selectedPath());
+    QString fm = ScriptManager::runCommand(u"xdg-mime query default inode/directory"_s);
+    if (fm.contains(u"dolphin"_sv))
+        ScriptManager::runCommandDetached(u"dolphin --select " + selectedPath());
+    else if (fm.contains(u"nautilus"_sv))
+        ScriptManager::runCommandDetached(u"nautilus --select " + selectedPath());
     else
         QDesktopServices::openUrl(QUrl::fromLocalFile(model->directoryPath()));
 #elif defined Q_OS_WIN32
-    QStringList    args;
-    args << QS("/select,") << QDir::toNativeSeparators(selectedPath());
-    QProcess::startDetached(QS("explorer"), args);
+    QStringList args = {u"/select,"_s, QDir::toNativeSeparators(selectedPath())};
+    QProcess::startDetached(u"explorer"_s, args);
 #elif defined Q_OS_APPLE
     QStringList args;
     args << "-e";
@@ -925,15 +919,14 @@ void Core::doInteractiveCopy(QString const &path, QString const &destDirectory, 
             qDebug() << FileOperations::decodeResult(result);
             return;
         }
-    } else if (!dstDir.mkpath(QS("."))) {
+    } else if (!dstDir.mkpath(u"."_s)) {
         mw->showError(tr("Could not create directory ") + dstDir.absolutePath());
         qDebug() << u"Could not create directory " << dstDir.absolutePath();
         return;
     }
     // copy all contents
     // TODO: skip symlinks? test
-    QStringList entryList = srcDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden |
-                                             QDir::System);
+    QStringList entryList = srcDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
     for (auto const &entry : entryList) {
         doInteractiveCopy(srcDir.absolutePath() + u'/' + entry, dstDir.absolutePath(), overwriteFiles);
         if (overwriteFiles.cancel)
@@ -999,7 +992,7 @@ void Core::doInteractiveMove(QString const &path, QString const &destDirectory, 
             qDebug() << FileOperations::decodeResult(result);
             return;
         }
-    } else if (!dstDir.mkpath(QS("."))) {
+    } else if (!dstDir.mkpath(u"."_s)) {
         mw->showError(tr("Could not create directory ") + dstDir.absolutePath());
         qDebug() << u"Could not create directory " << dstDir.absolutePath();
         return;
@@ -1116,7 +1109,7 @@ void Core::edit_template(
 {
     if (model->isEmpty())
         return;
-    if (save && !mw->showConfirmation(actionName, tr("Perform action \"") + actionName + QSV("\"? \n\n") +
+    if (save && !mw->showConfirmation(actionName, tr("Perform action \"") + actionName + u"\"? \n\n" +
                                                   tr("Changes will be saved immediately.")))
         return;
     for (auto const &path : currentSelection()) {
@@ -1224,7 +1217,7 @@ void Core::discardEdits()
 }
 
 // todo: remove?
-QString Core::selectedPath()
+QString Core::selectedPath() const
 {
     if (!model)
         return {};
@@ -1289,30 +1282,33 @@ void Core::setWallpaper()
         return;
     auto img = model->getImage(selectedPath());
     if (img->type() != DocumentType::STATIC) {
-        mw->showMessage(QS("Set wallpaper: file not supported"));
+        mw->showMessage(u"Set wallpaper: file not supported"_s);
         return;
     }
+
 #ifdef Q_OS_WIN32
     // Set fit mode (registry).
-    HKEY hKey;
-    LONG status = RegOpenKeyExW(HKEY_CURRENT_USER, L"Control Panel\\Desktop", 0, KEY_WRITE, &hKey);
+    HKEY    hKey;
+    LSTATUS status = ::RegOpenKeyExW(HKEY_CURRENT_USER, LR"(Control Panel\Desktop)", 0, KEY_WRITE, &hKey);
     if (status == ERROR_SUCCESS && hKey != nullptr) {
         static constexpr wchar_t data[]  = L"10";
-        status = RegSetValueExW(hKey, L"WallpaperStyle", 0, REG_SZ, reinterpret_cast<BYTE const *>(data), sizeof data);
-        RegCloseKey(hKey);
+        status = ::RegSetValueExW(hKey, L"WallpaperStyle", 0, REG_SZ, reinterpret_cast<BYTE const *>(data), sizeof data);
+        ::RegCloseKey(hKey);
     }
     // Set wallpaper path.
-    SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0,
-                          const_cast<void *>(static_cast<void const *>(selectedPath().toStdWString().c_str())),
-                          SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE);
-#else
+    ::SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0,
+                            const_cast<void *>(static_cast<void const *>(selectedPath().toStdWString().c_str())),
+                            SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE);
+#elif defined Q_OS_LINUX || (defined Q_OS_UNIX && !defined Q_OS_MACOS)
     auto session = qgetenv("DESKTOP_SESSION").toLower();
     if (session.contains("plasma"))
-        ScriptManager::runCommand(QSV("plasma-apply-wallpaperimage \"") + selectedPath() + QSV("\""));
+        ScriptManager::runCommand(u"plasma-apply-wallpaperimage \"" + selectedPath() + u"\"");
     else if (session.contains("gnome"))
-        ScriptManager::runCommand(QSV("gsettings set org.gnome.desktop.background picture-uri \"") + selectedPath() + QSV("\""));
+        ScriptManager::runCommand(u"gsettings set org.gnome.desktop.background picture-uri \"" + selectedPath() + u"\"");
     else
-        mw->showMessage(QSV("Action is not supported in your desktop session (\"") + QString::fromUtf8(session) + QSV("\")"), 3000);
+        mw->showMessage(u"Action is not supported in your desktop session (\"" + QString::fromUtf8(session) + u'\"'), 3000);
+#else
+    mw->showMessage(u"Action is not supported on your OS"_sv, 3000);
 #endif
 }
 
@@ -1320,8 +1316,8 @@ void Core::print()
 {
     if (model->isEmpty())
         return;
-    PrintDialog p(mw);
-    auto        img = model->getImage(selectedPath());
+    auto p   = PrintDialog(mw.get());
+    auto img = model->getImage(selectedPath());
     if (!img) {
         mw->showError(tr("Could not open image"));
         return;
@@ -1330,7 +1326,7 @@ void Core::print()
         mw->showError(tr("Can only print static images"));
         return;
     }
-    QString pdfPath = model->directoryPath() + u'/' + img->baseName() + QSV(".pdf");
+    QString pdfPath = model->directoryPath() + u'/' + img->baseName() + u".pdf";
     p.setImage(img->getImage());
     p.setOutputPath(pdfPath);
     p.exec();
@@ -1367,7 +1363,7 @@ bool Core::loadPath(QString path)
 {
     if (path.isEmpty())
         return false;
-    if (path.startsWith(QSV("file://"), Qt::CaseInsensitive))
+    if (path.startsWith(u"file://"_sv, Qt::CaseInsensitive))
         path.remove(0, 7);
 
     stopSlideshow();
@@ -1391,7 +1387,7 @@ bool Core::loadPath(QString path)
 
     // load file / folderview
     if (fileInfo.isFile()) {
-        int index = model->indexOfFile(fileInfo.absoluteFilePath());
+        auto index = model->indexOfFile(fileInfo.absoluteFilePath());
         // DirectoryManager only checks file extensions via regex (performance reasons)
         // But in this case we force check mimetype
         if (index == -1) {
@@ -1424,7 +1420,7 @@ bool Core::setDirectory(QString const &path)
     return true;
 }
 
-bool Core::loadFileIndex(int index, bool async, bool preload)
+bool Core::loadFileIndex(qsizetype index, bool async, bool preload)
 {
     if (!model)
         return false;
@@ -1554,7 +1550,7 @@ void Core::prevImage()
         return;
     }
 
-    int newIndex = model->indexOfFile(state.currentFilePath) - 1;
+    auto newIndex = model->indexOfFile(state.currentFilePath) - 1;
     if (newIndex < 0) {
         if (folderEndAction == FolderEndAction::LOOP) {
             newIndex = model->fileCount() - 1;
@@ -1577,7 +1573,7 @@ void Core::nextImageSlideshow()
     if (shuffle) {
         loadFileIndex(randomizer.next(), false, false);
     } else {
-        int newIndex = model->indexOfFile(state.currentFilePath) + 1;
+        auto newIndex = model->indexOfFile(state.currentFilePath) + 1;
         if (newIndex >= model->fileCount()) {
             if (loopSlideshow) {
                 newIndex = 0;

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <mutex>
 #include <qcoreapplication.h>
+#include <QDir>
 
 #ifdef Q_OS_WIN32
 # ifndef WIN32_LEAN_AND_MEAN
@@ -45,27 +46,13 @@ int probeOS()
 
 namespace util {
 
-StdString QStringToStdString(QString const &str)
+QString StdPathToQString(std::filesystem::path const &filePath)
 {
 #ifdef Q_OS_WIN32
-    return str.toStdWString();
+    return QString::fromStdWString(filePath.native());
 #else
-    return str.toStdString();
+    return QString::fromStdString(filePath.native());
 #endif
-}
-
-QString StdStringToQString(StdString const &str)
-{
-#ifdef Q_OS_WIN32
-    return QString::fromStdWString(str);
-#else
-    return QString::fromStdString(str);
-#endif
-}
-
-QString StdPathToQString(std::filesystem::path const &str)
-{
-    return StdStringToQString(str.native());
 }
 
 std::filesystem::path
@@ -73,13 +60,14 @@ QStringToStdPath(QString const &filePath)
 {
 #ifdef Q_OS_WIN32
     if (filePath.startsWith(QSV(R"(\\?\)")))
-        return {std::basic_string_view{filePath.data_ptr().data(),
-                                       static_cast<size_t>(filePath.size())}};
-    auto tmp = QFileInfo(filePath).absoluteFilePath();
-    tmp.replace(u'/', u'\\');
-    tmp.prepend(QSV(R"(\\?\)"));
-    return {std::basic_string_view{tmp.data_ptr().data(),
-                                   static_cast<size_t>(tmp.size())}};
+        return {std::u16string_view{filePath.data_ptr().data(),
+                                    static_cast<size_t>(filePath.size())}};
+    QString tmp = QFileInfo(filePath)
+        .absoluteFilePath()
+        .replace(u'/', u'\\')
+        .prepend(QSV(R"(\\?\)"));
+    return {std::u16string_view{tmp.data_ptr().data(),
+                                static_cast<size_t>(tmp.size())}};
 #else
     return absolute(std::filesystem::path{filePath.toStdString()});
 #endif
@@ -88,7 +76,7 @@ QStringToStdPath(QString const &filePath)
 /****************************************************************************************/
 
 
-static void demangle_setup()
+static void do_demangle_setup()
 {
 #if defined _MSC_VER
     static std::mutex       mtx;
@@ -106,6 +94,12 @@ static void demangle_setup()
         qFatal() << u"SymInitialize()";
     }
 #endif
+}
+
+static void demangle_setup()
+{
+    static std::once_flag flag;
+    std::call_once(flag, do_demangle_setup);
 }
 
 [[maybe_unused]] static std::string demangle(char const *raw_name)

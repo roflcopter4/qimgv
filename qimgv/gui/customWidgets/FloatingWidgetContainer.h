@@ -10,6 +10,7 @@ class FloatingWidgetContainer : public QWidget
   public:
     explicit FloatingWidgetContainer(QWidget *parent = nullptr);
     ~FloatingWidgetContainer() override;
+    DELETE_COPY_MOVE_ROUTINES(FloatingWidgetContainer);
 
   Q_SIGNALS:
     void resized(QSize);

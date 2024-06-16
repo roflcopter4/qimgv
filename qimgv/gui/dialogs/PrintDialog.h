@@ -15,16 +15,18 @@ namespace Ui {
 class PrintDialog;
 }
 
-class PrintDialog : public QDialog {
+class PrintDialog : public QDialog
+{
     Q_OBJECT
 
-public:
-    explicit PrintDialog(QWidget *parent = nullptr);
+  public:
+    explicit PrintDialog(QWidget *parent);
     ~PrintDialog() override;
-    void setImage(QSharedPointer<const QImage> const &_img);
+
+    void setImage(QSharedPointer<QImage const> const &newImg);
     void setOutputPath(QString path);
 
-private slots:
+  private Q_SLOTS:
     void    print();
     void    exportPdf();
     QRectF  getImagePrintRect(QPrinter *printer);
@@ -33,12 +35,14 @@ private slots:
     void    onPrinterSelected(QString const &name);
     QString pdfPathDialog();
 
-private:
+  private:
     void saveSettings();
+
+    QSharedPointer<QImage const> img;
     Ui::PrintDialog *ui;
-    QSharedPointer<const QImage> img = nullptr;
-    QPrinter pdfPrinter, *printer = nullptr;
-    bool printPdfDefault = false;
+    QPrinter *printer;
+    QPrinter  pdfPrinter;
+    bool      printPdfDefault;
 };
 
 #endif // PRINTDIALOG_H

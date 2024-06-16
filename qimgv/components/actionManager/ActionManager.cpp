@@ -46,52 +46,52 @@ void ActionManager::initDefaults()
     defaults.insert(QS("R"),                   QS("resize"));
     defaults.insert(QS("H"),                   QS("flipH"));
     defaults.insert(QS("V"),                   QS("flipV"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+R"), QS("rotateRight"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+L"), QS("rotateLeft"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+WheelUp"), QS("zoomInCursor"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+WheelDown"), QS("zoomOutCursor"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+R", QS("rotateRight"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+L", QS("rotateLeft"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+WheelUp", QS("zoomInCursor"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+WheelDown", QS("zoomOutCursor"));
     defaults.insert(QS("+"),                   QS("zoomIn"));
     defaults.insert(QS("-"),                   QS("zoomOut"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+Down"), QS("zoomOut"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+Up"), QS("zoomIn"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+Down", QS("zoomOut"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+Up", QS("zoomIn"));
     defaults.insert(QS("Up"),                  QS("scrollUp"));
     defaults.insert(QS("Down"),                QS("scrollDown"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+O"), QS("open"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+S"), QS("save"));
-    defaults.insert(InputMap::keyNameCtrl() + u'+' + InputMap::keyNameShift() + QSV("+S"), QS("saveAs"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+W"), QS("setWallpaper"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+O", QS("open"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+S", QS("save"));
+    defaults.insert(InputMap::keyNameCtrl() + u'+' + InputMap::keyNameShift() + u"+S", QS("saveAs"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+W", QS("setWallpaper"));
     defaults.insert(QS("X"),                   QS("crop"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+P"), QS("print"));
-    defaults.insert(InputMap::keyNameAlt() +   QSV("+X"), QS("exit"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+Q"), QS("exit"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+P", QS("print"));
+    defaults.insert(InputMap::keyNameAlt() + u"+X", QS("exit"));
+    defaults.insert(InputMap::keyNameCtrl() +  u"+Q", QS("exit"));
     defaults.insert(QS("Esc"),                 QS("closeFullScreenOrExit"));
     defaults.insert(QS("Del"),                 QS("moveToTrash"));
-    defaults.insert(InputMap::keyNameShift() + QSV("+Del"), QS("removeFile"));
+    defaults.insert(InputMap::keyNameShift() + u"+Del", QS("removeFile"));
     defaults.insert(QS("C"),                   QS("copyFile"));
     defaults.insert(QS("M"),                   QS("moveFile"));
     defaults.insert(QS("Home"),                QS("jumpToFirst"));
     defaults.insert(QS("End"),                 QS("jumpToLast"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+Right"), QS("seekVideoForward"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+Left"), QS("seekVideoBackward"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+Right", QS("seekVideoForward"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+Left", QS("seekVideoBackward"));
     defaults.insert(QS(","),                   QS("frameStepBack"));
     defaults.insert(QS("."),                   QS("frameStep"));
     defaults.insert(QS("Enter"),               QS("folderView"));
     defaults.insert(QS("Backspace"),           QS("folderView"));
     defaults.insert(QS("F5"),                  QS("reloadImage"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+C"), QS("copyFileClipboard"));
-    defaults.insert(InputMap::keyNameCtrl() + u'+' + InputMap::keyNameShift() + QSV("+C"), QS("copyPathClipboard"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+C", QS("copyFileClipboard"));
+    defaults.insert(InputMap::keyNameCtrl() + u'+' + InputMap::keyNameShift() + u"+C", QS("copyPathClipboard"));
     defaults.insert(QS("F2"),                  QS("renameFile"));
     defaults.insert(QS("RMB"),                 QS("contextMenu"));
     defaults.insert(QS("Menu"),                QS("contextMenu"));
     defaults.insert(QS("I"),                   QS("toggleImageInfo"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+`"), QS("toggleShuffle"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+D"), QS("showInDirectory"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+`", QS("toggleShuffle"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+D", QS("showInDirectory"));
     defaults.insert(QS("`"),                   QS("toggleSlideshow"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+Z"), QS("discardEdits"));
-    defaults.insert(InputMap::keyNameShift() + QSV("+Right"), QS("nextDirectory"));
-    defaults.insert(InputMap::keyNameShift() + QSV("+Left"), QS("prevDirectory"));
-    defaults.insert(InputMap::keyNameShift() + QSV("+F"), QS("toggleFullscreenInfoBar"));
-    defaults.insert(InputMap::keyNameCtrl() +  QSV("+V"), QS("pasteFile"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+Z", QS("discardEdits"));
+    defaults.insert(InputMap::keyNameShift() + u"+Right", QS("nextDirectory"));
+    defaults.insert(InputMap::keyNameShift() + u"+Left", QS("prevDirectory"));
+    defaults.insert(InputMap::keyNameShift() + u"+F", QS("toggleFullscreenInfoBar"));
+    defaults.insert(InputMap::keyNameCtrl() + u"+V", QS("pasteFile"));
 
 #ifdef __APPLE__
     defaults.insert(InputMap::keyNameAlt() + QS("+Up"), QS("zoomIn"));
@@ -153,9 +153,7 @@ void ActionManager::removeAllShortcuts(QString const &actionName)
 
 QString ActionManager::keyForNativeScancode(quint32 scanCode)
 {
-    if (inputMap->keys().contains(scanCode))
-        return inputMap->keys()[scanCode];
-    return QS("");
+    return InputMap::keyName(scanCode);
 }
 
 void ActionManager::resetDefaults()

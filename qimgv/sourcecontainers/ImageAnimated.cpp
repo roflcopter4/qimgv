@@ -54,8 +54,8 @@ bool ImageAnimated::save(QString destPath)
             qDebug() << warning1;
             return false;
         }
-        qDebug() << destPath << this->filePath();
-        if (destPath == this->filePath())
+        qDebug() << destPath << filePath();
+        if (destPath == filePath())
             mDocInfo->refresh();
         return true;
     }

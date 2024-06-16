@@ -15,7 +15,7 @@
 #include <cmath>
 #include <memory>
 
-class ImageViewerV2 Q_DECL_FINAL : public QGraphicsView
+class ImageViewerV2 final : public QGraphicsView
 {
     Q_OBJECT
 
@@ -26,13 +26,13 @@ class ImageViewerV2 Q_DECL_FINAL : public QGraphicsView
         DRAG,
         PAN,
         ZOOM,
-        WHEEL_ZOOM
+        WHEEL_ZOOM,
     };
     
     enum class ViewLockMode : uint8_t {
         NONE,
         ZOOM,
-        ALL
+        ALL,
     };
 
   public:
@@ -44,24 +44,22 @@ class ImageViewerV2 Q_DECL_FINAL : public QGraphicsView
     ImageViewerV2 &operator=(ImageViewerV2 const &) = delete;
     ImageViewerV2 &operator=(ImageViewerV2 &&)      = delete;
 
-    ND virtual auto fitMode() const -> ImageFitMode;
-    ND virtual auto scaledRectR() const -> QRect;
-    ND virtual auto currentScale() const -> qreal;
-    ND virtual auto sourceSize() const -> QSize;
-    ND virtual auto isDisplaying() const -> bool;
-    ND virtual auto imageFits() const -> bool;
-    ND virtual auto scalingFilter() const -> ScalingFilter;
+    ND auto fitMode() const -> ImageFitMode;
+    ND auto scaledRectR() const -> QRect;
+    ND auto currentScale() const -> qreal;
+    ND auto sourceSize() const -> QSize;
+    ND auto isDisplaying() const -> bool;
+    ND auto imageFits() const -> bool;
+    ND auto scalingFilter() const -> ScalingFilter;
+    ND bool scaledImageFits() const;
+    ND bool hasAnimation() const;
+    ND auto scaledSizeR() const -> QSize;
+    ND auto widget() -> QWidget *;
 
-    ND bool  scaledImageFits() const;
-    ND bool  hasAnimation() const;
-    ND QSize scaledSizeR() const;
-
-    virtual void showImage(std::unique_ptr<QPixmap> pixmap_);
-    virtual void showAnimation(QSharedPointer<QMovie> const &movie_);
-    virtual void setScaledPixmap(std::unique_ptr<QPixmap> newFrame);
-    void         pauseResume();
-
-    virtual QWidget *widget();
+    void showImage(std::unique_ptr<QPixmap> pixmap_);
+    void showAnimation(QSharedPointer<QMovie> const &movie_);
+    void setScaledPixmap(std::unique_ptr<QPixmap> newFrame);
+    void pauseResume();
 
   Q_SIGNALS:
     void scalingRequested(QSize, ScalingFilter);
@@ -75,30 +73,30 @@ class ImageViewerV2 Q_DECL_FINAL : public QGraphicsView
     void durationChanged(int);
 
   public Q_SLOTS:
-    virtual void setFitMode(ImageFitMode mode);
-    virtual void setFitOriginal();
-    virtual void setFitWidth();
-    virtual void setFitWindow();
-    virtual void zoomIn();
-    virtual void zoomOut();
-    virtual void zoomInCursor();
-    virtual void zoomOutCursor();
-    virtual void readSettings();
-    virtual void scrollUp();
-    virtual void scrollDown();
-    virtual void scrollLeft();
-    virtual void scrollRight();
-    virtual void startAnimation();
-    virtual void stopAnimation();
-    virtual void closeImage();
-    virtual void setExpandImage(bool mode);
+    void setFitMode(ImageFitMode mode);
+    void setFitOriginal();
+    void setFitWidth();
+    void setFitWindow();
+    void zoomIn();
+    void zoomOut();
+    void zoomInCursor();
+    void zoomOutCursor();
+    void readSettings();
+    void scrollUp();
+    void scrollDown();
+    void scrollLeft();
+    void scrollRight();
+    void startAnimation();
+    void stopAnimation();
+    void closeImage();
+    void setExpandImage(bool mode);
 
-    virtual void show();
-    virtual void hide();
+    void show();
+    void hide();
 
-    virtual void setFilterNearest();
-    virtual void setFilterBilinear();
-    virtual void setScalingFilter(ScalingFilter filter);
+    void setFilterNearest();
+    void setFilterBilinear();
+    void setScalingFilter(ScalingFilter filter);
 
     void setLoopPlayback(bool mode);
     void toggleTransparencyGrid();
@@ -134,68 +132,6 @@ class ImageViewerV2 Q_DECL_FINAL : public QGraphicsView
     void onScrollTimelineFinished();
 
   private:
-    static constexpr int   ANIMATION_SPEED            = 150;
-    static constexpr int   LARGE_VIEWPORT_SIZE        = 2'073'600;
-    static constexpr int   SCROLL_UPDATE_RATE         = 7;
-    static constexpr int   SCROLL_DISTANCE            = 220;
-    static constexpr qreal SCROLL_SPEED_MILTIPLIER    = 1.3;
-    static constexpr qreal TRACKPAD_SCROLL_MULTIPLIER = 0.7;
-    static constexpr qreal FAST_SCALE_THRESHOLD       = 1.0;
-
-    QGraphicsScene          *scene;
-    QSharedPointer<QPixmap> pixmap;
-    std::unique_ptr<QPixmap> pixmapScaled;
-    QSharedPointer<QMovie>  movie;
-    QGraphicsPixmapItem      pixmapItem;
-    QGraphicsPixmapItem      pixmapItemScaled;
-
-    QTimer     *animationTimer;
-    QTimer     *scaleTimer;
-    QScrollBar *hs;
-    QScrollBar *vs;
-    QPoint      mouseMoveStartPos;
-    QPoint      mousePressPos;
-    QPoint      drawPos;
-
-    bool transparencyGrid     : 1;
-    bool expandImage          : 1;
-    bool smoothAnimatedImages : 1;
-    bool smoothUpscaling      : 1;
-    bool forceFastScale       : 1;
-    bool keepFitMode          : 1;
-    bool loopPlayback         : 1;
-    bool mIsFullscreen        : 1;
-    bool scrollBarWorkaround  : 1;
-    bool useFixedZoomLevels   : 1;
-    bool trackpadDetection    : 1;
-
-    MouseInteractionState mouseInteraction;
-    ImageFitMode          imageFitMode;
-    ImageFitMode          imageFitModeDefault;
-    ImageFocusPoint       focusIn1to1;
-    ScalingFilter         mScalingFilter;
-    ViewLockMode          mViewLock;
-
-    // how many px you can move while holding RMB until it counts as a zoom attempt
-    int   zoomThreshold = 4;
-    int   dragThreshold = 10;
-    qreal zoomStep      = 0.1;
-    qreal dpr;
-    qreal minScale;
-    qreal maxScale;
-    qreal fitWindowScale;
-    qreal expandLimit;
-    qreal lockedScale;
-
-    QList<qreal>           zoomLevels;
-    QPointF                savedViewportPos;
-    QPair<QPointF, QPoint> zoomAnchor; // [pixmap coords, viewport coords]
-    QElapsedTimer          lastTouchpadScroll;
-    QPixmap               *checkboard;
-
-    QTimeLine *scrollTimeLineX;
-    QTimeLine *scrollTimeLineY;
-
     void zoomAnchored(qreal newScale);
     void fitNormal();
     void fitWidth();
@@ -210,7 +146,7 @@ class ImageViewerV2 Q_DECL_FINAL : public QGraphicsView
 
     ND QPointF sceneRoundPos(QPointF scenePoint) const;
     ND QRectF  sceneRoundRect(QRectF const &sceneRect) const;
-    ND Qt::TransformationMode selectTransformationMode() const;
+    ND auto    selectTransformationMode() const -> Qt::TransformationMode;
 
     void doZoom(qreal newScale);
     void swapToOriginalPixmap();
@@ -229,4 +165,66 @@ class ImageViewerV2 Q_DECL_FINAL : public QGraphicsView
     void doZoomIn(bool atCursor);
     void doZoomOut(bool atCursor);
 
+    static constexpr int   ANIMATION_SPEED            = 150;
+    static constexpr int   LARGE_VIEWPORT_SIZE        = 2'073'600;
+    static constexpr int   SCROLL_UPDATE_RATE         = 7;
+    static constexpr int   SCROLL_DISTANCE            = 220;
+    static constexpr qreal SCROLL_SPEED_MILTIPLIER    = 1.3;
+    static constexpr qreal TRACKPAD_SCROLL_MULTIPLIER = 0.7;
+    static constexpr qreal FAST_SCALE_THRESHOLD       = 1.0;
+
+    QSharedPointer<QMovie>   movie;
+    QSharedPointer<QPixmap>  pixmap;
+    std::unique_ptr<QPixmap> pixmapScaled;
+    QGraphicsPixmapItem      pixmapItem;
+    QGraphicsPixmapItem      pixmapItemScaled;
+
+    QGraphicsScene *scene;
+    QPixmap        *checkboard;
+    QTimer         *animationTimer;
+    QTimer         *scaleTimer;
+    QTimeLine      *scrollTimeLineX;
+    QTimeLine      *scrollTimeLineY;
+
+    QScrollBar *hs;
+    QScrollBar *vs;
+    qreal       dpr;
+
+    QPoint mouseMoveStartPos;
+    QPoint mousePressPos;
+    QPoint drawPos;
+
+    bool transparencyGrid     : 1 = false;
+    bool expandImage          : 1 = false;
+    bool smoothAnimatedImages : 1 = true;
+    bool smoothUpscaling      : 1 = true;
+    bool forceFastScale       : 1 = false;
+    bool keepFitMode          : 1 = false;
+    bool loopPlayback         : 1 = true;
+    bool mIsFullscreen        : 1 = false;
+    bool scrollBarWorkaround  : 1 = true;
+    bool useFixedZoomLevels   : 1 = false;
+    bool trackpadDetection    : 1 = true;
+
+    MouseInteractionState mouseInteraction    = MouseInteractionState::NONE;
+    ImageFitMode          imageFitMode        = ImageFitMode::WINDOW;
+    ImageFitMode          imageFitModeDefault = ImageFitMode::WINDOW;
+    ImageFocusPoint       focusIn1to1         = ImageFocusPoint::CENTER;
+    ScalingFilter         mScalingFilter      = ScalingFilter::BILINEAR;
+    ViewLockMode          mViewLock           = ViewLockMode::NONE;
+
+    // how many px you can move while holding RMB until it counts as a zoom attempt
+    int   zoomThreshold  = 4;
+    int   dragThreshold  = 10;
+    qreal zoomStep       = 0.1;
+    qreal minScale       = 0.01;
+    qreal maxScale       = 500.0;
+    qreal fitWindowScale = 0.125;
+    qreal expandLimit    = 0.0;
+    qreal lockedScale    = 0.0;
+
+    QList<qreal>           zoomLevels;
+    QPair<QPointF, QPoint> zoomAnchor; // [pixmap coords, viewport coords]
+    QPointF                savedViewportPos;
+    QElapsedTimer          lastTouchpadScroll;
 };

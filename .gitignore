@@ -23,12 +23,6 @@ Makefile
 .cache/
 /MSVC/
 /MSVC_2/
-/MSVC.bak
-/MSVC.bak2
-/MSVC.bak3
 bak/
 /external/mpv-x64
-/CMakeSettings.json
-/CMakePresets.json
-/CMakeUserPresets.json
 /cpp.hint

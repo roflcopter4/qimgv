@@ -19,7 +19,7 @@ FVOptionsPopup::FVOptionsPopup(QWidget *parent) :
     connect(ui->viewFoldersButton,  &ContextMenuItem::pressed, this, &FVOptionsPopup::selectFoldersView);
 
     // force size recalculation
-    this->adjustSize();
+    adjustSize();
 
     readSettings();
     connect(settings, &Settings::settingsChanged, this, &FVOptionsPopup::readSettings);
@@ -33,21 +33,21 @@ FVOptionsPopup::~FVOptionsPopup() {
 }
 
 void FVOptionsPopup::setSimpleView() {
-    ui->viewSimpleButton->setIconPath(QS(":res/icons/common/buttons/panel-small/add-new12.png"));
-    ui->viewExtendedButton->setIconPath(QS(""));
-    ui->viewFoldersButton->setIconPath(QS(""));
+    ui->viewSimpleButton->setIconPath(u":res/icons/common/buttons/panel-small/add-new12.png"_s);
+    ui->viewExtendedButton->setIconPath(u""_s);
+    ui->viewFoldersButton->setIconPath(u""_s);
 }
 
 void FVOptionsPopup::setExtendedView() {
-    ui->viewSimpleButton->setIconPath(QS(""));
-    ui->viewExtendedButton->setIconPath(QS(":res/icons/common/buttons/panel-small/add-new12.png"));
-    ui->viewFoldersButton->setIconPath(QS(""));
+    ui->viewSimpleButton->setIconPath(u""_s);
+    ui->viewExtendedButton->setIconPath(u":res/icons/common/buttons/panel-small/add-new12.png"_s);
+    ui->viewFoldersButton->setIconPath(u""_s);
 }
 
 void FVOptionsPopup::setFoldersView() {
-    ui->viewSimpleButton->setIconPath(QS(""));
-    ui->viewExtendedButton->setIconPath(QS(""));
-    ui->viewFoldersButton->setIconPath(QS(":res/icons/common/buttons/panel-small/add-new12.png"));
+    ui->viewSimpleButton->setIconPath(u""_s);
+    ui->viewExtendedButton->setIconPath(u""_s);
+    ui->viewFoldersButton->setIconPath(u":res/icons/common/buttons/panel-small/add-new12.png"_s);
 }
 
 void FVOptionsPopup::selectSimpleView() {

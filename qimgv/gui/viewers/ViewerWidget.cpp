@@ -8,9 +8,10 @@
 ViewerWidget::ViewerWidget(QWidget *parent)
     : FloatingWidgetContainer(parent),
       layout(new QVBoxLayout(this)),
-      imageViewer(nullptr),
-      videoPlayer(nullptr),
-      videoControls(nullptr),
+      imageViewer(new ImageViewerV2(this)),
+      videoPlayer(new VideoPlayerInitProxy(this)),
+      videoControls(new VideoControlsProxyWrapper(this)),
+      zoomIndicator(new ZoomIndicatorOverlayProxy(this)),
       contextMenu(nullptr),
       currentWidget(CurrentWidget::UNSET),
       mInteractionEnabled(false),
@@ -30,7 +31,7 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     setLayout(layout);
-    imageViewer = new ImageViewerV2(this);
+
     layout->addWidget(imageViewer);
     imageViewer->hide();
 
@@ -43,12 +44,8 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     connect(this, &ViewerWidget::setFilterBilinear,      imageViewer, &ImageViewerV2::setFilterBilinear);
     connect(this, &ViewerWidget::setScalingFilter,       imageViewer, &ImageViewerV2::setScalingFilter);
 
-    videoPlayer = new VideoPlayerInitProxy(this);
     layout->addWidget(videoPlayer);
     videoPlayer->hide();
-    videoControls = new VideoControlsProxyWrapper(this);
-    // tmp no wrapper
-    zoomIndicator = new ZoomIndicatorOverlayProxy(this);
 
     connect(videoPlayer, &VideoPlayer::playbackFinished, this, &ViewerWidget::onVideoPlaybackFinished);
     connect(videoControls, &VideoControlsProxyWrapper::seekBackward, this, &ViewerWidget::seekBackward);
@@ -154,7 +151,7 @@ void ViewerWidget::disableVideoPlayer()
 
 void ViewerWidget::onScaleChanged(qreal scale)
 {
-    if (!this->isVisible())
+    if (!isVisible())
         return;
     if (scale != 1.0) {
         zoomIndicator->setScale(scale);
@@ -482,7 +479,7 @@ void ViewerWidget::showCursor()
 
 void ViewerWidget::showContextMenu()
 {
-    this->setFocus();
+    setFocus();
     auto pos = QCursor::pos();
     showContextMenu(pos);
 }
@@ -491,8 +488,8 @@ void ViewerWidget::showContextMenu(QPoint pos)
 {
     if (isVisible() && interactionEnabled()) {
         if (!contextMenu) {
-            contextMenu = std::make_unique<ContextMenu>(this);
-            connect(contextMenu.get(), &ContextMenu::showScriptSettings, this, &ViewerWidget::showScriptSettings);
+            contextMenu = new ContextMenu(this);
+            connect(contextMenu, &ContextMenu::showScriptSettings, this, &ViewerWidget::showScriptSettings);
         }
         contextMenu->setImageEntriesEnabled(isDisplaying());
         if (!contextMenu->isVisible())

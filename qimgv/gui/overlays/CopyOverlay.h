@@ -14,45 +14,51 @@ enum class CopyOverlayMode {
     MOVE,
 };
 
-namespace Ui {
-    class CopyOverlay;
+namespace Ui
+{
+class CopyOverlay;
 }
 
-class CopyOverlay : public OverlayWidget {
+class CopyOverlay : public OverlayWidget
+{
     Q_OBJECT
-public:
+
+  public:
     CopyOverlay(FloatingWidgetContainer *parent);
     ~CopyOverlay() override;
-    void saveSettings();    
-    void setDialogMode(CopyOverlayMode _mode);
-    CopyOverlayMode operationMode() const;
 
-public slots:
+    void saveSettings();
+    void setDialogMode(CopyOverlayMode _mode);
+
+    ND CopyOverlayMode operationMode() const;
+
+  public Q_SLOTS:
     void show();
     void hide();
 
-signals:
+  Q_SIGNALS:
     void copyRequested(QString);
     void moveRequested(QString);
 
-protected:
-    void keyPressEvent(QKeyEvent *event) override;
-
-    bool focusNextPrevChild(bool) override;
-private slots:
+  private Q_SLOTS:
     void requestFileOperation(QString const &path);
     void readSettings();
 
-private:
+  protected:
+    void keyPressEvent(QKeyEvent *event) override;
+    bool focusNextPrevChild(bool) override;
+
+  private:
     void createDefaultPaths();
     void createPathWidgets();
     void createShortcuts();
-    Ui::CopyOverlay *ui;
-    QList<PathSelectorMenuItem*> pathWidgets;
-    const int maxPathCount = 9;
-    QStringList paths;
-    QMap<QString, int> shortcuts;
-    CopyOverlayMode mode;
     void removePathWidgets();
 
+    static constexpr int maxPathCount = 9;
+
+    Ui::CopyOverlay              *ui;
+    QList<PathSelectorMenuItem *> pathWidgets;
+    QStringList                   paths;
+    QMap<QString, int>            shortcuts;
+    CopyOverlayMode               mode;
 };

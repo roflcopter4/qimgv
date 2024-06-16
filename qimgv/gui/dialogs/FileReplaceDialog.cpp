@@ -1,23 +1,29 @@
 #include "FileReplaceDialog.h"
 #include "ui_FileReplaceDialog.h"
 
-FileReplaceDialog::FileReplaceDialog(QWidget *parent) : QDialog(parent), ui(new Ui::FileReplaceDialog) {
+FileReplaceDialog::FileReplaceDialog(QWidget *parent)
+    : QDialog(parent),
+      ui(new Ui::FileReplaceDialog),
+      multi(false)
+{
     ui->setupUi(this);
-    multi = false;
-    connect(ui->yesButton, &QPushButton::clicked, this, &FileReplaceDialog::onYesClicked);
-    connect(ui->noButton, &QPushButton::clicked, this, &FileReplaceDialog::onNoClicked);
+    connect(ui->yesButton,    &QPushButton::clicked, this, &FileReplaceDialog::onYesClicked);
+    connect(ui->noButton,     &QPushButton::clicked, this, &FileReplaceDialog::onNoClicked);
     connect(ui->cancelButton, &QPushButton::clicked, this, &FileReplaceDialog::onCancelClicked);
 }
 
-FileReplaceDialog::~FileReplaceDialog() {
+FileReplaceDialog::~FileReplaceDialog()
+{
     delete ui;
 }
 
-void FileReplaceDialog::setSource(QString const &src) {
+void FileReplaceDialog::setSource(QString const &src)
+{
     ui->srcLabel->setText(src);
 }
 
-void FileReplaceDialog::setDestination(QString const &dst) {
+void FileReplaceDialog::setDestination(QString const &dst)
+{
     ui->dstLabel->setText(dst);
 }
 
@@ -43,7 +49,8 @@ void FileReplaceDialog::setMode(FileReplaceMode mode)
     }
 }
 
-void FileReplaceDialog::setMulti(bool _multi) {
+void FileReplaceDialog::setMulti(bool _multi)
+{
     multi = _multi;
     ui->applyAllCheckBox->setVisible(multi);
 }
@@ -53,21 +60,24 @@ DialogResult FileReplaceDialog::getResult() const
     return result;
 }
 
-void FileReplaceDialog::onYesClicked() {
-    result.yes = true;
-    result.all = ui->applyAllCheckBox->isChecked();
+void FileReplaceDialog::onYesClicked()
+{
+    result.yes    = true;
+    result.all    = ui->applyAllCheckBox->isChecked();
     result.cancel = false;
-    this->close();
+    close();
 }
 
-void FileReplaceDialog::onNoClicked() {
-    result.yes = false;
-    result.all = ui->applyAllCheckBox->isChecked();
+void FileReplaceDialog::onNoClicked()
+{
+    result.yes    = false;
+    result.all    = ui->applyAllCheckBox->isChecked();
     result.cancel = false;
-    this->close();
+    close();
 }
 
-void FileReplaceDialog::onCancelClicked() {
+void FileReplaceDialog::onCancelClicked()
+{
     result.cancel = true;
-    this->close();
+    close();
 }

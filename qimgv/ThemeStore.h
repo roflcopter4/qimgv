@@ -10,7 +10,7 @@ enum class ColorSchemes {
     BLACK,
     DARK,
     DARKBLUE,
-    CUSTOMIZED
+    CUSTOMIZED,
 };
 
 struct BaseColorScheme {

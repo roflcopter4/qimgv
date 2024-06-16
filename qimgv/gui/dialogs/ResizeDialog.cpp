@@ -46,7 +46,7 @@ void ResizeDialog::sizeSelect()
 {
     if (targetSize != originalSize)
         emit sizeSelected(targetSize);
-    this->accept();
+    accept();
 }
 
 void ResizeDialog::setCommonResolution(int index)

@@ -8,27 +8,25 @@ DirectoryModel::DirectoryModel(QSharedPointer<Cache> cache, QObject *parent)
       cache(std::move(cache)),
       fileListSource(FileListSource::DIRECTORY)
 {
-    connect(dirManager, &DirectoryManager::fileRemoved, this, &DirectoryModel::onFileRemoved);
-    connect(dirManager, &DirectoryManager::fileAdded, this, &DirectoryModel::onFileAdded);
-    connect(dirManager, &DirectoryManager::fileRenamed, this, &DirectoryModel::onFileRenamed);
-    connect(dirManager, &DirectoryManager::fileModified, this, &DirectoryModel::onFileModified);
-    connect(dirManager, &DirectoryManager::dirRemoved, this, &DirectoryModel::dirRemoved);
-    connect(dirManager, &DirectoryManager::dirAdded, this, &DirectoryModel::dirAdded);
-    connect(dirManager, &DirectoryManager::dirRenamed, this, &DirectoryModel::dirRenamed);
-
-    connect(dirManager, &DirectoryManager::loaded, this, &DirectoryModel::loaded);
+    connect(dirManager, &DirectoryManager::fileRemoved,    this, &DirectoryModel::onFileRemoved);
+    connect(dirManager, &DirectoryManager::fileAdded,      this, &DirectoryModel::onFileAdded);
+    connect(dirManager, &DirectoryManager::fileRenamed,    this, &DirectoryModel::onFileRenamed);
+    connect(dirManager, &DirectoryManager::fileModified,   this, &DirectoryModel::onFileModified);
+    connect(dirManager, &DirectoryManager::dirRemoved,     this, &DirectoryModel::dirRemoved);
+    connect(dirManager, &DirectoryManager::dirAdded,       this, &DirectoryModel::dirAdded);
+    connect(dirManager, &DirectoryManager::dirRenamed,     this, &DirectoryModel::dirRenamed);
+    connect(dirManager, &DirectoryManager::loaded,         this, &DirectoryModel::loaded);
     connect(dirManager, &DirectoryManager::sortingChanged, this, &DirectoryModel::onSortingChanged);
+
     connect(loader, &Loader::loadFinished, this, &DirectoryModel::onImageReady);
-    connect(loader, &Loader::loadFailed, this, &DirectoryModel::loadFailed);
+    connect(loader, &Loader::loadFailed,   this, &DirectoryModel::loadFailed);
 }
 
 DirectoryModel::DirectoryModel(QObject *parent)
     : DirectoryModel(QSharedPointer<Cache>(new Cache()), parent)
 {}
 
-DirectoryModel::~DirectoryModel()
-{
-}
+DirectoryModel::~DirectoryModel() = default;
 
 qsizetype DirectoryModel::totalCount() const
 {
@@ -199,7 +197,7 @@ void DirectoryModel::moveFileTo(QString const &srcFile, QString const &destDirPa
     // Chew through watcher events so they won't be processed out of order.
     qApp->processEvents();
     if (result == FileOpResult::SUCCESS) {
-        if (destDirPath != this->directoryPath())
+        if (destDirPath != directoryPath())
             dirManager->removeFileEntry(srcFile);
     }
 }
@@ -212,7 +210,7 @@ bool DirectoryModel::setDirectory(QString const &path)
 
 void DirectoryModel::unload(qsizetype index)
 {
-    QString filePath = this->filePathAt(index);
+    QString filePath = filePathAt(index);
     cache->remove(filePath);
 }
 

@@ -4,10 +4,10 @@
 FloatingMessage::FloatingMessage(FloatingWidgetContainer *parent)
     : OverlayWidget(parent),
       ui(new Ui::FloatingMessage),
-      preferredPosition(FloatingWidgetPosition::BOTTOM)
+      preferredPosition(FloatingWidgetPosition::BOTTOM),
+      hideDelay(700)
 {
     ui->setupUi(this);
-    hideDelay = 700;
 
     visibilityTimer.setSingleShot(true);
     visibilityTimer.setInterval(hideDelay);
@@ -16,7 +16,7 @@ FloatingMessage::FloatingMessage(FloatingWidgetContainer *parent)
     setFadeDuration(300);
     setIcon(FloatingMessageIcon::NONE);
 
-    this->setAccessibleName(QS("FloatingMessage"));
+    setAccessibleName(QS("FloatingMessage"));
     connect(&visibilityTimer, &QTimer::timeout, this, &FloatingMessage::hideAnimated);
 
     readSettings();
@@ -63,7 +63,7 @@ void FloatingMessage::doShowMessage(QString const &text, FloatingMessageIcon ico
     show();
 }
 
-void FloatingMessage::setText(QString text)
+void FloatingMessage::setText(QString const &text)
 {
     ui->textLabel->setText(text);
     text.isEmpty() ? ui->textLabel->hide() : ui->textLabel->show();

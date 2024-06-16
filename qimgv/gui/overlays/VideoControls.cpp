@@ -6,7 +6,7 @@ VideoControls::VideoControls(FloatingWidgetContainer *parent) :
     ui(new Ui::VideoControls)
 {
     ui->setupUi(this);
-    this->setAttribute(Qt::WA_NoMousePropagation, true);
+    setAttribute(Qt::WA_NoMousePropagation, true);
     hide();
     ui->pauseButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/play24.png"));
     ui->pauseButton->setAction(QS("pauseVideo"));

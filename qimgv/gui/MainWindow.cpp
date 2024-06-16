@@ -21,7 +21,7 @@ MW::MW(QWidget *parent)
     setWindowTitle(QCoreApplication::applicationName() + u' ' + QCoreApplication::applicationVersion());
     setMouseTracking(true);
     setAcceptDrops(true);
-    setAccessibleName(QS("mainwindow"));
+    setAccessibleName(u"mainwindow"_s);
     windowGeometryChangeTimer->setSingleShot(true);
     windowGeometryChangeTimer->setInterval(30);
     setupUi();
@@ -38,9 +38,9 @@ MW::MW(QWidget *parent)
 
 MW::~MW()
 {
-    util::DeleteAndNullify(infoBarFullscreen);
-    util::DeleteAndNullify(imageInfoOverlay);
-    util::DeleteAndNullify(floatingMessage);
+    util::DeleteAndAssignNull(infoBarFullscreen);
+    util::DeleteAndAssignNull(imageInfoOverlay);
+    util::DeleteAndAssignNull(floatingMessage);
 }
 
 /*                                                             |--[ImageViewer]
@@ -398,10 +398,10 @@ void MW::setFilter(ScalingFilter filter)
     case ScalingFilter::CV_CUBIC:            filterName = QS("bicubic");            break;
     case ScalingFilter::CV_CUBIC_SHARPEN:    filterName = QS("bicubic + sharpen");  break;
     default:
-        filterName = QSV("configured ") + QString::number(static_cast<int>(filter));
+        filterName = u"configured " + QString::number(static_cast<int>(filter));
         break;
     }
-    showMessage(QSV("Filter ") + filterName, 600);
+    showMessage(u"Filter " + filterName, 600);
     emit viewerWidget->setScalingFilter(filter);
 }
 
@@ -613,7 +613,7 @@ QString MW::getSaveFileName(QString const &filePath)
     for (auto const &fmt : writerFormats) {
         auto qsFmt = QString::fromUtf8(fmt);
         if (filters.filter(qsFmt).isEmpty())
-            filters.append(qsFmt.toUpper() + QSV(" (*.") + qsFmt + u')');
+            filters.append(qsFmt.toUpper() + u" (*." + qsFmt + u')');
     }
     QString filterString = filters.join(QSV(";; "));
 
@@ -877,10 +877,10 @@ void MW::onInfoUpdated()
 {
     QString posString;
     if (info.fileCount)
-        posString = QSV("[ ") + QString::number(info.index + 1) + u"/" + QString::number(info.fileCount) + QSV(" ]");
+        posString = u"[ " + QString::number(info.index + 1) + u"/" + QString::number(info.fileCount) + u" ]";
     QString resString;
     if (info.imageSize.width())
-        resString = QString::number(info.imageSize.width()) + QSV(" x ") + QString::number(info.imageSize.height());
+        resString = QString::number(info.imageSize.width()) + u" x " + QString::number(info.imageSize.height());
     QString sizeString;
     if (info.fileSize)
         sizeString = locale().formattedDataSize(info.fileSize, 1);
@@ -902,9 +902,9 @@ void MW::onInfoUpdated()
         if (settings->windowTitleExtendedInfo()) {
             windowTitle.prepend(posString + QS("  "));
             if (!resString.isEmpty())
-                windowTitle.append(QSV("  -  ") + resString);
+                windowTitle.append(u"  -  " + resString);
             if (!sizeString.isEmpty())
-                windowTitle.append(QSV("  -  ") + sizeString);
+                windowTitle.append(u"  -  " + sizeString);
         }
 
         // toggleable states
@@ -919,17 +919,17 @@ void MW::onInfoUpdated()
             states.append(QSV(" [view lock]"));
 
         if (!settings->infoBarWindowed() && !states.isEmpty())
-            windowTitle.append(QSV(" -") + states);
+            windowTitle.append(u" -" + states);
         if (info.edited)
             windowTitle.prepend(QSV("* "));
 
         infoBarFullscreen->setInfo(posString,
                                    info.fileName + (info.edited ? QS("  *") : QString()),
-                                   resString + QSV("  ") + sizeString);
+                                   resString + u"  " + sizeString);
 
         infoBarWindowed->setInfo(posString,
                                  info.fileName + (info.edited ? QS("  *") : QString()),
-                                 resString + QSV("  ") + sizeString + u" " + states);
+                                 resString + u"  " + sizeString + u" " + states);
     }
     setWindowTitle(windowTitle);
 }
@@ -941,12 +941,12 @@ void MW::setExifInfo(QMap<QString, QString> const &xinfo)
         imageInfoOverlay->setExifInfo(xinfo);
 }
 
-FolderViewProxy *MW::getFolderView()
+FolderViewProxy *MW::getFolderView() const
 {
     return folderView;
 }
 
-ThumbnailStripProxy *MW::getThumbnailPanel()
+ThumbnailStripProxy *MW::getThumbnailPanel() const
 {
     return docWidget->thumbPanel();
 }

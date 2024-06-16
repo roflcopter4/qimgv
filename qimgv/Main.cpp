@@ -1,11 +1,3 @@
-#if defined _WIN32 && defined _MSC_VER && false
-# define USE_VLD
-#endif
-#ifdef USE_VLD
-# define VLD_FORCE_ENABLE 1
-# include <Shlwapi.h>
-# include <F:/Program Files (x86)/Visual Leak Detector/include/vld.h>
-#endif
 
 #include <QApplication>
 #include <QCommandLineParser>
@@ -22,17 +14,23 @@
 #include "ProxyStyle.h"
 #include "Core.h"
 
-#ifdef Q_OS_APPLE
+#if defined Q_OS_APPLE
 # include "macosapplication.h"
-#endif
-#ifdef Q_OS_WIN32
+#elif defined Q_OS_WIN32
 # ifndef WIN32_LEAN_AND_MEAN
 #  define WIN32_LEAN_AND_MEAN
 # endif
 # include <Windows.h>
+# if !defined USE_VLD && defined _MSC_VER && __has_include(<vld.h>) && false
+#  define USE_VLD
+# endif
+# ifdef USE_VLD
+#  define VLD_FORCE_ENABLE 1
+#  include <Shlwapi.h>
+#  include <vld.h>
+# endif
 #endif
-
-using namespace std::literals;
+#define tr(...) QCoreApplication::translate(__VA_ARGS__)
 
 //------------------------------------------------------------------------------
 
@@ -93,50 +91,36 @@ int main(int argc, char *argv[])
 
     // Qt6 hidpi rendering on windows still has artifacts.
     // This disables it for scale factors < 1.75 in this case only fonts are scaled.
-#ifdef Q_OS_WIN32
-# if (QT_VERSION_MAJOR == 6)
+#if defined Q_OS_WIN32 && QT_VERSION_MAJOR == 6
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::RoundPreferFloor);
-# endif
 #endif
 
-#if 0
-    qDebug() << qgetenv("QT_SCALE_FACTOR");
-    qDebug() << qgetenv("QT_SCREEN_SCALE_FACTORS");
-    qDebug() << qgetenv("QT_ENABLE_HIGHDPI_SCALING");
-#endif
-
-    Core *core;
-    int ret;
-
-    {
 #ifdef Q_OS_APPLE
-    MacOSApplication app(argc, argv);
+    auto *app = new MacOSApplication (argc, argv);
     // default to "fusion" if available ("macos" has layout bugs, weird comboboxes etc)
     if (QStyleFactory::keys().contains("Fusion"))
-        a.setStyle(QStyleFactory::create("Fusion"));
+        app->setStyle(QStyleFactory::create("Fusion"));
 #else
-    auto  app   = QApplication(argc, argv);
+    auto *app   = new QApplication(argc, argv);
     auto *style = new ProxyStyle(nullptr);
     QApplication::setStyle(style);
 #endif
 
-    QCoreApplication::setOrganizationName(QS("qimgv"));
-    QCoreApplication::setOrganizationDomain(QS("github.com/easymodo/qimgv"));
-    QCoreApplication::setApplicationName(QS("qimgv"));
+    QCoreApplication::setOrganizationName(u"qimgv"_s);
+    QCoreApplication::setOrganizationDomain(u"github.com/easymodo/qimgv"_s);
+    QCoreApplication::setApplicationName(u"qimgv"_s);
     QCoreApplication::setApplicationVersion(appVersion.toString());
+    QGuiApplication::setDesktopFileName(QCoreApplication::applicationName() + u".desktop");
     QApplication::setEffectEnabled(Qt::UI_AnimateCombo, false);
-    QGuiApplication::setDesktopFileName(QCoreApplication::applicationName() + QSV(".desktop"));
 
     // Needed for mpv.
 #ifndef _MSC_VER
     setlocale(LC_NUMERIC, "C");
 #endif
-
 #ifdef __GLIBC__
     // Default value of 128k causes memory fragmentation issues.
-    mallopt(M_MMAP_THRESHOLD, 64000);
+    mallopt(M_MMAP_THRESHOLD, 65536);
 #endif
-
 #ifdef USE_EXIV2
 # if EXIV2_TEST_VERSION(0, 27, 4)
     Exiv2::enableBMFF(true);
@@ -152,12 +136,7 @@ int main(int argc, char *argv[])
     qRegisterMetaTypeStreamOperators<Script>("Script");
 #endif
 
-#ifdef USE_VLD
-    //VLDMarkAllLeaksAsReported();
-#endif
-
     // Globals
-    inputMap      = InputMap::getInstance();
     appActions    = Actions::getInstance();
     settings      = Settings::getInstance();
     scriptManager = ScriptManager::getInstance();
@@ -167,71 +146,69 @@ int main(int argc, char *argv[])
     atexit(saveSettings);
 
     // Parse args ------------------------------------------------------------------
-    QString appDescription = qApp->applicationName() + QSV(" - Fast and configurable image viewer.") +
-                             QSV("\nVersion: ") + qApp->applicationVersion() +
-                             QSV("\nLicense: GNU GPLv3");
+    QString appDescription = qApp->applicationName() + u" - Fast and configurable image viewer.\n"
+                             u"Version: " + qApp->applicationVersion() + "\n"
+                             u"License: GNU GPLv3";
 
-    QCommandLineParser parser;
-    parser.setApplicationDescription(appDescription);
-    parser.addHelpOption();
-    parser.addVersionOption();
-    parser.addPositionalArgument(QS("path"), QCoreApplication::translate("main", "File or directory path."));
-
-    parser.addOptions({
-        {QS("gen-thumbs"),      QCoreApplication::translate("main", "Generate all thumbnails for directory."),                 QCoreApplication::translate("main", "directory-path")},
-        {QS("gen-thumbs-size"), QCoreApplication::translate("main", "Thumbnail size. Current size is used if not specified."), QCoreApplication::translate("main", "thumbnail-size")},
-        {QS("build-options"),   QCoreApplication::translate("main", "Show build options.")},
+    auto *parser = new QCommandLineParser;
+    parser->setApplicationDescription(appDescription);
+    parser->addHelpOption();
+    parser->addVersionOption();
+    parser->addPositionalArgument(u"path"_s, tr("main", "File or directory path."));
+    parser->addOptions({
+        {u"gen-thumbs"_s,      tr("main", "Generate all thumbnails for directory."),                 tr("main", "directory-path")},
+        {u"gen-thumbs-size"_s, tr("main", "Thumbnail size. Current size is used if not specified."), tr("main", "thumbnail-size")},
+        {u"build-options"_s,   tr("main", "Show build options.")},
     });
+    parser->process(*app);
 
-    parser.process(app);
-
-    if (parser.isSet(QS("build-options"))) {
+    if (parser->isSet(u"build-options"_s)) {
         CmdOptionsRunner r;
         QTimer::singleShot(0, &r, &CmdOptionsRunner::showBuildOptions);
         return QApplication::exec();
     }
-    if (parser.isSet(QS("gen-thumbs"))) {
-        int size = parser.isSet(QS("gen-thumbs-size"))
-                       ? parser.value(QS("gen-thumbs-size")).toInt()
+    if (parser->isSet(u"gen-thumbs"_s)) {
+        int size = parser->isSet(u"gen-thumbs-size"_s)
+                       ? parser->value(u"gen-thumbs-size"_s).toInt()
                        : settings->folderViewIconSize();
 
         //CmdOptionsRunner r;
-        //QTimer::singleShot(0, &r, std::bind(&CmdOptionsRunner::generateThumbs, &r, parser.value(QS("gen-thumbs")), size));
-        QTimer::singleShot(0,
-            [&parser, size] {
-                CmdOptionsRunner::generateThumbs(parser.value(QS("gen-thumbs")), size);
-            });
+        //QTimer::singleShot(0, &r, std::bind(&CmdOptionsRunner::generateThumbs, &r, parser.value(u"gen-thumbs"_s), size));
+        QTimer::singleShot(
+            0, [parser, size] {
+                CmdOptionsRunner::generateThumbs(parser->value(u"gen-thumbs"_s), size);
+            }
+        );
 
         return QApplication::exec();
     }
-
     // -----------------------------------------------------------------------------
 
-    core = new Core(nullptr);
-
+    auto *core = new Core(nullptr);
 #ifdef Q_OS_APPLE
     QObject::connect(&app, &MacOSApplication::fileOpened, &core, &Core::loadPath);
 #endif
-
-    if (parser.positionalArguments().count())
-        core->loadPath(parser.positionalArguments()[0]);
+    if (parser->positionalArguments().count())
+        core->loadPath(parser->positionalArguments()[0]);
     else if (settings->defaultViewMode() == ViewMode::FOLDERVIEW)
         core->loadPath(QDir::homePath());
 
     // Wait for event queue to catch up before showing window.
     // This avoids white background flicker on windows (or not?).
     qApp->processEvents();
-    core->showGui();
-    ret = QGuiApplication::exec();
 
-    util::DeleteAndNullify(core);
-    util::DeleteAndNullify(inputMap);
-    util::DeleteAndNullify(appActions);
-    util::DeleteAndNullify(scriptManager);
-    util::DeleteAndNullify(actionManager);
-    util::DeleteAndNullify(shrRes);
-    util::DeleteAndNullify(settings);
-    }
+    // Run the show.
+    core->showGui();
+    int ret = QGuiApplication::exec();
+
+    util::DeleteAndAssignNull(app);
+    util::DeleteAndAssignNull(parser);
+    util::DeleteAndAssignNull(core);
+    util::DeleteAndAssignNull(appActions);
+    util::DeleteAndAssignNull(scriptManager);
+    util::DeleteAndAssignNull(actionManager);
+    util::DeleteAndAssignNull(shrRes);
+    util::DeleteAndAssignNull(settings);
 
 #ifdef USE_VLD
     VLDSetReportOptions(VLD_OPT_UNICODE_REPORT | VLD_OPT_REPORT_TO_FILE,

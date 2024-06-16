@@ -7,8 +7,8 @@ FullscreenInfoOverlay::FullscreenInfoOverlay(FloatingWidgetContainer *parent)
 {
     ui->setupUi(this);
     setPosition(FloatingWidgetPosition::TOPLEFT);
-    this->setHorizontalMargin(0);
-    this->setVerticalMargin(0);
+    setHorizontalMargin(0);
+    setVerticalMargin(0);
     ui->nameLabel->setText(QS("No file opened"));
     if (parent)
         setContainerSize(parent->size());
@@ -24,5 +24,5 @@ void FullscreenInfoOverlay::setInfo(QString const &pos, QString const &fileName,
     ui->posLabel->setText(pos);
     ui->nameLabel->setText(fileName);
     ui->infoLabel->setText(info);
-    this->adjustSize();
+    adjustSize();
 }

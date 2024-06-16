@@ -44,10 +44,10 @@ class ScriptManager : public QObject
     void error(QString);
 
   private:
-    QMap<QString, Script> scripts; // <name, script>
-
     explicit    ScriptManager(QObject *parent = nullptr);
     static void processArguments(QStringList &cmd, QSharedPointer<Image> const &img);
+
+    QMap<QString, Script> scripts; // <name, script>
 };
 
 extern ScriptManager *scriptManager;

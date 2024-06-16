@@ -19,16 +19,14 @@ int probeOS();
 namespace util {
 
 #if defined Q_OS_WIN32 && false
-static constexpr QChar pathsep = QChar(u'\\');
+inline constexpr QChar pathsep = u'\\';
 #else
-static constexpr QChar pathsep = QChar(u'/');
+inline constexpr QChar pathsep = u'/';
 #endif
 
 using namespace Qt::Literals::StringLiterals;
 
-auto QStringToStdString(QString const &str) -> StdString;
-auto StdStringToQString(StdString const &str) -> QString;
-auto StdPathToQString(std::filesystem::path const &str) -> QString;
+auto StdPathToQString(std::filesystem::path const &filePath) -> QString;
 auto QStringToStdPath(QString const &filePath) -> std::filesystem::path;
 
 inline QString QStringViewToQString(QStringView const &view)
@@ -37,7 +35,7 @@ inline QString QStringViewToQString(QStringView const &view)
 }
 
 template <typename Ty>
-void DeleteAndNullify(Ty *&var)
+void DeleteAndAssignNull(Ty *&var)
 {
     delete var;
     var = nullptr;

@@ -1,44 +1,47 @@
 #pragma once
 
+#include "components/actionManager/ActionManager.h"
+#include "components/scriptManager/ScriptManager.h"
+#include <QPainter>
 #include <QScreen>
 #include <QStyleOption>
 #include <QTimer>
-#include <QPainter>
-#include "components/actionManager/ActionManager.h"
-#include "components/scriptManager/ScriptManager.h"
 
 namespace Ui {
 class ContextMenu;
 }
 
-class ContextMenu : public QWidget {
+class ContextMenu : public QWidget
+{
     Q_OBJECT
-public:
-    explicit ContextMenu(QWidget *parent = nullptr);
+
+  public:
+    explicit ContextMenu(QWidget *parent);
     ~ContextMenu() override;
+
     void setImageEntriesEnabled(bool mode);
 
-public slots:
+  public slots:
     void showAt(QPoint pos);
     void setGeometry(QRect geom);
-
     void show();
     void hide();
 
-private:
-    Ui::ContextMenu *ui;
-    QTimer mTimer;
-
-    void fillOpenWithMenu();
-
-signals:
+  Q_SIGNALS:
     void showScriptSettings();
 
-protected:
-    void mousePressEvent(QMouseEvent*) override;
-    void paintEvent(QPaintEvent *) override;
-    void keyPressEvent(QKeyEvent *event) override;
-private slots:
+  private Q_SLOTS:
     void switchToMainPage();
     void switchToScriptsPage();
+
+  protected:
+    void mousePressEvent(QMouseEvent *) override;
+    void paintEvent(QPaintEvent *) override;
+    void keyPressEvent(QKeyEvent *event) override;
+
+  private:
+    void fillOpenWithMenu();
+
+    Ui::ContextMenu *ui;
+    QTimer           mTimer;
 };

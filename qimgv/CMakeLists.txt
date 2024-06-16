@@ -64,6 +64,37 @@ if(OPENCV_SUPPORT)
     add_subdirectory(3rdparty/QtOpenCV)
 endif()
 
+if(MSVC)
+    file(GLOB_RECURSE ALL_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp" "*.h")
+    foreach(source_file ${ALL_SOURCES})
+        cmake_path(GET source_file PARENT_PATH source_path)
+        string(REPLACE "/" "\\" group_path "${source_path}")  # Escape backslashes for VS
+        if("${source_file}" MATCHES "\\.cpp$")
+            source_group("Source Files\\${group_path}" FILES "${source_file}")
+        elseif("${source_file}" MATCHES "\\.h$")
+            #target_sources(qimgv PRIVATE "${source_file}")
+            source_group("Header Files\\${group_path}" FILES "${source_file}")
+        endif()
+    endforeach()
+
+    file(GLOB_RECURSE ALL_UI_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.ui")
+    source_group("Qt\\UI" FILES ${ALL_UI_FILES})
+    foreach(source_file ${ALL_UI_FILES})
+        cmake_path(REPLACE_EXTENSION source_file ".h")
+        cmake_path(GET source_file FILENAME source_filename)
+        set(source_filename "ui_${source_filename}")
+        cmake_path(GET source_file PARENT_PATH source_path)
+        foreach(build_type Release RelWithDebInfo MinSizeRel Debug)
+            source_group("Qt\\MOC\\${build_type}" FILES "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}_autogen/include_${build_type}/${source_path}/${source_filename}")
+        endforeach()
+    endforeach()
+
+    foreach(build_type Release RelWithDebInfo MinSizeRel Debug)
+        source_group("Qt\\MOC\\${build_type}" FILES "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}_autogen/mocs_compilation_${build_type}.cpp")
+        source_group("CMake Rules\\Stamps" FILES "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}_autogen/autouic_${build_type}.stamp")
+    endforeach()
+endif()
+
 # C++ STANDARD
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
@@ -78,7 +109,7 @@ endif()
 
 # OPTION DEFINITIONS, LINKING
 if(EXIV2)
-	if (MSVC)
+	if(MSVC)
 		target_link_libraries(qimgv PRIVATE Exiv2::exiv2lib)
 	else()
 		target_link_libraries(qimgv PRIVATE exiv2)
@@ -104,17 +135,17 @@ if(OPENCV_SUPPORT)
     target_compile_definitions(qimgv PRIVATE USE_OPENCV)
 endif()
 
-add_definitions(
-    -DQT_NO_CAST_FROM_ASCII
-    -DQT_USE_QSTRINGBUILDER
-    -DQT_USE_FAST_OPERATOR_PLUS)
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
-    add_definitions(-DDEBUG -D_DEBUG)
+target_compile_definitions(qimgv PRIVATE
+    QT_NO_CAST_FROM_ASCII
+    QT_USE_QSTRINGBUILDER
+    QT_USE_FAST_OPERATOR_PLUS)
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    target_compile_definitions(qimgv PRIVATE DEBUG _DEBUG)
 endif()
 
 # generate proper GUI program on specified platform
-if(WIN32) # Check if we are on Windows
-    if(MSVC) # Check if we are using the Visual Studio compiler
+if(WIN32)
+    if(MSVC)
         set_target_properties(qimgv PROPERTIES WIN32_EXECUTABLE ON)
         target_link_options(qimgv PRIVATE "/ENTRY:mainCRTStartup")
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -125,7 +156,7 @@ if(WIN32) # Check if we are on Windows
         #target_link_options(qimgv PRIVATE "-mwindows")
     else()
         message(SEND_ERROR "You are using an unsupported Windows compiler! (Not MSVC or GCC)")
-    endif(MSVC)
+    endif()
 	target_link_libraries(qimgv PRIVATE "dbghelp.lib")
 elseif(APPLE)
     set_target_properties(qimgv PROPERTIES
@@ -141,11 +172,10 @@ elseif(NOT UNIX)
     message(SEND_ERROR "You are on an unsupported platform! (Not Win32, Mac OS X or Unix)")
 endif()
 
-if (MSVC)
+if(MSVC)
     target_compile_options(qimgv PRIVATE
           $<$<COMPILE_LANGUAGE:CXX>:/FI Common.h>)
-else ()
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include Common.h")
+else()
     target_compile_options(qimgv PRIVATE
           $<$<COMPILE_LANGUAGE:CXX>:-include Common.h>)
 endif()

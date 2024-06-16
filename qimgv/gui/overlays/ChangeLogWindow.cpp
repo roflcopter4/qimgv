@@ -47,9 +47,8 @@ void ChangelogWindow::wheelEvent(QWheelEvent *event)
 
 void ChangelogWindow::keyPressEvent(QKeyEvent *event)
 {
-    quint32 nativeScanCode = event->nativeScanCode();
-    QString key            = actionManager->keyForNativeScancode(nativeScanCode);
-    if (key == QSV("Esc")) {
+    QString key = ActionManager::keyForNativeScancode(event->nativeScanCode());
+    if (key == u"Esc"_sv) {
         event->accept();
         hide();
     }

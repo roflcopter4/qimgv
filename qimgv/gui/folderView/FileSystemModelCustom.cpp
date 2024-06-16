@@ -4,25 +4,28 @@
 
 class FileSystemModelCustom::FileIconProvider final : public QAbstractFileIconProvider
 {
-    static QString getFileType(const QFileInfo &info)
+#define appTr QGuiApplication::translate
+
+    // This is copied from the Qt source.
+    static QString getFileType(QFileInfo const &info)
     {
         if (info.isRoot())
-            return QGuiApplication::translate("QAbstractFileIconProvider", "Drive");
+            return appTr("QAbstractFileIconProvider", "Drive");
         if (info.isFile())
-            return QGuiApplication::translate("QAbstractFileIconProvider", "File");
+            return appTr("QAbstractFileIconProvider", "File");
         if (info.isDir())
 #ifdef Q_OS_WIN
-            return QGuiApplication::translate("QAbstractFileIconProvider", "File Folder", "Match Windows Explorer");
+            return appTr("QAbstractFileIconProvider", "File Folder", "Match Windows Explorer");
 #else
-            return QGuiApplication::translate("QAbstractFileIconProvider", "Folder", "All other platforms");
+            return appTr("QAbstractFileIconProvider", "Folder", "All other platforms");
 #endif
         if (info.isSymLink())
 #ifdef Q_OS_MACOS
-            return QGuiApplication::translate("QAbstractFileIconProvider", "Alias", "macOS Finder");
+            return appTr("QAbstractFileIconProvider", "Alias", "macOS Finder");
 #else
-            return QGuiApplication::translate("QAbstractFileIconProvider", "Shortcut", "All other platforms");
+            return appTr("QAbstractFileIconProvider", "Shortcut", "All other platforms");
 #endif
-        return QGuiApplication::translate("QAbstractFileIconProvider", "Unknown");
+        return appTr("QAbstractFileIconProvider", "Unknown");
     }
 
   public:
@@ -44,10 +47,12 @@ class FileSystemModelCustom::FileIconProvider final : public QAbstractFileIconPr
         return {};
     }
 
-    ND QIcon icon(const QFileInfo &) const override
+    ND QIcon icon(QFileInfo const &) const override
     {
         return {};
     }
+
+#undef appTr
 };
 
 /****************************************************************************************/
@@ -56,27 +61,25 @@ FileSystemModelCustom::FileSystemModelCustom(QObject *parent)
     : QFileSystemModel(parent),
       iconProvider(new FileIconProvider())
 {
-    setOptions(Option::DontWatchForChanges | Option::DontResolveSymlinks);
+    setOptions(Option::DontResolveSymlinks);
     setIconProvider(iconProvider.get());
 
     auto dpr      = qApp->devicePixelRatio();
-    auto iconPath = QS(":/res/icons/common/menuitem/folder16.png");
+    auto iconPath = u":/res/icons/common/menuitem/folder16.png"_s;
 
     if (dpr >= 1.0 + 0.001)
-        iconPath.replace(QS("."), QS("@2x."));
+        iconPath.replace(u'.', u"@2x."_s);
     folderIcon.load(iconPath);
     ImageLib::recolor(folderIcon, settings->colorScheme().icons);
 
     connect(settings, &Settings::settingsChanged, this, &FileSystemModelCustom::onSettingsChanged);
 }
 
+FileSystemModelCustom::~FileSystemModelCustom() = default;
+
 void FileSystemModelCustom::onSettingsChanged()
 {
-    ImageLib::recolor(this->folderIcon, settings->colorScheme().icons);
-}
-
-FileSystemModelCustom::~FileSystemModelCustom()
-{
+    ImageLib::recolor(folderIcon, settings->colorScheme().icons);
 }
 
 QVariant FileSystemModelCustom::data(QModelIndex const &index, int role) const
@@ -94,29 +97,3 @@ Qt::ItemFlags FileSystemModelCustom::flags(QModelIndex const &index) const
     }
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDropEnabled;
 }
-
-
-#if 0
-bool FileSystemModelCustom::event(QEvent *event)
-{
-    qDebug() << event->type();
-    return QFileSystemModel::event(event);
-
-#if 0
-    switch (event->type()) {
-    case QEvent::Type::MetaCall: {
-        std::thread fuck([&](QEvent *ev){QFileSystemModel::event(ev);}, event);
-        fuck.detach();
-        return false;
-        //QThread thr([](){});
-        //thr.
-        //QThread::run();
-        //connect(this, &QObject::finished, wkThrd, &QThread::quit);
-    }
-    default:
-        return QFileSystemModel::event(event);
-        break;
-    }
-#endif
-}
-#endif

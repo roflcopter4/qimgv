@@ -44,9 +44,9 @@ void ScriptManager::runScript(QString const &scriptName, QSharedPointer<Image> c
                 QFileInfo fi(program);
                 QString errorString;
                 if(fi.isFile() && !fi.isExecutable())
-                    errorString = QS("Error:  ") + program + QS("  is not an executable.");
+                    errorString = u"Error:  " + program + u"  is not an executable.";
                 else
-                    errorString = QS("Error: unable run application/script. See README for working examples.");
+                    errorString = u"Error: unable run application/script. See README for working examples."_s;
                 emit error(errorString);
                 qWarning() << errorString;
             }
@@ -74,16 +74,10 @@ void ScriptManager::runCommandDetached(QString const &cmd)
 // TODO: what if filename contains one of the tags?
 void ScriptManager::processArguments(QStringList &cmd, QSharedPointer<Image> const &img)
 {
-    QString field = QS("%file%");
-    for (auto &i : cmd) {
+    QString field = u"%file%"_s;
+    for (auto &i : cmd)
         if(i.contains(field))
             i.replace(field, img->filePath());
-#if defined _WIN32 && false
-        // force "\" as a directory separator
-        i.replace("/", "\\");
-        i.replace("\\\\", "\\");
-#endif
-    }
 }
 
 // thanks stackoverflow

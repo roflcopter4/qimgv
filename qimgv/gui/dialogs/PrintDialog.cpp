@@ -2,15 +2,20 @@
 #include "ui_PrintDialog.h"
 
 PrintDialog::PrintDialog(QWidget *parent)
-    : QDialog(parent), ui(new Ui::PrintDialog)
+    : QDialog(parent),
+      img(nullptr),
+      ui(new Ui::PrintDialog),
+      printer(nullptr),
+      printPdfDefault(false)
 {
     ui->setupUi(this);
-    ui->previewLabel->setContentsMargins(0,0,0,0);
+    ui->previewLabel->setContentsMargins(0, 0, 0, 0);
     pdfPrinter.setOutputFormat(QPrinter::PdfFormat);
-    pdfPrinter.setPageSize(QPageSize(QPageSize::A4));
-    pdfPrinter.setOutputFileName(QS(" "));
+    pdfPrinter.setPageSize(QPageSize::A4);
+    pdfPrinter.setOutputFileName(u" "_s);
+
     QStringList printerList = QPrinterInfo::availablePrinterNames();
-    if(printerList.isEmpty()) {
+    if (printerList.isEmpty()) {
         ui->printerListComboBox->hide();
         ui->printButton->setEnabled(false);
         ui->exportPdfButton->setFocus();
@@ -18,7 +23,7 @@ PrintDialog::PrintDialog(QWidget *parent)
         ui->printerListPlaceholder->hide();
         ui->printerListComboBox->addItems(printerList);
         ui->printerListComboBox->setCurrentText(QPrinterInfo::defaultPrinterName());
-        if(printerList.contains(settings->lastPrinter()))
+        if (printerList.contains(settings->lastPrinter()))
             onPrinterSelected(settings->lastPrinter());
         else
             onPrinterSelected(QPrinterInfo::defaultPrinterName());
@@ -27,8 +32,10 @@ PrintDialog::PrintDialog(QWidget *parent)
     ui->color->setChecked(settings->printColor());
     setLandscape(settings->printLandscape());
     ui->fitToPageCheckBox->setChecked(settings->printFitToPage());
-    if(printPdfDefault)
+
+    if (printPdfDefault)
         ui->exportPdfButton->setFocus();
+
     // ui signals
     connect(ui->cancelButton, &QPushButton::clicked, this, &QWidget::close);
     connect(ui->printButton, &QPushButton::clicked, this, &PrintDialog::print);
@@ -39,66 +46,75 @@ PrintDialog::PrintDialog(QWidget *parent)
     connect(ui->color, &QRadioButton::toggled, this, &PrintDialog::updatePreview);
 }
 
-void PrintDialog::saveSettings() {
+void PrintDialog::saveSettings()
+{
     settings->setPrintLandscape(ui->landscape->isChecked());
     settings->setPrintColor(ui->color->isChecked());
     settings->setPrintFitToPage(ui->fitToPageCheckBox->isChecked());
     settings->setPrintPdfDefault(printPdfDefault);
-    if(!ui->printerListComboBox->currentText().isEmpty())
+    if (!ui->printerListComboBox->currentText().isEmpty())
         settings->setLastPrinter(ui->printerListComboBox->currentText());
 }
 
-PrintDialog::~PrintDialog() {
+PrintDialog::~PrintDialog()
+{
     saveSettings();
-    if(printer)
-        delete printer;
+    delete printer;
     delete ui;
 }
 
-void PrintDialog::setImage(QSharedPointer<const QImage> const &_img) {
-    img = _img;
+void PrintDialog::setImage(QSharedPointer<QImage const> const &newImg)
+{
+    img = newImg;
     updatePreview();
 }
 
-void PrintDialog::setOutputPath(QString path) {
-    if(path.isEmpty())
-        path = QS(" ");
+void PrintDialog::setOutputPath(QString path)
+{
+    if (path.isEmpty())
+        path = u" "_s;
     pdfPrinter.setOutputFileName(path);
 }
 
-QString PrintDialog::pdfPathDialog() {
-    return QFileDialog::getSaveFileName(this, tr("Choose pdf location"), pdfPrinter.outputFileName(), QS("*.pdf"));
+QString PrintDialog::pdfPathDialog()
+{
+    return QFileDialog::getSaveFileName(this, tr("Choose pdf location"), pdfPrinter.outputFileName(), u"*.pdf"_s);
 }
 
-void PrintDialog::updatePreview() {
-    if(!img)
+void PrintDialog::updatePreview()
+{
+    if (!img)
         return;
-    QPrinter *targetPrinter = printer;
-    if(!targetPrinter)
-        targetPrinter = &pdfPrinter;
-    auto imgRect = getImagePrintRect(targetPrinter);
-    QRectF fullRect = targetPrinter->pageLayout().fullRectPixels(targetPrinter->resolution());
-    // margins
-    QMarginsF margins(targetPrinter->pageLayout().marginsPixels(targetPrinter->resolution()));
+
+    QPrinter *targetPrinter = printer ? printer : &pdfPrinter;
+    QRectF    imgRect       = getImagePrintRect(targetPrinter);
+    QRectF    fullRect      = targetPrinter->pageLayout().fullRectPixels(targetPrinter->resolution());
+    QMarginsF margins       = QMarginsF(targetPrinter->pageLayout().marginsPixels(targetPrinter->resolution()));
+
     // scaled page with margins
-    QRect fullRectScaled( QRectF(QPointF(0,0), fullRect.size().scaled(ui->previewLabel->size(), Qt::KeepAspectRatio)).toRect() );
+    QRect fullRectScaled = QRectF(QPointF(0, 0), fullRect.size().scaled(ui->previewLabel->size(), Qt::KeepAspectRatio)).toRect();
     qreal scale = fullRectScaled.width() / fullRect.width();
+
     // scaled image rect with margins (not accurate, but good enough for a preview)
     QRect imgRectScaled(QRectF((imgRect.left() + margins.left()) * scale, (imgRect.top() + margins.top()) * scale,
-                               imgRect.width() * scale, imgRect.height() * scale).toRect());
+                                 imgRect.width() * scale, imgRect.height() * scale)
+                              .toRect());
+
     QPixmap pagePixmap(fullRectScaled.size() * qApp->devicePixelRatio());
     pagePixmap.setDevicePixelRatio(qApp->devicePixelRatio());
     auto scaledImg = img->scaled(imgRectScaled.size() * qApp->devicePixelRatio(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    if(ui->grayscale->isChecked())
+    if (ui->grayscale->isChecked())
         scaledImg = scaledImg.convertToFormat(QImage::Format_Grayscale8);
     scaledImg.setDevicePixelRatio(qApp->devicePixelRatio());
+
     QPainter p(&pagePixmap);
-    p.fillRect(pagePixmap.rect(), QColor(255,255,255));
+    p.fillRect(pagePixmap.rect(), QColor(255, 255, 255));
     p.drawImage(imgRectScaled.left(), imgRectScaled.top(), scaledImg);
+
     // page border for white window bg
     QPalette palette;
-    QColor sys_window = palette.window().color();
-    if(sys_window.valueF() > 0.45f) {
+    QColor   sys_window = palette.window().color();
+    if (sys_window.valueF() > 0.45f) {
         p.setOpacity(0.25f);
         p.setPen(Qt::black);
         p.drawRect(QRectF(QPointF(0.5f, 0.5f), QSizeF(pagePixmap.size() / qApp->devicePixelRatio() - QSizeF(1.0f, 1.0f))));
@@ -106,14 +122,14 @@ void PrintDialog::updatePreview() {
     ui->previewLabel->setPixmap(pagePixmap);
 }
 
-QRectF PrintDialog::getImagePrintRect(QPrinter *pr) {
-    QRectF imgRect;
-    if(!pr || !img)
+QRectF PrintDialog::getImagePrintRect(QPrinter *pr)
+{
+    if (!pr || !img)
         return QRect();
-    QRectF pageRect = QRectF(QPoint(0,0), pr->pageRect(QPrinter::DevicePixel).size());
-    imgRect = img->rect();
+    QRectF pageRect = QRectF(QPoint(0, 0), pr->pageRect(QPrinter::DevicePixel).size());
+    QRectF imgRect  = img->rect();
     // downscale / upscale
-    if(ui->fitToPageCheckBox->isChecked() || imgRect.width() > pageRect.width() || imgRect.height() > pageRect.height())
+    if (ui->fitToPageCheckBox->isChecked() || imgRect.width() > pageRect.width() || imgRect.height() > pageRect.height())
         imgRect.setSize(imgRect.size().scaled(pageRect.size(), Qt::KeepAspectRatio));
     // align top center
     imgRect.moveCenter(pageRect.center());
@@ -121,54 +137,49 @@ QRectF PrintDialog::getImagePrintRect(QPrinter *pr) {
     return imgRect;
 }
 
-void PrintDialog::setLandscape(bool mode) {
+void PrintDialog::setLandscape(bool mode)
+{
     ui->landscape->blockSignals(true);
     ui->landscape->setChecked(mode);
     ui->landscape->blockSignals(false);
-    QPageLayout::Orientation orientation = QPageLayout::Portrait;
-    if(mode)
-        orientation = QPageLayout::Landscape;
-    if(printer)
+    auto orientation = mode ? QPageLayout::Landscape : QPageLayout::Portrait;
+    if (printer)
         printer->setPageOrientation(orientation);
     pdfPrinter.setPageOrientation(orientation);
     updatePreview();
 }
 
-void PrintDialog::onPrinterSelected(QString const &name) {
-    if(printer)
-        delete printer;
+void PrintDialog::onPrinterSelected(QString const &name)
+{
+    delete printer;
     printer = new QPrinter(QPrinterInfo::printerInfo(name));
     updatePreview();
 }
 
-void PrintDialog::print() {
-    if(!img || !printer) {
+void PrintDialog::print()
+{
+    if (!img || !printer) {
         close();
         return;
     }
-    if(ui->color->isChecked())
-        printer->setColorMode(QPrinter::Color);
-    else
-        printer->setColorMode(QPrinter::GrayScale);
+    printer->setColorMode(ui->color->isChecked() ? QPrinter::Color : QPrinter::GrayScale);
     QPainter p(printer);
     p.drawImage(getImagePrintRect(printer), *img);
     printPdfDefault = false;
     close();
 }
 
-void PrintDialog::exportPdf() {
-    if(!img || pdfPrinter.outputFileName().isEmpty()) {
+void PrintDialog::exportPdf()
+{
+    if (!img || pdfPrinter.outputFileName().isEmpty()) {
         close();
         return;
     }
     auto path = pdfPathDialog();
-    if(path.isEmpty())
+    if (path.isEmpty())
         return;
     pdfPrinter.setOutputFileName(path);
-    if(ui->color->isChecked())
-        pdfPrinter.setColorMode(QPrinter::Color);
-    else
-        pdfPrinter.setColorMode(QPrinter::GrayScale);
+    pdfPrinter.setColorMode(ui->color->isChecked() ? QPrinter::Color : QPrinter::GrayScale);
     QPainter p(&pdfPrinter);
     p.drawImage(getImagePrintRect(&pdfPrinter), *img);
     printPdfDefault = true;

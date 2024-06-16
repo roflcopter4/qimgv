@@ -34,8 +34,8 @@ void BookmarksWidget::addBookmark(QString const &dirPath)
     if (paths.contains(dirPath))
         return;
     paths.push_back(dirPath);
-    auto url  = QUrl(dirPath);
-    auto item = new BookmarksItem(url.fileName(), dirPath, this);
+    auto  url  = QUrl(dirPath);
+    auto *item = new BookmarksItem(url.fileName(), dirPath, this);
     layout->addWidget(item);
     connect(item, &BookmarksItem::clicked, this, &BookmarksWidget::bookmarkClicked);
     connect(item, &BookmarksItem::removeClicked, this, &BookmarksWidget::removeBookmark);
@@ -67,20 +67,20 @@ void BookmarksWidget::onPathChanged(QString const &path)
     if (highlightedPath == path)
         return;
     if (paths.contains(highlightedPath)) {
-        int  currentIndex = paths.indexOf(highlightedPath);
-        auto w            = dynamic_cast<BookmarksItem *>(layout->itemAt(currentIndex)->widget());
+        auto  currentIndex = paths.indexOf(highlightedPath);
+        auto *w            = dynamic_cast<BookmarksItem *>(layout->itemAt(currentIndex)->widget());
         w->setHighlighted(false);
         highlightedPath = QString();
     }
     if (paths.contains(path)) {
-        int  newIndex = paths.indexOf(path);
-        auto w        = dynamic_cast<BookmarksItem *>(layout->itemAt(newIndex)->widget());
+        auto  newIndex = paths.indexOf(path);
+        auto *w        = dynamic_cast<BookmarksItem *>(layout->itemAt(newIndex)->widget());
         w->setHighlighted(true);
         highlightedPath = path;
     }
 }
 
-void BookmarksWidget::dropEvent(QDropEvent *event)
+void BookmarksWidget::dropEvent(QDropEvent *)
 {
     //    QModelIndex dropIndex = indexAt(event->pos());
     //    if(dropIndex.isValid())

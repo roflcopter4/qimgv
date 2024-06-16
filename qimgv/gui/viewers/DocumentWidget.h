@@ -48,11 +48,11 @@ class DocumentWidget : public FloatingWidgetContainer
     InfoBarProxy *mInfoBar;
     MainPanel    *mainPanel;
 
-    bool avoidPanelFlag       : 1;
-    bool mPanelEnabled        : 1;
-    bool mPanelFullscreenOnly : 1;
-    bool mIsFullscreen        : 1;
-    bool mPanelPinned         : 1;
-    bool mInteractionEnabled  : 1;
-    bool mAllowPanelInit      : 1;
+    bool avoidPanelFlag       : 1 = false;
+    bool mPanelEnabled        : 1 = false;
+    bool mPanelFullscreenOnly : 1 = false;
+    bool mIsFullscreen        : 1 = false;
+    bool mPanelPinned         : 1 = false;
+    bool mInteractionEnabled  : 1 = false;
+    bool mAllowPanelInit      : 1 = false;
 };

@@ -9,14 +9,13 @@ class CacheItem
     CacheItem();
     explicit CacheItem(QSharedPointer<Image> const &contents);
     ~CacheItem();
+    DELETE_COPY_MOVE_ROUTINES(CacheItem);
 
     QSharedPointer<Image> getContents();
 
     void lock();
     void unlock();
     ND int lockStatus() const;
-
-    DELETE_COPY_MOVE_CONSTRUCTORS(CacheItem);
 
   private:
     QSharedPointer<Image> contents;

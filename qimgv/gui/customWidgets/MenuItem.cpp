@@ -9,7 +9,7 @@ MenuItem::MenuItem(QWidget *parent)
     mLayout->setContentsMargins(6, 0, 8, 0);
     mLayout->setSpacing(2);
 
-    setAccessibleName(QS("MenuItem"));
+    setAccessibleName(u"MenuItem"_s);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
     mTextLabel.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
@@ -18,10 +18,10 @@ MenuItem::MenuItem(QWidget *parent)
     mIconWidget->setMinimumSize(26, 26); // 5px padding from stylesheet
     mIconWidget->installEventFilter(this);
     mIconWidget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    mIconWidget->setAccessibleName(QS("MenuItemIcon"));
+    mIconWidget->setAccessibleName(u"MenuItemIcon"_s);
 
-    mTextLabel.setAccessibleName(QS("MenuItemText"));
-    mShortcutLabel.setAccessibleName(QS("MenuItemShortcutLabel"));
+    mTextLabel.setAccessibleName(u"MenuItemText"_s);
+    mShortcutLabel.setAccessibleName(u"MenuItemShortcutLabel"_s);
 
     mLayout->addWidget(mIconWidget);
     mLayout->addWidget(&mTextLabel);

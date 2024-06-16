@@ -1,9 +1,10 @@
 #include "CopyOverlay.h"
 #include "ui_CopyOverlay.h"
 
-CopyOverlay::CopyOverlay(FloatingWidgetContainer *parent) :
-    OverlayWidget(parent),
-    ui(new Ui::CopyOverlay)
+CopyOverlay::CopyOverlay(FloatingWidgetContainer *parent)
+    : OverlayWidget(parent),
+      ui(new Ui::CopyOverlay),
+      mode(CopyOverlayMode::COPY)
 {
     ui->setupUi(this);
     hide();
@@ -12,40 +13,43 @@ CopyOverlay::CopyOverlay(FloatingWidgetContainer *parent) :
     ui->closeButton->setIconPath(QS(":/res/icons/common/overlay/close-dim16.png"));
     ui->headerIcon->setIconPath(QS(":/res/icons/common/overlay/copy16.png"));
     ui->headerLabel->setText(tr("Copy to..."));
-    mode = CopyOverlayMode::COPY;
 
     createShortcuts();
 
     paths = settings->savedPaths();
-    if(paths.count() < maxPathCount)
+    if (paths.count() < maxPathCount)
         createDefaultPaths();
     createPathWidgets();
 
     setAcceptKeyboardFocus(true);
 
-    if(parent)
+    if (parent)
         setContainerSize(parent->size());
 
     readSettings();
     connect(settings, &Settings::settingsChanged, this, &CopyOverlay::readSettings);
 }
 
-CopyOverlay::~CopyOverlay() {
+CopyOverlay::~CopyOverlay()
+{
     delete ui;
 }
 
-void CopyOverlay::show() {
+void CopyOverlay::show()
+{
     OverlayWidget::show();
     setFocus();
 }
 
-void CopyOverlay::hide() {
+void CopyOverlay::hide()
+{
     OverlayWidget::hide();
 }
 
-void CopyOverlay::setDialogMode(CopyOverlayMode _mode) {
+void CopyOverlay::setDialogMode(CopyOverlayMode _mode)
+{
     mode = _mode;
-    if(mode == CopyOverlayMode::COPY) {
+    if (mode == CopyOverlayMode::COPY) {
         ui->headerIcon->setIconPath(QS(":/res/icons/common/overlay/copy16.png"));
         ui->headerLabel->setText(tr("Copy to..."));
     } else {
@@ -59,21 +63,23 @@ CopyOverlayMode CopyOverlay::operationMode() const
     return mode;
 }
 
-void CopyOverlay::removePathWidgets() {
-    for(int i = 0; i < pathWidgets.count(); i++) {
-        QWidget *tmp = pathWidgets.at(i);
+void CopyOverlay::removePathWidgets()
+{
+    for (int i = 0; i < pathWidgets.count(); ++i) {
+        QWidget *tmp = pathWidgets[i];
         ui->pathSelectorsLayout->removeWidget(tmp);
         delete tmp;
     }
     pathWidgets.clear();
 }
 
-void CopyOverlay::createPathWidgets() {
+void CopyOverlay::createPathWidgets()
+{
     removePathWidgets();
-    qsizetype count = (paths.length() > maxPathCount) ? maxPathCount : paths.length();
-    for(qsizetype i = 0; i < count; i++) {
-        PathSelectorMenuItem *item = new PathSelectorMenuItem(this);
-        item->setDirectory(paths.at(i));
+    int count = paths.length() > maxPathCount ? maxPathCount : int(paths.length());
+    for (int i = 0; i < count; ++i) {
+        auto *item = new PathSelectorMenuItem(this);
+        item->setDirectory(paths[i]);
         item->setShortcutText(shortcuts.key(i));
         connect(item, &PathSelectorMenuItem::directorySelected, this, &CopyOverlay::requestFileOperation);
         pathWidgets.append(item);
@@ -81,95 +87,101 @@ void CopyOverlay::createPathWidgets() {
     }
 }
 
-void CopyOverlay::createShortcuts() {
-    for(qsizetype i = 0; i < maxPathCount; i++)
+void CopyOverlay::createShortcuts()
+{
+    for (int i = 0; i < maxPathCount; ++i)
         shortcuts.insert(QString::number(i + 1), i);
 }
 
-void CopyOverlay::requestFileOperation(QString const &path) {
-    if(mode == CopyOverlayMode::COPY)
+void CopyOverlay::requestFileOperation(QString const &path)
+{
+    if (mode == CopyOverlayMode::COPY)
         emit copyRequested(path);
     else
         emit moveRequested(path);
 }
 
-void CopyOverlay::readSettings() {
+void CopyOverlay::readSettings()
+{
     // don't interfere with the main panel
-    if(settings->panelEnabled() && settings->panelPosition() == PanelPosition::BOTTOM) {
+    if (settings->panelEnabled() && settings->panelPosition() == PanelPosition::BOTTOM)
         setPosition(FloatingWidgetPosition::TOPLEFT);
-    } else {
+    else
         setPosition(FloatingWidgetPosition::BOTTOMLEFT);
-    }
     update();
 }
 
 // for some reason, duplicate folders may appear in the configuration
 // we remove duplicate directories
-void CopyOverlay::saveSettings() {
+void CopyOverlay::saveSettings()
+{
     paths.clear();
     QStringList temp;
-    for(int i = 0; i< pathWidgets.count(); i++) {
-        QString path = pathWidgets.at(i)->path();
+    for (int i = 0; i < pathWidgets.count(); i++) {
+        QString path = pathWidgets[i]->path();
         if (!path.isEmpty()) {
             if (!temp.contains(path)) {
                 temp << path;
-                paths << pathWidgets.at(i)->directory();
+                paths << pathWidgets[i]->directory();
             }
         }
     }
     settings->setSavedPaths(paths);
 }
 
-void CopyOverlay::createDefaultPaths() {
+void CopyOverlay::createDefaultPaths()
+{
     QString home = QDir::homePath();
     if (paths.count() < 1 || paths[0].isEmpty() || paths[0][0] == u'@') {
         paths.clear();
         paths << home;
     }
-    if (paths.count() == 1 && paths[0] == home) {
-        QDir dir(home);
-        foreach(QFileInfo mfi, dir.entryInfoList()) {
-            if (paths.count() >= maxPathCount) {
-                break;
-            }
-            if(mfi.isFile()) {
-                continue;
-            } 
-            else {
-                if(mfi.fileName() == QSV(".")  
-                || mfi.fileName() == QSV("..")
-                // hide directory
-                || mfi.fileName()[0] ==  u'.' 
-                // windows system directory
-                || mfi.fileName() ==  QSV("3D Objects")
-                || mfi.fileName() ==  QSV("Contacts")
-                || mfi.fileName() ==  QSV("Favorites")
-                || mfi.fileName() ==  QSV("Links")
-                || mfi.fileName() ==  QSV("Saved Games")
-                || mfi.fileName() ==  QSV("Searches")
-                ) {
-                    continue;
-                }
-                QString qpath(home + u'/' + mfi.fileName());
-                QFileInfo qinfo(qpath);
-                if (qinfo.permission(QFile::WriteUser | QFile::ReadGroup)) {
-                    paths << qpath;
-                }
-            }
+    if (paths.count() != 1 || paths[0] != home)
+        return;
+    QDir dir(home);
+
+    for (QFileInfo const &mfi : dir.entryInfoList()) {
+        if (paths.count() >= maxPathCount)
+            break;
+        if (mfi.isFile())
+            continue;
+        QString fname = mfi.fileName();
+        if (fname == u"."_sv ||
+            fname == u".."_sv ||
+            // hide directory
+            fname[0] == u'.' ||
+            // windows system directory
+            fname == u"3D Objects"_sv ||
+            fname == u"Contacts"_sv ||
+            fname == u"Favorites"_sv ||
+            fname == u"Links"_sv ||
+            fname == u"Saved Games"_sv ||
+            fname == u"Searches"_sv)
+        {
+            continue;
         }
+
+        QString   qpath(home + u'/' + mfi.fileName());
+        QFileInfo qinfo(qpath);
+        if (qinfo.permission(QFile::WriteUser | QFile::ReadGroup))
+            paths << qpath;
     }
 }
 
 // block native tab-switching so we can use it in shortcuts
-bool CopyOverlay::focusNextPrevChild(bool) {
+bool CopyOverlay::focusNextPrevChild(bool)
+{
     return false;
 }
 
-void CopyOverlay::keyPressEvent(QKeyEvent *event) {
+void CopyOverlay::keyPressEvent(QKeyEvent *event)
+{
     event->accept();
-    QString key = actionManager->keyForNativeScancode(event->nativeScanCode());
-    if(shortcuts.contains(key))
-        requestFileOperation(pathWidgets.at(shortcuts[key])->directory());
+
+
+    QString key = ActionManager::keyForNativeScancode(event->nativeScanCode());
+    if (shortcuts.contains(key))
+        requestFileOperation(pathWidgets[shortcuts[key]]->directory());
     else
         actionManager->processEvent(event);
 }
