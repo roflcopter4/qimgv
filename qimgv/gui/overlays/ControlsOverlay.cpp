@@ -79,7 +79,7 @@ void ControlsOverlay::enterEvent(QEvent *event)
     fadeEffect->setOpacity(1.0);
 }
 
-void ControlsOverlay::leaveEvent(QEvent *event)
+void ControlsOverlay::leaveEvent(QEvent *)
 {
     fadeAnimation->start();
 }

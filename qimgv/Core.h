@@ -1,4 +1,13 @@
 #pragma once
+#include "AppVersion.h"
+#include "Settings.h"
+#include "components/DirectoryModel.h"
+#include "components/DirectoryPresenter.h"
+#include "components/scriptManager/ScriptManager.h"
+#include "gui/MainWindow.h"
+#include "gui/dialogs/PrintDialog.h"
+#include "gui/folderView/FileSystemModelCustom.h"
+#include "utils/Randomizer.h"
 #include <QClipboard>
 #include <QDebug>
 #include <QDesktopServices>
@@ -7,15 +16,7 @@
 #include <QMutex>
 #include <QObject>
 #include <QTranslator>
-
-#include "AppVersion.h"
-#include "Settings.h"
-#include "components/DirectoryModel.h"
-#include "components/DirectoryPresenter.h"
-#include "components/scriptManager/ScriptManager.h"
-#include "gui/MainWindow.h"
-#include "gui/dialogs/PrintDialog.h"
-#include "utils/Randomizer.h"
+#include <mutex>
 
 #ifdef __GLIBC__
 # include <malloc.h>
@@ -43,9 +44,10 @@ class Core final : public QObject
     ~Core() override;
     DELETE_COPY_MOVE_ROUTINES(Core);
 
-    void showGui() const;
+    void showGui();
 
   private:
+    void doShowGui();
     void connectComponents();
     void connectActions();
     void loadTranslation();
@@ -61,7 +63,6 @@ class Core final : public QObject
     void stopSlideshow();
     bool saveFile(QString const &filePath, QString const &newPath);
     bool saveFile(QString const &filePath);
-
     void doInteractiveCopy(QString const &path, QString const &destDirectory, DialogResult &overwriteFiles);
     void doInteractiveMove(QString const &path, QString const &destDirectory, DialogResult &overwriteFiles);
 
@@ -76,26 +77,6 @@ class Core final : public QObject
                        Args &&...as);
 
     static QMimeData *getMimeDataForImage(QSharedPointer<Image> const &img, MimeDataTarget target);
-
-    // The entire UI.
-    std::unique_ptr<MW> mw;
-
-    // components
-    QSharedPointer<DirectoryModel> model;
-    DirectoryPresenter *thumbPanelPresenter;
-    DirectoryPresenter *folderViewPresenter;
-
-    QTranslator  *translator;
-    QDrag        *mDrag;
-    Randomizer    randomizer;
-    QTimer        slideshowTimer;
-    QElapsedTimer t;
-
-    State state;
-    FolderEndAction folderEndAction;
-    bool  loopSlideshow;
-    bool  slideshow;
-    bool  shuffle;
 
   public Q_SLOTS:
     void updateInfoString();
@@ -177,4 +158,27 @@ class Core final : public QObject
     void prevDirectory();
     void print();
     void modelDelayLoad();
+
+  private:
+    // The entire UI.
+    std::unique_ptr<MW> mw;
+
+    // components
+    QSharedPointer<DirectoryModel> model;
+    DirectoryPresenter *thumbPanelPresenter;
+    DirectoryPresenter *folderViewPresenter;
+
+    QTranslator  *translator;
+    QDrag        *mDrag;
+    Randomizer    randomizer;
+    QTimer        slideshowTimer;
+    QElapsedTimer t;
+
+    std::once_flag onceFlag_;
+
+    State state;
+    FolderEndAction folderEndAction;
+    bool  loopSlideshow;
+    bool  slideshow;
+    bool  shuffle;
 };

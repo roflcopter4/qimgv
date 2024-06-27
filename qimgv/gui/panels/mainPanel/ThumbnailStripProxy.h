@@ -22,6 +22,8 @@ class ThumbnailStripProxy : public QWidget, public IDirectoryView
 
     ND bool  isInitialized() const;
     ND QSize itemSize() const;
+    SelectionList       &selection() final;
+    SelectionList const &selection() const final;
 
   public Q_SLOTS:
     void populate(qsizetype) override;
@@ -36,9 +38,6 @@ class ThumbnailStripProxy : public QWidget, public IDirectoryView
     void setDragHover(qsizetype index) override;
     void setDirectoryPath(QString path) override;
     void addItem();
-
-    SelectionList       &selection() final;
-    SelectionList const &selection() const final;
 
   protected:
     void showEvent(QShowEvent *event) override;

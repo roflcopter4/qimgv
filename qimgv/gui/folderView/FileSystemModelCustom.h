@@ -19,10 +19,6 @@ class FileSystemModelCustom final : public QFileSystemModel
   protected:
     ND Qt::ItemFlags flags(QModelIndex const &index) const override;
 
-#if 0
-    bool event(QEvent *event) override;
-#endif
-
   private Q_SLOTS:
     void onSettingsChanged();
 

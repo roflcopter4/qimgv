@@ -21,8 +21,7 @@ class DummyDirectoryWatcherPrivate final : public DirectoryWatcherPrivate
   public:
     explicit DummyDirectoryWatcherPrivate(DirectoryWatcher *watcher)
         : DirectoryWatcherPrivate(watcher, new DummyDirectoryWatcherWorker())
-    {
-    }
+    {}
 };
 
 DummyDirectoryWatcher::DummyDirectoryWatcher(DirectoryManager *parent)

@@ -3,6 +3,7 @@
 #include <QObject>
 #include "cache/Cache.h"
 #include "directoryManager/DirectoryManager.h"
+#include "gui/folderView/FileSystemModelCustom.h"
 #include "scaler/Scaler.h"
 #include "loader/Loader.h"
 #include "utils/FileOperations.h"
@@ -15,6 +16,7 @@ class DirectoryModel final : public QObject
     explicit DirectoryModel(QSharedPointer<Cache> cache, QObject *parent);
     explicit DirectoryModel(QObject *parent);
     ~DirectoryModel() override;
+    DELETE_COPY_MOVE_ROUTINES(DirectoryModel);
 
     void load(QString const &filePath, bool asyncHint);
     void preload(QString const &filePath);
@@ -70,9 +72,6 @@ class DirectoryModel final : public QObject
 
     static void copyFileTo(QString const &srcFile, QString const &destDirPath, bool force, FileOpResult &result);
 
-    Q_DISABLE_COPY_MOVE(DirectoryModel)
-
-
   Q_SIGNALS:
     void fileRemoved(QString filePath, qsizetype index);
     void fileRenamed(QString fromPath, qsizetype indexFrom, QString toPath, qsizetype indexTo);
@@ -88,13 +87,6 @@ class DirectoryModel final : public QObject
     void imageReady(QSharedPointer<Image> img, QString const &);
     void imageUpdated(QString filePath);
 
-  private:
-    DirectoryManager     *dirManager;
-    Loader               *loader;
-    Scaler               *scaler_;
-    QSharedPointer<Cache> cache;
-    FileListSource        fileListSource;
-
   private Q_SLOTS:
     void onImageReady(QSharedPointer<Image> const &img, QString const &path);
     void onSortingChanged();
@@ -102,4 +94,11 @@ class DirectoryModel final : public QObject
     void onFileRemoved(QString const &filePath, qsizetype index);
     void onFileRenamed(QString const &fromPath, qsizetype indexFrom, QString const &toPath, qsizetype indexTo);
     void onFileModified(QString const &filePath);
+
+  private:
+    DirectoryManager      *dirManager;
+    Loader                *loader;
+    Scaler                *scaler_;
+    QSharedPointer<Cache>  cache;
+    FileListSource         fileListSource;
 };

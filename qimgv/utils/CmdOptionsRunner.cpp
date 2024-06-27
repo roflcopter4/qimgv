@@ -22,8 +22,8 @@ void CmdOptionsRunner::generateThumbs(QString const &dirPath, int size)
         return;
     }
 
-    auto dm = DirectoryManager(nullptr);
-    if (!dm.setDirectoryRecursive(dirPath)) {
+    auto dm = std::make_unique<DirectoryManager>();
+    if (!dm->setDirectoryRecursive(dirPath)) {
         QString out = u"Error: Invalid path \"" + dirPath + u"\".\n";
         std::cout << out.toStdString();
         Win32WaitForKey();
@@ -31,7 +31,7 @@ void CmdOptionsRunner::generateThumbs(QString const &dirPath, int size)
         return;
     }
 
-    auto list = dm.fileList();
+    auto list = dm->fileList();
     QString out = u"Directory: " + dirPath + "\n"
                   u"File count: " + QString::number(list.size()) + "\n"
                   u"Size limit:" + QString::number(size) + u'x' + QString::number(size) + u"px\n"

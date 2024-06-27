@@ -893,7 +893,7 @@ inline void ImageViewerV2::scroll(int dx, int dy, bool smooth)
         scrollPrecise(dx, dy);
 }
 
-void ImageViewerV2::mousePanWrapping(QMouseEvent *event)
+void ImageViewerV2::mousePanWrapping(QMouseEvent *)
 {
     (void)this;
 }

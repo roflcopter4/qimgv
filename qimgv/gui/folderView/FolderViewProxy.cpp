@@ -2,21 +2,11 @@
 
 FolderViewProxy::FolderViewProxy(QWidget *parent)
     : QWidget(parent),
-      folderView(nullptr),
+      folderView(new FolderView(this)),
       layout(new QVBoxLayout(this))
 {
     stateBuf.sortingMode = settings->sortingMode();
     layout->setContentsMargins(0,0,0,0);
-}
-
-void FolderViewProxy::init()
-{
-    qApp->processEvents(); // chew through events in case we have something that alters stateBuf in queue
-    QMutexLocker ml(&mtx);
-    if (folderView)
-        return;
-    folderView = new FolderView(this);
-    ml.unlock();
 
     layout->addWidget(folderView);
     setFocusProxy(folderView);
@@ -41,9 +31,10 @@ void FolderViewProxy::init()
     folderView->onFullscreenModeChanged(stateBuf.fullscreenMode);
     folderView->populate(stateBuf.itemCount);
     folderView->select(stateBuf.selection);
+
     // wait till layout stuff happens
     // before calling focusOn()
-    qApp->processEvents();
+    //qApp->processEvents();
     folderView->focusOnSelection();
     folderView->onSortingChanged(stateBuf.sortingMode);
 }
@@ -173,10 +164,4 @@ void FolderViewProxy::onSortingChanged(SortingMode mode)
         folderView->onSortingChanged(mode);
     else
         stateBuf.sortingMode = mode;
-}
-
-void FolderViewProxy::showEvent(QShowEvent *event)
-{
-    init();
-    QWidget::showEvent(event);
 }

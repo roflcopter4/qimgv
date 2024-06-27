@@ -3,18 +3,9 @@
 FloatingMessageProxy::FloatingMessageProxy(FloatingWidgetContainer *parent)
     : container(parent),
       overlay(nullptr)
-{
-}
+{}
 
-FloatingMessageProxy::~FloatingMessageProxy()
-#if 0
-{
-    if (overlay)
-        overlay->deleteLater();
-}
-#else
-    = default;
-#endif
+FloatingMessageProxy::~FloatingMessageProxy() = default;
 
 void FloatingMessageProxy::showMessage(QString const &text, FloatingMessageIcon icon, int duration)
 {

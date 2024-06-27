@@ -22,9 +22,14 @@ class WindowsDirectoryWorker : public DirectoryWatcherWorker
   public:
     WindowsDirectoryWorker() = default;
     ~WindowsDirectoryWorker() override = default;
+    DELETE_COPY_MOVE_ROUTINES(WindowsDirectoryWorker);
 
     void setDirectoryHandle(HANDLE handle);
     void run() override;
+
+  private:
+    void freeHandle();
+    void iterateDirectoryEvents(PCBYTE buffer);
 
   Q_SIGNALS:
     void notifyEvent(LPBYTE);
@@ -35,9 +40,6 @@ class WindowsDirectoryWorker : public DirectoryWatcherWorker
 
     HANDLE hDir          = INVALID_HANDLE_VALUE;
     DWORD  bytesReturned = 0;
-
-    void freeHandle();
-    void iterateDirectoryEvents(PCBYTE buffer);
 };
 
 #endif // WINDOWSWATCHERWORKER_H

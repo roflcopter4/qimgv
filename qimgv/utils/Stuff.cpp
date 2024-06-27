@@ -59,13 +59,13 @@ std::filesystem::path
 QStringToStdPath(QString const &filePath)
 {
 #ifdef Q_OS_WIN32
-    if (filePath.startsWith(QSV(R"(\\?\)")))
+    if (filePath.startsWith(uR"(\\?\)"_sv))
         return {std::u16string_view{filePath.data_ptr().data(),
                                     static_cast<size_t>(filePath.size())}};
     QString tmp = QFileInfo(filePath)
         .absoluteFilePath()
         .replace(u'/', u'\\')
-        .prepend(QSV(R"(\\?\)"));
+        .prepend(uR"(\\?\)"_sv);
     return {std::u16string_view{tmp.data_ptr().data(),
                                 static_cast<size_t>(tmp.size())}};
 #else
@@ -245,7 +245,7 @@ QString GetBacktrace()
 
     symbol->MaxNameLen   = (namelen - 1) / sizeof(char);
     symbol->SizeOfStruct = sizeof(symbol_type);
-    QString ret          = QS("\n\n\033[1mBACKTRACE:\033[0m");
+    QString ret          = u"\n\n\033[1mBACKTRACE:\033[0m"_s;
 
     for (unsigned i = 0; i < frames && i < std::size(stack); ++i) {
         ::SymFromAddr(process, reinterpret_cast<::DWORD64>(stack[i]), nullptr, symbol);
@@ -273,8 +273,8 @@ QString GetErrorMessage(unsigned errVal)
     wchar_t buf[512];
     DWORD res = ::FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr,
                                  errVal, LANG_SYSTEM_DEFAULT, buf, std::size(buf), nullptr);
-    return (res == 0 ? QString::fromWCharArray(buf, res) : QS(u"Unknown error")) +
-           QSV(" (") + QString::number(errVal, 16) + u')';
+    return (res == 0 ? QString::fromWCharArray(buf, res) : u"Unknown error"_s) +
+           u" (" + QString::number(errVal, 16) + u')';
 #else
     char  buf[512]{};
     char *msg = strerror_r(errVal, buf, std::size(buf));

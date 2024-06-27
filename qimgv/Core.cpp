@@ -12,7 +12,7 @@
 
 Core::Core(QObject *parent)
     : QObject(parent),
-      mw(new MW(nullptr)), // Creates the GUI and all widgets.
+      mw(new MW(nullptr)),
       model(QSharedPointer<DirectoryModel>(new DirectoryModel(nullptr))),
       thumbPanelPresenter(new DirectoryPresenter(this)),
       folderViewPresenter(new DirectoryPresenter(this)),
@@ -215,14 +215,19 @@ void Core::updateSettings()
         syncRandomizer();
 }
 
-void Core::showGui() const
+void Core::showGui()
+{
+    std::call_once(onceFlag_, &Core::doShowGui, this);
+}
+
+void Core::doShowGui()
 {
     if (mw && !mw->isVisible())
         mw->showDefault();
     // TODO: this is unreliable.
     // how to make it wait until a window is shown?
     qApp->processEvents();
-    QTimer::singleShot(50, mw.get(), &MW::setupFullUi);
+    QTimer::singleShot(50ms, mw.get(), &MW::setupFullUi);
 }
 
 void Core::onUpdate()
@@ -1461,11 +1466,11 @@ void Core::nextDirectory()
     QFileInfo parentDir(currentDir.absolutePath());
 
     if (parentDir.exists() && parentDir.isReadable()) {
-        auto dm = DirectoryManager(nullptr);
-        if (!dm.setDirectory(parentDir.absoluteFilePath()))
+        auto dm = std::make_unique<DirectoryManager>();
+        if (!dm->setDirectory(parentDir.absoluteFilePath()))
             return;
 
-        QString next = dm.nextOfDir(model->directoryPath());
+        QString next = dm->nextOfDir(model->directoryPath());
         if (!next.isEmpty()) {
             if (!setDirectory(next))
                 return;
@@ -1487,10 +1492,10 @@ void Core::prevDirectory(bool selectLast)
     QFileInfo parentDir(currentDir.absolutePath());
 
     if (parentDir.exists() && parentDir.isReadable()) {
-        auto dm = DirectoryManager(nullptr);
-        dm.setDirectory(parentDir.absoluteFilePath());
+        auto dm = std::make_unique<DirectoryManager>();
+        dm->setDirectory(parentDir.absoluteFilePath());
 
-        QString prev = dm.prevOfDir(model->directoryPath());
+        QString prev = dm->prevOfDir(model->directoryPath());
         if (!prev.isEmpty()) {
             if (!setDirectory(prev))
                 return;

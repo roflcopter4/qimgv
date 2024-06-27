@@ -44,7 +44,7 @@ class ActionManager final : public QObject
     void resetDefaults(QString const &action);
     void saveShortcuts();
 
-  public slots:
+  public Q_SLOTS:
     bool invokeAction(QString const &actionName);
 
   private:
@@ -64,7 +64,7 @@ class ActionManager final : public QObject
 
     static ActionType validateAction(QString const &actionName);
 
-  signals:
+  Q_SIGNALS:
     void open();
     void save();
     void saveAs();

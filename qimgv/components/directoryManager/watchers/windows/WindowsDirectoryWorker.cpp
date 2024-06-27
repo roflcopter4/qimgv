@@ -13,9 +13,10 @@ void WindowsDirectoryWorker::freeHandle()
 {
     if (!hDir || hDir == INVALID_HANDLE_VALUE)
         return;
-    ::CancelIoEx(hDir, nullptr);
-    ::CloseHandle(hDir);
-    hDir = INVALID_HANDLE_VALUE;
+    HANDLE tmp = hDir;
+    hDir       = INVALID_HANDLE_VALUE;
+    ::CancelIoEx(tmp, nullptr);
+    ::CloseHandle(tmp);
 }
 
 
@@ -43,9 +44,9 @@ void WindowsDirectoryWorker::run()
     if (!ovl.hEvent || ovl.hEvent == INVALID_HANDLE_VALUE) {
         qDebug() << u"[WindowsWorker] CreateEvent failed?";
         QMessageBox::warning(
-            nullptr, QS("Error"),
-            QSV("CreateEvent failed in ") + QString::fromLatin1(PRETTY_FUNCTION_SIG) +
-            QSV(". \nThis probably means everything will break catastrophically. Fairly warned, be thee, says I.")
+            nullptr, u"Error"_s,
+            u"CreateEvent failed in " + QString::fromLatin1(PRETTY_FUNCTION_SIG) + u".\n"
+            u"This probably means everything will break catastrophically. Fairly warned, be thee, says I."
         );
     }
 

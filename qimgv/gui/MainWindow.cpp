@@ -53,51 +53,50 @@ MW::~MW()
  */
 void MW::setupUi()
 {
-    viewerWidget    = new ViewerWidget(this);
-    infoBarWindowed = new InfoBarProxy(this);
-    docWidget       = new DocumentWidget(viewerWidget, infoBarWindowed, this);
-    folderView      = new FolderViewProxy(this);
-    
-    connect(folderView, &FolderViewProxy::sortingSelected,    this, &MW::sortingSelected);
-    connect(folderView, &FolderViewProxy::directorySelected,  this, &MW::opened);
-    connect(folderView, &FolderViewProxy::copyUrlsRequested,  this, &MW::copyUrlsRequested);
-    connect(folderView, &FolderViewProxy::moveUrlsRequested,  this, &MW::moveUrlsRequested);
-    connect(folderView, &FolderViewProxy::showFoldersChanged, this, &MW::showFoldersChanged);
-
+    viewerWidget      = new ViewerWidget(this);
+    infoBarWindowed   = new InfoBarProxy(this);
+    docWidget         = new DocumentWidget(viewerWidget, infoBarWindowed, this);
+    folderView        = new FolderViewProxy(this);
     controlsOverlay   = new ControlsOverlay(docWidget);
     infoBarFullscreen = new FullscreenInfoOverlayProxy(viewerWidget);
     imageInfoOverlay  = new ImageInfoOverlayProxy(viewerWidget);
     floatingMessage   = new FloatingMessageProxy(viewerWidget); // todo: use additional one for folderview?
     sidePanel         = new SidePanel(this);
+    centralWidget     = new CentralWidget(docWidget, folderView, this);
 
-    centralWidget = new CentralWidget(docWidget, folderView, this);
     layout->addWidget(centralWidget);
     layout->addWidget(sidePanel);
 
-    connect(viewerWidget, &ViewerWidget::scalingRequested,   this, &MW::scalingRequested);
+    connect(folderView, &FolderViewProxy::copyUrlsRequested,  this, &MW::copyUrlsRequested);
+    connect(folderView, &FolderViewProxy::directorySelected,  this, &MW::opened);
+    connect(folderView, &FolderViewProxy::moveUrlsRequested,  this, &MW::moveUrlsRequested);
+    connect(folderView, &FolderViewProxy::showFoldersChanged, this, &MW::showFoldersChanged);
+    connect(folderView, &FolderViewProxy::sortingSelected,    this, &MW::sortingSelected);
+
     connect(viewerWidget, &ViewerWidget::draggedOut,         this, qOverload<>(&MW::draggedOut));
     connect(viewerWidget, &ViewerWidget::playbackFinished,   this, &MW::playbackFinished);
+    connect(viewerWidget, &ViewerWidget::scalingRequested,   this, &MW::scalingRequested);
     connect(viewerWidget, &ViewerWidget::showScriptSettings, this, &MW::showScriptSettings);
 
-    connect(this, &MW::zoomIn,                 viewerWidget, &ViewerWidget::zoomIn);
-    connect(this, &MW::zoomOut,                viewerWidget, &ViewerWidget::zoomOut);
-    connect(this, &MW::zoomInCursor,           viewerWidget, &ViewerWidget::zoomInCursor);
-    connect(this, &MW::zoomOutCursor,          viewerWidget, &ViewerWidget::zoomOutCursor);
-    connect(this, &MW::scrollUp,               viewerWidget, &ViewerWidget::scrollUp);
+    connect(this, &MW::frameStep,              viewerWidget, &ViewerWidget::frameStep);
+    connect(this, &MW::frameStepBack,          viewerWidget, &ViewerWidget::frameStepBack);
+    connect(this, &MW::pauseVideo,             viewerWidget, &ViewerWidget::pauseResumePlayback);
     connect(this, &MW::scrollDown,             viewerWidget, &ViewerWidget::scrollDown);
     connect(this, &MW::scrollLeft,             viewerWidget, &ViewerWidget::scrollLeft);
     connect(this, &MW::scrollRight,            viewerWidget, &ViewerWidget::scrollRight);
-    connect(this, &MW::pauseVideo,             viewerWidget, &ViewerWidget::pauseResumePlayback);
-    connect(this, &MW::stopPlayback,           viewerWidget, &ViewerWidget::stopPlayback);
-    connect(this, &MW::seekVideoForward,       viewerWidget, &ViewerWidget::seekForward);
+    connect(this, &MW::scrollUp,               viewerWidget, &ViewerWidget::scrollUp);
     connect(this, &MW::seekVideoBackward,      viewerWidget, &ViewerWidget::seekBackward);
-    connect(this, &MW::frameStep,              viewerWidget, &ViewerWidget::frameStep);
-    connect(this, &MW::frameStepBack,          viewerWidget, &ViewerWidget::frameStepBack);
-    connect(this, &MW::toggleMute,             viewerWidget, &ViewerWidget::toggleMute);
-    connect(this, &MW::volumeUp,               viewerWidget, &ViewerWidget::volumeUp);
-    connect(this, &MW::volumeDown,             viewerWidget, &ViewerWidget::volumeDown);
-    connect(this, &MW::toggleTransparencyGrid, viewerWidget, &ViewerWidget::toggleTransparencyGrid);
+    connect(this, &MW::seekVideoForward,       viewerWidget, &ViewerWidget::seekForward);
     connect(this, &MW::setLoopPlayback,        viewerWidget, &ViewerWidget::setLoopPlayback);
+    connect(this, &MW::stopPlayback,           viewerWidget, &ViewerWidget::stopPlayback);
+    connect(this, &MW::toggleMute,             viewerWidget, &ViewerWidget::toggleMute);
+    connect(this, &MW::toggleTransparencyGrid, viewerWidget, &ViewerWidget::toggleTransparencyGrid);
+    connect(this, &MW::volumeDown,             viewerWidget, &ViewerWidget::volumeDown);
+    connect(this, &MW::volumeUp,               viewerWidget, &ViewerWidget::volumeUp);
+    connect(this, &MW::zoomIn,                 viewerWidget, &ViewerWidget::zoomIn);
+    connect(this, &MW::zoomInCursor,           viewerWidget, &ViewerWidget::zoomInCursor);
+    connect(this, &MW::zoomOut,                viewerWidget, &ViewerWidget::zoomOut);
+    connect(this, &MW::zoomOutCursor,          viewerWidget, &ViewerWidget::zoomOutCursor);
 }
 
 void MW::setupFullUi()
@@ -111,11 +110,10 @@ void MW::setupFullUi()
 
 void MW::setupCropPanel()
 {
-    if (cropPanel)
-        return;
+    if (cropOverlay || cropPanel)
+        throw std::logic_error("Crop Panel already exists.");
     cropOverlay = new CropOverlay(viewerWidget);
     cropPanel   = new CropPanel(cropOverlay, this);
-
     connect(cropPanel, &CropPanel::cancel,      this, &MW::hideCropPanel);
     connect(cropPanel, &CropPanel::crop,        this, &MW::hideCropPanel);
     connect(cropPanel, &CropPanel::crop,        this, &MW::cropRequested);
@@ -126,7 +124,7 @@ void MW::setupCropPanel()
 void MW::setupCopyOverlay()
 {
     if (copyOverlay)
-        throw std::logic_error("Overlay already exists.");
+        throw std::logic_error("Copy Overlay already exists.");
     copyOverlay = new CopyOverlay(viewerWidget);
     connect(copyOverlay, &CopyOverlay::copyRequested, this, &MW::copyRequested);
     connect(copyOverlay, &CopyOverlay::moveRequested, this, &MW::moveRequested);
@@ -135,7 +133,7 @@ void MW::setupCopyOverlay()
 void MW::setupSaveOverlay()
 {
     if (saveOverlay)
-        throw std::logic_error("Overlay already exists.");
+        throw std::logic_error("Save Overlay already exists.");
     saveOverlay = new SaveConfirmOverlay(viewerWidget);
     connect(saveOverlay, &SaveConfirmOverlay::saveClicked,    this, &MW::saveRequested);
     connect(saveOverlay, &SaveConfirmOverlay::saveAsClicked,  this, &MW::saveAsClicked);
@@ -145,11 +143,13 @@ void MW::setupSaveOverlay()
 void MW::setupRenameOverlay()
 {
     if (renameOverlay)
-        throw std::logic_error("Overlay already exists.");
+        throw std::logic_error("Rename Overlay already exists.");
     renameOverlay = new RenameOverlay(this);
     renameOverlay->setName(info.fileName);
     connect(renameOverlay, &RenameOverlay::renameRequested, this, &MW::renameRequested);
 }
+
+/****************************************************************************************/
 
 void MW::toggleFolderView()
 {
@@ -437,7 +437,7 @@ void MW::updateCurrentDisplay()
     currentDisplay = desktopWidget.screenNumber(this);
 #else
     auto screens   = qApp->screens();
-    currentDisplay = screens.indexOf(window()->screen());
+    currentDisplay = static_cast<int>(screens.indexOf(window()->screen()));
 #endif
 }
 
@@ -452,10 +452,11 @@ void MW::saveCurrentDisplay()
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     settings->setLastDisplay(desktopWidget.screenNumber(this));
 #else
-    settings->setLastDisplay(qApp->screens().indexOf(window()->screen()));
+    settings->setLastDisplay(static_cast<int>(qApp->screens().indexOf(window()->screen())));
 #endif
 }
 
+/****************************************************************************************/
 // #############################################################
 // ######################### EVENTS ############################
 // #############################################################
@@ -763,6 +764,8 @@ void MW::showChangelogWindow(QString const &text)
     changelogWindow->show();
 }
 
+/****************************************************************************************/
+
 void MW::triggerCropPanel()
 {
     if (activeSidePanel != ActiveSidePanel::CROP)
@@ -951,6 +954,8 @@ ThumbnailStripProxy *MW::getThumbnailPanel() const
     return docWidget->thumbPanel();
 }
 
+/****************************************************************************************/
+
 // todo: this is crap
 void MW::showMessageDirectory(QString const &dirName)
 {
@@ -1019,6 +1024,8 @@ bool MW::showConfirmation(QString const &title, QString const &msg)
     msgBox.setModal(true);
     return msgBox.exec() == QMessageBox::Yes;
 }
+
+/****************************************************************************************/
 
 void MW::readSettings()
 {

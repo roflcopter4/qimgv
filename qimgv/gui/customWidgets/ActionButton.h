@@ -21,8 +21,9 @@ class ActionButton : public IconButton
     ND TriggerMode triggerMode() const;
 
   protected:
-    void        mousePressEvent(QMouseEvent *event) override;
-    void        mouseReleaseEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
     QString     actionName;
-    TriggerMode mTriggerMode;
+    TriggerMode mTriggerMode = TriggerMode::Click;
 };

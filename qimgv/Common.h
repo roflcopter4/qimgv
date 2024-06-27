@@ -41,6 +41,12 @@ using Qt::Literals::StringLiterals::operator ""_ba;
 using util::Literals::StringLiterals::operator""_sv;
 #endif
 
+#if defined __has_include && __has_include(<string>) && __has_include(<chrono>)
+# include <chrono>
+# include <string>
+using namespace std::literals; //NOLINT(clang-diagnostic-header-hygiene)
+#endif
+
 #define DELETE_COPY_ROUTINES(CLASS)                                                 \
     CLASS(CLASS const &)            = delete;/*NOLINT(bugprone-macro-parentheses)*/ \
     CLASS &operator=(CLASS const &) = delete /*NOLINT(bugprone-macro-parentheses)*/

@@ -12,8 +12,8 @@
 #include <QElapsedTimer>
 #include <QFileDialog>
 #include <QFileSystemModel>
+#include <QObject>
 #include <QStyledItemDelegate>
-#include <QWidget>
 
 namespace Ui {
 class FolderView;
@@ -27,6 +27,7 @@ class FolderView : public FloatingWidgetContainer, public IDirectoryView
   public:
     explicit FolderView(QWidget *parent);
     ~FolderView() override;
+    DELETE_COPY_MOVE_ROUTINES(FolderView);
 
     SelectionList       &selection() final;
     SelectionList const &selection() const final;
@@ -55,10 +56,6 @@ class FolderView : public FloatingWidgetContainer, public IDirectoryView
     void paintEvent(QPaintEvent *) override;
     void resizeEvent(QResizeEvent *event) override;
 
-  protected Q_SLOTS:
-    void onThumbnailSizeChanged(int newSize) const;
-    void onZoomSliderValueChanged(int value) const;
-
   Q_SIGNALS:
     void itemActivated(qsizetype) override;
     void thumbnailsRequested(SelectionList, int, bool, bool) override;
@@ -71,6 +68,10 @@ class FolderView : public FloatingWidgetContainer, public IDirectoryView
     void moveUrlsRequested(QList<QString>, QString path);
     void droppedInto(QMimeData const *, QObject *, qsizetype) override;
     void draggedOver(qsizetype) override;
+
+  protected Q_SLOTS:
+    void onThumbnailSizeChanged(int newSize) const;
+    void onZoomSliderValueChanged(int value) const;
 
   private Q_SLOTS:
     void onSortingSelected(int);

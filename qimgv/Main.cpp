@@ -1,4 +1,3 @@
-
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QStyleFactory>
@@ -13,6 +12,8 @@
 #include "SharedResources.h"
 #include "ProxyStyle.h"
 #include "Core.h"
+
+#define USE_VLD
 
 #if defined Q_OS_APPLE
 # include "macosapplication.h"
@@ -212,7 +213,7 @@ int main(int argc, char *argv[])
 
 #ifdef USE_VLD
     VLDSetReportOptions(VLD_OPT_UNICODE_REPORT | VLD_OPT_REPORT_TO_FILE,
-                        (LR"(D:\ass\GIT\qimgv\#LOGS\vld_report_)" + std::to_wstring(time(nullptr)) + L".log").c_str());
+                        (LR"(F:\Ass\GIT\qimgv\MSVC_2\#LOGS\vld_report_)" + std::to_wstring(time(nullptr)) + L".log").c_str());
     wprintf(L"Leaks: %u\n", VLDGetLeaksCount());
 # ifdef _DEBUG
     util::WaitForAnyKey();

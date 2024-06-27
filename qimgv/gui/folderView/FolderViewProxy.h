@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gui/folderView/FileSystemModelCustom.h"
 #include "gui/folderView/FolderView.h"
 #include <QMutexLocker>
 
@@ -19,7 +20,8 @@ class FolderViewProxy : public QWidget, public IDirectoryView
   public:
     explicit FolderViewProxy(QWidget *parent);
 
-    void init();
+    SelectionList       &selection() override;
+    SelectionList const &selection() const override;
 
   public Q_SLOTS:
     void populate(qsizetype) override;
@@ -36,12 +38,6 @@ class FolderViewProxy : public QWidget, public IDirectoryView
     void addItem();
     void onFullscreenModeChanged(bool mode);
     void onSortingChanged(SortingMode mode);
-
-    SelectionList       &selection() override;
-    SelectionList const &selection() const override;
-
-  protected:
-    void showEvent(QShowEvent *event) override;
 
   Q_SIGNALS:
     void itemActivated(qsizetype) override;

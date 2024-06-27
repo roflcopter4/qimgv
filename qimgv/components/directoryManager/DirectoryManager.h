@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Settings.h"
+#include "gui/folderView/FileSystemModelCustom.h"
 #include "sourcecontainers/FsEntry.h"
 #include "utils/Stuff.h"
 #include "watchers/DirectoryWatcher.h"
@@ -22,7 +23,7 @@ enum class FileListSource { // rename? wip
     INVALID,
     DIRECTORY,
     DIRECTORY_RECURSIVE,
-    LIST
+    LIST,
 };
 
 // TODO: rename? EntrySomething?
@@ -34,7 +35,7 @@ class DirectoryManager final : public QObject
     using CompareFunction = bool (DirectoryManager::*)(FSEntry const &e1, FSEntry const &e2) const;
 
   public:
-    explicit DirectoryManager(QObject *parent);
+    explicit DirectoryManager(QObject *parent = nullptr);
 
     // ignored if the same dir is already opened
     bool setDirectory(QString const &);
@@ -85,16 +86,6 @@ class DirectoryManager final : public QObject
     ND static bool isFile(QString const &filePath);
 
   private:
-    DirectoryWatcher    *watcher;
-    std::vector<FSEntry> fileEntryVec;
-    std::vector<FSEntry> dirEntryVec;
-    FSEntry const        defaultEntry;
-    QRegularExpression   regex;
-    QCollator            collator;
-    QString              mDirectoryPath;
-    FileListSource       mListSource;
-    SortingMode          mSortingMode;
-
     ND bool path_entry_compare(FSEntry const &e1, FSEntry const &e2) const;
     ND bool path_entry_compare_reverse(FSEntry const &e1, FSEntry const &e2) const;
     ND bool name_entry_compare(FSEntry const &e1, FSEntry const &e2) const;
@@ -105,6 +96,7 @@ class DirectoryManager final : public QObject
     ND bool size_entry_compare_reverse(FSEntry const &e1, FSEntry const &e2) const;
     ND bool checkFileRange(qsizetype index) const;
     ND bool checkDirRange(qsizetype index) const;
+    ND auto compareFunction() const -> CompareFunction;
 
     void readSettings();
     void loadEntryList(QString const &directoryPath, bool recursive);
@@ -112,7 +104,6 @@ class DirectoryManager final : public QObject
     void stopFileWatcher();
     void addEntriesFromDirectory(std::vector<FSEntry> &entryVec, QString const &directoryPath);
     void addEntriesFromDirectoryRecursive(std::vector<FSEntry> &entryVec, QString const &directoryPath) const;
-    auto compareFunction() -> CompareFunction;
 
   private Q_SLOTS:
     void onFileAddedExternal(QString const &fileName);
@@ -123,11 +114,22 @@ class DirectoryManager final : public QObject
   Q_SIGNALS:
     void loaded(QString const &path);
     void sortingChanged();
-    void fileRemoved(QString filePath, int);
+    void fileRemoved(QString filePath, qsizetype);
     void fileModified(QString filePath);
     void fileAdded(QString filePath);
     void fileRenamed(QString fromPath, qsizetype indexFrom, QString toPath, qsizetype indexTo);
-    void dirRemoved(QString dirPath, int);
+    void dirRemoved(QString dirPath, qsizetype);
     void dirAdded(QString dirPath);
     void dirRenamed(QString fromPath, qsizetype indexFrom, QString toPath, qsizetype indexTo);
+
+  private:
+    DirectoryWatcher    *watcher;
+    std::vector<FSEntry> fileEntryVec;
+    std::vector<FSEntry> dirEntryVec;
+    FSEntry const        defaultEntry;
+    QRegularExpression   regex;
+    QCollator            collator;
+    QString              mDirectoryPath;
+    FileListSource       mListSource;
+    SortingMode          mSortingMode;
 };

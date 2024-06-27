@@ -10,7 +10,7 @@ FolderView::FolderView(QWidget *parent)
     ui->setupUi(this);
 
     // ------- filesystem view --------
-    QString style = QS("font: %1pt;").arg(QApplication::font().pointSize());
+    QString style = u"font: %1pt;"_s.arg(QApplication::font().pointSize());
     ui->dirTreeView->setStyleSheet(style);
     popupTimerClutch.start();
 
@@ -30,28 +30,28 @@ FolderView::FolderView(QWidget *parent)
     ui->dirTreeView->setRootIndex(idx);
 #endif
     // -------------------------------
-    ui->upButton->setAction(QS("goUp"));
-    ui->upButton->setIconPath(QS(":res/icons/common/buttons/panel/up16.png"));
+    ui->upButton->setAction(u"goUp"_s);
+    ui->upButton->setIconPath(u":res/icons/common/buttons/panel/up16.png"_s);
     ui->upButton->setTriggerMode(TriggerMode::Click);
-    ui->settingsButton->setAction(QS("openSettings"));
-    ui->settingsButton->setIconPath(QS(":res/icons/common/buttons/panel/settings16.png"));
-    ui->exitButton->setAction(QS("exit"));
-    ui->exitButton->setIconPath(QS(":res/icons/common/buttons/panel/close16.png"));
+    ui->settingsButton->setAction(u"openSettings"_s);
+    ui->settingsButton->setIconPath(u":res/icons/common/buttons/panel/settings16.png"_s);
+    ui->exitButton->setAction(u"exit"_s);
+    ui->exitButton->setIconPath(u":res/icons/common/buttons/panel/close16.png"_s);
     ui->exitButton->setIconOffset(-1, 0);
-    ui->docViewButton->setAction(QS("documentView"));
-    ui->docViewButton->setIconPath(QS(":res/icons/common/buttons/panel/document-view20.png"));
+    ui->docViewButton->setAction(u"documentView"_s);
+    ui->docViewButton->setIconPath(u":res/icons/common/buttons/panel/document-view20.png"_s);
     ui->togglePlacesPanelButton->setCheckable(true);
-    ui->togglePlacesPanelButton->setIconPath(QS(":res/icons/common/buttons/panel/toggle-panel20.png"));
+    ui->togglePlacesPanelButton->setIconPath(u":res/icons/common/buttons/panel/toggle-panel20.png"_s);
     ui->togglePlacesPanelButton->setIconOffset(1, 0);
 
     ui->optionsPopupButton->setCheckable(true);
-    ui->optionsPopupButton->setIconPath(QS(":res/icons/common/buttons/panel/folderview20.png"));
+    ui->optionsPopupButton->setIconPath(u":res/icons/common/buttons/panel/folderview20.png"_s);
 
-    ui->sortingComboBox->setIconPath(QS(":res/icons/common/other/sorting-mode16.png"));
+    ui->sortingComboBox->setIconPath(u":res/icons/common/other/sorting-mode16.png"_s);
 
-    ui->newBookmarkButton->setIconPath(QS(":res/icons/common/buttons/panel-small/add-new12.png"));
-    ui->homeButton->setIconPath(QS(":res/icons/common/buttons/panel-small/home12.png"));
-    ui->rootButton->setIconPath(QS(":res/icons/common/buttons/panel-small/root12.png"));
+    ui->newBookmarkButton->setIconPath(u":res/icons/common/buttons/panel-small/add-new12.png"_s);
+    ui->homeButton->setIconPath(u":res/icons/common/buttons/panel-small/home12.png"_s);
+    ui->rootButton->setIconPath(u":res/icons/common/buttons/panel-small/root12.png"_s);
 
     static constexpr int minimum = FolderGridView::THUMBNAIL_SIZE_MIN / FolderGridView::ZOOM_STEP;
     static constexpr int maximum = FolderGridView::THUMBNAIL_SIZE_MAX / FolderGridView::ZOOM_STEP;
@@ -299,7 +299,7 @@ void FolderView::onHomeBtn()
 
 void FolderView::onRootBtn()
 {
-    emit directorySelected(QS("/"));
+    emit directorySelected(u"/"_s);
 }
 
 void FolderView::setDirectoryPath(QString path)
@@ -312,7 +312,7 @@ void FolderView::setDirectoryPath(QString path)
             ui->dirTreeView->setRootIndex(idx);
         }
     } else {
-        dirModel->setRootPath(QS("/"));
+        dirModel->setRootPath(u"/"_s);
         QModelIndex idx = dirModel->index(dirModel->rootPath());
         ui->dirTreeView->setRootIndex(idx);
     }
@@ -360,7 +360,7 @@ void FolderView::newBookmark()
 {
     QFileDialog dialog;
     dialog.setDirectory(QDir::homePath());
-    dialog.setWindowTitle(QS("Select directory"));
+    dialog.setWindowTitle(u"Select directory"_s);
     dialog.setWindowModality(Qt::ApplicationModal);
     dialog.setFileMode(QFileDialog::Directory);
     dialog.setOption(QFileDialog::ShowDirsOnly);

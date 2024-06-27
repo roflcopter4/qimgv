@@ -1,14 +1,14 @@
 #include "ActionButton.h"
 
 ActionButton::ActionButton(QWidget *parent)
-    : IconButton(parent),
-      mTriggerMode(TriggerMode::Click)
+    : IconButton(parent)
 {
     setFocusPolicy(Qt::NoFocus);
     setProperty("checked", false);
 }
 
-ActionButton::ActionButton(QString const &actionName, QString const &iconPath, QWidget *parent) : ActionButton(parent)
+ActionButton::ActionButton(QString const &actionName, QString const &iconPath, QWidget *parent)
+    : ActionButton(parent)
 {
     setIconPath(iconPath);
     setAction(actionName);

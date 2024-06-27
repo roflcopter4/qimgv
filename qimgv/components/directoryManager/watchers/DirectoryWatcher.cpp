@@ -23,6 +23,7 @@ DirectoryWatcherPrivate::DirectoryWatcherPrivate(DirectoryWatcher *qq, Directory
       worker(w),
       workerThread(new QThread(this))
 {
+    workerThread->setObjectName(u"Directory Watcher Worker"_sv);
 }
 
 DirectoryWatcherPrivate::~DirectoryWatcherPrivate()
@@ -42,8 +43,8 @@ DirectoryWatcher::DirectoryWatcher(DirectoryWatcherPrivate *ptr, DirectoryManage
       d_ptr(ptr)
 {
     Q_D(DirectoryWatcher);
-    connect(d->worker.get(), &DirectoryWatcherWorker::started,  this,   &DirectoryWatcher::observingStarted);
-    connect(d->worker.get(), &DirectoryWatcherWorker::finished, this,   &DirectoryWatcher::observingStopped);
+    connect(d->worker.get(), &DirectoryWatcherWorker::started,  this, &DirectoryWatcher::observingStarted);
+    connect(d->worker.get(), &DirectoryWatcherWorker::finished, this, &DirectoryWatcher::observingStopped);
 }
 
 DirectoryWatcher::~DirectoryWatcher()
