@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-enum class FileListSource { // rename? wip
+enum class FileListSource : uint8_t { // rename? wip
     INVALID,
     DIRECTORY,
     DIRECTORY_RECURSIVE,
@@ -86,13 +86,13 @@ class DirectoryManager final : public QObject
     ND static bool isFile(QString const &filePath);
 
   private:
-    ND bool path_entry_compare(FSEntry const &e1, FSEntry const &e2) const;
+    ND bool path_entry_compare        (FSEntry const &e1, FSEntry const &e2) const;
     ND bool path_entry_compare_reverse(FSEntry const &e1, FSEntry const &e2) const;
-    ND bool name_entry_compare(FSEntry const &e1, FSEntry const &e2) const;
+    ND bool name_entry_compare        (FSEntry const &e1, FSEntry const &e2) const;
     ND bool name_entry_compare_reverse(FSEntry const &e1, FSEntry const &e2) const;
-    ND bool date_entry_compare(FSEntry const &e1, FSEntry const &e2) const;
+    ND bool date_entry_compare        (FSEntry const &e1, FSEntry const &e2) const;
     ND bool date_entry_compare_reverse(FSEntry const &e1, FSEntry const &e2) const;
-    ND bool size_entry_compare(FSEntry const &e1, FSEntry const &e2) const;
+    ND bool size_entry_compare        (FSEntry const &e1, FSEntry const &e2) const;
     ND bool size_entry_compare_reverse(FSEntry const &e1, FSEntry const &e2) const;
     ND bool checkFileRange(qsizetype index) const;
     ND bool checkDirRange(qsizetype index) const;
@@ -126,10 +126,11 @@ class DirectoryManager final : public QObject
     DirectoryWatcher    *watcher;
     std::vector<FSEntry> fileEntryVec;
     std::vector<FSEntry> dirEntryVec;
-    FSEntry const        defaultEntry;
     QRegularExpression   regex;
     QCollator            collator;
     QString              mDirectoryPath;
     FileListSource       mListSource;
     SortingMode          mSortingMode;
+
+    static FSEntry const defaultEntry;
 };

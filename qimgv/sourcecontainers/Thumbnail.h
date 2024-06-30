@@ -2,7 +2,6 @@
 
 #include <QString>
 #include <QPixmap>
-#include <memory>
 #include <QSharedPointer>
 
 class Thumbnail
@@ -10,8 +9,8 @@ class Thumbnail
   public:
     Thumbnail(QString name, QString info, int size, QSharedPointer<QPixmap> pixmap);
 
-    ND QString const &name() const &;
-    ND QString const &info() const &;
+    ND QString const &name() const;
+    ND QString const &info() const;
 
     ND int  size() const;
     ND bool hasAlphaChannel() const;

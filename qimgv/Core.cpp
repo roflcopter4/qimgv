@@ -68,10 +68,10 @@ void Core::loadTranslation()
 
     QString trFile = trPath + u'/' + localeName;
     if (!translator->load(trFile)) {
-        qDebug() << u"Could not load translation file: " << trFile;
+        qDebug() << u"Could not load translation file:" << trFile;
         QString trFileFallback = trPathFallback + u'/' + localeName;
         if (!translator->load(trFileFallback)) {
-            qDebug() << u"Could not load translation file: " << trFileFallback;
+            qDebug() << u"Could not load translation file:" << trFileFallback;
             return;
         }
     }
@@ -246,7 +246,7 @@ void Core::onUpdate()
 
     actionManager->adjustFromVersion(lastVer);
 
-    qDebug() << u"Updated: " << settings->lastVersion().toString() << u'>' << appVersion.toString();
+    qDebug() << u"Updated:" << settings->lastVersion().toString() << u'>' << appVersion.toString();
     // TODO: finish changelogs
     // if(settings->showChangelogs())
     //    mw->showChangelogWindow();
@@ -412,15 +412,26 @@ void Core::moveToTrash()
     unsigned     successCount = 0;
     for (auto const &path : paths) {
         result = removeFile(path, true);
-        if (result == FileOpResult::SUCCESS)
-            successCount++;
+        if (result == FileOpResult::SUCCESS) {
+            ++successCount;
+        } else if (
+            mw->showConfirmation(
+                tr("Error"),
+                tr("There was an error when attempting to move a file to the trash. "
+                   "Would you like to try permanently deleting it instead?"),
+                QMessageBox::No))
+        {
+            removeFile(path, false);
+        }
     }
 
     if (paths.count() == 1) {
-        if (result == FileOpResult::SUCCESS)
+        if (result == FileOpResult::SUCCESS) {
             mw->showMessageSuccess(tr("Moved to trash"));
-        else
+        } else {
             outputError(result);
+
+        }
     } else if (paths.count() > 1) {
         mw->showMessageSuccess(tr("Moved to trash: ") + QString::number(successCount) + tr(" files"));
     }
@@ -548,7 +559,8 @@ void Core::openFromClipboard()
         else if (ext.compare(u"jpg"_sv, Qt::CaseInsensitive) == 0 || ext.compare(u"jpeg"_sv, Qt::CaseInsensitive) == 0)
             quality = settings->JPEGSaveQuality();
 
-        bool backupExists = false, success = false, originalExists = false;
+        bool backupExists   = false;
+        bool originalExists = false;
 
         if (QFile::exists(destPath))
             originalExists = true;
@@ -562,8 +574,9 @@ void Core::openFromClipboard()
             }
             backupExists = true;
         }
+
         // save file
-        success = image.save(destPath, ext.toStdString().c_str(), quality);
+        bool success = image.save(destPath, ext.toUtf8().data(), quality);
 
         if (backupExists) {
             if (success) {
@@ -588,7 +601,7 @@ void Core::openFromClipboard()
 
 static QString evilWindowsMimeDataHack(QMimeData const *mimeData)
 {
-    QByteArray shIdList = mimeData->data(u"application/x-qt-windows-mime;value=\"Shell IDList Array\""_s);
+    QByteArray shIdList = mimeData->data(uR"(application/x-qt-windows-mime;value="Shell IDList Array")"_s);
     if (shIdList.size() < 8LL + 35LL + 2LL)
         return {};
 
@@ -597,8 +610,9 @@ static QString evilWindowsMimeDataHack(QMimeData const *mimeData)
     char const *last = data + *reinterpret_cast<uint32_t const *>(data + 8);
     data += 35;
 
-    // The drive letter is an ASCII string only. Technically a drive letter can be more than
-    // one letter, so we treat it as a string.
+    // The drive letter is an ASCII string only. Technically a drive letter can be more
+    // than one letter, so we treat it as a string. We use strnlen out of paranoia. It is
+    // non-standard but definitely exists on Windows.
     QString str = uR"(\\?\)" + QString::fromLatin1(data, qsizetype(strnlen(data, end - data)));
 
     // We blindly add path separators later so ensure there isn't one.
@@ -620,7 +634,7 @@ static QString evilWindowsMimeDataHack(QMimeData const *mimeData)
             break;
 
         // UTF-16 path segment (null-terminated). Qt won't accept an unaligned string,
-        // so we must copy it to a buffer first.
+        // so we must copy it to a buffer first. wcsnlen for paranoia as before.
         size_t len = wcsnlen(reinterpret_cast<wchar_t const *>(data), end - data);
         auto   tmp = std::make_unique<QChar[]>(len + 1);
         memcpy(tmp.get(), data, (len + 1) * sizeof(wchar_t));
@@ -649,7 +663,7 @@ void Core::onDropIn(QMimeData const *mimeData, QObject const *source)
     if (mimeData->hasUrls()) {
         QList<QUrl> urlList = mimeData->urls();
         if (urlList.isEmpty()) {
-            static constexpr char16_t commonWarning[] = u"mimeData->urls() returned an empty list despite mimeData->hasUrls() returning true.";
+            static constexpr char16_t commonWarning[] = u"hasUrls() indicated that file urls should exist, but urls() returned an empty list.";
 #ifdef Q_OS_WINDOWS
             QString path = evilWindowsMimeDataHack(mimeData);
             if (path.isEmpty()) {
@@ -926,7 +940,7 @@ void Core::doInteractiveCopy(QString const &path, QString const &destDirectory, 
         }
     } else if (!dstDir.mkpath(u"."_s)) {
         mw->showError(tr("Could not create directory ") + dstDir.absolutePath());
-        qDebug() << u"Could not create directory " << dstDir.absolutePath();
+        qDebug() << u"Could not create directory" << dstDir.absolutePath();
         return;
     }
     // copy all contents
@@ -999,7 +1013,7 @@ void Core::doInteractiveMove(QString const &path, QString const &destDirectory, 
         }
     } else if (!dstDir.mkpath(u"."_s)) {
         mw->showError(tr("Could not create directory ") + dstDir.absolutePath());
-        qDebug() << u"Could not create directory " << dstDir.absolutePath();
+        qDebug() << u"Could not create directory" << dstDir.absolutePath();
         return;
     }
     // move all contents
@@ -1135,17 +1149,17 @@ void Core::edit_template(
 
 void Core::flipH()
 {
-    edit_template((mw->currentViewMode() == ViewMode::FOLDERVIEW), tr("Flip horizontal"), {ImageLib::flippedH});
+    edit_template(mw->currentViewMode() == ViewMode::FOLDERVIEW, tr("Flip horizontal"), {ImageLib::flippedH});
 }
 
 void Core::flipV()
 {
-    edit_template((mw->currentViewMode() == ViewMode::FOLDERVIEW), tr("Flip vertical"), {ImageLib::flippedV});
+    edit_template(mw->currentViewMode() == ViewMode::FOLDERVIEW, tr("Flip vertical"), {ImageLib::flippedV});
 }
 
 void Core::rotateByDegrees(int degrees)
 {
-    edit_template((mw->currentViewMode() == ViewMode::FOLDERVIEW), tr("Rotate"), {ImageLib::rotated}, degrees);
+    edit_template(mw->currentViewMode() == ViewMode::FOLDERVIEW, tr("Rotate"), {ImageLib::rotated}, degrees);
 }
 
 void Core::resize(QSize size)
@@ -1383,7 +1397,7 @@ bool Core::loadPath(QString path)
             state.delayModel = true;
     } else {
         mw->showError(tr("Could not open path: ") + path);
-        qDebug() << u"Could not open path: " << path;
+        qDebug() << u"Could not open path:" << path;
         return false;
     }
 

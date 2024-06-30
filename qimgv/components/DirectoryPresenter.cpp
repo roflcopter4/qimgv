@@ -52,22 +52,20 @@ void DirectoryPresenter::setView(IDirectoryView *newView)
         view->populate(n);
     }
 
-    connect(dynamic_cast<QObject *>(view), SIGNAL(itemActivated(qsizetype)), this, SLOT(onItemActivated(qsizetype)));
-    connect(dynamic_cast<QObject *>(view), SIGNAL(draggedOut()), this, SLOT(onDraggedOut()));
-    connect(dynamic_cast<QObject *>(view), SIGNAL(draggedOver(qsizetype)), this, SLOT(onDraggedOver(qsizetype)));
-    connect(dynamic_cast<QObject *>(view), SIGNAL(droppedInto(const QMimeData*,QObject*,qsizetype)), this, SLOT(onDroppedInto(const QMimeData*,QObject*,qsizetype)));
-
-#if 0
-    connect(view, &IDirectoryView::thumbnailsRequested, this, &DirectoryPresenter::generateThumbnails);
+    qRegisterMetaType<IDirectoryView::SelectionList>("IDirectoryView::SelectionList");
+#if 1
+    auto *obj = dynamic_cast<QObject *>(view);
+    connect(obj, SIGNAL(itemActivated(qsizetype)), this, SLOT(onItemActivated(qsizetype)));
+    connect(obj, SIGNAL(draggedOut()),             this, SLOT(onDraggedOut()));
+    connect(obj, SIGNAL(draggedOver(qsizetype)),   this, SLOT(onDraggedOver(qsizetype)));
+    connect(obj, SIGNAL(droppedInto(const QMimeData*,QObject*,qsizetype)), this, SLOT(onDroppedInto(const QMimeData*,QObject*,qsizetype)));
+    connect(obj, SIGNAL(thumbnailsRequested(IDirectoryView::SelectionList,int,bool,bool)), this, SLOT(generateThumbnails(IDirectoryView::SelectionList,int,bool,bool)));
 #else
-    if constexpr (std::is_same_v<qsizetype, long long>)
-        connect(dynamic_cast<QObject *>(view), SIGNAL(thumbnailsRequested(QList<long long>,int,bool,bool)), this, SLOT(generateThumbnails(QList<long long>,int,bool,bool)));
-    else if constexpr (std::is_same_v<qsizetype, long>)
-        connect(dynamic_cast<QObject *>(view), SIGNAL(thumbnailsRequested(QList<long>,int,bool,bool)), this, SLOT(generateThumbnails(QList<long>,int,bool,bool)));
-    else if constexpr (std::is_same_v<qsizetype, int>)
-        connect(dynamic_cast<QObject *>(view), SIGNAL(thumbnailsRequested(QList<int>,int,bool,bool)), this, SLOT(generateThumbnails(QList<int>,int,bool,bool)));
-    else
-        StaticAssertHack::InvalidQSizeType();
+    connect(view, &IDirectoryView::itemActivated, this, &DirectoryPresenter::onItemActivated);
+    connect(view, &IDirectoryView::draggedOut,    this, &DirectoryPresenter::onDraggedOut);
+    connect(view, &IDirectoryView::draggedOver,   this, &DirectoryPresenter::onDraggedOver);
+    connect(view, &IDirectoryView::droppedInto,   this, &DirectoryPresenter::onDroppedInto);
+    connect(view, &IDirectoryView::thumbnailsRequested, this, &DirectoryPresenter::generateThumbnails);
 #endif
 }
 

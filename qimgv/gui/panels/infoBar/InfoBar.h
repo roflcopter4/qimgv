@@ -14,15 +14,18 @@ class InfoBar : public QWidget
 {
     Q_OBJECT
 
-public:
+  public:
     explicit InfoBar(QWidget *parent = nullptr);
     ~InfoBar() override;
+    DELETE_COPY_MOVE_ROUTINES(InfoBar);
 
-public slots:
+  public Q_SLOTS:
     void setInfo(QString const &position, QString const &fileName, QString const &info);
-protected:
+
+  protected:
     void paintEvent(QPaintEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
-private:
+
+  private:
     Ui::InfoBar *ui;
 };

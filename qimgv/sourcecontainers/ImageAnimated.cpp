@@ -4,15 +4,13 @@
 // TODO: this class is kinda useless now. redesign?
 
 ImageAnimated::ImageAnimated(QString const &path)
-    : Image(path),
-      mSize(0, 0)
+    : Image(path)
 {
     ImageAnimated::load();
 }
 
 ImageAnimated::ImageAnimated(std::unique_ptr<DocumentInfo> info)
-    : Image(std::move(info)),
-      mSize(0, 0)
+    : Image(std::move(info))
 {
     ImageAnimated::load();
 }
@@ -43,14 +41,14 @@ int ImageAnimated::frameCount() const
 // TODO: overwrite (self included)
 bool ImageAnimated::save(QString destPath)
 {
-    static constexpr auto warning1 = QSV("Unable to save file.");
-    static constexpr auto warning2 = QSV("Unable to save file. Perhaps the source file was deleted?");
+    static constexpr auto warning1 = u"Unable to save file."_sv;
+    static constexpr auto warning2 = u"Unable to save file. Perhaps the source file was deleted?"_sv;
 
     QFile file(mPath);
 
     if (file.exists()) {
         if (!file.copy(destPath)) {
-            QMessageBox::warning(nullptr, QS("Error"), util::QStringViewToQString(warning1));
+            QMessageBox::warning(nullptr, u"Error"_s, util::QStringViewToQString(warning1));
             qDebug() << warning1;
             return false;
         }
@@ -60,7 +58,7 @@ bool ImageAnimated::save(QString destPath)
         return true;
     }
 
-    QMessageBox::warning(nullptr, QS("Error"), util::QStringViewToQString(warning2));
+    QMessageBox::warning(nullptr, u"Error"_s, util::QStringViewToQString(warning2));
     qDebug() << warning2;
     return false;
 }

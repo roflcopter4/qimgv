@@ -324,7 +324,7 @@ void FolderGridView::addItemToLayout(ThumbnailWidget *widget, qsizetype pos)
 
 void FolderGridView::removeItemFromLayout(qsizetype pos)
 {
-    flowLayout->removeAt(pos);
+    flowLayout->removeAt(static_cast<int>(pos));
 }
 
 void FolderGridView::removeAll()
@@ -359,12 +359,12 @@ void FolderGridView::keyPressEvent(QKeyEvent *event)
 
     // temporary, will be configurable later
     if (event->key() == Qt::Key_Backspace) {
-        actionManager->invokeAction(QS("goUp"));
+        actionManager->invokeAction(u"goUp"_s);
         return;
     }
 
     if (event->modifiers() & Qt::ControlModifier) {
-        if (ShortcutBuilder::fromEvent(event) == QSV("Ctrl+A"))
+        if (ShortcutBuilder::fromEvent(event) == u"Ctrl+A"_sv)
             selectAll();
         else
             actionManager->processEvent(event);

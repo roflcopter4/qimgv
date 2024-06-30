@@ -1,15 +1,12 @@
 #include "FloatingWidget.h"
 #include <iostream>
 
-FloatingWidget::FloatingWidget(FloatingWidgetContainer *parent) : QWidget(parent), mAcceptKeyboardFocus(false)
+FloatingWidget::FloatingWidget(FloatingWidgetContainer *parent)
+    : QWidget(parent)
 {
     setAccessibleName(u"OverlayWidget"_s);
     connect(parent, &FloatingWidgetContainer::resized, this, &FloatingWidget::onContainerResized);
     hide();
-}
-
-FloatingWidget::~FloatingWidget()
-{
 }
 
 QSize FloatingWidget::containerSize() const
@@ -48,6 +45,7 @@ void FloatingWidget::setAcceptKeyboardFocus(bool mode)
 
 void FloatingWidget::recalculateGeometry()
 {
+    // ???
 }
 
 void FloatingWidget::mousePressEvent(QMouseEvent *event)

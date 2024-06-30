@@ -1,16 +1,18 @@
 #include "FsEntry.h"
+#include "utils/Stuff.h"
 #include <QDebug>
+#include <QDir>
+#include <QFileInfo>
 
 FSEntry::FSEntry(QString const &filePath)
 {
-    auto    stdEntry = std::filesystem::directory_entry(util::QStringToStdPath(filePath));
-    QString fileName = util::StdPathToQString(stdEntry.path().filename());
-
     try {
-        name        = std::move(fileName);
-        path        = filePath;
-        isDirectory = stdEntry.is_directory();
+        auto stdEntry = std::filesystem::directory_entry(util::QStringToStdPath(filePath));
 
+        name = util::StdPathToQString(stdEntry.path().filename());
+        path = QDir::isAbsolutePath(filePath) ? filePath
+                                              : QDir::fromNativeSeparators(util::StdPathToQString(stdEntry));
+        isDirectory = stdEntry.is_directory();
         if (!isDirectory) {
             size       = stdEntry.file_size();
             modifyTime = stdEntry.last_write_time();
@@ -20,30 +22,10 @@ FSEntry::FSEntry(QString const &filePath)
     }
 }
 
-FSEntry::FSEntry(QString path, QString name, size_t size, std::filesystem::file_time_type modifyTime, bool isDirectory)
+FSEntry::FSEntry(QString path, QString name, size_t size, ftime_t modifyTime, bool isDirectory)
     : path(std::move(path)),
       name(std::move(name)),
-      size(size),
       modifyTime(modifyTime),
+      size(size),
       isDirectory(isDirectory)
 {}
-
-#if 0
-FSEntry::FSEntry( QString const &_path, QString const &_name, std::uintmax_t _size, bool _isDirectory)
-    : path(_path),
-      name(_name),
-      size(_size),
-      isDirectory(_isDirectory)
-{}
-
-FSEntry::FSEntry( QString const &_path, QString const &_name, bool _isDirectory)
-    : path(_path),
-      name(_name),
-      isDirectory(_isDirectory)
-{}
-#endif
-
-bool FSEntry::operator==(QString const &anotherPath) const
-{
-    return path == anotherPath;
-}

@@ -94,7 +94,7 @@ void IconWidget::paintEvent(QPaintEvent *event)
     Q_UNUSED(event)
     QPainter p(this);
     if (!isEnabled())
-        p.setOpacity(0.5f);
+        p.setOpacity(0.5);
     QStyleOption opt;
     opt.initFrom(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);

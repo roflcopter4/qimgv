@@ -1,45 +1,28 @@
 #pragma once
 #include <QString>
 #include <filesystem>
-#include "utils/Stuff.h"
-
-#if 0
-class FSEntry
-{
-  public:
-    FSEntry();
-    explicit FSEntry(QString const &filePath);
-
-    FSEntry(QString const &_path, QString const &_name, std::uintmax_t _size, std::filesystem::file_time_type _modifyTime, bool _isDirectory);
-    FSEntry(QString const &_path, QString const &_name, std::uintmax_t _size, bool _isDirectory);
-    FSEntry(QString const &_path, QString const &_name, bool _isDirectory);
-
-    bool operator==(QString const &anotherPath) const;
-
-    QString        path;
-    QString        name;
-    std::uintmax_t size;
-    std::filesystem::file_time_type modifyTime;
-    bool           isDirectory;
-};
-#endif
 
 struct FSEntry
 {
+  private:
+    using ftime_t = std::filesystem::file_time_type;
+
+  public:
     FSEntry() = default;
     explicit FSEntry(QString const &filePath);
 
-    FSEntry(QString   path,
-            QString   name,
-            size_t    size = 0, 
-            std::filesystem::file_time_type modifyTime  = std::filesystem::file_time_type::min(), 
-            bool      isDirectory = false);
+    FSEntry(QString path,
+            QString name,
+            size_t  size        = 0, 
+            ftime_t modifyTime  = std::filesystem::file_time_type::min(), 
+            bool    isDirectory = false);
 
-    bool operator==(QString const &anotherPath) const;
+    bool operator==(FSEntry const &other) const { return path == other.path; }
+    bool operator==(QString const &other) const { return path == other; }
 
-    QString   path;
-    QString   name;
-    size_t    size        = 0;
-    std::filesystem::file_time_type modifyTime = std::filesystem::file_time_type::min();
-    bool      isDirectory = false;
+    QString path;
+    QString name;
+    ftime_t modifyTime  = std::filesystem::file_time_type::min();
+    size_t  size        = 0;
+    bool    isDirectory = false;
 };

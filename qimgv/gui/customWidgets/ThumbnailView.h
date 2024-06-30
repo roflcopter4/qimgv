@@ -40,8 +40,7 @@ class ThumbnailView : public QGraphicsView, public IDirectoryView
   public:
     explicit ThumbnailView(Qt::Orientation orientation, QWidget *parent);
     ~ThumbnailView() override;
-
-    Q_DISABLE_COPY_MOVE(ThumbnailView)
+    DELETE_COPY_MOVE_ROUTINES(ThumbnailView);
 
     void setDirectoryPath(QString path) override;
     void select(SelectionList) override;
@@ -86,45 +85,7 @@ class ThumbnailView : public QGraphicsView, public IDirectoryView
     void draggedOver(qsizetype) override;
     void droppedInto(QMimeData const *, QObject *, qsizetype) override;
 
-  private:
-    void createScrollTimeLine();
-    void onScrollTimeLineFrameChanged(int value);
-    void onScrollTimeLineFinished();
-
-    std::function<void(int)> centerOn;
-
-    QTimer           loadTimer;
-    SelectionList     mSelection;
-    QPoint           dragStartPos;
-    ThumbnailWidget *dragTarget;
-    QElapsedTimer    scrollFrameTimer;
-    QElapsedTimer    lastTouchpadScroll;
-    qint64            lastScrollFrameTime;
-    Qt::Orientation  mOrientation = Qt::Horizontal;
-
-    int    mDrawScrollbarIndicator;
-    bool   blockThumbnailLoading;
-    bool   mCropThumbnails;
-    bool   mouseReleaseSelect;
-
-    ThumbnailSelectMode selectMode;
-
   protected:
-    int  mThumbnailSize       = 120;
-    int  offscreenPreloadArea = 3000;
-    int  scrollRefreshRate    = 16;
-    bool rangeSelection; // true if shift is pressed
-    ScrollDirection lastScrollDirection = ScrollDirection::FORWARDS;
-
-    QPointF       viewportCenter;
-    QRect         indicator;
-    SelectionList rangeSelectionSnapshot;
-    QList<ThumbnailWidget *> thumbnails;
-
-    QScrollBar     *scrollBar;
-    QTimeLine      *scrollTimeLine;
-    QGraphicsScene *scene;
-
     ND virtual auto createThumbnailWidget() -> ThumbnailWidget *         = 0;
     virtual void addItemToLayout(ThumbnailWidget *widget, qsizetype pos) = 0;
     virtual void removeItemFromLayout(qsizetype pos)                     = 0;
@@ -166,9 +127,48 @@ class ThumbnailView : public QGraphicsView, public IDirectoryView
     static constexpr qreal indicatorSize = 2.0;
 
   private:
+    void createScrollTimeLine();
+    void onScrollTimeLineFrameChanged(int value);
+    void onScrollTimeLineFinished();
+
     static constexpr qreal SCROLL_ACCELERATION           = 1.4;
     static constexpr qreal SCROLL_MULTIPLIER             = 2.5;
     static constexpr int   SCROLL_ACCELERATION_THRESHOLD = 50;
     static constexpr int   SCROLL_DURATION               = 120;
     static constexpr int   LOAD_DELAY                    = 150;
+
+    std::function<void(int)> centerOn;
+
+    ThumbnailWidget *dragTarget = nullptr;
+    QElapsedTimer    scrollFrameTimer;
+    QElapsedTimer    lastTouchpadScroll;
+    SelectionList    mSelection;
+    QTimer           loadTimer;
+    QPoint           dragStartPos;
+
+    qint64 lastScrollFrameTime     = 0;
+    int    mDrawScrollbarIndicator = true;
+    quint8 mOrientation            = Qt::Horizontal;
+    bool   blockThumbnailLoading   = false;
+    bool   mCropThumbnails         = false;
+    bool   mouseReleaseSelect      = false;
+
+    ThumbnailSelectMode selectMode = ThumbnailSelectMode::ACTIVATE_BY_PRESS;
+
+  protected:
+    ScrollDirection lastScrollDirection = ScrollDirection::FORWARDS;
+
+    bool rangeSelection       = false; // true if shift is pressed
+    int  mThumbnailSize       = 120;
+    int  offscreenPreloadArea = 3000;
+    int  scrollRefreshRate    = 16;
+
+    QPointF         viewportCenter;
+    QRect           indicator;
+    QGraphicsScene *scene;
+    QScrollBar     *scrollBar      = nullptr;
+    QTimeLine      *scrollTimeLine = nullptr;
+    SelectionList   rangeSelectionSnapshot;
+
+    QList<ThumbnailWidget *> thumbnails;
 };

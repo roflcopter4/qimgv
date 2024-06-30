@@ -8,7 +8,7 @@ ScriptEditorDialog::ScriptEditorDialog(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle(tr("New application/script"));
-    ui->keywordsLabel->setText(tr("Keywords:") + QSV(" %file%"));
+    ui->keywordsLabel->setText(tr("Keywords:") + u" %file%");
     connect(ui->nameLineEdit, &QLineEdit::textChanged, this, &ScriptEditorDialog::onNameChanged);
     onNameChanged(ui->nameLineEdit->text());
 }
@@ -60,15 +60,15 @@ void ScriptEditorDialog::onNameChanged(QString const &name)
     if (editMode) {
         if (name != editTarget && scriptManager->scriptExists(name)) {
             ui->messageLabel->setText(tr("A script with this same name exists"));
-            okBtnText = QS("Replace");
+            okBtnText = u"Replace"_s;
         } else {
-            okBtnText = QS("Save");
+            okBtnText = u"Save"_s;
         }
     } else if (scriptManager->scriptExists(name)) {
         ui->messageLabel->setText(tr("A script with this same name exists"));
-        okBtnText = QS("Replace");
+        okBtnText = u"Replace"_s;
     } else {
-        okBtnText = QS("Create");
+        okBtnText = u"Create"_s;
     }
     ui->acceptButton->setText(okBtnText);
 }
@@ -77,10 +77,10 @@ void ScriptEditorDialog::selectScriptPath()
 {
     QString file;
 #ifdef Q_OS_WIN32
-    file = QFileDialog::getOpenFileName(this, tr("Select an executable/script"), {}, QS("Executable/script (*.exe *.bat)"));
+    file = QFileDialog::getOpenFileName(this, tr("Select an executable/script"), {}, u"Executable/script (*.exe *.bat)"_s);
 #else
-    file = QFileDialog::getOpenFileName(this, tr("Select a script file"), {}, QS("Shell script (*.sh)"));
+    file = QFileDialog::getOpenFileName(this, tr("Select a script file"), {}, u"Shell script (*.sh)"_s);
 #endif
     if (!file.isEmpty())
-        ui->pathLineEdit->setText(u'"' + file + u'"' + QSV(" %file%"));
+        ui->pathLineEdit->setText(u'"' + file + u'"' + u" %file%");
 }

@@ -27,10 +27,10 @@ class ImageAnimated : public Image
     void frameChanged(QPixmap *);
 
   private:
-    int   mFrameCount;
-    QSize mSize;
-    QSharedPointer<QMovie> movie;
-
     void load() override;
     void loadMovie();
+
+    QSharedPointer<QMovie> movie;
+    QSize mSize{0, 0};
+    int   mFrameCount;
 };

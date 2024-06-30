@@ -68,10 +68,10 @@ void LinuxDirectoryWatcherPrivate::setWatchPath(QString path)
     DirectoryWatcherPrivate::setWatchPath(std::move(path));
 }
 
-qsizetype LinuxDirectoryWatcherPrivate::indexOfWatcherEvent(uint cookie) const
+qsizetype LinuxDirectoryWatcherPrivate::indexOfWatcherEvent(uint32_t cookie) const
 {
     for (qsizetype i = 0; i < watcherEvents.size(); ++i) {
-        auto event = watcherEvents.at(i);
+        auto const &event = watcherEvents[i];
         if (event->cookie() == cookie)
             return i;
     }
@@ -81,7 +81,7 @@ qsizetype LinuxDirectoryWatcherPrivate::indexOfWatcherEvent(uint cookie) const
 qsizetype LinuxDirectoryWatcherPrivate::indexOfWatcherEvent(QString const &name) const
 {
     for (qsizetype i = 0; i < watcherEvents.size(); ++i) {
-        auto event = watcherEvents.at(i);
+        auto const &event = watcherEvents[i];
         if (event->name() == name)
             return i;
     }
@@ -90,19 +90,17 @@ qsizetype LinuxDirectoryWatcherPrivate::indexOfWatcherEvent(QString const &name)
 
 void LinuxDirectoryWatcherPrivate::dispatchFilesystemEvent(LinuxFsEvent *e)
 {
+    auto   event      = std::unique_ptr<LinuxFsEvent>(e);
+    size_t dataOffset = 0;
     Q_Q(LinuxDirectoryWatcher);
-    std::unique_ptr<LinuxFsEvent> event(e);
-
-    uint dataOffset = 0;
 
     while (dataOffset < event->dataSize()) {
         auto *notify_event = reinterpret_cast<inotify_event *>(event->data() + dataOffset);
         dataOffset += sizeof(inotify_event) + notify_event->len;
 
-        uint32_t mask       = notify_event->mask;
-        QString  name       = QString::fromUtf8(notify_event->name);
-        uint     cookie     = notify_event->cookie;
-        bool     isDirEvent = mask & IN_ISDIR;
+        uint32_t mask   = notify_event->mask;
+        QString  name   = QString::fromUtf8(notify_event->name);
+        uint32_t cookie = notify_event->cookie;
 
         // Skip events for directories and files that isn't in filter range
         /*if((isDirEvent) && !(mask & IN_MOVED_TO) ) {
@@ -152,7 +150,7 @@ void LinuxDirectoryWatcherPrivate::handleCreateEvent(QString const &name)
     emit q->fileCreated(name);
 }
 
-void LinuxDirectoryWatcherPrivate::handleMovedFromEvent(QString const &name, uint cookie)
+void LinuxDirectoryWatcherPrivate::handleMovedFromEvent(QString const &name, uint32_t cookie)
 {
     int timerId = startTimer(EVENT_MOVE_TIMEOUT);
     // Save timer id to find out later which event timer is running
@@ -160,7 +158,7 @@ void LinuxDirectoryWatcherPrivate::handleMovedFromEvent(QString const &name, uin
     watcherEvents.append(QSharedPointer<WatcherEvent>(event));
 }
 
-void LinuxDirectoryWatcherPrivate::handleMovedToEvent(QString const &name, uint cookie)
+void LinuxDirectoryWatcherPrivate::handleMovedToEvent(QString const &name, uint32_t cookie)
 {
     Q_Q(LinuxDirectoryWatcher);
 

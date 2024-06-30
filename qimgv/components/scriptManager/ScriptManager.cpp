@@ -13,7 +13,7 @@ ScriptManager::~ScriptManager()
 
 ScriptManager *ScriptManager::getInstance()
 {
-    if(!scriptManager) {
+    if (!scriptManager) {
         scriptManager = new ScriptManager();
         scriptManager->readScripts();
     }
@@ -22,34 +22,32 @@ ScriptManager *ScriptManager::getInstance()
 
 void ScriptManager::runScript(QString const &scriptName, QSharedPointer<Image> const &img)
 {
-    if(scripts.contains(scriptName)) {
+    if (scripts.contains(scriptName)) {
         Script script = scripts.value(scriptName);
-        if(script.command.isEmpty())
+        if (script.command.isEmpty())
             return;
         QProcess exec(this);
 
-        //auto arguments = splitCommandLine(script.command);
+        // auto arguments = splitCommandLine(script.command);
         auto arguments = QProcess::splitCommand(script.command);
         processArguments(arguments, img);
         QString program = arguments.takeAt(0);
 
         qDebug() << u"Running program" << program << u"with arguments" << arguments;
-        if(script.blocking) {
+        if (script.blocking) {
             exec.start(program, arguments);
-            if(!exec.waitForStarted())
+            if (!exec.waitForStarted())
                 qDebug() << u"Unable not run application/script \"" << program << u"\". Make sure it is an executable.";
             exec.waitForFinished(10000);
-        } else {
-            if(!QProcess::startDetached(program, arguments)) {
-                QFileInfo fi(program);
-                QString errorString;
-                if(fi.isFile() && !fi.isExecutable())
-                    errorString = u"Error:  " + program + u"  is not an executable.";
-                else
-                    errorString = u"Error: unable run application/script. See README for working examples."_s;
-                emit error(errorString);
-                qWarning() << errorString;
-            }
+        } else if (!QProcess::startDetached(program, arguments)) {
+            QFileInfo fi(program);
+            QString   errorString;
+            if (fi.isFile() && !fi.isExecutable())
+                errorString = u"Error:  " + program + u"  is not an executable.";
+            else
+                errorString = u"Error: unable run application/script. See README for working examples."_s;
+            emit error(errorString);
+            qWarning() << errorString;
         }
     } else {
         qDebug() << u"[ScriptManager] File " << scriptName << u" does not exist.";
@@ -58,7 +56,7 @@ void ScriptManager::runScript(QString const &scriptName, QSharedPointer<Image> c
 
 QString ScriptManager::runCommand(QString const &cmd)
 {
-    QProcess exec;
+    QProcess    exec;
     QStringList cmdSplit = QProcess::splitCommand(cmd);
     exec.start(cmdSplit.takeAt(0), cmdSplit);
     exec.waitForFinished(2000);
@@ -76,25 +74,26 @@ void ScriptManager::processArguments(QStringList &cmd, QSharedPointer<Image> con
 {
     QString field = u"%file%"_s;
     for (auto &i : cmd)
-        if(i.contains(field))
+        if (i.contains(field))
             i.replace(field, img->filePath());
 }
 
 // thanks stackoverflow
 QStringList ScriptManager::splitCommandLine(QString const &cmdLine)
 {
-    QStringList list;
-    QString arg;
-    bool escape = false;
     enum { Idle, Arg, QuotedArg } state = Idle;
-    foreach (QChar const c, cmdLine) {
-        //if(!escape && c == '\\') {
-        //    escape = true;
-        //    continue;
-        //}
+    QStringList list;
+    QString     arg;
+    bool        escape = false;
+
+    for (QChar c : cmdLine) {
+        // if(!escape && c == '\\') {
+        //     escape = true;
+        //     continue;
+        // }
         switch (state) {
         case Idle:
-            if(!escape && c == u'"')
+            if (!escape && c == u'"')
                 state = QuotedArg;
             else if (escape || !c.isSpace()) {
                 arg += c;
@@ -102,9 +101,9 @@ QStringList ScriptManager::splitCommandLine(QString const &cmdLine)
             }
             break;
         case Arg:
-            if(!escape && c == u'"')
+            if (!escape && c == u'"')
                 state = QuotedArg;
-            else if(escape || !c.isSpace())
+            else if (escape || !c.isSpace())
                 arg += c;
             else {
                 list << arg;
@@ -113,7 +112,7 @@ QStringList ScriptManager::splitCommandLine(QString const &cmdLine)
             }
             break;
         case QuotedArg:
-            if(!escape && c == u'"')
+            if (!escape && c == u'"')
                 state = arg.isEmpty() ? Idle : Arg;
             else
                 arg += c;
@@ -121,7 +120,7 @@ QStringList ScriptManager::splitCommandLine(QString const &cmdLine)
         }
         escape = false;
     }
-    if(!arg.isEmpty())
+    if (!arg.isEmpty())
         list << arg;
     return list;
 }

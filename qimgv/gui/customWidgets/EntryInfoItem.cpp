@@ -27,8 +27,9 @@ void EntryInfoItem::setInfo(QString newName, QString newValue)
     valueLabel.setText(value);
 }
 
-void EntryInfoItem::paintEvent([[maybe_unused]] QPaintEvent *event)
+void EntryInfoItem::paintEvent(QPaintEvent *event)
 {
+    Q_UNUSED(event);
     QStyleOption opt;
     opt.initFrom(this);
     QPainter p(this);

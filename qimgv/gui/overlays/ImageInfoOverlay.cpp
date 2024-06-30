@@ -6,8 +6,8 @@ ImageInfoOverlay::ImageInfoOverlay(FloatingWidgetContainer *parent)
       ui(new Ui::ImageInfoOverlay)
 {
     ui->setupUi(this);
-    ui->closeButton->setIconPath(QS(":res/icons/common/overlay/close-dim16.png"));
-    ui->headerIcon->setIconPath(QS(":res/icons/common/overlay/info16.png"));
+    ui->closeButton->setIconPath(u":res/icons/common/overlay/close-dim16.png"_s);
+    ui->headerIcon->setIconPath(u":res/icons/common/overlay/info16.png"_s);
     entryStub.setFixedSize(280, 48);
     entryStub.setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     connect(ui->closeButton, &IconButton::clicked, this, &ImageInfoOverlay::hide);
@@ -20,7 +20,7 @@ ImageInfoOverlay::ImageInfoOverlay(FloatingWidgetContainer *parent)
 ImageInfoOverlay::~ImageInfoOverlay()
 {
     delete ui;
-    for (auto i = entries.count() - 1; i >= 0; i--)
+    for (auto i = entries.count() - 1; i >= 0; --i)
         delete entries.takeAt(i);
 }
 
@@ -29,12 +29,12 @@ void ImageInfoOverlay::setExifInfo(QMap<QString, QString> const &info)
     // remove/add entries
     qsizetype entryCount = entries.count();
     if (entryCount > info.count()) {
-        for (auto i = entryCount - 1; i >= info.count(); i--) {
+        for (auto i = entryCount - 1; i >= info.count(); --i) {
             ui->entryLayout->removeWidget(entries.last());
             delete entries.takeLast();
         }
     } else if (entryCount < info.count()) {
-        for (auto i = entryCount; i < info.count(); i++) {
+        for (auto i = entryCount; i < info.count(); ++i) {
             entries.append(new EntryInfoItem(this));
             ui->entryLayout->addWidget(entries.last());
         }
@@ -49,10 +49,10 @@ void ImageInfoOverlay::setExifInfo(QMap<QString, QString> const &info)
     // It's still there but basically not visible
     if (entries.count()) {
         ui->entryLayout->removeWidget(&entryStub);
-        entryStub.setText(QS(""));
+        entryStub.setText(u""_s);
     } else {
         ui->entryLayout->addWidget(&entryStub);
-        entryStub.setText(QS("<no metadata found>"));
+        entryStub.setText(u"<no metadata found>"_s);
     }
 
     if (!isHidden() && entryCount != info.count()) {

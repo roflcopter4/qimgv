@@ -335,7 +335,7 @@ void FolderView::setDirectoryPath(QString path)
     if (keepExpand)
         ui->dirTreeView->expand(targetIndex);
 
-    // OK I'mtx done with this shit. none of the "solutions" work just do scrollTo
+    // OK I'm done with this shit. none of the "solutions" work just do scrollTo
     // after a delay and hope that model is loaded by then larger than ~150ms
     // becomes too noticeable.
     QTimer::singleShot(150, this, &FolderView::fsTreeScrollToCurrent);

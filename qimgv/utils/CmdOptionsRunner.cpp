@@ -54,16 +54,16 @@ void CmdOptionsRunner::showBuildOptions()
 
     QStringList features;
 #ifdef USE_MPV
-    features << QS("USE_MPV");
+    features << u"USE_MPV"_s;
 #endif
 #ifdef USE_EXIV2
-    features << QS("USE_EXIV2");
+    features << u"USE_EXIV2"_s;
 #endif
 #ifdef USE_KDE_BLUR
-    features << QS("USE_KDE_BLUR");
+    features << u"USE_KDE_BLUR"_s;
 #endif
 #ifdef USE_OPENCV
-    features << QS("USE_OPENCV");
+    features << u"USE_OPENCV"_s;
 #endif
 
     QString out;

@@ -2,18 +2,20 @@
 
 ControlsOverlay::ControlsOverlay(FloatingWidgetContainer *parent)
     : FloatingWidget(parent),
-      layout(new QHBoxLayout(this))
+      layout(new QHBoxLayout(this)),
+      closeButton(new ActionButton(u"exit"_s, u":/res/icons/common/buttons/panel/close16.png"_s, 30)),
+      settingsButton(new ActionButton(u"openSettings"_s, u":/res/icons/common/buttons/panel/settings20.png"_s, 30)),
+      folderViewButton(new ActionButton(u"folderView"_s, u":/res/icons/common/buttons/panel/folderview20.png"_s, 30)),
+      fadeEffect(new QGraphicsOpacityEffect(this)),
+      fadeAnimation(new QPropertyAnimation(fadeEffect, "opacity", this))
 {
-    folderViewButton = new ActionButton(QS("folderView"), QS(":/res/icons/common/buttons/panel/folderview20.png"), 30);
-    folderViewButton->setAccessibleName(QS("ButtonSmall"));
-    settingsButton = new ActionButton(QS("openSettings"), QS(":/res/icons/common/buttons/panel/settings20.png"), 30);
-    settingsButton->setAccessibleName(QS("ButtonSmall"));
-    closeButton = new ActionButton(QS("exit"), QS(":/res/icons/common/buttons/panel/close16.png"), 30);
-    closeButton->setAccessibleName(QS("ButtonSmall"));
+    folderViewButton->setAccessibleName(u"ButtonSmall"_s);
+    settingsButton->setAccessibleName(u"ButtonSmall"_s);
+    closeButton->setAccessibleName(u"ButtonSmall"_s);
 
     auto horizontalLineWidget = new QWidget(this);
     horizontalLineWidget->setFixedSize(5, 22);
-    horizontalLineWidget->setStyleSheet(QString(QS("background-color: #707070; margin-left: 2px; margin-right: 2px")));
+    horizontalLineWidget->setStyleSheet(QString(u"background-color: #707070; margin-left: 2px; margin-right: 2px"_s));
 
     layout->setContentsMargins(0, 0, 0, 0);
     setContentsMargins(0, 0, 0, 0);
@@ -26,10 +28,7 @@ ControlsOverlay::ControlsOverlay(FloatingWidgetContainer *parent)
     fitToContents();
 
     setMouseTracking(true);
-
-    fadeEffect = new QGraphicsOpacityEffect(this);
     setGraphicsEffect(fadeEffect);
-    fadeAnimation = new QPropertyAnimation(fadeEffect, "opacity", this);
     fadeAnimation->setDuration(230);
     fadeAnimation->setStartValue(1.0f);
     fadeAnimation->setEndValue(0);

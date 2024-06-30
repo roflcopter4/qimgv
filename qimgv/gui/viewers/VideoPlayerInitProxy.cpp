@@ -1,12 +1,5 @@
 #include "VideoPlayerInitProxy.h"
 
-#ifdef Q_OS_WIN32
-# ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-# endif
-# include "Windows.h"
-#endif
-
 #ifdef _QIMGV_PLAYER_PLUGIN
     #define QIMGV_PLAYER_PLUGIN _QIMGV_PLAYER_PLUGIN
 #else
@@ -16,25 +9,26 @@
 VideoPlayerInitProxy::VideoPlayerInitProxy(QWidget *parent)
     : VideoPlayer(parent),
       player(nullptr),
-      layout(new QVBoxLayout (this))
+      layout(new QVBoxLayout(this)),
+      errorLabel(nullptr),
+      libFile(QStringLiteral(QIMGV_PLAYER_PLUGIN))
 {
-    setAccessibleName(QS("VideoPlayerInitProxy"));
+    setAccessibleName(u"VideoPlayerInitProxy"_s);
     setMouseTracking(true);
     layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
     connect(settings, &Settings::settingsChanged, this, &VideoPlayerInitProxy::onSettingsChanged);
-    libFile = QStringLiteral(QIMGV_PLAYER_PLUGIN);
+
 #ifdef Q_OS_WIN32
-    libDirs << QApplication::applicationDirPath() + QSV("/plugins");
+    libDirs << QApplication::applicationDirPath() + u"/plugins";
 #else
-    QDir libPath(QApplication::applicationDirPath() + QS("/../lib/qimgv"));
-    libDirs << (libPath.makeAbsolute() ? libPath.path() : QS(".")) << QS("/usr/lib/qimgv")
-            << QS("/usr/lib64/qimgv");
+    QDir libPath(QApplication::applicationDirPath() + u"/../lib/qimgv"_s);
+    libDirs << (libPath.makeAbsolute() ? libPath.path() : u"."_s) << u"/usr/lib/qimgv"_s
+            << u"/usr/lib64/qimgv"_s;
 #endif
 }
 
-VideoPlayerInitProxy::~VideoPlayerInitProxy()
-{}
+VideoPlayerInitProxy::~VideoPlayerInitProxy() = default;
 
 void VideoPlayerInitProxy::onSettingsChanged()
 {
@@ -77,12 +71,18 @@ inline bool VideoPlayerInitProxy::initPlayer()
 
     using createPlayerWidgetFn = VideoPlayer *(*)();
 
-    playerLib.load();
-
+    if (!playerLib.load()) {
+        qDebug() << u"Error loading library." << playerLib.errorString();
+        return false;
+    }
+    auto fn = reinterpret_cast<createPlayerWidgetFn>(playerLib.resolve("CreatePlayerWidget"));
     // load lib
-    if (auto fn = reinterpret_cast<createPlayerWidgetFn>(playerLib.resolve("CreatePlayerWidget"))) {
+    if (fn) {
         VideoPlayer *pl = fn();
         player.reset(pl);
+    } else {
+        qDebug() << u"Error resolving function." << playerLib.errorString();
+        return false;
     }
     if (!player) {
         qDebug() << u"Could not load:" << playerLib.fileName() << u". Wrong plugin version?";
@@ -97,10 +97,12 @@ inline bool VideoPlayerInitProxy::initPlayer()
     layout->addWidget(player.get());
     player->hide();
     setFocusProxy(player.get());
-    connect(player.get(), SIGNAL(durationChanged(int)), this, SIGNAL(durationChanged(int)));
-    connect(player.get(), SIGNAL(positionChanged(int)), this, SIGNAL(positionChanged(int)));
-    connect(player.get(), SIGNAL(videoPaused(bool)), this, SIGNAL(videoPaused(bool)));
-    connect(player.get(), SIGNAL(playbackFinished()), this, SIGNAL(playbackFinished()));
+
+    connect(player.get(), &VideoPlayer::durationChanged,  this, &VideoPlayerInitProxy::durationChanged);
+    connect(player.get(), &VideoPlayer::positionChanged,  this, &VideoPlayerInitProxy::positionChanged);
+    connect(player.get(), &VideoPlayer::videoPaused,      this, &VideoPlayerInitProxy::videoPaused);
+    connect(player.get(), &VideoPlayer::playbackFinished, this, &VideoPlayerInitProxy::playbackFinished);
+
     return true;
 }
 
@@ -229,7 +231,7 @@ void VideoPlayerInitProxy::show()
         errorLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
         errorLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
         // errorLabel->setAlignment(Qt::AlignVCenter);
-        QString errString = QSV("Could not load ") + libFile + QSV(" from:");
+        QString errString = u"Could not load " + libFile + u" from:";
         for (auto const &path : libDirs)
             errString.append(u'\n' + path + u'/');
         errorLabel->setText(errString);

@@ -13,21 +13,23 @@ class WatcherEvent
     };
 
     WatcherEvent(QString const &name, int timerId, Type type = Type::None);
-    WatcherEvent(QString name, uint cookie, int timerId, Type type = Type::None);
+    WatcherEvent(QString name, uint32_t cookie, int timerId, Type type = Type::None);
     ~WatcherEvent();
 
-    ND QString name() const;
-       void    setName(QString const &name);
-    ND uint    cookie() const;
-       void    setCookie(uint cookie);
-    ND int     timerId() const;
-       void    setTimerId(int timerId);
-    ND Type    type() const;
-       void    setType(Type type);
+    DEFAULT_COPY_MOVE_CONSTRUCTORS(WatcherEvent);
+
+    ND auto name() const -> QString;
+       void setName(QString const &name);
+    ND auto cookie() const -> uint32_t;
+       void setCookie(uint32_t cookie);
+    ND auto timerId() const -> int;
+       void setTimerId(int timerId);
+    ND auto type() const -> Type;
+       void setType(Type type);
 
   private:
-    QString mName;
-    uint    mCookie;
-    int     mTimerId;
-    Type    mType;
+    QString  mName;
+    uint32_t mCookie;
+    int      mTimerId;
+    Type     mType;
 };

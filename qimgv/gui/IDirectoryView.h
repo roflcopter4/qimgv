@@ -1,10 +1,9 @@
 #pragma once
 
-
 #include <QList>
+#include <QtClassHelperMacros>
 #include <QtPlugin>
 #include <QtTypes>
-#include <QtClassHelperMacros>
 #include <memory>
 
 class Thumbnail;

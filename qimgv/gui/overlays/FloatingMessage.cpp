@@ -16,7 +16,7 @@ FloatingMessage::FloatingMessage(FloatingWidgetContainer *parent)
     setFadeDuration(300);
     setIcon(FloatingMessageIcon::NONE);
 
-    setAccessibleName(QS("FloatingMessage"));
+    setAccessibleName(u"FloatingMessage"_s);
     connect(&visibilityTimer, &QTimer::timeout, this, &FloatingMessage::hideAnimated);
 
     readSettings();
@@ -77,24 +77,24 @@ void FloatingMessage::setIcon(FloatingMessageIcon icon)
     case FloatingMessageIcon::NONE:
     case FloatingMessageIcon::WARNING:
     case FloatingMessageIcon::ERROR:
-        // ui->iconLabel->setIconPath(QS(":/res/icons/common/notifications/error16.png"));
+        // ui->iconLabel->setIconPath(u":/res/icons/common/notifications/error16.png"_s);
         ui->iconLabel->hide();
         break;
     case FloatingMessageIcon::DIRECTORY:
         ui->iconLabel->show();
-        ui->iconLabel->setIconPath(QS(":/res/icons/common/buttons/panel/folder16.png"));
+        ui->iconLabel->setIconPath(u":/res/icons/common/buttons/panel/folder16.png"_s);
         break;
     case FloatingMessageIcon::LEFT_EDGE:
         ui->iconLabel->show();
-        ui->iconLabel->setIconPath(QS(":/res/icons/common/notifications/dir_start20.png"));
+        ui->iconLabel->setIconPath(u":/res/icons/common/notifications/dir_start20.png"_s);
         break;
     case FloatingMessageIcon::RIGHT_EDGE:
         ui->iconLabel->show();
-        ui->iconLabel->setIconPath(QS(":/res/icons/common/notifications/dir_end20.png"));
+        ui->iconLabel->setIconPath(u":/res/icons/common/notifications/dir_end20.png"_s);
         break;
     case FloatingMessageIcon::SUCCESS:
         ui->iconLabel->show();
-        ui->iconLabel->setIconPath(QS(":/res/icons/common/notifications/success16.png"));
+        ui->iconLabel->setIconPath(u":/res/icons/common/notifications/success16.png"_s);
         break;
     }
 }
@@ -104,7 +104,7 @@ void FloatingMessage::mousePressEvent(QMouseEvent *event)
     Q_UNUSED(event)
 }
 
-// QS("blink") the widget; show then fade out immediately
+// u"blink"_s the widget; show then fade out immediately
 void FloatingMessage::show()
 {
     visibilityTimer.stop();

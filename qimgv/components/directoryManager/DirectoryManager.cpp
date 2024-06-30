@@ -1,6 +1,14 @@
 #include "DirectoryManager.h"
 #include "utils/Stuff.h"
 #include <ranges>
+#ifdef Q_OS_WIN32
+# ifndef WIN32_LEAN_AND_MEAN
+#  define WIN32_LEAN_AND_MEAN
+# endif
+# include <Windows.h>
+#endif
+
+FSEntry const DirectoryManager::defaultEntry;
 
 DirectoryManager::DirectoryManager(QObject *parent)
     : QObject(parent),
@@ -307,7 +315,7 @@ QDateTime DirectoryManager::lastModified(QString const &filePath) const
 // TODO: what about symlinks?
 bool DirectoryManager::isSupportedFile(QString const &filePath) const
 {
-    return (isFile(filePath) && regex.match(filePath).hasMatch());
+    return isFile(filePath) && regex.match(filePath).hasMatch();
 }
 
 bool DirectoryManager::isFile(QString const &filePath)
@@ -351,23 +359,36 @@ void DirectoryManager::loadEntryList(QString const &directoryPath, bool recursiv
 }
 
 // both directories & files
-void DirectoryManager::addEntriesFromDirectory(std::vector<FSEntry> &entryVec, QString const &directoryPath)
+void DirectoryManager::addEntriesFromDirectory(
+      std::vector<FSEntry> &entryVec,
+      QString const        &directoryPath)
 {
-    for (auto const &entry : std::filesystem::directory_iterator(util::QStringToStdPath(directoryPath)))
+    auto stdPath = util::QStringToStdPath(directoryPath);
+    for (auto const &entry : std::filesystem::directory_iterator(stdPath))
     {
+#if 0
         auto info  = QFileInfo(entry.path());
         auto name  = info.fileName();
+        auto path  = info.absoluteFilePath();
+#else
+        auto name = util::StdPathToQString(entry.path().filename());
+        auto path = QDir::fromNativeSeparators(util::StdPathToQString(entry.path()));
+#endif
+
         // Ignore hidden files
 #ifdef Q_OS_WIN32
-        // TODO Support hidden files on Windows via attributes.
+# if 0
+        if (::GetFileAttributesW(entry.path().c_str()) & FILE_ATTRIBUTE_HIDDEN)
+            continue;
+# endif
 #else
         if (name.startsWith(u'.'))
             continue;
 #endif
 
-        auto path  = info.absoluteFilePath();
         auto match = regex.match(name);
-        if (entry.is_directory()) { // this can still throw std::bad_alloc ..
+
+        if (entry.is_directory()) { // this can still throw std::bad_alloc.
             FSEntry newEntry;
             try {
                 newEntry.name        = name;
@@ -396,10 +417,11 @@ void DirectoryManager::addEntriesFromDirectory(std::vector<FSEntry> &entryVec, Q
 }
 
 void DirectoryManager::addEntriesFromDirectoryRecursive(
-    std::vector<FSEntry> &entryVec,
-    QString const        &directoryPath) const
+      std::vector<FSEntry> &entryVec,
+      QString const        &directoryPath) const
 {
-    for (auto const &entry : std::filesystem::recursive_directory_iterator(util::QStringToStdPath(directoryPath)))
+    auto stdPath = util::QStringToStdPath(directoryPath);
+    for (auto const &entry : std::filesystem::recursive_directory_iterator(stdPath))
     {
         auto info  = QFileInfo(entry.path());
         auto name  = info.fileName();
@@ -463,9 +485,9 @@ bool DirectoryManager::forceInsertFileEntry(QString const &filePath)
     if (!isFile(filePath) || containsFile(filePath))
         return false;
 
-    auto    stdEntry = std::filesystem::directory_entry(util::QStringToStdPath(filePath));
-    QString fileName = util::StdPathToQString(stdEntry.path().filename());
-    auto    fsEntry  = FSEntry(filePath, fileName, stdEntry.file_size(), stdEntry.last_write_time(), stdEntry.is_directory());
+    auto stdEntry = std::filesystem::directory_entry(util::QStringToStdPath(filePath));
+    auto fileName = util::StdPathToQString(stdEntry.path().filename());
+    auto fsEntry  = FSEntry(filePath, fileName, stdEntry.file_size(), stdEntry.last_write_time(), stdEntry.is_directory());
 
     insert_sorted(fileEntryVec, fsEntry, [this, cmp = compareFunction()](FSEntry const &e1, FSEntry const &e2) { return (this->*cmp)(e1, e2); });
     if (!directoryPath().isEmpty()) {

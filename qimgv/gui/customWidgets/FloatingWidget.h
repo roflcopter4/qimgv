@@ -20,7 +20,8 @@ class FloatingWidget : public QWidget
 
   public:
     explicit FloatingWidget(FloatingWidgetContainer *parent);
-    ~FloatingWidget() override;
+    ~FloatingWidget() override = default;
+    DELETE_COPY_MOVE_ROUTINES(FloatingWidget);
 
     ND QSize containerSize() const;
     ND bool  acceptKeyboardFocus() const;
@@ -28,6 +29,9 @@ class FloatingWidget : public QWidget
 
   public Q_SLOTS:
     void hide();
+
+  private Q_SLOTS:
+    void onContainerResized(QSize size);
 
   protected:
     // called whenever container rectangle changes
@@ -42,10 +46,7 @@ class FloatingWidget : public QWidget
 
   private:
     // size of whatever widget we are overlayed on
-    QSize container;
-    bool  mAcceptKeyboardFocus;
-    quint16 destructorCount = 0; 
-
-  private Q_SLOTS:
-    void onContainerResized(QSize size);
+    QSize   container;
+    bool    mAcceptKeyboardFocus = false;
+    quint16 destructorCount      = 0;
 };

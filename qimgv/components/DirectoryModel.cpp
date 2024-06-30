@@ -357,7 +357,7 @@ void DirectoryModel::load(QString const &filePath, bool asyncHint)
     if (!cache->contains(filePath)) {
         if (asyncHint) {
             loader->loadAsyncPriority(filePath);
-        } else if (auto img = loader->load(filePath)) {
+        } else if (auto img = Loader::load(filePath)) {
             cache->insert(img);
             emit imageReady(img, filePath);
         } else {

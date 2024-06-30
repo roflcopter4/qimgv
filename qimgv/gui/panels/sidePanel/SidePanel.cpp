@@ -7,7 +7,7 @@ SidePanel::SidePanel(QWidget *parent)
       mWidget(nullptr)
 {
     ui->setupUi(this);
-    setObjectName(QS("SidePanel"));
+    setObjectName(u"SidePanel"_s);
     hide();
 }
 

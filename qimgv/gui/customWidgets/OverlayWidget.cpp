@@ -3,27 +3,19 @@
 OverlayWidget::OverlayWidget(FloatingWidgetContainer *parent)
     : FloatingWidget(parent),
       opacityEffect(new QGraphicsOpacityEffect(this)),
-      fadeAnimation(new QPropertyAnimation(this, "opacity", this)),
-      mHorizontalMargin(20),
-      mVerticalMargin(35),
-      fadeEnabled(false),
-      position(FloatingWidgetPosition::BOTTOM)
+      fadeAnimation(new QPropertyAnimation(this, "opacity"_ba, this))
 {
     opacityEffect->setOpacity(1.0);
     setGraphicsEffect(opacityEffect);
     fadeAnimation->setDuration(120);
-    fadeAnimation->setStartValue(1.0f);
-    fadeAnimation->setEndValue(0.0f);
+    fadeAnimation->setStartValue(1.0);
+    fadeAnimation->setEndValue(0.0);
     fadeAnimation->setEasingCurve(QEasingCurve::OutQuad);
 
     connect(fadeAnimation, &QPropertyAnimation::finished, this, &QWidget::hide);
 }
 
-OverlayWidget::~OverlayWidget()
-{
-    //delete opacityEffect;
-    //delete fadeAnimation;
-}
+OverlayWidget::~OverlayWidget() = default;
 
 qreal OverlayWidget::opacity() const
 {
@@ -101,6 +93,7 @@ void OverlayWidget::recalculateGeometry()
 {
     QRect  newRect = QRect(QPoint(0, 0), sizeHint());
     QPoint pos(0, 0);
+
     switch (position) {
     case FloatingWidgetPosition::LEFT:
         pos.setX(mHorizontalMargin);
@@ -137,7 +130,9 @@ void OverlayWidget::recalculateGeometry()
     case FloatingWidgetPosition::CENTER:
         pos.setX((containerSize().width() - newRect.width()) / 2);
         pos.setY((containerSize().height() - newRect.height()) / 2);
+        break;
     }
+
     // apply position
     newRect.moveTopLeft(pos);
     setGeometry(newRect);

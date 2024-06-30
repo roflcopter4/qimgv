@@ -10,8 +10,8 @@ CropPanel::CropPanel(CropOverlay *_overlay, QWidget *parent)
     setFocusPolicy(Qt::NoFocus);
     ui->ARcomboBox->setItemDelegate(new QStyledItemDelegate(ui->ARcomboBox));
     ui->ARcomboBox->view()->setTextElideMode(Qt::ElideNone);
-    ui->headerIcon->setIconPath(QS(":/res/icons/common/other/image-crop48.png"));
-    ui->ARcomboBox->setIconPath(QS(":res/icons/common/other/dropDownArrow.png"));
+    ui->headerIcon->setIconPath(u":/res/icons/common/other/image-crop48.png"_s);
+    ui->ARcomboBox->setIconPath(u":res/icons/common/other/dropDownArrow.png"_s);
     hide();
 
     if (settings->defaultCropAction() == DefaultCropAction::CROP)
@@ -112,7 +112,7 @@ void CropPanel::onSelectionChange()
 
 void CropPanel::onAspectRatioChange()
 {
-    ui->ARcomboBox->setCurrentIndex(1); // QS("Custom")
+    ui->ARcomboBox->setCurrentIndex(1); // u"Custom"_s
     if (ui->ARX->value() && ui->ARY->value())
         emit aspectRatioChanged(QPointF(ui->ARX->value(), ui->ARY->value()));
 }

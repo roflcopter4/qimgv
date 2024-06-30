@@ -215,6 +215,21 @@ std::map<uint32_t, InputMap::NativeInputKeyInfo> const InputMap::keyMap = {
     {82,  {82,  KeyCode::Key_0,        u"0"_s}},
     {83,  {83,  KeyCode::Key_Period,   u"."_s}},
 
+    {57372, {57372, KeyCode::Key_Enter,    u"Enter"_s}},
+    {57397, {57397, KeyCode::Key_FwdSlash, u"/"_s}},
+    {57413, {57413, KeyCode::Key_NumLock,  u"NumLock"_s}},
+    {57415, {57424, KeyCode::Key_Home,     u"Home"_s}},
+    {57416, {57423, KeyCode::Key_Up,       u"Up"_s}},
+    {57417, {57419, KeyCode::Key_PgUp,     u"PgUp"_s}},
+    {57419, {57417, KeyCode::Key_Left,     u"Left"_s}},
+    {57421, {57426, KeyCode::Key_Right,    u"Right"_s}},
+    {57423, {57416, KeyCode::Key_End,      u"End"_s}},
+    {57424, {57415, KeyCode::Key_Down,     u"Down"_s}},
+    {57425, {57425, KeyCode::Key_PgDown,   u"PgDown"_s}},
+    {57426, {57421, KeyCode::Key_Ins,      u"Ins"_s}},
+    {57427, {57437, KeyCode::Key_Del,      u"Del"_s}},
+    {57437, {57427, KeyCode::Key_Menu,     u"Menu"_s}},
+
 #elif defined Q_OS_LINUX
    // Row 1
    {9,   {9,   KeyCode::Key_Esc,        u"Esc"_s}},

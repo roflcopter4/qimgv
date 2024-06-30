@@ -8,21 +8,21 @@ MainPanel::MainPanel(FloatingWidgetContainer *parent)
 {
     // buttons stuff
     
-    buttonsWidget->setAccessibleName(QS("panelButtonsWidget"));
-    openButton = new ActionButton(QS("open"), QS(":res/icons/common/buttons/panel/open20.png"), 30, this);
-    openButton->setAccessibleName(QS("ButtonSmall"));
+    buttonsWidget->setAccessibleName(u"panelButtonsWidget"_s);
+    openButton = new ActionButton(u"open"_s, u":res/icons/common/buttons/panel/open20.png"_s, 30, this);
+    openButton->setAccessibleName(u"ButtonSmall"_s);
     openButton->setTriggerMode(TriggerMode::Press);
-    settingsButton = new ActionButton(QS("openSettings"), QS(":res/icons/common/buttons/panel/settings20.png"), 30, this);
-    settingsButton->setAccessibleName(QS("ButtonSmall"));
+    settingsButton = new ActionButton(u"openSettings"_s, u":res/icons/common/buttons/panel/settings20.png"_s, 30, this);
+    settingsButton->setAccessibleName(u"ButtonSmall"_s);
     settingsButton->setTriggerMode(TriggerMode::Press);
-    exitButton = new ActionButton(QS("exit"), QS(":res/icons/common/buttons/panel/close16.png"), 30, this);
-    exitButton->setAccessibleName(QS("ButtonSmall"));
+    exitButton = new ActionButton(u"exit"_s, u":res/icons/common/buttons/panel/close16.png"_s, 30, this);
+    exitButton->setAccessibleName(u"ButtonSmall"_s);
     exitButton->setTriggerMode(TriggerMode::Press);
-    folderViewButton = new ActionButton(QS("folderView"), QS(":res/icons/common/buttons/panel/folderview20.png"), 30, this);
-    folderViewButton->setAccessibleName(QS("ButtonSmall"));
+    folderViewButton = new ActionButton(u"folderView"_s, u":res/icons/common/buttons/panel/folderview20.png"_s, 30, this);
+    folderViewButton->setAccessibleName(u"ButtonSmall"_s);
     folderViewButton->setTriggerMode(TriggerMode::Press);
-    pinButton = new ActionButton(QS(""), QS(":res/icons/common/buttons/panel/pin-panel20.png"), 30, this);
-    pinButton->setAccessibleName(QS("ButtonSmall"));
+    pinButton = new ActionButton(u""_s, u":res/icons/common/buttons/panel/pin-panel20.png"_s, 30, this);
+    pinButton->setAccessibleName(u"ButtonSmall"_s);
     pinButton->setTriggerMode(TriggerMode::Press);
     pinButton->setCheckable(true);
     connect(pinButton, &ActionButton::toggled, this, &MainPanel::onPinClicked);

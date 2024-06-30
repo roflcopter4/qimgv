@@ -380,7 +380,7 @@ QString Settings::supportedFormatsRegex() const
 {
     QString           filter;
     QList<QByteArray> formats = supportedFormats();
-    filter.append(u".*\\.("_sv);
+    filter.append(u".*\\.(?:"_sv);
     for (auto &fmt : formats)
         filter.append(QString::fromUtf8(fmt) + u'|');
     filter.chop(1);

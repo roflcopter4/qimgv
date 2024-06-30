@@ -31,20 +31,20 @@ void FileReplaceDialog::setMode(FileReplaceMode mode)
 {
     switch (mode) {
     case FileReplaceMode::FILE_TO_FILE:
-        setWindowTitle(QS("File already exists"));
-        ui->titleLabel->setText(QS("Replace destination file?"));
+        setWindowTitle(u"File already exists"_s);
+        ui->titleLabel->setText(u"Replace destination file?"_s);
         break;
     case FileReplaceMode::DIR_TO_DIR:
-        setWindowTitle(QS("Directory already exists"));
-        ui->titleLabel->setText(QS("Merge directories?"));
+        setWindowTitle(u"Directory already exists"_s);
+        ui->titleLabel->setText(u"Merge directories?"_s);
         break;
     case FileReplaceMode::DIR_TO_FILE:
-        setWindowTitle(QS("Destination already exists"));
-        ui->titleLabel->setText(QS("There is a file with that name. Replace?"));
+        setWindowTitle(u"Destination already exists"_s);
+        ui->titleLabel->setText(u"There is a file with that name. Replace?"_s);
         break;
     case FileReplaceMode::FILE_TO_DIR:
-        setWindowTitle(QS("Destination already exists"));
-        ui->titleLabel->setText(QS("There is a folder with that name. Replace?"));
+        setWindowTitle(u"Destination already exists"_s);
+        ui->titleLabel->setText(u"There is a folder with that name. Replace?"_s);
         break;
     }
 }

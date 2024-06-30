@@ -10,7 +10,7 @@
 #include <QPropertyAnimation>
 #include <QDebug>
 
-enum class FloatingWidgetPosition {
+enum class FloatingWidgetPosition : uint8_t {
     LEFT,
     RIGHT,
     BOTTOM,
@@ -30,9 +30,7 @@ class OverlayWidget : public FloatingWidget
   public:
     explicit OverlayWidget(FloatingWidgetContainer *parent);
     ~OverlayWidget() override;
-
-    ND int horizontalMargin() const;
-    ND int verticalMargin() const;
+    DELETE_COPY_MOVE_ROUTINES(OverlayWidget);
 
     void setHorizontalMargin(int);
     void setVerticalMargin(int);
@@ -40,25 +38,28 @@ class OverlayWidget : public FloatingWidget
     void setFadeDuration(int duration);
     void setFadeEnabled(bool mode);
 
-  public slots:
+    ND int horizontalMargin() const;
+    ND int verticalMargin() const;
+
+  public Q_SLOTS:
     void show();
     void hide();
     void hideAnimated();
 
-  private:
-    QGraphicsOpacityEffect *opacityEffect;
-    QPropertyAnimation     *fadeAnimation;
-
-    int  mHorizontalMargin;
-    int  mVerticalMargin;
-    bool fadeEnabled;
-
-  private slots:
+  private Q_SLOTS:
     void setOpacity(qreal opacity);
     ND qreal opacity() const;
 
   protected:
     void recalculateGeometry() override;
 
-    FloatingWidgetPosition position;
+  private:
+    QGraphicsOpacityEffect *opacityEffect;
+    QPropertyAnimation     *fadeAnimation;
+
+    int  mHorizontalMargin = 20;
+    int  mVerticalMargin   = 35;
+    bool fadeEnabled       = false;
+
+    FloatingWidgetPosition position = FloatingWidgetPosition::BOTTOM;
 };

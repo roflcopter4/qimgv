@@ -38,8 +38,8 @@ void ColorSelectorButton::paintEvent(QPaintEvent *e)
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
     if (!isEnabled())
-        p.setOpacity(0.5f);
+        p.setOpacity(0.5);
     p.setPen(QColor(40, 40, 40));
-    p.drawRect(QRectF(0.5f, 0.5f, width() - 1.0f, height() - 1.0f));
+    p.drawRect(QRectF(0.5, 0.5, width() - 1.0, height() - 1.0));
     p.fillRect(rect().adjusted(2, 2, -2, -2), mColor);
 }

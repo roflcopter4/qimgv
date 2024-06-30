@@ -184,11 +184,9 @@ FlowLayout::GridInfo FlowLayout::doLayout(QRectF const &geom, bool applyNewGeome
         // calculate offset for centering
         qreal const itemWidth = m_items[0]->effectiveSizeHint(Qt::PreferredSize).width();
         auto const  maxCols   = static_cast<qsizetype>(maxRowWidth / itemWidth);
-
         if (m_items.count() >= maxCols)
             centerOffset = static_cast<qsizetype>(fmod(maxRowWidth, itemWidth) / 2);
-        QGraphicsLayoutItem *item = m_items[0];
-        itemSize                  = item->effectiveSizeHint(Qt::PreferredSize);
+        itemSize = m_items[0]->effectiveSizeHint(Qt::PreferredSize);
     }
 
     for (qsizetype i = 0; i < m_items.count(); ++i) {
@@ -206,7 +204,7 @@ FlowLayout::GridInfo FlowLayout::doLayout(QRectF const &geom, bool applyNewGeome
             y += itemSize.height() + spacing(Qt::Vertical);
         }
         if (applyNewGeometry)
-            m_items[i]->setGeometry(QRectF(QPointF(leftMargin + x + static_cast<qreal>(centerOffset), topMargin + y), itemSize));
+            m_items[i]->setGeometry({{leftMargin + x + static_cast<qreal>(centerOffset), topMargin + y}, itemSize});
         x = next_x + spacing(Qt::Horizontal);
     }
 

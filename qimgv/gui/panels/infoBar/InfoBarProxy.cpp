@@ -5,7 +5,7 @@ InfoBarProxy::InfoBarProxy(QWidget *parent)
       infoBar(nullptr),
       layout(new QVBoxLayout(this))
 {
-    setAccessibleName(QS("InfoBarProxy"));
+    setAccessibleName(u"InfoBarProxy"_s);
     setMinimumHeight(23);
     setMaximumHeight(23);
     layout->setContentsMargins(0, 0, 0, 0);

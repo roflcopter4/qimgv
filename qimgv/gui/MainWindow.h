@@ -42,20 +42,6 @@
 #include <KWindowEffects>
 #endif
 
-struct CurrentInfo {
-    qsizetype index;
-    qsizetype fileCount;
-    QString   fileName;
-    QString   filePath;
-    QString   directoryName;
-    QString   directoryPath;
-    QSize     imageSize;
-    qint64    fileSize;
-    bool      slideshow;
-    bool      shuffle;
-    bool      edited;
-};
-
 enum class ActiveSidePanel : uint8_t {
     NONE,
     CROP,
@@ -64,6 +50,20 @@ enum class ActiveSidePanel : uint8_t {
 class MW final : public FloatingWidgetContainer
 {
     Q_OBJECT
+
+    struct CurrentInfo {
+        QString   fileName;
+        QString   filePath;
+        QString   directoryName;
+        QString   directoryPath;
+        QSize     imageSize = {0, 0};
+        qsizetype index     = 0;
+        qsizetype fileCount = 0;
+        qint64    fileSize  = 0;
+        bool      slideshow = false;
+        bool      shuffle   = false;
+        bool      edited    = false;
+    };
 
   public:
     explicit MW(QWidget *parent);
@@ -74,11 +74,11 @@ class MW final : public FloatingWidgetContainer
     void showImage(std::unique_ptr<QPixmap> pixmap);
     void showAnimation(QSharedPointer<QMovie> const &movie);
     void showVideo(QString const &file);
-    bool showConfirmation(QString const &title, QString const &msg);
+    bool showConfirmation(QString const &title, QString const &msg, QMessageBox::StandardButton defaultButton = QMessageBox::Yes);
     void setExifInfo(QMap<QString, QString> const &);
 
     void setCurrentInfo(qsizetype fileIndex, qsizetype fileCount,
-                        QString const &filePath, QString const &fileName,
+                        QString filePath, QString fileName,
                         QSize imageSize, qint64 fileSize,
                         bool slideshow, bool shuffle, bool edited);
 
@@ -233,7 +233,6 @@ class MW final : public FloatingWidgetContainer
     bool showInfoBarFullscreen : 1 = false;
     bool showInfoBarWindowed   : 1 = false;
     bool maximized             : 1 = false;
-    bool unused_               : 4 = false;
 
     PanelPosition   panelPosition   = PanelPosition::TOP;
     ActiveSidePanel activeSidePanel = ActiveSidePanel::NONE;

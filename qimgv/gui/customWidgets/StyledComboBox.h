@@ -10,6 +10,8 @@ class StyledComboBox : public QComboBox
 {
   public:
     explicit StyledComboBox(QWidget *parent = nullptr);
+    ~StyledComboBox() override;
+
     void setIconPath(QString path);
 
   protected:
@@ -20,8 +22,8 @@ class StyledComboBox : public QComboBox
     void onSettingsChanged();
 
   private:
-    bool    hiResPixmap;
     QPixmap downArrow;
     qreal   dpr;
     qreal   pixmapDrawScale;
+    bool    hiResPixmap;
 };

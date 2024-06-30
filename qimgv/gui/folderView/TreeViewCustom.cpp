@@ -14,7 +14,7 @@ TreeViewCustom::TreeViewCustom(QWidget *parent)
 
     connect(verticalScrollBar(), &QScrollBar::rangeChanged, &overlayScrollbar, &QScrollBar::setRange);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, &overlayScrollbar, &QScrollBar::setValue);
-    connect(&overlayScrollbar, &QScrollBar::valueChanged, this, &TreeViewCustom::onValueChanged);
+    connect(&overlayScrollbar,   &QScrollBar::valueChanged, this,              &TreeViewCustom::onValueChanged);
 }
 
 void TreeViewCustom::dropEvent(QDropEvent *event)
@@ -53,8 +53,7 @@ void TreeViewCustom::leaveEvent(QEvent *event)
 
 QSize TreeViewCustom::minimumSizeHint() const
 {
-    QSize sz(QTreeView::minimumSizeHint().width(), 0);
-    return sz;
+    return {QTreeView::minimumSizeHint().width(), 0};
 }
 
 void TreeViewCustom::resizeEvent(QResizeEvent *event)
@@ -65,18 +64,15 @@ void TreeViewCustom::resizeEvent(QResizeEvent *event)
 
 void TreeViewCustom::updateScrollbarStyle()
 {
-    QString handle;
-    QString hover = settings->colorScheme().scrollbar_hover.name();
-
-    if (rect().contains(mapFromGlobal(QCursor::pos())))
-        handle = settings->colorScheme().scrollbar.name();
-    else
-        handle = settings->colorScheme().folderview_hc.name();
+    QString hover  = settings->colorScheme().scrollbar_hover.name();
+    QString handle = rect().contains(mapFromGlobal(QCursor::pos())) ? settings->colorScheme().scrollbar.name()
+                                                                    : settings->colorScheme().folderview_hc.name();
 
     overlayScrollbar.setGeometry(width() - SCROLLBAR_WIDTH, 0, SCROLLBAR_WIDTH, height());
     overlayScrollbar.setStyleSheet(
-        u"QScrollBar { background-color: transparent; } QScrollBar::handle:vertical { background-color: " +
-        handle + u" } QScrollBar::handle:vertical:hover { background-color: " + hover + u" }");
+        u"QScrollBar { background-color: transparent; } "
+        u"QScrollBar::handle:vertical { background-color: " + handle + u" } "
+        u"QScrollBar::handle:vertical:hover { background-color: " + hover + u" }");
 
     overlayScrollbar.setVisible(verticalScrollBar()->maximum());
 }
@@ -89,7 +85,6 @@ void TreeViewCustom::onValueChanged()
 void TreeViewCustom::keyPressEvent(QKeyEvent *event)
 {
     QModelIndex index = currentIndex();
-
     if (index.isValid()) {
         switch (event->key()) {
         case Qt::Key_Space:
@@ -104,6 +99,6 @@ void TreeViewCustom::keyPressEvent(QKeyEvent *event)
             break;
         }
     } else {
-            QTreeView::keyPressEvent(event);
+        QTreeView::keyPressEvent(event);
     }
 }

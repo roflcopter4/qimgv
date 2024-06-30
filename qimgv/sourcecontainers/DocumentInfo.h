@@ -35,7 +35,6 @@ class DocumentInfo
 {
   public:
     explicit DocumentInfo(QString const &path);
-    ~DocumentInfo() = default;
 
     ND QString      directoryPath() const;
     ND QString      filePath() const;
@@ -54,11 +53,6 @@ class DocumentInfo
     void loadExifTags();
 
     QMap<QString, QString> getExifTags();
-
-    DocumentInfo(DocumentInfo const &)            = default;
-    DocumentInfo(DocumentInfo &&)                 = default;
-    DocumentInfo &operator=(DocumentInfo const &) = default;
-    DocumentInfo &operator=(DocumentInfo &&)      = default;
 
   private:
     QFileInfo    fileInfo;

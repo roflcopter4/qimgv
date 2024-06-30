@@ -11,9 +11,10 @@ class ColorSelectorButton : public ClickableLabel
   public:
     explicit ColorSelectorButton(QWidget *parent = nullptr);
 
-    void   setColor(QColor const &newColor);
-    QColor color() const;
-    void   setDescription(QString const &text);
+    void setColor(QColor const &newColor);
+    void setDescription(QString const &text);
+
+    ND QColor color() const;
 
   protected:
     void paintEvent(QPaintEvent *e) override;

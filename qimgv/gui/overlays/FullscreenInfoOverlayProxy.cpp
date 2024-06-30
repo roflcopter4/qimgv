@@ -3,8 +3,7 @@
 FullscreenInfoOverlayProxy::FullscreenInfoOverlayProxy(FloatingWidgetContainer *parent)
     : container(parent),
       infoOverlay(nullptr)
-{
-}
+{}
 
 FullscreenInfoOverlayProxy::~FullscreenInfoOverlayProxy()
 #if 0

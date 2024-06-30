@@ -5,17 +5,20 @@
 #include "gui/panels/mainPanel/MainPanel.h"
 #include "gui/viewers/ViewerWidget.h"
 #include <QBoxLayout>
+#include <QObject>
 #include <memory>
 
 // TODO: use a template here?
 
 class DocumentWidget : public FloatingWidgetContainer
 {
+    Q_OBJECT
+
   public:
     DocumentWidget(ViewerWidget *viewWidget, InfoBarProxy *infoBar, QWidget *parent);
     ~DocumentWidget() override;
 
-    ND ViewerWidget        *viewWidget();
+    ND ViewerWidget        *viewWidget() const;
     ND ThumbnailStripProxy *thumbPanel() const;
 
     ND bool panelEnabled() const;
@@ -48,11 +51,11 @@ class DocumentWidget : public FloatingWidgetContainer
     InfoBarProxy *mInfoBar;
     MainPanel    *mainPanel;
 
-    bool avoidPanelFlag       : 1 = false;
+    bool mAllowPanelInit      : 1 = false;
+    bool mAvoidPanelFlag      : 1 = false;
+    bool mInteractionEnabled  : 1 = false;
+    bool mIsFullscreen        : 1 = false;
     bool mPanelEnabled        : 1 = false;
     bool mPanelFullscreenOnly : 1 = false;
-    bool mIsFullscreen        : 1 = false;
     bool mPanelPinned         : 1 = false;
-    bool mInteractionEnabled  : 1 = false;
-    bool mAllowPanelInit      : 1 = false;
 };

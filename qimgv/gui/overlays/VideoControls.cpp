@@ -1,21 +1,21 @@
 #include "VideoControls.h"
 #include "ui_VideoControls.h"
 
-VideoControls::VideoControls(FloatingWidgetContainer *parent) :
-    OverlayWidget(parent),
-    ui(new Ui::VideoControls)
+VideoControls::VideoControls(FloatingWidgetContainer *parent)
+    : OverlayWidget(parent),
+      ui(new Ui::VideoControls)
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_NoMousePropagation, true);
     hide();
-    ui->pauseButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/play24.png"));
-    ui->pauseButton->setAction(QS("pauseVideo"));
-    ui->prevFrameButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/skip-backwards24.png"));
-    ui->prevFrameButton->setAction(QS("frameStepBack"));
-    ui->nextFrameButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/skip-forward24.png"));
-    ui->nextFrameButton->setAction(QS("frameStep"));
-    ui->muteButton->setIconPath(QS(":/res/icons/common/buttons/videocontrols/mute-on24.png"));
-    ui->muteButton->setAction(QS("toggleMute"));
+    ui->pauseButton->setIconPath(u":res/icons/common/buttons/videocontrols/play24.png"_s);
+    ui->pauseButton->setAction(u"pauseVideo"_s);
+    ui->prevFrameButton->setIconPath(u":res/icons/common/buttons/videocontrols/skip-backwards24.png"_s);
+    ui->prevFrameButton->setAction(u"frameStepBack"_s);
+    ui->nextFrameButton->setIconPath(u":res/icons/common/buttons/videocontrols/skip-forward24.png"_s);
+    ui->nextFrameButton->setAction(u"frameStep"_s);
+    ui->muteButton->setIconPath(u":/res/icons/common/buttons/videocontrols/mute-on24.png"_s);
+    ui->muteButton->setAction(u"toggleMute"_s);
 
     lastPosition = -1;
 
@@ -24,38 +24,41 @@ VideoControls::VideoControls(FloatingWidgetContainer *parent) :
 
     connect(ui->seekBar, &VideoSlider::sliderMovedX, this, &VideoControls::seek);
 
-    if(parent)
+    if (parent)
         setContainerSize(parent->size());
 }
 
-void VideoControls::readSettings() {
-    if(settings->panelEnabled() && settings->panelPosition() == PanelPosition::BOTTOM)
+void VideoControls::readSettings()
+{
+    if (settings->panelEnabled() && settings->panelPosition() == PanelPosition::BOTTOM)
         setPosition(FloatingWidgetPosition::TOP);
     else
         setPosition(FloatingWidgetPosition::BOTTOM);
 }
 
-VideoControls::~VideoControls() {
+VideoControls::~VideoControls()
+{
     delete ui;
 }
 
-void VideoControls::setMode(PlaybackMode _mode) {
+void VideoControls::setMode(PlaybackMode _mode)
+{
     mode = _mode;
-    ui->muteButton->setVisible( (mode == PlaybackMode::VIDEO) );
+    ui->muteButton->setVisible((mode == PlaybackMode::VIDEO));
 }
 
-void VideoControls::setPlaybackDuration(int duration) {
+void VideoControls::setPlaybackDuration(int duration)
+{
     QString durationStr;
-    if(mode == PlaybackMode::VIDEO) {
-        int _time = duration;
-        int hours = _time / 3600;
-        _time -= hours * 3600;
-        int minutes = _time / 60;
-        int seconds = _time - minutes * 60;
-        durationStr = QS("%1").arg(minutes, 2, 10, QChar(u'0')) + u':' +
-                      QS("%1").arg(seconds, 2, 10, QChar(u'0'));
-        if(hours)
-            durationStr.prepend(QS("%1").arg(hours, 2, 10, QChar(u'0')) + u':');
+    if (mode == PlaybackMode::VIDEO) {
+        int time  = duration;
+        int hours = time / 3600;
+        time -= hours * 3600;
+        int minutes = time / 60;
+        int seconds = time - minutes * 60;
+        durationStr = u"%1"_s.arg(minutes, 2, 10, QChar(u'0')) + u':' + u"%1"_s.arg(seconds, 2, 10, QChar(u'0'));
+        if (hours)
+            durationStr.prepend(u"%1"_s.arg(hours, 2, 10, QChar(u'0')) + u':');
     } else {
         durationStr = QString::number(duration);
     }
@@ -63,23 +66,23 @@ void VideoControls::setPlaybackDuration(int duration) {
     ui->durationLabel->setText(durationStr);
     ui->positionLabel->setText(durationStr);
     recalculateGeometry();
-    ui->positionLabel->setText(QS(""));
+    ui->positionLabel->setText(u""_s);
 }
 
-void VideoControls::setPlaybackPosition(int Position) {
-    if(Position == lastPosition)
+void VideoControls::setPlaybackPosition(int Position)
+{
+    if (Position == lastPosition)
         return;
     QString positionStr;
-    if(mode == PlaybackMode::VIDEO) {
-        int _time = Position;
-        int hours = _time / 3600;
-        _time -= hours * 3600;
-        int minutes = _time / 60;
-        int seconds = _time - minutes * 60;
-        positionStr = QS("%1").arg(minutes, 2, 10, QChar(u'0')) + u':' +
-                      QS("%1").arg(seconds, 2, 10, QChar(u'0'));
-        if(hours)
-            positionStr.prepend(QS("%1").arg(hours, 2, 10, QChar(u'0')) + u':');
+    if (mode == PlaybackMode::VIDEO) {
+        int time  = Position;
+        int hours = time / 3600;
+        time -= hours * 3600;
+        int minutes = time / 60;
+        int seconds = time - minutes * 60;
+        positionStr = u"%1"_s.arg(minutes, 2, 10, QChar(u'0')) + u':' + u"%1"_s.arg(seconds, 2, 10, QChar(u'0'));
+        if (hours)
+            positionStr.prepend(u"%1"_s.arg(hours, 2, 10, QChar(u'0')) + u':');
     } else {
         positionStr = QString::number(Position + 1);
     }
@@ -90,16 +93,18 @@ void VideoControls::setPlaybackPosition(int Position) {
     lastPosition = Position;
 }
 
-void VideoControls::onPlaybackPaused(bool newMode) {
-    if(newMode)
-        ui->pauseButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/play24.png"));
+void VideoControls::onPlaybackPaused(bool newMode)
+{
+    if (newMode)
+        ui->pauseButton->setIconPath(u":res/icons/common/buttons/videocontrols/play24.png"_s);
     else
-        ui->pauseButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/pause24.png"));
+        ui->pauseButton->setIconPath(u":res/icons/common/buttons/videocontrols/pause24.png"_s);
 }
 
-void VideoControls::onVideoMuted(bool newMode) {
-    if(newMode)
-        ui->muteButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/mute-on24.png"));
+void VideoControls::onVideoMuted(bool newMode)
+{
+    if (newMode)
+        ui->muteButton->setIconPath(u":res/icons/common/buttons/videocontrols/mute-on24.png"_s);
     else
-        ui->muteButton->setIconPath(QS(":res/icons/common/buttons/videocontrols/mute-off24.png"));
+        ui->muteButton->setIconPath(u":res/icons/common/buttons/videocontrols/mute-off24.png"_s);
 }

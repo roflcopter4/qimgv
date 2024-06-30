@@ -14,9 +14,12 @@
 
 class VideoPlayerInitProxy : public VideoPlayer
 {
+    Q_OBJECT
+
   public:
     explicit VideoPlayerInitProxy(QWidget *parent = nullptr);
     ~VideoPlayerInitProxy() override;
+    DELETE_COPY_MOVE_ROUTINES(VideoPlayerInitProxy);
 
     bool showVideo(QString const &file) override;
     void seek(int pos) override;
@@ -27,41 +30,40 @@ class VideoPlayerInitProxy : public VideoPlayer
     void stop() override;
     void setPaused(bool mode) override;
     void setMuted(bool) override;
-
-    [[nodiscard]] bool muted() const override;
-
     void volumeUp() override;
     void volumeDown() override;
     void setVolume(int) override;
-
-    [[nodiscard]] int volume() const override;
-
     void setVideoUnscaled(bool mode) override;
     void setLoopPlayback(bool mode) override;
-    bool isInitialized() const;
 
-    QSharedPointer<VideoPlayer> getPlayer();
+    ND bool muted() const override;
+    ND int volume() const override;
 
-  public Q_SLOTS:
-    void show() override;
-    void hide() override;
+    ND bool isInitialized() const;
+    ND auto getPlayer() -> QSharedPointer<VideoPlayer>;
 
   protected:
     void paintEvent(QPaintEvent *event) override;
 
   private:
-    QSharedPointer<VideoPlayer> player;
-    QString     libFile;
-    QStringList libDirs;
-    QLibrary    playerLib;
-    QVBoxLayout *layout;
-    QLabel     *errorLabel = nullptr;
-
     bool initPlayer();
+
+  public Q_SLOTS:
+    void show() override;
+    void hide() override;
 
   private Q_SLOTS:
     void onSettingsChanged();
 
   Q_SIGNALS:
     void playbackFinished();
+
+  private:
+    QSharedPointer<VideoPlayer> player;
+
+    QVBoxLayout *layout;
+    QLabel      *errorLabel;
+    QString     libFile;
+    QStringList libDirs;
+    QLibrary    playerLib;
 };

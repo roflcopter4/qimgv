@@ -96,7 +96,8 @@ void MapOverlay::MapOverlayPrivate::moveMainImage(qreal xPos, qreal yPos)
 MapOverlay::MapOverlay(QWidget *parent)
     : QWidget(parent),
       d(new MapOverlayPrivate(this)),
-      visibilityEnabled(true)
+      visibilityEnabled(true),
+      imageDoesNotFit(false)
 {
     setMouseTracking(true);
 
@@ -145,7 +146,7 @@ void MapOverlay::setOpacity(qreal opacity)
 void MapOverlay::animateVisible(bool isVisible)
 {
     if (isVisible) {
-        setOpacity(1.0f);
+        setOpacity(1.0);
     } else {
         d->opacityAnimation->setEndValue(1.0f * isVisible);
 

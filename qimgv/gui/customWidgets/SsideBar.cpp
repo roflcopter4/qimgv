@@ -1,30 +1,34 @@
 #include "SsideBar.h"
 
-SSideBar::SSideBar(QWidget *parent) : QWidget{parent} {
-    layout = new QBoxLayout(QBoxLayout::TopToBottom);
+SSideBar::SSideBar(QWidget *parent)
+    : QWidget{parent},
+      layout(new QBoxLayout(QBoxLayout::TopToBottom))
+{
     layout->setSpacing(0);
-    layout->setContentsMargins(8,8,9,9);
+    layout->setContentsMargins(8, 8, 9, 9);
     layout->addStretch();
     setLayout(layout);
-    addEntry(QS(":res/icons/common/settings/general32.png"),    tr("General"));
-    addEntry(QS(":res/icons/common/settings/view32.png"),       tr("View"));
-    addEntry(QS(":res/icons/common/settings/appearance32.png"), tr("Theme"));
-    addEntry(QS(":res/icons/common/settings/shortcuts32.png"),  tr("Controls"));
-    addEntry(QS(":res/icons/common/settings/terminal32.png"),   tr("Scripts"));
-    addEntry(QS(":res/icons/common/settings/advanced32.png"),   tr("Advanced"));
-    addEntry(QS(":res/icons/common/settings/about32.png"),      tr("About"));
+    addEntry(u":res/icons/common/settings/general32.png"_s, tr("General"));
+    addEntry(u":res/icons/common/settings/view32.png"_s, tr("View"));
+    addEntry(u":res/icons/common/settings/appearance32.png"_s, tr("Theme"));
+    addEntry(u":res/icons/common/settings/shortcuts32.png"_s, tr("Controls"));
+    addEntry(u":res/icons/common/settings/terminal32.png"_s, tr("Scripts"));
+    addEntry(u":res/icons/common/settings/advanced32.png"_s, tr("Advanced"));
+    addEntry(u":res/icons/common/settings/about32.png"_s, tr("About"));
 }
 
-void SSideBar::addEntry(QString const &icon, QString const &name) {
-    SSideBarItem *entry = new SSideBarItem(icon, name);
-    layout->insertWidget(entries.count(), entry);
+void SSideBar::addEntry(QString const &icon, QString const &name)
+{
+    auto entry = new SSideBarItem(icon, name);
+    layout->insertWidget(static_cast<int>(entries.count()), entry);
     entries.append(entry);
-    if(entries.count() == 1)
+    if (entries.count() == 1)
         selectEntry(0);
 }
 
-void SSideBar::selectEntry(qsizetype idx) {
-    if(idx >= 0 && idx < entries.count()) {
+void SSideBar::selectEntry(qsizetype idx)
+{
+    if (idx >= 0 && idx < entries.count()) {
         for (auto entry : entries)
             entry->setHighlighted(false);
         entries[idx]->setHighlighted(true);
@@ -32,26 +36,28 @@ void SSideBar::selectEntry(qsizetype idx) {
     }
 }
 
-void SSideBar::mousePressEvent(QMouseEvent *event) {
+void SSideBar::mousePressEvent(QMouseEvent *event)
+{
     event->accept();
-    if(!(event->buttons() & Qt::LeftButton))
-        return;
-    selectEntryAt(event->pos());
-
-}
-
-void SSideBar::mouseMoveEvent(QMouseEvent *event) {
-    event->accept();
-    if(!(event->buttons() & Qt::LeftButton))
+    if (!(event->buttons() & Qt::LeftButton))
         return;
     selectEntryAt(event->pos());
 }
 
-void SSideBar::selectEntryAt(QPoint pos) {
+void SSideBar::mouseMoveEvent(QMouseEvent *event)
+{
+    event->accept();
+    if (!(event->buttons() & Qt::LeftButton))
+        return;
+    selectEntryAt(event->pos());
+}
+
+void SSideBar::selectEntryAt(QPoint pos)
+{
     qsizetype newSelection = -1;
-    for(qsizetype i = 0; i < entries.count(); ++i) {
-        if(entries[i]->geometry().contains(pos)) {
-            if(!entries[i]->highlighted())
+    for (qsizetype i = 0; i < entries.count(); ++i) {
+        if (entries[i]->geometry().contains(pos)) {
+            if (!entries[i]->highlighted())
                 newSelection = i;
             break;
         }
@@ -59,7 +65,8 @@ void SSideBar::selectEntryAt(QPoint pos) {
     selectEntry(newSelection);
 }
 
-void SSideBar::paintEvent(QPaintEvent *event) {
+void SSideBar::paintEvent(QPaintEvent *event)
+{
     Q_UNUSED(event)
     QStyleOption opt;
     opt.initFrom(this);
@@ -69,7 +76,9 @@ void SSideBar::paintEvent(QPaintEvent *event) {
 
 // -------------------------------------------------------------------
 
-SSideBarItem::SSideBarItem(QString const &icon, QString const &name, QWidget *parent) : QWidget{parent}
+SSideBarItem::SSideBarItem(QString const &icon, QString const &name, QWidget *parent)
+    : QWidget{parent},
+      layout(new QBoxLayout(QBoxLayout::LeftToRight))
 {
     QPalette p;
     if (p.base().color().valueF() <= 0.45f)
@@ -78,7 +87,7 @@ SSideBarItem::SSideBarItem(QString const &icon, QString const &name, QWidget *pa
         iconWidget.setColor(QColor(70, 70, 70));
     iconWidget.setIconPath(icon);
     textLabel.setText(name);
-    layout = new QBoxLayout(QBoxLayout::LeftToRight);
+
     layout->setContentsMargins(6, 4, 6, 4);
     layout->setSpacing(7);
     layout->addWidget(&iconWidget);
@@ -88,7 +97,8 @@ SSideBarItem::SSideBarItem(QString const &icon, QString const &name, QWidget *pa
     setMouseTracking(true);
 }
 
-void SSideBarItem::setHighlighted(bool mode) {
+void SSideBarItem::setHighlighted(bool mode)
+{
     mHighlighted = mode;
     setProperty("checked", mHighlighted);
     style()->unpolish(this);
@@ -100,7 +110,8 @@ bool SSideBarItem::highlighted() const
     return mHighlighted;
 }
 
-void SSideBarItem::paintEvent(QPaintEvent *event) {
+void SSideBarItem::paintEvent(QPaintEvent *event)
+{
     Q_UNUSED(event)
     QStyleOption opt;
     opt.initFrom(this);

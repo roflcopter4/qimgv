@@ -18,7 +18,7 @@ ResizeDialog::ResizeDialog(QSize initialSize, QWidget *parent)
 
     ui->resetButton->setText(tr("Reset:") + u' ' +
                              QString::number(initialSize.width()) +
-                             QS(" x ") +
+                             u" x " +
                              QString::number(initialSize.height()));
 
     desktopSize = qApp->primaryScreen()->size();

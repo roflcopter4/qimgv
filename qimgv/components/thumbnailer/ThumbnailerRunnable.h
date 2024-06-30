@@ -19,7 +19,6 @@ class ThumbnailerRunnable : public QObject, public QRunnable
 
   public:
     ThumbnailerRunnable(ThumbnailCache *cache, QString path, int size, bool crop, bool force);
-    ~ThumbnailerRunnable() override;
 
     void run() override;
 
@@ -27,16 +26,17 @@ class ThumbnailerRunnable : public QObject, public QRunnable
 
   private:
     static auto generateIdString(QString const &path, int size, bool crop) -> QString;
-    static auto createThumbnail(QString const &path, const char *format, int size, bool crop) -> std::pair<QImage *, QSize>;
+    static auto createThumbnail(QString const &path, char const *format, int size, bool crop) -> std::pair<QImage *, QSize>;
     static auto createVideoThumbnail(QString const &path, int size, bool crop) -> std::pair<QImage *, QSize>;
 
+  Q_SIGNALS:
+    void taskStart(QString, int);
+    void taskEnd(QSharedPointer<Thumbnail>, QString);
+
+  private:
     ThumbnailCache *cache = nullptr;
     QString path;
     int     size;
     bool    crop;
     bool    force;
-
-  Q_SIGNALS:
-    void taskStart(QString, int);
-    void taskEnd(QSharedPointer<Thumbnail>, QString);
 };

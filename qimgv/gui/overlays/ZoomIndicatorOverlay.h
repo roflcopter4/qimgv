@@ -2,26 +2,28 @@
 
 #include "gui/customWidgets/OverlayWidget.h"
 #include <QApplication>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QTimer>
-#include <QHBoxLayout>
 
-class ZoomIndicatorOverlay : public OverlayWidget {
+class ZoomIndicatorOverlay : public OverlayWidget
+{
     Q_OBJECT
-public:
+
+  public:
     explicit ZoomIndicatorOverlay(FloatingWidgetContainer *parent = nullptr);
 
     void setScale(qreal scale);
     void show();
     void show(int duration);
-protected:
+
+  protected:
     void recalculateGeometry() override;
 
-private:
+  private:
     std::unique_ptr<QFontMetrics> fm;
     QHBoxLayout *layout;
-    QLabel label;
-    QTimer visibilityTimer;
-    int hideDelay;
+    QLabel       label;
+    QTimer       visibilityTimer;
+    int          hideDelay = 2000;
 };
-

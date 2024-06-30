@@ -16,19 +16,18 @@ class TreeViewCustom : public QTreeView
 
     ND QSize minimumSizeHint() const override;
 
-  Q_SIGNALS:
-    void droppedIn(QList<QString>, QModelIndex);
-    void tabbedOut();
-
   protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
-
     void enterEvent(QEnterEvent *event) override;
     void leaveEvent(QEvent *event) override;
     void showEvent(QShowEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
+
+  Q_SIGNALS:
+    void droppedIn(QList<QString>, QModelIndex);
+    void tabbedOut();
 
   private Q_SLOTS:
     void updateScrollbarStyle();

@@ -67,12 +67,12 @@ class FlowLayout final : public QGraphicsLayout
 
     void insertItem(qsizetype index, QGraphicsLayoutItem *item);
     void clear();
+    void setGeometry(QRectF const &geom) override;
 
     // It's very annoying but there's no way around using `int` for these.
+    void removeAt(int index) override;
     ND int  count() const override;
     ND auto itemAt(int index) const -> QGraphicsLayoutItem * override;
-       void removeAt(int index) override;
-       void setGeometry(QRectF const &geom) override;
 
     // returns the index of item above / below
     ND qsizetype itemAbove(qsizetype index) const;

@@ -15,14 +15,14 @@ BookmarksItem::BookmarksItem(QString const &dirName, QString const &dirPath, QWi
     spacer = new QSpacerItem(16, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 
     folderIconWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    folderIconWidget.setIconPath(QS(":/res/icons/common/menuitem/folder16.png"));
+    folderIconWidget.setIconPath(u":/res/icons/common/menuitem/folder16.png"_s);
     folderIconWidget.setMinimumSize(16, 16);
     folderIconWidget.installEventFilter(this);
 
-    removeItemButton.setIconPath(QS(":/res/icons/common/buttons/panel-small/remove12.png"));
+    removeItemButton.setIconPath(u":/res/icons/common/buttons/panel-small/remove12.png"_s);
     removeItemButton.setMinimumSize(16, 16);
     removeItemButton.installEventFilter(this);
-    removeItemButton.setAccessibleName(QS("BookmarksItemRemoveLabel"));
+    removeItemButton.setAccessibleName(u"BookmarksItemRemoveLabel"_s);
 
     connect(&removeItemButton, &IconButton::clicked, this, &BookmarksItem::onRemoveClicked);
 

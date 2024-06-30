@@ -3,8 +3,7 @@
 ZoomIndicatorOverlay::ZoomIndicatorOverlay(FloatingWidgetContainer *parent)
     : OverlayWidget(parent),
       fm(new QFontMetrics(QApplication::font())),
-      layout(new QHBoxLayout(this)),
-      hideDelay(2000)
+      layout(new QHBoxLayout(this))
 {
     visibilityTimer.setSingleShot(true);
     visibilityTimer.setInterval(hideDelay);

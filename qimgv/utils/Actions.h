@@ -9,7 +9,7 @@ class Actions
   public:
     static Actions *getInstance();
 
-    ND auto getMap() const & -> QMap<QString, QVersionNumber> const &;
+    ND auto getMap() const -> QMap<QString, QVersionNumber> const &;
     ND auto getList() const -> QList<QString>;
 
   private:

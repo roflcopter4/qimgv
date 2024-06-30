@@ -1,6 +1,6 @@
 #include "CentralWidget.h"
 
-CentralWidget::CentralWidget(DocumentWidget *aDocWidget,
+CentralWidget::CentralWidget(DocumentWidget  *aDocWidget,
                              FolderViewProxy *aFolderView,
                              QWidget          *parent)
     : QStackedWidget(parent),
@@ -47,7 +47,7 @@ void CentralWidget::showFolderView()
 
 void CentralWidget::toggleViewMode()
 {
-    (mode == ViewMode::DOCUMENT) ? showFolderView() : showDocumentView();
+    mode == ViewMode::DOCUMENT ? showFolderView() : showDocumentView();
 }
 
 ViewMode CentralWidget::currentViewMode() const

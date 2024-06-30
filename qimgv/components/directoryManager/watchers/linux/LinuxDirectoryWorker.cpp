@@ -7,13 +7,12 @@
 #include "LinuxDirectoryWorker.h"
 #include "utils/Stuff.h"
 
-#define TAG "[LinuxWatcherWorker]"
+#define TAG u"[LinuxWatcherWorker]"
 static constexpr int TIMEOUT = 300; // ms
 
 LinuxDirectoryWorker::LinuxDirectoryWorker()
     : fd(-1)
-{
-}
+{}
 
 void LinuxDirectoryWorker::setDescriptor(int desc)
 {
@@ -23,18 +22,14 @@ void LinuxDirectoryWorker::setDescriptor(int desc)
 void LinuxDirectoryWorker::run()
 {
     emit started();
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    isRunning.store(true);
-#else
-    isRunning.store(true, std::memory_order::relaxed);
-#endif
+    isRunning.store(true, std::memory_order::release);
 
     if (fd == -1) {
         qDebug() << TAG << u"File descriptor isn't set! Stopping.";
         emit finished();
         return;
     }
-    if (!isRunning.load(std::memory_order::relaxed)) {
+    if (!isRunning.load(std::memory_order::acquire)) {
         emit finished();
         return;
     }
@@ -61,7 +56,7 @@ void LinuxDirectoryWorker::run()
         handleErrorCode(errorCode);
         eventData[bytesAvailable] = '\0';
 
-        if (!isRunning.load(std::memory_order::relaxed))
+        if (!isRunning.load(std::memory_order::acquire))
             break;
         emit fileEvent(new LinuxFsEvent(std::move(eventData), bytesAvailable));
     }

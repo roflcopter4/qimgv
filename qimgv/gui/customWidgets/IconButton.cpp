@@ -1,12 +1,8 @@
 #include "IconButton.h"
 
 IconButton::IconButton(QWidget *parent)
-    : IconWidget(parent),
-      mCheckable(false),
-      mChecked(false),
-      mPressed(false)
-{
-}
+    : IconWidget(parent)
+{}
 
 void IconButton::setCheckable(bool mode)
 {
@@ -30,8 +26,10 @@ void IconButton::setChecked(bool mode)
     }
 }
 
-void IconButton::mousePressEvent([[maybe_unused]] QMouseEvent *event)
+void IconButton::mousePressEvent(QMouseEvent *event)
 {
+    Q_UNUSED(event);
+
     if (mCheckable) {
         setChecked(!property("checked").toBool());
         emit toggled(mChecked);

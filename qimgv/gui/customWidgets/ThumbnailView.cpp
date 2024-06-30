@@ -2,19 +2,11 @@
 
 ThumbnailView::ThumbnailView(Qt::Orientation orientation, QWidget *parent)
     : QGraphicsView(parent),
-      lastScrollFrameTime(0),
-      mDrawScrollbarIndicator(true),
-      blockThumbnailLoading(false),
-      mCropThumbnails(false),
-      mouseReleaseSelect(false),
-      selectMode(ThumbnailSelectMode::ACTIVATE_BY_PRESS),
-      rangeSelection(false),
-      scrollTimeLine(nullptr)
+      scene(new QGraphicsScene(this))
 {
     setAccessibleName(u"thumbnailView"_s);
     setMouseTracking(true);
     setAcceptDrops(false);
-    scene = new QGraphicsScene(this);
     setScene(scene);
     setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
     setAttribute(Qt::WA_TranslucentBackground, false);
@@ -62,7 +54,7 @@ ThumbnailView::~ThumbnailView()
 
 Qt::Orientation ThumbnailView::orientation() const
 {
-    return mOrientation;
+    return static_cast<Qt::Orientation>(mOrientation);
 }
 
 void ThumbnailView::setOrientation(Qt::Orientation orientation)
@@ -364,7 +356,7 @@ void ThumbnailView::reloadItem(qsizetype index)
     if (thumb->isLoaded)
         thumb->unsetThumbnail();
     emit thumbnailsRequested(SelectionList() << index,
-                             static_cast<qsizetype>(qApp->devicePixelRatio() * mThumbnailSize),
+                             static_cast<int>(qApp->devicePixelRatio() * mThumbnailSize),
                              mCropThumbnails,
                              true);
 }
@@ -436,7 +428,7 @@ void ThumbnailView::loadVisibleThumbnails()
         // load
         if (loadList.count())
             emit thumbnailsRequested(loadList,
-                                     static_cast<qsizetype>(qApp->devicePixelRatio() * mThumbnailSize),
+                                     static_cast<int>(qApp->devicePixelRatio() * mThumbnailSize),
                                      mCropThumbnails,
                                      false);
         // unload offscreen

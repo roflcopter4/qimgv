@@ -15,6 +15,7 @@ class SaveConfirmOverlay : public OverlayWidget
   public:
     explicit SaveConfirmOverlay(FloatingWidgetContainer *parent = nullptr);
     ~SaveConfirmOverlay() override;
+    DELETE_COPY_MOVE_ROUTINES(SaveConfirmOverlay);
 
   Q_SIGNALS:
     void saveClicked();

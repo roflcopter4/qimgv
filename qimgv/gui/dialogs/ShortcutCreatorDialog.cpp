@@ -6,7 +6,7 @@ ShortcutCreatorDialog::ShortcutCreatorDialog(QWidget *parent)
       ui(new Ui::ShortcutCreatorDialog)
 {
     ui->setupUi(this);
-    setWindowTitle(QS("Add shortcut"));
+    setWindowTitle(u"Add shortcut"_s);
     actionList = appActions->getList();
     scriptList = ScriptManager::scriptNames();
 
@@ -27,7 +27,7 @@ QString ShortcutCreatorDialog::selectedAction() const
     if (ui->actionsRadioButton->isChecked())
         return ui->actionsComboBox->currentText();
     else
-        return QSV("s:") + ui->scriptsComboBox->currentText();
+        return u"s:"_sv + ui->scriptsComboBox->currentText();
 }
 
 QString ShortcutCreatorDialog::selectedShortcut() const
@@ -39,15 +39,15 @@ void ShortcutCreatorDialog::onShortcutEdited()
 {
     QString action = actionManager->actionForShortcut(ui->sequenceEdit->sequence());
     if (!action.isEmpty())
-        ui->warningLabel->setText(QSV("This shortcut is used for action: ") + action + QSV(". Replace?"));
+        ui->warningLabel->setText(u"This shortcut is used for action: " + action + u". Replace?");
     else
-        ui->warningLabel->setText(QS(""));
+        ui->warningLabel->setText(u""_s);
 }
 
 void ShortcutCreatorDialog::setAction(QString action)
 {
     auto cbox = ui->actionsComboBox;
-    if (action.startsWith(QSV("s:"))) {
+    if (action.startsWith(u"s:"_sv)) {
         action = action.remove(0, 2);
         cbox   = ui->scriptsComboBox;
         ui->scriptsRadioButton->setChecked(true);

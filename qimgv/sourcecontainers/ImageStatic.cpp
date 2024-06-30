@@ -20,7 +20,7 @@ void ImageStatic::load()
 {
     if (isLoaded())
         return;
-    if (mDocInfo->mimeType().name() == QSV("image/vnd.microsoft.icon"))
+    if (mDocInfo->mimeType().name() == u"image/vnd.microsoft.icon"_sv)
         loadICO();
     else
         loadGeneric();
@@ -90,9 +90,9 @@ bool ImageStatic::save(QString destPath)
     // Note that tests have shown that zlib compression levels 3-6 usually perform as well
     // as level 9 for PNG images, and do considerably fewer caclulations
     int quality = 95;
-    if (ext.compare(QSV("png"), Qt::CaseInsensitive) == 0)
+    if (ext.compare(u"png"_sv, Qt::CaseInsensitive) == 0)
         quality = 30;
-    else if (ext.compare(QSV("jpg"), Qt::CaseInsensitive) == 0 || ext.compare(QSV("jpeg"), Qt::CaseInsensitive) == 0)
+    else if (ext.compare(u"jpg"_sv, Qt::CaseInsensitive) == 0 || ext.compare(u"jpeg"_sv, Qt::CaseInsensitive) == 0)
         quality = settings->JPEGSaveQuality();
 
     bool backupExists = false, success = false, originalExists = false;

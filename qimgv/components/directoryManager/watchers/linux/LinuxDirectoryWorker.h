@@ -2,6 +2,7 @@
 
 #include "LinuxFsEvent.h"
 #include "../DirectoryWatcherWorker.h"
+#include <unistd.h>
 
 class LinuxDirectoryWorker : public DirectoryWatcherWorker
 {
@@ -12,8 +13,7 @@ class LinuxDirectoryWorker : public DirectoryWatcherWorker
 
     void setDescriptor(int desc);
     void handleErrorCode(ssize_t code);
-
-    virtual void run() override;
+    void run() override;
 
   Q_SIGNALS:
     void fileEvent(LinuxFsEvent *event);

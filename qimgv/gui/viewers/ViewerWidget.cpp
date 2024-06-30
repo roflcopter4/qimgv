@@ -12,11 +12,7 @@ ViewerWidget::ViewerWidget(QWidget *parent)
       videoPlayer(new VideoPlayerInitProxy(this)),
       videoControls(new VideoControlsProxyWrapper(this)),
       zoomIndicator(new ZoomIndicatorOverlayProxy(this)),
-      contextMenu(nullptr),
-      currentWidget(CurrentWidget::UNSET),
-      mInteractionEnabled(false),
-      mWaylandCursorWorkaround(false),
-      mIsFullscreen(false)
+      contextMenu(nullptr)
 {
     setAttribute(Qt::WA_TranslucentBackground, true);
     setMouseTracking(true);
@@ -543,7 +539,7 @@ void ViewerWidget::keyPressEvent(QKeyEvent *event)
     }
     if (currentWidget == CurrentWidget::IMAGE_VIEWER && imageViewer->isDisplaying()) {
         // switch to fitWidth via up arrow
-        if (ShortcutBuilder::fromEvent(event) == QSV("Up") && !actionManager->actionForShortcut(QS("Up")).isEmpty())
+        if (ShortcutBuilder::fromEvent(event) == u"Up"_sv && !actionManager->actionForShortcut(u"Up"_s).isEmpty())
         {
             if (imageViewer->fitMode() == ImageFitMode::WINDOW && imageViewer->scaledImageFits()) {
                 imageViewer->setFitWidth();

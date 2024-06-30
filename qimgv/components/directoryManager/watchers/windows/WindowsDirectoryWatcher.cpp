@@ -11,9 +11,6 @@ WindowsDirectoryWatcherPrivate::WindowsDirectoryWatcherPrivate(DirectoryWatcher 
     auto *workerPtr = reinterpret_cast<WindowsDirectoryWorker *>(worker.get());
     auto *threadPtr = workerThread.get();
 
-    //qRegisterMetaType<PFILE_NOTIFY_INFORMATION>("PFILE_NOTIFY_INFORMATION");
-    //connect(windowsWorker, SIGNAL(notifyEvent(PFILE_NOTIFY_INFORMATION)), this, SLOT(dispatchNotify(PFILE_NOTIFY_INFORMATION)));
-
     connect(threadPtr, &QThread::started,                    workerPtr, &DirectoryWatcherWorker::run);
     connect(workerPtr, &WindowsDirectoryWorker::notifyEvent, this,      &WindowsDirectoryWatcherPrivate::dispatchNotify);
     connect(workerPtr, &DirectoryWatcherWorker::finished,    threadPtr, &QThread::quit);
@@ -42,7 +39,7 @@ void WindowsDirectoryWatcherPrivate::setWatchPath(QString path)
 HANDLE WindowsDirectoryWatcherPrivate::requestDirectoryHandle(QString const &path)
 {
     HANDLE hDirectory;
-    std::wstring wpath = path.startsWith(QSV(R"(\\?\)"))
+    std::wstring wpath = path.startsWith(uR"(\\?\)"_sv)
         ? path.toStdWString()
         : util::QStringToStdPath(path).wstring();
 

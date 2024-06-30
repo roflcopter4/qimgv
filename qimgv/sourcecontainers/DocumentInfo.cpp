@@ -1,13 +1,14 @@
 #include "DocumentInfo.h"
+#include "Platform.h"
 
 DocumentInfo::DocumentInfo(QString const &path)
-    : mDocumentType(DocumentType::NONE),
-      mOrientation(0),
+    : mOrientation(0),
+      mDocumentType(DocumentType::NONE),
       exifLoaded(false)
 {
     fileInfo.setFile(path);
     if (!fileInfo.isFile()) {
-        qDebug() << u"FileInfo: cannot open: " << path;
+        qDebug() << u"FileInfo: cannot open:" << path;
         return;
     }
     detectFormat();
@@ -89,10 +90,10 @@ void DocumentInfo::detectFormat()
     auto mimeNameUTF8 = mimeName.toUtf8();
     auto suffix       = fileInfo.suffix().toLower().toUtf8();
 
-    if (mimeName == QSV("image/jpeg")) {
+    if (mimeName == u"image/jpeg"_sv) {
         mFormat       = "jpg";
         mDocumentType = DocumentType::STATIC;
-    } else if (mimeName == QSV("image/png")) {
+    } else if (mimeName == u"image/png"_sv) {
         if (QImageReader::supportedImageFormats().contains(QByteArrayView("apng")) && detectAPNG()) {
             mFormat       = "apng";
             mDocumentType = DocumentType::ANIMATED;
@@ -100,23 +101,23 @@ void DocumentInfo::detectFormat()
             mFormat       = "png";
             mDocumentType = DocumentType::STATIC;
         }
-    } else if (mimeName == QSV("image/gif")) {
+    } else if (mimeName == u"image/gif"_sv) {
         mFormat       = "gif";
         mDocumentType = DocumentType::ANIMATED;
-    } else if (mimeName == QSV("image/webp") || (mimeName == QSV("audio/x-riff") && suffix == "webp")) {
+    } else if (mimeName == u"image/webp"_sv || (mimeName == u"audio/x-riff"_sv && suffix == "webp")) {
         mFormat       = "webp";
         mDocumentType = detectAnimatedWebP() ? DocumentType::ANIMATED : DocumentType::STATIC;
-    } else if (mimeName == QSV("image/jxl")) {
+    } else if (mimeName == u"image/jxl"_sv) {
         mFormat       = "jxl";
         mDocumentType = detectAnimatedJxl() ? DocumentType::ANIMATED : DocumentType::STATIC;
         if (mDocumentType == DocumentType::ANIMATED && !settings->jxlAnimation()) {
             mDocumentType = DocumentType::NONE;
             qDebug() << u"animated jxl is off; skipping file";
         }
-    } else if (mimeName == QSV("image/avif")) {
+    } else if (mimeName == u"image/avif"_sv) {
         mFormat       = "avif";
         mDocumentType = detectAnimatedAvif() ? DocumentType::ANIMATED : DocumentType::STATIC;
-    } else if (mimeName == QSV("image/bmp")) {
+    } else if (mimeName == u"image/bmp"_sv) {
         mFormat       = "bmp";
         mDocumentType = DocumentType::STATIC;
     } else if (settings->videoPlayback() && settings->videoFormats().contains(mimeNameUTF8)) {
@@ -205,10 +206,14 @@ void DocumentInfo::loadExifTags()
 
 #ifdef USE_EXIV2
     try {
-        auto image = Exiv2::ImageFactory::open(reinterpret_cast<char const *>(util::QStringToStdPath(fileInfo.filePath()).u8string().c_str()));
-        //auto image = Exiv2::ImageFactory::open(fileInfo.absoluteFilePath().toStdString().c_str());
+# if defined Q_OS_WINDOWS
+        auto u8path = R"(\\?\)" + QDir::toNativeSeparators(fileInfo.absoluteFilePath()).toStdString();
+# else
+        auto u8path = fileInfo.absoluteFilePath().toStdString();
+# endif
+        auto image = Exiv2::ImageFactory::open(u8path);
+        assert(image != nullptr);
 
-        assert(image.get() != nullptr);
         image->readMetadata();
         Exiv2::ExifData &exifData = image->exifData();
         if (exifData.empty())
@@ -243,7 +248,7 @@ void DocumentInfo::loadExifTags()
             Exiv2::Rational r = it->toRational();
             if (r.first < r.second) {
                 qreal exp = round(static_cast<qreal>(r.second) / r.first);
-                exifTags.insert(QObject::tr("ExposureTime"), QSV("1/") + QString::number(exp) + QObject::tr(" sec"));
+                exifTags.insert(QObject::tr("ExposureTime"), u"1/"_sv + QString::number(exp) + QObject::tr(" sec"));
             } else {
                 qreal exp = round(static_cast<qreal>(r.first) / r.second);
                 exifTags.insert(QObject::tr("ExposureTime"), QString::number(exp) + QObject::tr(" sec"));
@@ -252,9 +257,9 @@ void DocumentInfo::loadExifTags()
 
         it = exifData.findKey(fnumber);
         if (it != exifData.end()) {
-            Exiv2::Rational r  = it->toRational();
-            qreal           fn = static_cast<qreal>(r.first) / r.second;
-            exifTags.insert(QObject::tr("F Number"), QSV("f/") + QString::number(fn, 'g', 3));
+            auto r  = it->toRational();
+            auto fn = static_cast<qreal>(r.first) / static_cast<qreal>(r.second);
+            exifTags.insert(QObject::tr("F Number"), u"f/"_sv + QString::number(fn, 'g', 3));
         }
 
         it = exifData.findKey(isoSpeedRatings);
@@ -281,7 +286,7 @@ void DocumentInfo::loadExifTags()
                     auto stdStr = it->toString();
                     if (!stdStr.empty()) {
                         auto comment = QString::fromStdString(stdStr);
-                        if (comment.startsWith(QSV("charset=")))
+                        if (comment.startsWith(u"charset="_sv))
                             comment.remove(0, comment.indexOf(u' ') + 1);
                         exifTags.insert(QObject::tr("UserComment"), comment);
                     }
@@ -296,16 +301,16 @@ void DocumentInfo::loadExifTags()
 # if !EXIV2_TEST_VERSION(0, 28, 0)
 #  ifdef _WIN32
     catch (Exiv2::BasicError<wchar_t>& e) {
-        qDebug() << u"Caught Exiv2::BasicError exception:\n" << e.what();
+        qDebug() << u"Caught Exiv2::BasicError exception:" << e.what();
     }
 #  else
     catch (Exiv2::BasicError<char>& e) {
-        qDebug() << u"Caught Exiv2::BasicError exception:\n" << e.what();
+        qDebug() << u"Caught Exiv2::BasicError exception:" << e.what();
     }
 #  endif
 # endif
     catch (Exiv2::Error& e) {
-        qDebug() << u"Caught Exiv2 exception:\n" << e.what();
+        qDebug() << u"Caught Exiv2 exception:" << e.what();
     }
 #endif
 }

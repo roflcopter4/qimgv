@@ -11,7 +11,6 @@ class ContextMenuItem : public MenuItem
 
   public:
     explicit ContextMenuItem(QWidget *parent = nullptr);
-    ~ContextMenuItem() override;
 
     void setAction(QString const &action);
 

@@ -3,24 +3,32 @@
 #include "gui/customWidgets/IconWidget.h"
 #include <QMouseEvent>
 
-class IconButton : public IconWidget {
+class IconButton : public IconWidget
+{
     Q_OBJECT
-    bool isHovered();
-public:
-    explicit IconButton(QWidget *parent = nullptr);
-    void setCheckable(bool mode);
-    bool isChecked() const;
 
-public slots:
+  public:
+    explicit IconButton(QWidget *parent = nullptr);
+
+    void setCheckable(bool mode);
+
+    ND bool isChecked() const;
+    ND bool isHovered() const = delete;
+
+  public Q_SLOTS:
     void setChecked(bool mode);
 
-signals:
+  Q_SIGNALS:
     void clicked();
     void toggled(bool);
 
-protected:
+  protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
-    bool mCheckable, mChecked, mPressed;
     void mouseMoveEvent(QMouseEvent *event) override;
+
+  private:
+    bool mCheckable = false;
+    bool mChecked   = false;
+    bool mPressed   = false;
 };

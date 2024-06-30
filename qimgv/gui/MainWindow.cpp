@@ -22,13 +22,14 @@ MW::MW(QWidget *parent)
     setMouseTracking(true);
     setAcceptDrops(true);
     setAccessibleName(u"mainwindow"_s);
+
     windowGeometryChangeTimer->setSingleShot(true);
     windowGeometryChangeTimer->setInterval(30);
     setupUi();
 
-    connect(settings, &Settings::settingsChanged, this, &MW::readSettings);
-    connect(windowGeometryChangeTimer, &QTimer::timeout, this, &MW::onWindowGeometryChanged);
-    connect(this, &MW::fullscreenStateChanged, this, &MW::adaptToWindowState);
+    connect(settings,                  &Settings::settingsChanged,  this, &MW::readSettings);
+    connect(windowGeometryChangeTimer, &QTimer::timeout,            this, &MW::onWindowGeometryChanged);
+    connect(this,                      &MW::fullscreenStateChanged, this, &MW::adaptToWindowState);
 
     readSettings();
     currentDisplay = settings->lastDisplay();
@@ -38,9 +39,9 @@ MW::MW(QWidget *parent)
 
 MW::~MW()
 {
-    util::DeleteAndAssignNull(infoBarFullscreen);
-    util::DeleteAndAssignNull(imageInfoOverlay);
-    util::DeleteAndAssignNull(floatingMessage);
+    delete infoBarFullscreen; infoBarFullscreen = nullptr;
+    delete imageInfoOverlay; imageInfoOverlay = nullptr;
+    delete floatingMessage; floatingMessage = nullptr;
 }
 
 /*                                                             |--[ImageViewer]
@@ -193,7 +194,7 @@ void MW::fitWindow()
     if (viewerWidget->interactionEnabled())
         emit viewerWidget->fitWindow();
     else
-        showMessage(QS("Zoom temporary disabled"));
+        showMessage(u"Zoom temporary disabled"_s);
 }
 
 void MW::fitWidth()
@@ -201,7 +202,7 @@ void MW::fitWidth()
     if (viewerWidget->interactionEnabled())
         emit viewerWidget->fitWidth();
     else
-        showMessage(QS("Zoom temporary disabled"));
+        showMessage(u"Zoom temporary disabled"_s);
 }
 
 void MW::fitOriginal()
@@ -209,7 +210,7 @@ void MW::fitOriginal()
     if (viewerWidget->interactionEnabled())
         emit viewerWidget->fitOriginal();
     else
-        showMessage(QS("Zoom temporary disabled"));
+        showMessage(u"Zoom temporary disabled"_s);
 }
 
 // switch between 1:1 and Fit All
@@ -294,12 +295,12 @@ void MW::onSortingChanged(SortingMode mode)
     folderView->onSortingChanged(mode);
     if (centralWidget->currentViewMode() == ViewMode::DOCUMENT) {
         switch (mode) {
-        case SortingMode::NAME:      showMessage(QS("Sorting: By Name"));              break;
-        case SortingMode::NAME_DESC: showMessage(QS("Sorting: By Name (desc.)"));      break;
-        case SortingMode::TIME:      showMessage(QS("Sorting: By Time"));              break;
-        case SortingMode::TIME_DESC: showMessage(QS("Sorting: By Time (desc.)"));      break;
-        case SortingMode::SIZE:      showMessage(QS("Sorting: By File Size"));         break;
-        case SortingMode::SIZE_DESC: showMessage(QS("Sorting: By File Size (desc.)")); break;
+        case SortingMode::NAME:      showMessage(u"Sorting: By Name"_s);              break;
+        case SortingMode::NAME_DESC: showMessage(u"Sorting: By Name (desc.)"_s);      break;
+        case SortingMode::TIME:      showMessage(u"Sorting: By Time"_s);              break;
+        case SortingMode::TIME_DESC: showMessage(u"Sorting: By Time (desc.)"_s);      break;
+        case SortingMode::SIZE:      showMessage(u"Sorting: By File Size"_s);         break;
+        case SortingMode::SIZE_DESC: showMessage(u"Sorting: By File Size (desc.)"_s); break;
         }
     }
 }
@@ -317,9 +318,9 @@ void MW::toggleLockZoom()
 {
     emit viewerWidget->toggleLockZoom();
     if (viewerWidget->lockZoomEnabled())
-        showMessage(QS("Zoom lock: ON"));
+        showMessage(u"Zoom lock: ON"_s);
     else
-        showMessage(QS("Zoom lock: OFF"));
+        showMessage(u"Zoom lock: OFF"_s);
     onInfoUpdated();
 }
 
@@ -327,9 +328,9 @@ void MW::toggleLockView()
 {
     emit viewerWidget->toggleLockView();
     if (viewerWidget->lockViewEnabled())
-        showMessage(QS("View lock: ON"));
+        showMessage(u"View lock: ON"_s);
     else
-        showMessage(QS("View lock: OFF"));
+        showMessage(u"View lock: OFF"_s);
     onInfoUpdated();
 }
 
@@ -378,13 +379,13 @@ void MW::toggleScalingFilter()
 
 void MW::setFilterNearest()
 {
-    showMessage(QS("Filter: nearest"), 600);
+    showMessage(u"Filter: nearest"_s, 600);
     emit viewerWidget->setFilterNearest();
 }
 
 void MW::setFilterBilinear()
 {
-    showMessage(QS("Filter: bilinear"), 600);
+    showMessage(u"Filter: bilinear"_s, 600);
     emit viewerWidget->setFilterBilinear();
 }
 
@@ -392,11 +393,11 @@ void MW::setFilter(ScalingFilter filter)
 {
     QString filterName;
     switch (filter) {
-    case ScalingFilter::NEAREST:             filterName = QS("nearest");            break;
-    case ScalingFilter::BILINEAR:            filterName = QS("bilinear");           break;
-    case ScalingFilter::CV_BILINEAR_SHARPEN: filterName = QS("bilinear + sharpen"); break;
-    case ScalingFilter::CV_CUBIC:            filterName = QS("bicubic");            break;
-    case ScalingFilter::CV_CUBIC_SHARPEN:    filterName = QS("bicubic + sharpen");  break;
+    case ScalingFilter::NEAREST:             filterName = u"nearest"_s;            break;
+    case ScalingFilter::BILINEAR:            filterName = u"bilinear"_s;           break;
+    case ScalingFilter::CV_BILINEAR_SHARPEN: filterName = u"bilinear + sharpen"_s; break;
+    case ScalingFilter::CV_CUBIC:            filterName = u"bicubic"_s;            break;
+    case ScalingFilter::CV_CUBIC_SHARPEN:    filterName = u"bicubic + sharpen"_s;  break;
     default:
         filterName = u"configured " + QString::number(static_cast<int>(filter));
         break;
@@ -532,7 +533,7 @@ void MW::closeEvent(QCloseEvent *event)
 {
     // catch the close event when user presses X on the window itself
     event->accept();
-    actionManager->invokeAction(QS("exit"));
+    actionManager->invokeAction(u"exit"_s);
 }
 
 void MW::dragEnterEvent(QDragEnterEvent *e)
@@ -580,46 +581,46 @@ QString MW::getSaveFileName(QString const &filePath)
     // todo: some may need to be blacklisted
     QList<QByteArray> writerFormats = QImageWriter::supportedImageFormats();
     if (writerFormats.contains(QByteArrayView("jpg")))
-        filters.append(QS("JPEG (*.jpg *.jpeg *jpe *jfif)"));
+        filters.append(u"JPEG (*.jpg *.jpeg *jpe *jfif)"_s);
     if (writerFormats.contains(QByteArrayView("png")))
-        filters.append(QS("PNG (*.png)"));
+        filters.append(u"PNG (*.png)"_s);
     if (writerFormats.contains(QByteArrayView("webp")))
-        filters.append(QS("WebP (*.webp)"));
+        filters.append(u"WebP (*.webp)"_s);
     // May not work...
     if (writerFormats.contains(QByteArrayView("jp2")))
-        filters.append(QS("JPEG 2000 (*.jp2 *.j2k *.jpf *.jpx *.jpm *.jpgx)"));
+        filters.append(u"JPEG 2000 (*.jp2 *.j2k *.jpf *.jpx *.jpm *.jpgx)"_s);
     if (writerFormats.contains(QByteArrayView("jxl")))
-        filters.append(QS("JPEG-XL (*.jxl)"));
+        filters.append(u"JPEG-XL (*.jxl)"_s);
     if (writerFormats.contains(QByteArrayView("avif")))
-        filters.append(QS("AVIF (*.avif *.avifs)"));
+        filters.append(u"AVIF (*.avif *.avifs)"_s);
     if (writerFormats.contains(QByteArrayView("tif")))
-        filters.append(QS("TIFF (*.tif *.tiff)"));
+        filters.append(u"TIFF (*.tif *.tiff)"_s);
     if (writerFormats.contains(QByteArrayView("bmp")))
-        filters.append(QS("BMP (*.bmp)"));
+        filters.append(u"BMP (*.bmp)"_s);
 #ifdef Q_OS_WIN32
     if (writerFormats.contains(QByteArrayView("ico")))
-        filters.append(QS("Icon Files (*.ico)"));
+        filters.append(u"Icon Files (*.ico)"_s);
 #endif
     if (writerFormats.contains(QByteArrayView("ppm")))
-        filters.append(QS("PPM (*.ppm)"));
+        filters.append(u"PPM (*.ppm)"_s);
     if (writerFormats.contains(QByteArrayView("xbm")))
-        filters.append(QS("XBM (*.xbm)"));
+        filters.append(u"XBM (*.xbm)"_s);
     if (writerFormats.contains(QByteArrayView("xpm")))
-        filters.append(QS("XPM (*.xpm)"));
+        filters.append(u"XPM (*.xpm)"_s);
     if (writerFormats.contains(QByteArrayView("dds")))
-        filters.append(QS("DDS (*.dds)"));
+        filters.append(u"DDS (*.dds)"_s);
     if (writerFormats.contains(QByteArrayView("wbmp")))
-        filters.append(QS("WBMP (*.wbmp)"));
+        filters.append(u"WBMP (*.wbmp)"_s);
     // Add everything else from imagewriter.
     for (auto const &fmt : writerFormats) {
         auto qsFmt = QString::fromUtf8(fmt);
         if (filters.filter(qsFmt).isEmpty())
             filters.append(qsFmt.toUpper() + u" (*." + qsFmt + u')');
     }
-    QString filterString = filters.join(QSV(";; "));
+    QString filterString = filters.join(u";; "_sv);
 
     // Find matching filter for the current image.
-    auto selectedFilter = QS("JPEG (*.jpg *.jpeg *jpe *jfif)");
+    auto selectedFilter = u"JPEG (*.jpg *.jpeg *jpe *jfif)"_s;
     auto fi = QFileInfo(filePath);
 
     for (auto const &filter : filters) {
@@ -639,10 +640,10 @@ void MW::showOpenDialog(QString const &path)
     QFileDialog dialog(this);
     QStringList imageFilter;
     imageFilter.append(settings->supportedFormatsFilter());
-    imageFilter.append(QS("All Files (*)"));
+    imageFilter.append(u"All Files (*)"_s);
     dialog.setDirectory(path);
     dialog.setNameFilters(imageFilter);
-    dialog.setWindowTitle(QS("Open image"));
+    dialog.setWindowTitle(u"Open image"_s);
     dialog.setWindowModality(Qt::ApplicationModal);
     connect(&dialog, &QFileDialog::fileSelected, this, &MW::opened);
     dialog.exec();
@@ -705,10 +706,8 @@ void MW::showFullScreen()
 #endif
 
     // move to target screen
-    if (screens.count() > currentDisplay && currentDisplay != trueCurrentDisplay) {
-        auto const &geom = screens[currentDisplay]->geometry();
-        move(geom.x(), geom.y());
-    }
+    if (screens.count() > currentDisplay && currentDisplay != trueCurrentDisplay)
+        move(screens[currentDisplay]->geometry().topLeft());
     QWidget::showFullScreen();
 
     //// try to repaint sooner
@@ -849,24 +848,25 @@ void MW::closeFullScreenOrExit()
     if (isFullScreen())
         showWindowed();
     else
-        actionManager->invokeAction(QS("exit"));
+        actionManager->invokeAction(u"exit"_s);
 }
 
 // todo: this is crap, use shared state object
-void MW::setCurrentInfo(qsizetype      fileIndex,
-                        qsizetype      fileCount,
-                        QString const &filePath,
-                        QString const &fileName,
-                        QSize          imageSize,
-                        qint64         fileSize,
-                        bool           slideshow,
-                        bool           shuffle,
-                        bool           edited)
+void MW::setCurrentInfo(
+      qsizetype fileIndex,
+      qsizetype fileCount,
+      QString   filePath,
+      QString   fileName,
+      QSize     imageSize,
+      qint64    fileSize,
+      bool      slideshow,
+      bool      shuffle,
+      bool      edited)
 {
     info.index     = fileIndex;
     info.fileCount = fileCount;
-    info.fileName  = fileName;
-    info.filePath  = filePath;
+    info.fileName  = std::move(fileName);
+    info.filePath  = std::move(filePath);
     info.imageSize = imageSize;
     info.fileSize  = fileSize;
     info.slideshow = slideshow;
@@ -903,7 +903,7 @@ void MW::onInfoUpdated()
     } else {
         windowTitle = info.fileName;
         if (settings->windowTitleExtendedInfo()) {
-            windowTitle.prepend(posString + QS("  "));
+            windowTitle.prepend(posString + u"  "_s);
             if (!resString.isEmpty())
                 windowTitle.append(u"  -  " + resString);
             if (!sizeString.isEmpty())
@@ -913,25 +913,25 @@ void MW::onInfoUpdated()
         // toggleable states
         QString states;
         if (info.slideshow)
-            states.append(QSV(" [slideshow]"));
+            states.append(u" [slideshow]"_sv);
         if (info.shuffle)
-            states.append(QSV(" [shuffle]"));
+            states.append(u" [shuffle]"_sv);
         if (viewerWidget->lockZoomEnabled())
-            states.append(QSV(" [zoom lock]"));
+            states.append(u" [zoom lock]"_sv);
         if (viewerWidget->lockViewEnabled())
-            states.append(QSV(" [view lock]"));
+            states.append(u" [view lock]"_sv);
 
         if (!settings->infoBarWindowed() && !states.isEmpty())
             windowTitle.append(u" -" + states);
         if (info.edited)
-            windowTitle.prepend(QSV("* "));
+            windowTitle.prepend(u"* "_sv);
 
         infoBarFullscreen->setInfo(posString,
-                                   info.fileName + (info.edited ? QS("  *") : QString()),
+                                   info.fileName + (info.edited ? u"  *"_s : u""_s),
                                    resString + u"  " + sizeString);
 
         infoBarWindowed->setInfo(posString,
-                                 info.fileName + (info.edited ? QS("  *") : QString()),
+                                 info.fileName + (info.edited ? u"  *"_s : u""_s),
                                  resString + u"  " + sizeString + u" " + states);
     }
     setWindowTitle(windowTitle);
@@ -1012,16 +1012,12 @@ void MW::showError(QString const &text)
     floatingMessage->showMessage(text, FloatingMessageIcon::ERROR, 2800);
 }
 
-bool MW::showConfirmation(QString const &title, QString const &msg)
+bool MW::showConfirmation(QString const &title, QString const &msg, QMessageBox::StandardButton defaultButton)
 {
-    QMessageBox msgBox(this);
-    msgBox.setWindowTitle(title);
-    msgBox.setText(msg);
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.setStandardButtons(QMessageBox::Yes);
-    msgBox.addButton(QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::Yes);
-    msgBox.setModal(true);
+    Q_ASSERT(defaultButton == QMessageBox::Yes || defaultButton == QMessageBox::No);
+    QMessageBox msgBox(QMessageBox::Warning, title, msg, QMessageBox::Yes | QMessageBox::No, this);
+    msgBox.setDefaultButton(defaultButton);
+    msgBox.setWindowModality(Qt::WindowModality::WindowModal);
     return msgBox.exec() == QMessageBox::Yes;
 }
 

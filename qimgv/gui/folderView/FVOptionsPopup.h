@@ -11,36 +11,39 @@ namespace Ui {
 class FVOptionsPopup;
 }
 
-class FVOptionsPopup : public QWidget {
+class FVOptionsPopup : public QWidget
+{
     Q_OBJECT
 
-public:
+  public:
     explicit FVOptionsPopup(QWidget *parent = nullptr);
     ~FVOptionsPopup() override;
+    DELETE_COPY_MOVE_ROUTINES(FVOptionsPopup);
 
-public slots:
-    void showAt(QPoint pos);
-
-protected:
+  protected:
     void paintEvent(QPaintEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
     void hideEvent(QHideEvent *event) override;
 
-signals:
-    void dismissed();
-    void viewModeSelected(FolderViewMode);
-
-private slots:
-    void readSettings();
-
-    void selectSimpleView();
-    void selectExtendedView();
-    void selectFoldersView();
-
-private:
-    Ui::FVOptionsPopup *ui;
+  private:
     void setViewMode(FolderViewMode mode);
     void setSimpleView();
     void setExtendedView();
     void setFoldersView();
+
+  Q_SIGNALS:
+    void dismissed();
+    void viewModeSelected(FolderViewMode);
+
+  public Q_SLOTS:
+    void showAt(QPoint pos);
+
+  private Q_SLOTS:
+    void readSettings();
+    void selectSimpleView();
+    void selectExtendedView();
+    void selectFoldersView();
+
+  private:
+    Ui::FVOptionsPopup *ui;
 };

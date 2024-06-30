@@ -13,7 +13,7 @@
 #include "ProxyStyle.h"
 #include "Core.h"
 
-#define USE_VLD
+//#define USE_VLD
 
 #if defined Q_OS_APPLE
 # include "macosapplication.h"
@@ -202,7 +202,6 @@ int main(int argc, char *argv[])
     core->showGui();
     int ret = QGuiApplication::exec();
 
-    util::DeleteAndAssignNull(app);
     util::DeleteAndAssignNull(parser);
     util::DeleteAndAssignNull(core);
     util::DeleteAndAssignNull(appActions);
@@ -210,6 +209,7 @@ int main(int argc, char *argv[])
     util::DeleteAndAssignNull(actionManager);
     util::DeleteAndAssignNull(shrRes);
     util::DeleteAndAssignNull(settings);
+    util::DeleteAndAssignNull(app);
 
 #ifdef USE_VLD
     VLDSetReportOptions(VLD_OPT_UNICODE_REPORT | VLD_OPT_REPORT_TO_FILE,

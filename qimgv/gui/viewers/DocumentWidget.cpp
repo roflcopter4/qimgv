@@ -33,7 +33,7 @@ DocumentWidget::DocumentWidget(ViewerWidget *viewWidget, InfoBarProxy *infoBar, 
 
 DocumentWidget::~DocumentWidget() = default;
 
-ViewerWidget *DocumentWidget::viewWidget()
+ViewerWidget *DocumentWidget::viewWidget() const
 {
     return mViewWidget;
 }
@@ -146,12 +146,12 @@ void DocumentWidget::mouseMoveEvent(QMouseEvent *event)
     // ignore if we are doing something with the mouse (zoom / drag)
     if (event->buttons() != Qt::NoButton) {
         if (mainPanel->triggerRect().contains(event->pos()))
-            avoidPanelFlag = true;
+            mAvoidPanelFlag = true;
         return;
     }
     // show on hover event
     if (mPanelEnabled && (mIsFullscreen || !mPanelFullscreenOnly)) {
-        if (mainPanel->triggerRect().contains(event->pos()) && !avoidPanelFlag)
+        if (mainPanel->triggerRect().contains(event->pos()) && !mAvoidPanelFlag)
             mainPanel->show();
     }
     // fade out on leave event
@@ -165,7 +165,7 @@ void DocumentWidget::mouseMoveEvent(QMouseEvent *event)
             mainPanel->hideAnimated();
     }
     if (!mainPanel->triggerRect().contains(event->pos()))
-        avoidPanelFlag = false;
+        mAvoidPanelFlag = false;
 }
 
 void DocumentWidget::enterEvent(QEnterEvent *event)
@@ -176,7 +176,7 @@ void DocumentWidget::enterEvent(QEnterEvent *event)
     // we can't track move events outside the window (without additional timer),
     // so just hook the panel event here
     if (!mPanelPinned && mPanelEnabled && (mIsFullscreen || !mPanelFullscreenOnly) &&
-        (mainPanel->triggerRect().contains(mapFromGlobal(QCursor::pos())) && !avoidPanelFlag)) {
+        (mainPanel->triggerRect().contains(mapFromGlobal(QCursor::pos())) && !mAvoidPanelFlag)) {
         mainPanel->show();
     }
 }
@@ -188,5 +188,5 @@ void DocumentWidget::leaveEvent(QEvent *event)
     //  this misfires on hidpi.
     // instead do the panel hiding in MW::leaveEvent  (it works properly in root window)
     // mainPanel->hide();
-    avoidPanelFlag = false;
+    mAvoidPanelFlag = false;
 }

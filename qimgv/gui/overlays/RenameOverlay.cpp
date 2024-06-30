@@ -10,13 +10,13 @@ RenameOverlay::RenameOverlay(FloatingWidgetContainer *parent)
     connect(ui->closeButton, &IconButton::clicked, this, &RenameOverlay::hide);
     connect(ui->okButton, &QPushButton::clicked, this, &RenameOverlay::rename);
     ui->okButton->setHighlighted(true);
-    ui->closeButton->setIconPath(QS(":res/icons/common/overlay/close-dim16.png"));
-    ui->headerIcon->setIconPath(QS(":res/icons/common/overlay/edit16.png"));
+    ui->closeButton->setIconPath(u":res/icons/common/overlay/close-dim16.png"_s);
+    ui->headerIcon->setIconPath(u":res/icons/common/overlay/edit16.png"_s);
     setPosition(FloatingWidgetPosition::CENTER);
     setAcceptKeyboardFocus(true);
 
-    keyFilter.append(actionManager->shortcutsForAction(QS("exit")));
-    keyFilter.append(actionManager->shortcutsForAction(QS("renameFile")));
+    keyFilter.append(actionManager->shortcutsForAction(u"exit"_s));
+    keyFilter.append(actionManager->shortcutsForAction(u"renameFile"_s));
 
     hide();
     if (parent)
@@ -32,7 +32,7 @@ void RenameOverlay::show()
 {
     selectName();
     OverlayWidget::show();
-    QTimer::singleShot(0, ui->fileName, SLOT(setFocus()));
+    QTimer::singleShot(0, ui->fileName, qOverload<>(&QWidget::setFocus));
 }
 
 void RenameOverlay::hide()

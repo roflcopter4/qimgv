@@ -5,7 +5,7 @@ WatcherEvent::WatcherEvent(QString const &name, int timerId, Type type)
     : WatcherEvent(name, 0, timerId, type)
 {}
 
-WatcherEvent::WatcherEvent(QString name, uint cookie, int timerId, Type type)
+WatcherEvent::WatcherEvent(QString name, uint32_t cookie, int timerId, Type type)
     : mName(std::move(name)),
       mCookie(cookie),
       mTimerId(timerId),
@@ -44,12 +44,12 @@ void WatcherEvent::setTimerId(int timerId)
     mTimerId = timerId;
 }
 
-uint WatcherEvent::cookie() const
+uint32_t WatcherEvent::cookie() const
 {
     return mCookie;
 }
 
-void WatcherEvent::setCookie(uint cookie)
+void WatcherEvent::setCookie(uint32_t cookie)
 {
     mCookie = cookie;
 }
