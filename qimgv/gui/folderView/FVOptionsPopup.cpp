@@ -7,7 +7,7 @@ FVOptionsPopup::FVOptionsPopup(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Popup);
-    setAttribute(Qt::WA_TranslucentBackground, true);
+    setAttribute(Qt::WA_TranslucentBackground);
 
     ui->viewSimpleButton->  setText(QObject::tr("Simple"));
     ui->viewExtendedButton->setText(QObject::tr("Extended"));

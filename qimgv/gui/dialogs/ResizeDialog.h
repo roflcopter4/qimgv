@@ -22,26 +22,24 @@ class ResizeDialog : public QDialog
   public:
     explicit ResizeDialog(QSize initialSize, QWidget *parent = nullptr);
     ~ResizeDialog() override;
+    DELETE_COPY_MOVE_ROUTINES(ResizeDialog);
 
     ND QSize newSize() const;
-
-  public slots:
-    int exec() override;
 
   protected:
     void keyPressEvent(QKeyEvent *event) override;
 
   private:
-    Ui::ResizeDialog *ui;
-    QSize originalSize;
-    QSize targetSize;
-    QSize desktopSize;
-    int   lastEdited; // 0 - width, 1 - height
+    void updateToTargetValues();
+    void resetResCheckBox();
 
-    void  updateToTargetValues();
-    void  resetResCheckBox();
+  Q_SIGNALS:
+    void sizeSelected(QSize);
 
-  private slots:
+  public Q_SLOTS:
+    int exec() override;
+
+  private Q_SLOTS:
     void widthChanged(int);
     void heightChanged(int);
     void percentChanged(double);
@@ -55,6 +53,10 @@ class ResizeDialog : public QDialog
     void onPercentageRadioButton();
     void onAbsoluteSizeRadioButton();
 
-  signals:
-    void sizeSelected(QSize);
+  private:
+    Ui::ResizeDialog *ui;
+    QSize originalSize;
+    QSize targetSize;
+    QSize desktopSize;
+    int   lastEdited; // 0 - width, 1 - height
 };

@@ -4,29 +4,27 @@ MainPanel::MainPanel(FloatingWidgetContainer *parent)
     : SlidePanel(parent),
       buttonsLayout(new QVBoxLayout()),
       buttonsWidget(new QWidget()),
-      thumbnailStrip(new ThumbnailStripProxy(this))
+      thumbnailStrip(new ThumbnailStripProxy(this)),
+      openButton(new ActionButton(u"open"_s, u":res/icons/common/buttons/panel/open20.png"_s, 30, this)),
+      settingsButton(new ActionButton(u"openSettings"_s, u":res/icons/common/buttons/panel/settings20.png"_s, 30, this)),
+      exitButton(new ActionButton(u"exit"_s, u":res/icons/common/buttons/panel/close16.png"_s, 30, this)),
+      folderViewButton(new ActionButton(u"folderView"_s, u":res/icons/common/buttons/panel/folderview20.png"_s, 30, this)),
+      pinButton(new ActionButton(u""_s, u":res/icons/common/buttons/panel/pin-panel20.png"_s, 30, this))
 {
     // buttons stuff
-    
     buttonsWidget->setAccessibleName(u"panelButtonsWidget"_s);
-    openButton = new ActionButton(u"open"_s, u":res/icons/common/buttons/panel/open20.png"_s, 30, this);
     openButton->setAccessibleName(u"ButtonSmall"_s);
     openButton->setTriggerMode(TriggerMode::Press);
-    settingsButton = new ActionButton(u"openSettings"_s, u":res/icons/common/buttons/panel/settings20.png"_s, 30, this);
     settingsButton->setAccessibleName(u"ButtonSmall"_s);
     settingsButton->setTriggerMode(TriggerMode::Press);
-    exitButton = new ActionButton(u"exit"_s, u":res/icons/common/buttons/panel/close16.png"_s, 30, this);
     exitButton->setAccessibleName(u"ButtonSmall"_s);
     exitButton->setTriggerMode(TriggerMode::Press);
-    folderViewButton = new ActionButton(u"folderView"_s, u":res/icons/common/buttons/panel/folderview20.png"_s, 30, this);
     folderViewButton->setAccessibleName(u"ButtonSmall"_s);
     folderViewButton->setTriggerMode(TriggerMode::Press);
-    pinButton = new ActionButton(u""_s, u":res/icons/common/buttons/panel/pin-panel20.png"_s, 30, this);
     pinButton->setAccessibleName(u"ButtonSmall"_s);
     pinButton->setTriggerMode(TriggerMode::Press);
     pinButton->setCheckable(true);
     connect(pinButton, &ActionButton::toggled, this, &MainPanel::onPinClicked);
-
     
     buttonsLayout->setDirection(QBoxLayout::BottomToTop);
     buttonsLayout->setSpacing(0);
@@ -39,17 +37,12 @@ MainPanel::MainPanel(FloatingWidgetContainer *parent)
 
     buttonsWidget->setLayout(buttonsLayout);
     layout()->addWidget(buttonsWidget);
-
-    
     setWidget(thumbnailStrip);
-
     readSettings();
-    // connect(settings, SIGNAL(settingsChanged()), this, SLOT(readSettings()));
+    //connect(settings, SIGNAL(settingsChanged()), this, SLOT(readSettings()));
 }
 
-MainPanel::~MainPanel()
-{
-}
+MainPanel::~MainPanel() = default;
 
 void MainPanel::onPinClicked()
 {

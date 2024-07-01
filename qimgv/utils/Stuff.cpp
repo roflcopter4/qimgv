@@ -62,10 +62,7 @@ QStringToStdPath(QString const &filePath)
     if (filePath.startsWith(uR"(\\?\)"_sv))
         return {std::u16string_view{filePath.data_ptr().data(),
                                     static_cast<size_t>(filePath.size())}};
-    QString tmp = QFileInfo(filePath)
-        .absoluteFilePath()
-        .replace(u'/', u'\\')
-        .prepend(uR"(\\?\)"_sv);
+    QString tmp = uR"(\\?\)" + QFileInfo(filePath).absoluteFilePath().replace(u'/', u'\\');
     return {std::u16string_view{tmp.data_ptr().data(),
                                 static_cast<size_t>(tmp.size())}};
 #else
@@ -85,8 +82,6 @@ static void do_demangle_setup()
     std::lock_guard lock(mtx);
     if (flg.test_and_set())
         return;
-    //if (::IsDebuggerPresent())
-    //    return;
     ::SymSetOptions(SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
     if (::BOOL ret = ::SymInitialize(::GetCurrentProcess(), nullptr, true); !ret) {
         ::DWORD e = ::GetLastError();
@@ -319,14 +314,14 @@ static void do_OpenConsoleWindow()
 void OpenConsoleWindow()
 {
     std::lock_guard lock(console_mutex);
-    if (!console_opened.exchange(true, std::memory_order::relaxed))
+    if (!console_opened.exchange(true, std::memory_order::acq_rel))
         do_OpenConsoleWindow();
 }
 
 void CloseConsoleWindow()
 {
     std::lock_guard lock(console_mutex);
-    if (console_opened.exchange(false, std::memory_order::relaxed))
+    if (console_opened.exchange(false, std::memory_order::acq_rel))
         ::FreeConsole();
 }
 

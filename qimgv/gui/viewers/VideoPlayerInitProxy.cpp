@@ -1,9 +1,13 @@
 #include "VideoPlayerInitProxy.h"
 
+#ifdef Q_OS_WINDOWS
+# include "Platform.h"
+# define QStrToWChar(s) (reinterpret_cast<wchar_t *>(s.data()))
+#endif
 #ifdef _QIMGV_PLAYER_PLUGIN
-    #define QIMGV_PLAYER_PLUGIN _QIMGV_PLAYER_PLUGIN
+# define QIMGV_PLAYER_PLUGIN _QIMGV_PLAYER_PLUGIN
 #else
-    #define QIMGV_PLAYER_PLUGIN ""
+# define QIMGV_PLAYER_PLUGIN ""
 #endif
 
 VideoPlayerInitProxy::VideoPlayerInitProxy(QWidget *parent)
@@ -23,12 +27,19 @@ VideoPlayerInitProxy::VideoPlayerInitProxy(QWidget *parent)
     libDirs << QApplication::applicationDirPath() + u"/plugins";
 #else
     QDir libPath(QApplication::applicationDirPath() + u"/../lib/qimgv"_s);
-    libDirs << (libPath.makeAbsolute() ? libPath.path() : u"."_s) << u"/usr/lib/qimgv"_s
-            << u"/usr/lib64/qimgv"_s;
+    libDirs << (libPath.makeAbsolute() ? libPath.path() : u"."_s) << u"/usr/lib/qimgv"_s << u"/usr/lib64/qimgv"_s;
 #endif
 }
 
-VideoPlayerInitProxy::~VideoPlayerInitProxy() = default;
+VideoPlayerInitProxy::~VideoPlayerInitProxy()
+{
+#ifdef Q_OS_WINDOWS
+    if (hPlayerModule)
+        ::FreeLibrary(hPlayerModule);
+#endif
+    if (playerLib.isLoaded())
+        playerLib.unload();
+}
 
 void VideoPlayerInitProxy::onSettingsChanged()
 {
@@ -50,9 +61,7 @@ bool VideoPlayerInitProxy::isInitialized() const
 
 inline bool VideoPlayerInitProxy::initPlayer()
 {
-#ifndef USE_MPV
-    return false;
-#endif
+#ifdef USE_MPV
     if (player)
         return true;
 
@@ -65,34 +74,43 @@ inline bool VideoPlayerInitProxy::initPlayer()
         }
     }
     if (playerLib.fileName().isEmpty()) {
-        qDebug() << u"Could not find" << libFile << u"in the following directories:" << libDirs;
+        qWarning() << u"Could not find" << libFile << u"in the following directories:" << libDirs;
         return false;
     }
 
-    using createPlayerWidgetFn = VideoPlayer *(*)();
-
+#if defined Q_OS_WINDOWS
+    QString mpvDll  = QDir::toNativeSeparators(pluginFile.absolutePath()) + u'\\' + u"libmpv-2.dll";
+    HMODULE hLibMpv = ::LoadLibraryExW(reinterpret_cast<wchar_t *>(mpvDll.data()), nullptr, 0);
+    if (!hLibMpv) {
+        qWarning() << u"Error loading library libmpv";
+        return false;
+    }
+#endif
     if (!playerLib.load()) {
-        qDebug() << u"Error loading library." << playerLib.errorString();
+        qWarning() << u"Error loading library:" << playerLib.errorString();
         return false;
     }
-    auto fn = reinterpret_cast<createPlayerWidgetFn>(playerLib.resolve("CreatePlayerWidget"));
-    // load lib
-    if (fn) {
-        VideoPlayer *pl = fn();
-        player.reset(pl);
-    } else {
-        qDebug() << u"Error resolving function." << playerLib.errorString();
+#ifdef Q_OS_WINDOWS
+    ::FreeLibrary(hLibMpv);
+#endif
+
+    using CreatePlayerWidget_t = VideoPlayer *(*)(QWidget *);
+    //NOLINTNEXTLINE(clang-diagnostic-cast-function-type-strict)
+    auto CreatePlayerWidget = reinterpret_cast<CreatePlayerWidget_t>(playerLib.resolve("CreatePlayerWidget"));
+
+    if (!CreatePlayerWidget) {
+        qWarning() << u"Error resolving function:" << playerLib.errorString();
         return false;
     }
+    player.reset(CreatePlayerWidget(this));
     if (!player) {
-        qDebug() << u"Could not load:" << playerLib.fileName() << u". Wrong plugin version?";
+        qWarning() << u"Could not load:" << playerLib.fileName() << u". Wrong plugin version?";
         return false;
     }
 
     player->setMuted(!settings->playVideoSounds());
     player->setVideoUnscaled(!settings->expandImage());
     player->setVolume(settings->volume());
-
     player->setParent(this);
     layout->addWidget(player.get());
     player->hide();
@@ -104,6 +122,9 @@ inline bool VideoPlayerInitProxy::initPlayer()
     connect(player.get(), &VideoPlayer::playbackFinished, this, &VideoPlayerInitProxy::playbackFinished);
 
     return true;
+#else
+    return false;
+#endif
 }
 
 bool VideoPlayerInitProxy::showVideo(QString const &file)
@@ -113,14 +134,14 @@ bool VideoPlayerInitProxy::showVideo(QString const &file)
     return player->showVideo(file);
 }
 
-void VideoPlayerInitProxy::seek(int pos)
+void VideoPlayerInitProxy::seek(int64_t pos)
 {
     if (!player)
         return;
     player->seek(pos);
 }
 
-void VideoPlayerInitProxy::seekRelative(int pos)
+void VideoPlayerInitProxy::seekRelative(int64_t pos)
 {
     if (!player)
         return;
@@ -246,9 +267,4 @@ void VideoPlayerInitProxy::hide()
         player->hide();
     VideoPlayer::hide();
     player.reset();
-}
-
-void VideoPlayerInitProxy::paintEvent(QPaintEvent *event)
-{
-    Q_UNUSED(event)
 }

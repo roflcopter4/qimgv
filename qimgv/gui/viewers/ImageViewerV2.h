@@ -12,7 +12,6 @@
 #include <QTimeLine>
 #include <QTimer>
 #include <QWheelEvent>
-#include <cmath>
 #include <memory>
 
 class ImageViewerV2 final : public QGraphicsView
@@ -38,11 +37,7 @@ class ImageViewerV2 final : public QGraphicsView
   public:
     explicit ImageViewerV2(QWidget *parent = nullptr);
     ~ImageViewerV2() override;
-
-    ImageViewerV2(ImageViewerV2 const &)            = delete;
-    ImageViewerV2(ImageViewerV2 &&)                 = delete;
-    ImageViewerV2 &operator=(ImageViewerV2 const &) = delete;
-    ImageViewerV2 &operator=(ImageViewerV2 &&)      = delete;
+    DELETE_COPY_MOVE_ROUTINES(ImageViewerV2);
 
     ND auto fitMode() const -> ImageFitMode;
     ND auto scaledRectR() const -> QRect;
@@ -60,6 +55,49 @@ class ImageViewerV2 final : public QGraphicsView
     void showAnimation(QSharedPointer<QMovie> const &movie_);
     void setScaledPixmap(std::unique_ptr<QPixmap> newFrame);
     void pauseResume();
+
+  protected:
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent*event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void resizeEvent(QResizeEvent*event) override;
+    void wheelEvent(QWheelEvent *event) override;
+    void showEvent(QShowEvent *event) override;
+    void drawBackground(QPainter *painter, QRectF const &rect) override;
+
+  private:
+    void zoomAnchored(qreal newScale);
+    void fitNormal();
+    void fitWidth();
+    void fitWindow();
+    void scroll(int dx, int dy, bool smooth);
+    void mousePanWrapping(QMouseEvent *event);
+    void mousePan(QMouseEvent const *event);
+    void mouseMoveZoom(QMouseEvent const *event);
+    void reset();
+    void applyFitMode();
+    void stopPosAnimation() const;
+
+    ND QPointF sceneRoundPos(QPointF scenePoint) const;
+    ND QRectF  sceneRoundRect(QRectF const &sceneRect) const;
+    ND auto    selectTransformationMode() const -> Qt::TransformationMode;
+
+    void doZoom(qreal newScale);
+    void swapToOriginalPixmap();
+    void setZoomAnchor(QPoint viewportPos);
+    void updatePixmap(std::unique_ptr<QPixmap> newPixmap);
+    void centerIfNecessary() const;
+    void snapToEdges();
+    void scrollSmooth(int dx, int dy);
+    void scrollPrecise(int dx, int dy);
+    void updateFitWindowScale();
+    void updateMinScale();
+    void fitFree(qreal scale);
+    void applySavedViewportPos();
+    void saveViewportPos();
+    void lockZoom();
+    void doZoomIn(bool atCursor);
+    void doZoomOut(bool atCursor);
 
   Q_SIGNALS:
     void scalingRequested(QSize, ScalingFilter);
@@ -112,15 +150,6 @@ class ImageViewerV2 final : public QGraphicsView
     ND bool lockViewEnabled() const;
     ND bool lockZoomEnabled() const;
 
-  protected:
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent*event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void resizeEvent(QResizeEvent*event) override;
-    void wheelEvent(QWheelEvent *event) override;
-    void showEvent(QShowEvent *event) override;
-    void drawBackground(QPainter *painter, const QRectF &rect) override;
-
   protected Q_SLOTS:
     void onAnimationTimer();
 
@@ -132,39 +161,6 @@ class ImageViewerV2 final : public QGraphicsView
     void onScrollTimelineFinished();
 
   private:
-    void zoomAnchored(qreal newScale);
-    void fitNormal();
-    void fitWidth();
-    void fitWindow();
-    void scroll(int dx, int dy, bool smooth);
-    void mousePanWrapping(QMouseEvent *event);
-    void mousePan(QMouseEvent const *event);
-    void mouseMoveZoom(QMouseEvent const *event);
-    void reset();
-    void applyFitMode();
-    void stopPosAnimation() const;
-
-    ND QPointF sceneRoundPos(QPointF scenePoint) const;
-    ND QRectF  sceneRoundRect(QRectF const &sceneRect) const;
-    ND auto    selectTransformationMode() const -> Qt::TransformationMode;
-
-    void doZoom(qreal newScale);
-    void swapToOriginalPixmap();
-    void setZoomAnchor(QPoint viewportPos);
-    void updatePixmap(std::unique_ptr<QPixmap> newPixmap);
-    void centerIfNecessary() const;
-    void snapToEdges();
-    void scrollSmooth(int dx, int dy);
-    void scrollPrecise(int dx, int dy);
-    void updateFitWindowScale();
-    void updateMinScale();
-    void fitFree(qreal scale);
-    void applySavedViewportPos();
-    void saveViewportPos();
-    void lockZoom();
-    void doZoomIn(bool atCursor);
-    void doZoomOut(bool atCursor);
-
     static constexpr int   ANIMATION_SPEED            = 150;
     static constexpr int   LARGE_VIEWPORT_SIZE        = 2'073'600;
     static constexpr int   SCROLL_UPDATE_RATE         = 7;
@@ -223,8 +219,8 @@ class ImageViewerV2 final : public QGraphicsView
     qreal expandLimit    = 0.0;
     qreal lockedScale    = 0.0;
 
-    QList<qreal>           zoomLevels;
     QPair<QPointF, QPoint> zoomAnchor; // [pixmap coords, viewport coords]
+    QList<qreal>           zoomLevels;
     QPointF                savedViewportPos;
     QElapsedTimer          lastTouchpadScroll;
 };

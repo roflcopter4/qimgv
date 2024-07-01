@@ -11,13 +11,13 @@ class CentralWidget : public QStackedWidget
     Q_OBJECT
 
   public:
-    explicit CentralWidget(DocumentWidget *DocWidget, FolderViewProxy *aFolderView, QWidget *parent);
-
+    explicit CentralWidget(DocumentWidget *docWidget, FolderViewProxy *folderView, QWidget *parent);
     ~CentralWidget() override;
+    DELETE_COPY_MOVE_ROUTINES(CentralWidget);
 
-    ViewMode currentViewMode() const;
+    ND ViewMode currentViewMode() const;
 
-  public slots:
+  public Q_SLOTS:
     void showDocumentView();
     void showFolderView();
     void toggleViewMode();
@@ -25,5 +25,5 @@ class CentralWidget : public QStackedWidget
   private:
     DocumentWidget  *documentView;
     FolderViewProxy *folderView;
-    ViewMode         mode;
+    ViewMode         mode = ViewMode::INVALID;
 };

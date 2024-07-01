@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 # only export CreatePlayerWidget function
-ADD_DEFINITIONS(-DQIMGV_PLAYER_MPV_LIBRARY)
+add_definitions(-DQIMGV_PLAYER_MPV_LIBRARY)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets)
@@ -22,9 +22,9 @@ endif()
 include(GNUInstallDirs)
 
 add_library(player_mpv MODULE
-    src/videoplayer.cpp
-    src/mpvwidget.cpp
-    src/videoplayermpv.cpp
+    src/VideoPlayer.cpp
+    src/MpvWidget.cpp
+    src/VideoPlayerMpv.cpp
     src/qthelper.hpp)
 
 target_compile_features(player_mpv PRIVATE cxx_std_11)

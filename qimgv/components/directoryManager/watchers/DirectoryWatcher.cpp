@@ -1,9 +1,9 @@
 #include "../DirectoryManager.h"
 #include "DirectoryWatcher_p.h"
 
-#if defined __linux__
+#if defined Q_OS_LINUX
 # include "linux/LinuxDirectoryWatcher.h"
-#elif defined Q_OS_WIN32
+#elif defined Q_OS_WINDOWS
 # include "windows/WindowsDirectoryWatcher.h"
 #elif defined Q_OS_APPLE
   // TODO: implement this

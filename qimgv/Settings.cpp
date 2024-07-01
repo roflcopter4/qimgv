@@ -335,7 +335,7 @@ QString Settings::mpvBinary() const
     QString mpvPath = settingsConf.value(u"mpvBinary"_sv, u""_s).toString();
     if (!QFile::exists(mpvPath)) {
 #ifdef Q_OS_WIN32
-        mpvPath = QCoreApplication::applicationDirPath() + u"/mpv.exe";
+        mpvPath = QCoreApplication::applicationDirPath() + u"/plugins/mpv.exe";
 #elif defined __linux__
         mpvPath = u"/usr/bin/mpv"_s;
 #endif

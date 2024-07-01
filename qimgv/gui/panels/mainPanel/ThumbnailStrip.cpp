@@ -5,7 +5,7 @@
 ThumbnailStrip::ThumbnailStrip(QWidget *parent)
     : ThumbnailView(Qt::Horizontal, parent)
 {
-    setAttribute(Qt::WA_NoMousePropagation, true);
+    setAttribute(Qt::WA_NoMousePropagation);
     setFocusPolicy(Qt::NoFocus);
     setupLayout();
     readSettings();

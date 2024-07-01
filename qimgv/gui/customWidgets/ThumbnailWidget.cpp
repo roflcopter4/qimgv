@@ -3,7 +3,7 @@
 ThumbnailWidget::ThumbnailWidget(QGraphicsItem *parent)
     : QGraphicsWidget(parent)
 {
-    setAttribute(Qt::WA_OpaquePaintEvent, true);
+    setAttribute(Qt::WA_OpaquePaintEvent);
     qreal dpr = qApp->devicePixelRatio();
     if (trunc(dpr) == dpr) // don't enable for fractional scaling
         setCacheMode(QGraphicsItem::DeviceCoordinateCache);

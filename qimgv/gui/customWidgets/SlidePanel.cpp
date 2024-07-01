@@ -31,7 +31,7 @@ SlidePanel::SlidePanel(FloatingWidgetContainer *parent)
     connect(&timeline, &QTimeLine::frameChanged, this, &SlidePanel::animationUpdate);
     connect(&timeline, &QTimeLine::finished, this, &SlidePanel::onAnimationFinish);
 
-    setAttribute(Qt::WA_NoMousePropagation, true);
+    setAttribute(Qt::WA_NoMousePropagation);
     setFocusPolicy(Qt::NoFocus);
     SlidePanel::setPosition(PanelPosition::TOP);
 

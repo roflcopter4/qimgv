@@ -26,3 +26,8 @@ Makefile
 bak/
 /external/mpv-x64
 /cpp.hint
+/CMakePresets.json
+/CMakeUserPresets.json
+/mpv-log.log
+/qimgv/qimgv.aps
+/external

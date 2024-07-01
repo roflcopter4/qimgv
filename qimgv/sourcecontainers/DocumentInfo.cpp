@@ -91,34 +91,34 @@ void DocumentInfo::detectFormat()
     auto suffix       = fileInfo.suffix().toLower().toUtf8();
 
     if (mimeName == u"image/jpeg"_sv) {
-        mFormat       = "jpg";
+        mFormat       = "jpg"_ba;
         mDocumentType = DocumentType::STATIC;
     } else if (mimeName == u"image/png"_sv) {
-        if (QImageReader::supportedImageFormats().contains(QByteArrayView("apng")) && detectAPNG()) {
-            mFormat       = "apng";
+        if (QImageReader::supportedImageFormats().contains("apng"_ba) && detectAPNG()) {
+            mFormat       = "apng"_ba;
             mDocumentType = DocumentType::ANIMATED;
         } else {
-            mFormat       = "png";
+            mFormat       = "png"_ba;
             mDocumentType = DocumentType::STATIC;
         }
     } else if (mimeName == u"image/gif"_sv) {
-        mFormat       = "gif";
+        mFormat       = "gif"_ba;
         mDocumentType = DocumentType::ANIMATED;
-    } else if (mimeName == u"image/webp"_sv || (mimeName == u"audio/x-riff"_sv && suffix == "webp")) {
+    } else if (mimeName == u"image/webp"_sv || (mimeName == u"audio/x-riff"_sv && suffix == "webp"_ba)) {
         mFormat       = "webp";
         mDocumentType = detectAnimatedWebP() ? DocumentType::ANIMATED : DocumentType::STATIC;
     } else if (mimeName == u"image/jxl"_sv) {
-        mFormat       = "jxl";
+        mFormat       = "jxl"_ba;
         mDocumentType = detectAnimatedJxl() ? DocumentType::ANIMATED : DocumentType::STATIC;
         if (mDocumentType == DocumentType::ANIMATED && !settings->jxlAnimation()) {
             mDocumentType = DocumentType::NONE;
             qDebug() << u"animated jxl is off; skipping file";
         }
     } else if (mimeName == u"image/avif"_sv) {
-        mFormat       = "avif";
+        mFormat       = "avif"_ba;
         mDocumentType = detectAnimatedAvif() ? DocumentType::ANIMATED : DocumentType::STATIC;
     } else if (mimeName == u"image/bmp"_sv) {
-        mFormat       = "bmp";
+        mFormat       = "bmp"_ba;
         mDocumentType = DocumentType::STATIC;
     } else if (settings->videoPlayback() && settings->videoFormats().contains(mimeNameUTF8)) {
         mDocumentType = DocumentType::VIDEO;
@@ -126,8 +126,8 @@ void DocumentInfo::detectFormat()
     } else {
         // just try to open via suffix if all of the above fails
         mFormat = suffix;
-        if (mFormat.compare("jfif", Qt::CaseInsensitive) == 0)
-            mFormat = "jpg";
+        if (mFormat.compare("jfif"_ba, Qt::CaseInsensitive) == 0)
+            mFormat = "jpg"_ba;
         if (settings->videoPlayback() && settings->videoFormats().values().contains(suffix))
             mDocumentType = DocumentType::VIDEO;
         else

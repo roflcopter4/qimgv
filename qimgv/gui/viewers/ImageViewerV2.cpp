@@ -17,7 +17,7 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
       zoomThreshold(static_cast<int>(devicePixelRatioF() * 4.0))
 {
     setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
-    viewport()->setAttribute(Qt::WA_OpaquePaintEvent, true);
+    viewport()->setAttribute(Qt::WA_OpaquePaintEvent);
     setFocusPolicy(Qt::FocusPolicy::NoFocus);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setAcceptDrops(false);
@@ -60,8 +60,8 @@ ImageViewerV2::ImageViewerV2(QWidget *parent)
 
     connect(scrollTimeLineX, &QTimeLine::frameChanged, this, &ImageViewerV2::scrollToX);
     connect(scrollTimeLineY, &QTimeLine::frameChanged, this, &ImageViewerV2::scrollToY);
-    connect(animationTimer, &QTimer::timeout, this, &ImageViewerV2::onAnimationTimer, Qt::UniqueConnection);
-    connect(scaleTimer, &QTimer::timeout, this, &ImageViewerV2::requestScaling);
+    connect(animationTimer,  &QTimer::timeout,         this, &ImageViewerV2::onAnimationTimer, Qt::UniqueConnection);
+    connect(scaleTimer,      &QTimer::timeout,         this, &ImageViewerV2::requestScaling);
 
     readSettings();
     connect(settings, &Settings::settingsChanged, this, &ImageViewerV2::readSettings);
@@ -86,6 +86,7 @@ void ImageViewerV2::readSettings()
     zoomStep            = settings->zoomStep();
     focusIn1to1         = settings->focusPointIn1to1Mode();
     trackpadDetection   = settings->trackpadDetection();
+
     if ((useFixedZoomLevels = settings->useFixedZoomLevels())) {
         // zoomlevels are stored as a string, parse into list
         zoomLevels.clear();
@@ -94,6 +95,7 @@ void ImageViewerV2::readSettings()
             zoomLevels.append(i.toDouble());
         std::ranges::sort(zoomLevels);
     }
+
     // set bg color
     onFullscreenModeChanged(mIsFullscreen);
     updateMinScale();
@@ -472,7 +474,7 @@ bool ImageViewerV2::hasAnimation() const
 void ImageViewerV2::mousePressEvent(QMouseEvent *event)
 {
     if (!pixmap) {
-        QWidget::mousePressEvent(event);
+        QWidget::mousePressEvent(event); //NOLINT(bugprone-parent-virtual-call)
         return;
     }
     mouseMoveStartPos = event->pos();
@@ -480,12 +482,12 @@ void ImageViewerV2::mousePressEvent(QMouseEvent *event)
     if (event->button() & Qt::RightButton)
         setZoomAnchor(event->pos());
     else
-        QWidget::mousePressEvent(event);
+        QWidget::mousePressEvent(event); //NOLINT(bugprone-parent-virtual-call)
 }
 
 void ImageViewerV2::mouseMoveEvent(QMouseEvent *event)
 {
-    QWidget::mouseMoveEvent(event);
+    QWidget::mouseMoveEvent(event); //NOLINT(bugprone-parent-virtual-call)
 
     if (!pixmap ||
         mouseInteraction == MouseInteractionState::DRAG ||
@@ -508,7 +510,7 @@ void ImageViewerV2::mouseMoveEvent(QMouseEvent *event)
         }
         // emit a signal to start dnd; set flag to ignore further mouse move events
         if (mouseInteraction == MouseInteractionState::DRAG_BEGIN) {
-            if ((abs(mousePressPos.x() - event->pos().x()) > dragThreshold) ||
+            if (abs(mousePressPos.x() - event->pos().x()) > dragThreshold ||
                 abs(mousePressPos.y() - event->pos().y()) > dragThreshold)
             {
                 mouseInteraction = MouseInteractionState::NONE;
@@ -640,13 +642,13 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event)
         } else {
             qDebug() << u"pass2";
             event->ignore();
-            QWidget::wheelEvent(event);
+            QWidget::wheelEvent(event); //NOLINT(bugprone-parent-virtual-call)
         }
         saveViewportPos();
     } else {
         qDebug() << u"pass3";
         event->ignore();
-        QWidget::wheelEvent(event);
+        QWidget::wheelEvent(event); //NOLINT(bugprone-parent-virtual-call)
     }
 }
 
@@ -1070,6 +1072,7 @@ void ImageViewerV2::doZoomOut(bool atCursor)
         setZoomAnchor(mapFromGlobal(QCursor::pos()));
     else
         setZoomAnchor(viewport()->rect().center());
+
     qreal newScale = currentScale() * (1.0 - zoomStep);
     if (useFixedZoomLevels && zoomLevels.count()) {
         if (currentScale() > zoomLevels.last()) {
@@ -1108,7 +1111,7 @@ void ImageViewerV2::toggleLockZoom()
 
 bool ImageViewerV2::lockZoomEnabled() const
 {
-    return (mViewLock == ViewLockMode::ZOOM);
+    return mViewLock == ViewLockMode::ZOOM;
 }
 
 void ImageViewerV2::lockZoom()

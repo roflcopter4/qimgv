@@ -31,11 +31,7 @@ class FileSystemModelCustom::FileIconProvider final : public QAbstractFileIconPr
   public:
     FileIconProvider()           = default;
     ~FileIconProvider() override = default;
-
-    FileIconProvider(FileIconProvider const &)                = delete;
-    FileIconProvider(FileIconProvider &&) noexcept            = delete;
-    FileIconProvider &operator=(FileIconProvider const &)     = delete;
-    FileIconProvider &operator=(FileIconProvider &&) noexcept = delete;
+    DELETE_COPY_MOVE_ROUTINES(FileIconProvider);
 
     ND QString type(QFileInfo const &info) const override
     {

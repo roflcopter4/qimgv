@@ -1,4 +1,5 @@
 #include "DocumentWidget.h"
+#include <memory>
 
 DocumentWidget::DocumentWidget(ViewerWidget *viewWidget, InfoBarProxy *infoBar, QWidget *parent)
     : FloatingWidgetContainer(parent),
@@ -14,7 +15,7 @@ DocumentWidget::DocumentWidget(ViewerWidget *viewWidget, InfoBarProxy *infoBar, 
     layout->setSpacing(0);
     layoutRoot->addLayout(layout);
     setLayout(layoutRoot);
-    setAttribute(Qt::WA_TranslucentBackground, true);
+    setAttribute(Qt::WA_TranslucentBackground);
     setMouseTracking(true);
 
     layout->addWidget(mViewWidget);
@@ -25,9 +26,8 @@ DocumentWidget::DocumentWidget(ViewerWidget *viewWidget, InfoBarProxy *infoBar, 
 
     setInteractionEnabled(true);
 
-    connect(mainPanel, &MainPanel::pinned, this, &DocumentWidget::setPanelPinned);
-
-    connect(settings, &Settings::settingsChanged, this, &DocumentWidget::readSettings);
+    connect(mainPanel, &MainPanel::pinned,         this, &DocumentWidget::setPanelPinned);
+    connect(settings,  &Settings::settingsChanged, this, &DocumentWidget::readSettings);
     readSettings();
 }
 
@@ -48,10 +48,9 @@ void DocumentWidget::readSettings()
 
 void DocumentWidget::onFullscreenModeChanged(bool mode)
 {
-    if (settings->panelPosition() == PanelPosition::TOP || settings->panelPosition() == PanelPosition::RIGHT)
-        mainPanel->setExitButtonEnabled(mode);
-    else
-        mainPanel->setExitButtonEnabled(false);
+    mainPanel->setExitButtonEnabled(settings->panelPosition() == PanelPosition::TOP ||
+                                    settings->panelPosition() == PanelPosition::RIGHT
+                                        ? mode : false);
     mIsFullscreen = mode;
 }
 
@@ -150,9 +149,10 @@ void DocumentWidget::mouseMoveEvent(QMouseEvent *event)
         return;
     }
     // show on hover event
-    if (mPanelEnabled && (mIsFullscreen || !mPanelFullscreenOnly)) {
-        if (mainPanel->triggerRect().contains(event->pos()) && !mAvoidPanelFlag)
-            mainPanel->show();
+    if (mPanelEnabled && (mIsFullscreen || !mPanelFullscreenOnly) &&
+        (mainPanel->triggerRect().contains(event->pos()) && !mAvoidPanelFlag))
+    {
+        mainPanel->show();
     }
     // fade out on leave event
     if (!mainPanel->isHidden()) {
@@ -176,7 +176,8 @@ void DocumentWidget::enterEvent(QEnterEvent *event)
     // we can't track move events outside the window (without additional timer),
     // so just hook the panel event here
     if (!mPanelPinned && mPanelEnabled && (mIsFullscreen || !mPanelFullscreenOnly) &&
-        (mainPanel->triggerRect().contains(mapFromGlobal(QCursor::pos())) && !mAvoidPanelFlag)) {
+        (mainPanel->triggerRect().contains(mapFromGlobal(QCursor::pos())) && !mAvoidPanelFlag))
+    {
         mainPanel->show();
     }
 }

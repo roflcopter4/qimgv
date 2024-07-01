@@ -1,12 +1,11 @@
 #include "CentralWidget.h"
 
-CentralWidget::CentralWidget(DocumentWidget  *aDocWidget,
-                             FolderViewProxy *aFolderView,
-                             QWidget          *parent)
+CentralWidget::CentralWidget(DocumentWidget  *docWidget,
+                             FolderViewProxy *folderView,
+                             QWidget         *parent)
     : QStackedWidget(parent),
-      documentView(aDocWidget),
-      folderView(aFolderView),
-      mode(ViewMode::INVALID)
+      documentView(docWidget),
+      folderView(folderView)
 {
     setMouseTracking(true);
     if (!documentView || !folderView)
@@ -19,9 +18,7 @@ CentralWidget::CentralWidget(DocumentWidget  *aDocWidget,
     showDocumentView();
 }
 
-CentralWidget::~CentralWidget()
-{
-}
+CentralWidget::~CentralWidget() = default;
 
 void CentralWidget::showDocumentView()
 {

@@ -14,7 +14,7 @@ ViewerWidget::ViewerWidget(QWidget *parent)
       zoomIndicator(new ZoomIndicatorOverlayProxy(this)),
       contextMenu(nullptr)
 {
-    setAttribute(Qt::WA_TranslucentBackground, true);
+    setAttribute(Qt::WA_TranslucentBackground);
     setMouseTracking(true);
 
 #ifdef Q_OS_LINUX
@@ -23,7 +23,6 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     if (qgetenv("XDG_SESSION_TYPE") == "wayland")
         mWaylandCursorWorkaround = true;
 #endif
-
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     setLayout(layout);
@@ -43,7 +42,7 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     layout->addWidget(videoPlayer);
     videoPlayer->hide();
 
-    connect(videoPlayer, &VideoPlayer::playbackFinished, this, &ViewerWidget::onVideoPlaybackFinished);
+    connect(videoPlayer,   &VideoPlayer::playbackFinished,           this, &ViewerWidget::onVideoPlaybackFinished);
     connect(videoControls, &VideoControlsProxyWrapper::seekBackward, this, &ViewerWidget::seekBackward);
     connect(videoControls, &VideoControlsProxyWrapper::seekForward,  this, &ViewerWidget::seekForward);
     connect(videoControls, &VideoControlsProxyWrapper::seek,         this, &ViewerWidget::seek);
@@ -51,8 +50,8 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     enableImageViewer();
     setInteractionEnabled(true);
 
-    connect(&cursorTimer, &QTimer::timeout, this, &ViewerWidget::hideCursor);
-    connect(settings, &Settings::settingsChanged, this, &ViewerWidget::readSettings);
+    connect(&cursorTimer, &QTimer::timeout,           this, &ViewerWidget::hideCursor);
+    connect(settings,     &Settings::settingsChanged, this, &ViewerWidget::readSettings);
 
     readSettings();
 }
@@ -136,6 +135,7 @@ void ViewerWidget::disableVideoPlayer()
         disconnect(videoPlayer, &VideoPlayer::positionChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackPosition);
         disconnect(videoPlayer, &VideoPlayer::videoPaused,     videoControls, &VideoControlsProxyWrapper::onPlaybackPaused);
         videoPlayer->setPaused(true);
+
         // even after calling hide() the player sends a few video frames
         // which paints over the imageviewer, causing corruption
         // so we do not HIDE it, but rather just cover it by imageviewer's widget
@@ -143,6 +143,12 @@ void ViewerWidget::disableVideoPlayer()
         if (!videoPlayer->isInitialized())
             videoPlayer->hide();
     }
+}
+
+void ViewerWidget::cleanVideoPlayer()
+{
+    disableVideoPlayer();
+    videoPlayer->hide();
 }
 
 void ViewerWidget::onScaleChanged(qreal scale)
@@ -305,7 +311,7 @@ void ViewerWidget::pauseResumePlayback()
         imageViewer->pauseResume();
 }
 
-void ViewerWidget::seek(int pos)
+void ViewerWidget::seek(int64_t pos)
 {
     if (currentWidget == CurrentWidget::VIDEO_PLAYER) {
         videoPlayer->seek(pos);
@@ -315,7 +321,7 @@ void ViewerWidget::seek(int pos)
     }
 }
 
-void ViewerWidget::seekRelative(int pos)
+void ViewerWidget::seekRelative(int64_t pos)
 {
     if (currentWidget == CurrentWidget::VIDEO_PLAYER)
         videoPlayer->seekRelative(pos);

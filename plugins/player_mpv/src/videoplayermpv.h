@@ -1,6 +1,8 @@
 #pragma once
 
+#include "../../qimgv/Common.h"
 #include "videoplayer.h"
+
 #include <QKeyEvent>
 
 #if defined QIMGV_PLAYER_MPV_LIBRARY
@@ -8,6 +10,8 @@
 #else
  #define TEST_COMMON_DLLSPEC Q_DECL_IMPORT
 #endif
+
+namespace qimgv {
 
 class MpvWidget;
 
@@ -20,18 +24,24 @@ class VideoPlayerMpv final : public VideoPlayer
 
     bool showVideo(QString const &file) override;
     void setVideoUnscaled(bool mode) override;
-    [[nodiscard]] int volume() const override;
+
+    ND int volume() const override;
+
+  protected:
+    void paintEvent(QPaintEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
   public Q_SLOTS:
-    void seek(int pos) override;
-    void seekRelative(int pos) override;
+    void seek(int64_t pos) override;
+    void seekRelative(int64_t pos) override;
     void pauseResume() override;
     void frameStep() override;
     void frameStepBack() override;
     void stop() override;
     void setPaused(bool mode) override;
     void setMuted(bool) override;
-    [[nodiscard]] bool muted() const override;
     void volumeUp() override;
     void volumeDown() override;
     void setVolume(int) override;
@@ -39,12 +49,7 @@ class VideoPlayerMpv final : public VideoPlayer
     void hide() override;
     void setLoopPlayback(bool mode) override;
 
-  protected:
-    void paintEvent(QPaintEvent *event) override;
-
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
+    ND bool muted() const override;
 
   Q_SIGNALS:
     void playbackFinished();
@@ -56,4 +61,6 @@ class VideoPlayerMpv final : public VideoPlayer
     MpvWidget *m_mpv;
 };
 
-extern "C" TEST_COMMON_DLLSPEC VideoPlayer *CreatePlayerWidget();
+} // namespace qimgv
+
+extern "C" ND TEST_COMMON_DLLSPEC qimgv::VideoPlayer *CreatePlayerWidget(QWidget *parent);

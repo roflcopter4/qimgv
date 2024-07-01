@@ -6,7 +6,6 @@
 #include "gui/viewers/ViewerWidget.h"
 #include <QBoxLayout>
 #include <QObject>
-#include <memory>
 
 // TODO: use a template here?
 
@@ -17,10 +16,10 @@ class DocumentWidget : public FloatingWidgetContainer
   public:
     DocumentWidget(ViewerWidget *viewWidget, InfoBarProxy *infoBar, QWidget *parent);
     ~DocumentWidget() override;
+    DELETE_COPY_MOVE_ROUTINES(DocumentWidget);
 
-    ND ViewerWidget        *viewWidget() const;
-    ND ThumbnailStripProxy *thumbPanel() const;
-
+    ND auto viewWidget() const -> ViewerWidget *;
+    ND auto thumbPanel() const -> ThumbnailStripProxy *;
     ND bool panelEnabled() const;
 
     void setFocus();
@@ -31,18 +30,18 @@ class DocumentWidget : public FloatingWidgetContainer
     void setInteractionEnabled(bool mode);
     void allowPanelInit();
 
-  public Q_SLOTS:
-    void onFullscreenModeChanged(bool mode);
-
-  private Q_SLOTS:
-    void setPanelPinned(bool mode);
-    bool panelPinned() const;
-    void readSettings();
-
   protected:
     void enterEvent(QEnterEvent *event) override;
     void leaveEvent(QEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+
+  public Q_SLOTS:
+    void onFullscreenModeChanged(bool mode);
+
+  private Q_SLOTS:
+    void readSettings();
+    void setPanelPinned(bool mode);
+    ND bool panelPinned() const;
 
   private:
     QBoxLayout   *layout;

@@ -21,17 +21,17 @@ class VideoControls : public OverlayWidget
     explicit VideoControls(FloatingWidgetContainer *parent = nullptr);
     ~VideoControls() override;
 
-  public Q_SLOTS:
-    void setPlaybackDuration(int);
-    void setPlaybackPosition(int);
-    void onPlaybackPaused(bool);
-    void onVideoMuted(bool);
-    void setMode(PlaybackMode _mode);
-
   Q_SIGNALS:
-    void seek(int pos);
+    void seek(int64_t pos);
     void seekForward();
     void seekBackward();
+
+  public Q_SLOTS:
+    void setPlaybackDuration(int64_t);
+    void setPlaybackPosition(int64_t);
+    void onPlaybackPaused(bool);
+    void onVideoMuted(bool);
+    void setMode(PlaybackMode);
 
   private Q_SLOTS:
     void readSettings();

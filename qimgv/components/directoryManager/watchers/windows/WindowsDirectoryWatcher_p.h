@@ -7,7 +7,6 @@
 
 #include "../windows/WindowsDirectoryWatcher.h"
 #include "../DirectoryWatcher_p.h"
-#include <QDebug>
 #include <QObject>
 #include <QtClassHelperMacros>
 
@@ -19,14 +18,16 @@ class WindowsDirectoryWatcherPrivate final : public DirectoryWatcherPrivate
   public:
     explicit WindowsDirectoryWatcherPrivate(DirectoryWatcher *qq);
     ~WindowsDirectoryWatcherPrivate() override = default;
+    DEFAULT_COPY_MOVE_ROUTINES(WindowsDirectoryWatcherPrivate);
 
     void setWatchPath(QString path) override;
 
   private:
-    QString oldFileName;
-
     static HANDLE requestDirectoryHandle(QString const &path);
 
   public Q_SLOTS:
     void dispatchNotify(LPBYTE ptr);
+
+  private:
+    QString oldFileName;
 };

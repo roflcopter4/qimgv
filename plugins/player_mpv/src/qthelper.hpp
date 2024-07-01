@@ -2,10 +2,9 @@
 #ifndef LIBMPV_QTHELPER_H_
 #define LIBMPV_QTHELPER_H_
 
+#include "../../qimgv/Common.h"
 #include <mpv/client.h>
-
 #include <cstring>
-
 #include <QVariant>
 #include <QString>
 #include <QList>
@@ -16,15 +15,12 @@
 namespace mpv::qt {
 
 // Wrapper around mpv_handle. Does refcounting under the hood.
+#if 1
 class Handle
 {
     struct container {
-        explicit container(mpv_handle *h) : mpv(h)
-        {}
-        ~container()
-        {
-            mpv_terminate_destroy(mpv);
-        }
+        explicit container(mpv_handle *h) : mpv(h) {}
+        ~container() { mpv_terminate_destroy(mpv); }
         mpv_handle *mpv;
     };
     QSharedPointer<container> sptr;
@@ -38,7 +34,7 @@ class Handle
     // destroying the mpv_handle.
     // Never create multiple wrappers from the same raw mpv_handle; copy the
     // wrapper instead (that's what it's for).
-    static Handle FromRawHandle(mpv_handle *handle)
+    ND static Handle FromRawHandle(mpv_handle *handle)
     {
         Handle h;
         h.sptr = QSharedPointer<container>(new container(handle));
@@ -51,34 +47,52 @@ class Handle
         return sptr ? sptr->mpv : nullptr;
     }
 };
+#else
+class Handle
+{
+    QSharedPointer<::mpv_handle> sptr;
+  public:
+    static Handle FromRawHandle(mpv_handle *handle)
+    {
+        Handle h;
+        h.sptr = QSharedPointer<::mpv_handle>(handle, ::mpv_terminate_destroy);
+        return h;
+    }
+    // Return the raw handle; for use with the libmpv C API.
+    operator mpv_handle *() const
+    {
+        return sptr.get();
+    }
+};
+#endif
 
 inline QVariant node_to_variant(mpv_node const *node)
 {
     switch (node->format) {
     case MPV_FORMAT_STRING:
-        return QVariant(QString::fromUtf8(node->u.string));
+        return {QString::fromUtf8(node->u.string)};
     case MPV_FORMAT_FLAG:
-        return QVariant(static_cast<bool>(node->u.flag));
+        return {static_cast<bool>(node->u.flag)};
     case MPV_FORMAT_INT64:
-        return QVariant(static_cast<qlonglong>(node->u.int64));
+        return {static_cast<qlonglong>(node->u.int64)};
     case MPV_FORMAT_DOUBLE:
-        return QVariant(node->u.double_);
+        return {node->u.double_};
     case MPV_FORMAT_NODE_ARRAY: {
         mpv_node_list *list = node->u.list;
         QVariantList   qlist;
-        for (int n = 0; n < list->num; n++)
+        for (size_t n = 0; n < list->num; ++n)
             qlist.append(node_to_variant(&list->values[n]));
-        return QVariant(qlist);
+        return {qlist};
     }
     case MPV_FORMAT_NODE_MAP: {
         mpv_node_list *list = node->u.list;
         QVariantMap    qmap;
-        for (int n = 0; n < list->num; n++)
+        for (size_t n = 0; n < list->num; ++n)
             qmap.insert(QString::fromUtf8(list->keys[n]), node_to_variant(&list->values[n]));
-        return QVariant(qmap);
+        return {qmap};
     }
     default: // MPV_FORMAT_NONE, unknown values (e.g. future extensions)
-        return QVariant();
+        return {};
     }
 }
 
@@ -94,19 +108,19 @@ struct node_builder
         free_node(&node_);
     }
 
-    [[nodiscard]] mpv_node       *node()       { return &node_; }
-    [[nodiscard]] mpv_node const *node() const { return &node_; }
+    DELETE_COPY_ROUTINES(node_builder);
+    DEFAULT_MOVE_ROUTINES(node_builder);
 
-    Q_DISABLE_COPY(node_builder)
+    ND mpv_node       *node()       { return &node_; }
+    ND mpv_node const *node() const { return &node_; }
 
   private:
-    mpv_node node_;
-
-    [[nodiscard]] static mpv_node_list *create_list(mpv_node *dst, bool is_map, int num)
+    ND static mpv_node_list *create_list(mpv_node *dst, bool is_map, qsizetype num)
     {
-        dst->format         = is_map ? MPV_FORMAT_NODE_MAP : MPV_FORMAT_NODE_ARRAY;
-        mpv_node_list *list = new mpv_node_list();
-        dst->u.list         = list;
+        dst->format = is_map ? MPV_FORMAT_NODE_MAP : MPV_FORMAT_NODE_ARRAY;
+        auto *list  = new mpv_node_list();
+        dst->u.list = list;
+
         if (!list)
             goto err;
         list->values = new mpv_node[num]();
@@ -118,30 +132,32 @@ struct node_builder
                 goto err;
         }
         return list;
+
     err:
         free_node(dst);
         return nullptr;
     }
 
-    [[nodiscard]] static char *dup_qstring(QString const &s)
+    ND static char *dup_qstring(QString const &s)
     {
         auto b = s.toUtf8();
         auto r = new char[b.size() + 1];
         if (r)
-            std::memcpy(r, b.data(), b.size() + 1);
+            memcpy(r, b.data(), b.size() + 1);
         return r;
     }
 
-    [[nodiscard]] static bool test_type(QVariant const &v, QMetaType::Type t)
+    ND static bool test_type(QVariant const &v, QMetaType::Type t)
     {
-#if 0
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         // The Qt docs say: "Although this function is declared as returning
         // "QVariant::Type(obsolete), the return value should be interpreted
         // as QMetaType::Type."
         // So a cast really seems to be needed to avoid warnings (urgh).
         return static_cast<int>(v.type()) == static_cast<int>(t);
-#endif
+#else
         return v.typeId() == t;
+#endif
     }
 
     static void set(mpv_node *dst, QVariant const &src)
@@ -154,8 +170,9 @@ struct node_builder
         } else if (test_type(src, QMetaType::Bool)) {
             dst->format = MPV_FORMAT_FLAG;
             dst->u.flag = src.toBool() ? 1 : 0;
-        } else if (test_type(src, QMetaType::Int) || test_type(src, QMetaType::LongLong) || test_type(src, QMetaType::UInt) ||
-                   test_type(src, QMetaType::ULongLong)) {
+        } else if (test_type(src, QMetaType::Int) || test_type(src, QMetaType::LongLong)
+                   || test_type(src, QMetaType::UInt) || test_type(src, QMetaType::ULongLong))
+        {
             dst->format  = MPV_FORMAT_INT64;
             dst->u.int64 = src.toLongLong();
         } else if (test_type(src, QMetaType::Double)) {
@@ -197,7 +214,6 @@ struct node_builder
         case MPV_FORMAT_STRING:
             delete[] dst->u.string;
             break;
-
         case MPV_FORMAT_NODE_ARRAY:
         case MPV_FORMAT_NODE_MAP: {
             mpv_node_list *list = dst->u.list;
@@ -214,27 +230,25 @@ struct node_builder
             delete list;
             break;
         }
-
         default:
             break;
         }
 
         dst->format = MPV_FORMAT_NONE;
     }
+    
+    mpv_node node_;
 };
 
 /**
  * RAII wrapper that calls mpv_free_node_contents() on the pointer.
  */
 struct node_autofree {
-    mpv_node *ptr;
-    explicit node_autofree(mpv_node *a_ptr)
-        : ptr(a_ptr)
+    std::unique_ptr<::mpv_node, decltype(&::mpv_free_node_contents)> ptr;
+
+    explicit node_autofree(::mpv_node *a_ptr)
+        : ptr(a_ptr, ::mpv_free_node_contents)
     {}
-    ~node_autofree()
-    {
-        mpv_free_node_contents(ptr);
-    }
 };
 
 /**
@@ -243,6 +257,7 @@ struct node_autofree {
  *
  * @deprecated use get_property() instead
  *
+ * @param ctx mpv context
  * @param name the property name
  */
 [[deprecated("Use `set_property()`")]]
@@ -257,7 +272,7 @@ inline QVariant get_property_variant(mpv_handle *ctx, QString const &name)
 
 /**
  * Set the given property as mpv_node converted from the QVariant argument.
-
+ *
  * @deprecated use set_property() instead
  */
 [[deprecated("Use `set_property()`")]]

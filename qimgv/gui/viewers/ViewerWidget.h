@@ -28,6 +28,7 @@ class ViewerWidget final : public FloatingWidgetContainer
     bool showImage(std::unique_ptr<QPixmap> pixmap);
     bool showAnimation(QSharedPointer<QMovie> const &movie);
     void onScalingFinished(std::unique_ptr<QPixmap> scaled);
+    void cleanVideoPlayer();
 
     ND QRect imageRect() const;
     ND qreal currentScale() const;
@@ -96,8 +97,8 @@ class ViewerWidget final : public FloatingWidgetContainer
 
     // video control
     void pauseResumePlayback();
-    void seek(int pos);
-    void seekRelative(int pos);
+    void seek(int64_t pos);
+    void seekRelative(int64_t pos);
     void seekBackward();
     void seekForward();
     void frameStep();
@@ -105,7 +106,6 @@ class ViewerWidget final : public FloatingWidgetContainer
     void toggleMute();
     void volumeUp();
     void volumeDown();
-
     void startPlayback();
     void showContextMenu();
     void hideContextMenu();

@@ -8,7 +8,7 @@ MW::MW(QWidget *parent)
       layout(new QHBoxLayout(this)),
       windowGeometryChangeTimer(new QTimer(this))
 {
-    setAttribute(Qt::WA_TranslucentBackground, true);
+    setAttribute(Qt::WA_TranslucentBackground);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     setMinimumSize(10, 10);
@@ -531,7 +531,8 @@ void MW::close()
 
 void MW::closeEvent(QCloseEvent *event)
 {
-    // catch the close event when user presses X on the window itself
+    viewerWidget->cleanVideoPlayer();
+    // Catch the close event when user presses X on the window itself
     event->accept();
     actionManager->invokeAction(u"exit"_s);
 }

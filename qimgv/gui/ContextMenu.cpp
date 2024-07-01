@@ -7,8 +7,8 @@ ContextMenu::ContextMenu(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowFlags(Qt::WindowType::Popup | Qt::WindowType::WindowStaysOnTopHint);
-    setAttribute(Qt::WidgetAttribute::WA_TranslucentBackground, true);
-    setAttribute(Qt::WidgetAttribute::WA_NoMousePropagation, true);
+    setAttribute(Qt::WidgetAttribute::WA_TranslucentBackground);
+    setAttribute(Qt::WidgetAttribute::WA_NoMousePropagation);
     hide();
 
     // -------------------------------------------------------------------------

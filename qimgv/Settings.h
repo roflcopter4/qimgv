@@ -104,11 +104,14 @@ class Settings final : public QObject
   public:
     static Settings *getInstance();
     ~Settings() override;
+    DELETE_COPY_MOVE_ROUTINES(Settings);
 
-    Settings(Settings const &)                = delete;
-    Settings(Settings &&) noexcept            = delete;
-    Settings &operator=(Settings const &)     = delete;
-    Settings &operator=(Settings &&) noexcept = delete;
+    void loadStylesheet();
+    void readShortcuts(QMap<QString, QString> &shortcuts);
+    void saveShortcuts(QMap<QString, QString> const &shortcuts);
+    void readScripts(QMap<QString, Script> &scripts);
+    void saveScripts(QMap<QString, Script> const &scripts);
+    void sync();
 
     ND auto supportedMimeTypes() const -> QStringList;
     ND auto supportedFormats() const -> QList<QByteArray>;
@@ -117,6 +120,8 @@ class Settings final : public QObject
     ND auto tmpDir() const -> QString;
     ND auto thumbnailCacheDir() const -> QString;
     ND auto videoFormats() const -> QMultiMap<QByteArray, QByteArray> const &;
+    ND bool unlockMinZoom() const;
+    ND static auto defaultZoomLevels() -> QString;
 
     ND bool printLandscape() const;
        void setPrintLandscape(bool mode);
@@ -136,14 +141,6 @@ class Settings final : public QObject
        void setColorScheme(ColorScheme const &scheme);
        void setColorTid(int tid);
        void setColorTid(ColorSchemes tid);
-
-    void loadStylesheet();
-    void readShortcuts(QMap<QString, QString> &shortcuts);
-    void saveShortcuts(QMap<QString, QString> const &shortcuts);
-    void readScripts(QMap<QString, Script> &scripts);
-    void saveScripts(QMap<QString, Script> const &scripts);
-    void sync();
-    ND bool unlockMinZoom() const;
 
     ND auto mpvBinary() const -> QString;
        void setMpvBinary(QString const &path);
@@ -285,23 +282,8 @@ class Settings final : public QObject
     ND bool useSystemColorScheme() const;
        void setUseSystemColorScheme(bool mode);
 
-    ND static auto defaultZoomLevels() -> QString;
-
   private:
     explicit Settings(QObject *parent = nullptr);
-
-#ifndef Q_OS_LINUX
-    QDir mConfDir;
-#endif
-    QDir mTmpDir;
-    QDir mThumbCacheDir;
-
-    ColorScheme mColorScheme;
-    QSettings   settingsConf;
-    QSettings   stateConf;
-    QSettings   themeConf;
-
-    QMultiMap<QByteArray, QByteArray> mVideoFormatsMap; // [mimetype, format]
 
     void loadTheme();
     void saveTheme();
@@ -315,6 +297,19 @@ class Settings final : public QObject
   public Q_SLOTS:
     void sendChangeNotification();
 
+  private:
+#ifndef Q_OS_LINUX
+    QDir mConfDir;
+#endif
+    QDir mTmpDir;
+    QDir mThumbCacheDir;
+
+    ColorScheme mColorScheme;
+    QSettings   settingsConf;
+    QSettings   stateConf;
+    QSettings   themeConf;
+
+    QMultiMap<QByteArray, QByteArray> mVideoFormatsMap; // [mimetype, format]
 };
 
 extern Settings *settings;

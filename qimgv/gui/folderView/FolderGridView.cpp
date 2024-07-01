@@ -10,7 +10,7 @@ FolderGridView::FolderGridView(QWidget *parent)
     offscreenPreloadArea = 2300;
 
     setAcceptDrops(true);
-    viewport()->setAttribute(Qt::WA_OpaquePaintEvent, true);
+    viewport()->setAttribute(Qt::WA_OpaquePaintEvent);
     scene->setBackgroundBrush(settings->colorScheme().folderview);
     setCacheMode(QGraphicsView::CacheBackground);
 
@@ -86,9 +86,9 @@ void FolderGridView::updateScrollbarIndicator()
 {
     if (!thumbnails.count() || !selection().count())
         return;
-    ThumbnailWidget *thumb = thumbnails.at(lastSelected());
-    qreal itemCenter = (thumb->pos().y() + (thumb->height() / 2)) / scene->height();
-    indicator = QRect(2, scrollBar->height() * itemCenter - indicatorSize, scrollBar->width() - 4, indicatorSize);
+    ThumbnailWidget *thumb = thumbnails[lastSelected()];
+    qreal itemCenter = (thumb->pos().y() + (thumb->height() / 2.0)) / scene->height();
+    indicator = QRectF(2.0, scrollBar->height() * itemCenter - indicatorSize, scrollBar->width() - 4, indicatorSize).toRect();
 }
 
 // probably unneeded

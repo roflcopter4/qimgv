@@ -85,7 +85,7 @@ void WindowsDirectoryWatcherPrivate::dispatchNotify(LPBYTE ptr)
     case FILE_ACTION_RENAMED_NEW_NAME: emit q->fileRenamed(oldFileName, name); break;
     case FILE_ACTION_RENAMED_OLD_NAME: oldFileName = std::move(name);          break;
     default:
-        qDebug() << u"Some error, notify->Action" << event->Action;
+        qDebug() << u"Some error, notify->Action:" << event->Action;
         break;
     }
 }

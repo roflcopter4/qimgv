@@ -36,8 +36,7 @@ consteval QStringView operator""_sv(char16_t const *str, size_t size) noexcept
 
 } // namespace util
 
-using Qt::Literals::StringLiterals::operator ""_s;
-using Qt::Literals::StringLiterals::operator ""_ba;
+using namespace Qt::Literals::StringLiterals;
 using util::Literals::StringLiterals::operator""_sv;
 #endif
 
@@ -67,8 +66,8 @@ using namespace std::literals; //NOLINT(clang-diagnostic-header-hygiene)
     CLASS(CLASS &&) noexcept            = default; /*NOLINT(bugprone-macro-parentheses)*/ \
     CLASS &operator=(CLASS &&) noexcept = default  /*NOLINT(bugprone-macro-parentheses)*/
 
-#define DEFAULT_COPY_MOVE_CONSTRUCTORS(CLASS) \
-    DEFAULT_COPY_ROUTINES(CLASS);             \
+#define DEFAULT_COPY_MOVE_ROUTINES(CLASS) \
+    DEFAULT_COPY_ROUTINES(CLASS);         \
     DEFAULT_MOVE_ROUTINES(CLASS)
 
 

@@ -3,22 +3,26 @@
 #include <QThread>
 
 
+WindowsDirectoryWorker::WindowsDirectoryWorker()
+{
+    ::InitializeCriticalSection(&criticalSection);
+}
+
+WindowsDirectoryWorker::~WindowsDirectoryWorker()
+{
+    ::DeleteCriticalSection(&criticalSection);
+}
+
 void WindowsDirectoryWorker::setDirectoryHandle(HANDLE handle)
 {
-    freeHandle();
+    ::EnterCriticalSection(&criticalSection);
+    if (hDir != INVALID_HANDLE_VALUE) {
+        ::CancelIoEx(hDir, nullptr);
+        ::CloseHandle(hDir);
+    }
     hDir = handle;
+    ::LeaveCriticalSection(&criticalSection);
 }
-
-void WindowsDirectoryWorker::freeHandle()
-{
-    if (!hDir || hDir == INVALID_HANDLE_VALUE)
-        return;
-    HANDLE tmp = hDir;
-    hDir       = INVALID_HANDLE_VALUE;
-    ::CancelIoEx(tmp, nullptr);
-    ::CloseHandle(tmp);
-}
-
 
 void WindowsDirectoryWorker::iterateDirectoryEvents(PCBYTE buffer)
 {
@@ -28,7 +32,7 @@ void WindowsDirectoryWorker::iterateDirectoryEvents(PCBYTE buffer)
             size_t size  = sizeof(FILE_NOTIFY_INFORMATION) + fni->FileNameLength * sizeof(wchar_t);
             auto   event = std::make_unique<BYTE[]>(size);
             memcpy(event.get(), fni, size);
-            emit notifyEvent(event.release());
+            Q_EMIT notifyEvent(event.release());
         }
         if (fni->NextEntryOffset == 0)
             break;
@@ -64,23 +68,39 @@ void WindowsDirectoryWorker::run()
             &ovl,
             nullptr
         );
+        if (!isRunning.load(std::memory_order::seq_cst))
+            break;
 
-        if (!bPending) {
-            DWORD error = ::GetLastError();
-            if (error == ERROR_IO_INCOMPLETE)
-                qDebug() << u"ERROR_IO_INCOMPLETE";
-        }
-        else if (::GetOverlappedResult(hDir, &ovl, &dwBytes, false)) {
-            if (dwBytes != 0)
-                iterateDirectoryEvents(buffer.get());
+        DWORD error;
+        if (bPending) {
+            if (::GetOverlappedResult(hDir, &ovl, &dwBytes, false)) {
+                error = ::GetLastError();
+                if (dwBytes != 0)
+                    iterateDirectoryEvents(buffer.get());
+                if (error == ERROR_IO_INCOMPLETE || error == ERROR_NOTIFY_ENUM_DIR)
+                    goto BadIO;
+            }
+        } else {
+            error = ::GetLastError();
+            if (error == ERROR_IO_INCOMPLETE || error == ERROR_NOTIFY_ENUM_DIR) {
+            BadIO:
+                ::MessageBoxW(nullptr,
+                    L"An asynchronous IO operation in WindowDirectoryWorker has not completed due to insufficient buffer size. "
+                    L"The event will be ignored and files listed in the current folder will be out of date. You can re-synchronize "
+                    L"it by reloading the folder entirely.",
+                    L"Error", MB_ICONERROR | MB_TASKMODAL | MB_TOPMOST | MB_SETFOREGROUND
+                );
+            }
         }
 
         ::Sleep(POLL_RATE_MS);
     }
 
+    ::EnterCriticalSection(&criticalSection);
     if (hDir && hDir != INVALID_HANDLE_VALUE) {
         ::CloseHandle(hDir);
         hDir = INVALID_HANDLE_VALUE;
     }
+    ::LeaveCriticalSection(&criticalSection);
     QThread::currentThread()->exit();
 }

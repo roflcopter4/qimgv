@@ -4,6 +4,7 @@ BookmarksItem::BookmarksItem(QString const &dirName, QString const &dirPath, QWi
     : QWidget(parent),
       dirName(dirName),
       dirPath(dirPath),
+      spacer(new QSpacerItem(16, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Fixed)),
       layout(new QHBoxLayout(this)),
       mHighlighted(false)
 {
@@ -12,9 +13,7 @@ BookmarksItem::BookmarksItem(QString const &dirName, QString const &dirPath, QWi
     setAcceptDrops(true);
     dirNameLabel.setText(dirName);
 
-    spacer = new QSpacerItem(16, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-
-    folderIconWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    folderIconWidget.setAttribute(Qt::WA_TransparentForMouseEvents);
     folderIconWidget.setIconPath(u":/res/icons/common/menuitem/folder16.png"_s);
     folderIconWidget.setMinimumSize(16, 16);
     folderIconWidget.installEventFilter(this);

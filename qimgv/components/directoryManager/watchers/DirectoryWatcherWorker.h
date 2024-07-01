@@ -9,15 +9,17 @@ class DirectoryWatcherWorker : public QObject
   public:
     DirectoryWatcherWorker();
     ~DirectoryWatcherWorker() override = default;
-    virtual void run() = 0;
+    DEFAULT_COPY_MOVE_ROUTINES(DirectoryWatcherWorker);
 
-  public Q_SLOTS:
-    void setRunning(bool running);
+    virtual void run() = 0;
 
   Q_SIGNALS:
     void error(QString const &errorMessage);
     void started();
     void finished();
+
+  public Q_SLOTS:
+    void setRunning(bool running);
 
   protected:
     std::atomic_bool isRunning = false;

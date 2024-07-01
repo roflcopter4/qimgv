@@ -12,7 +12,7 @@
 #include <QObject>
 #include <QtClassHelperMacros>
 
-class WindowsDirectoryWorker : public DirectoryWatcherWorker
+class WindowsDirectoryWorker final : public DirectoryWatcherWorker
 {
     Q_OBJECT
 
@@ -20,15 +20,14 @@ class WindowsDirectoryWorker : public DirectoryWatcherWorker
     using PCFILE_NOTIFY_INFORMATION = FILE_NOTIFY_INFORMATION const *;
 
   public:
-    WindowsDirectoryWorker() = default;
-    ~WindowsDirectoryWorker() override = default;
+    WindowsDirectoryWorker();
+    ~WindowsDirectoryWorker() override;
     DELETE_COPY_MOVE_ROUTINES(WindowsDirectoryWorker);
 
     void setDirectoryHandle(HANDLE handle);
     void run() override;
 
   private:
-    void freeHandle();
     void iterateDirectoryEvents(PCBYTE buffer);
 
   Q_SIGNALS:
@@ -36,10 +35,11 @@ class WindowsDirectoryWorker : public DirectoryWatcherWorker
 
   private:
     static constexpr DWORD POLL_RATE_MS = 100;
-    static constexpr DWORD BUFFER_SIZE  = 65536;
+    static constexpr DWORD BUFFER_SIZE  = 1 << 18;
+    //static constexpr DWORD BUFFER_SIZE  = 256;
 
-    HANDLE hDir          = INVALID_HANDLE_VALUE;
-    DWORD  bytesReturned = 0;
+    volatile HANDLE hDir = INVALID_HANDLE_VALUE;
+    CRITICAL_SECTION criticalSection;
 };
 
 #endif // WINDOWSWATCHERWORKER_H

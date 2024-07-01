@@ -15,8 +15,7 @@ class WatcherEvent
     WatcherEvent(QString const &name, int timerId, Type type = Type::None);
     WatcherEvent(QString name, uint32_t cookie, int timerId, Type type = Type::None);
     ~WatcherEvent();
-
-    DEFAULT_COPY_MOVE_CONSTRUCTORS(WatcherEvent);
+    DEFAULT_COPY_MOVE_ROUTINES(WatcherEvent);
 
     ND auto name() const -> QString;
        void setName(QString const &name);

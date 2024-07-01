@@ -20,62 +20,64 @@ enum class ThumbnailStyle {
     COMPACT,
 };
 
-class ThumbnailWidgetCmp : public QGraphicsWidget
+class ThumbnailWidgetCmp final : public QGraphicsWidget
 {
     Q_OBJECT
 
   public:
     explicit ThumbnailWidgetCmp(QGraphicsItem *parent = nullptr);
     ~ThumbnailWidgetCmp() override;
+    DELETE_COPY_MOVE_ROUTINES(ThumbnailWidgetCmp);
 
     enum { Type = UserType + 1 };
     ND int type() const override { return Type; }
 
-    void  setThumbnail(QSharedPointer<Thumbnail> _thumbnail);
-    void  setHighlighted(bool mode);
-    bool  isHighlighted();
-    void  setDropHovered(bool mode);
-    bool  isDropHovered();
-    qreal width();
-    qreal height();
-    void  setThumbnailSize(int size);
-    void  setGeometry(QRectF const &rect) override;
-
-    ND virtual QRectF geometry() const;
+    ND QRectF geometry() const;
+       void   setGeometry(QRectF const &rect) override;
+    ND int    thumbnailSize() const;
+       void   setThumbnailSize(int size);
+    ND bool   isDropHovered() const;
+       void   setDropHovered(bool mode);
+    ND bool   isHighlighted() const;
+       void   setHighlighted(bool mode);
 
     ND QRectF boundingRect() const override;
     ND QSizeF effectiveSizeHint(Qt::SizeHint which, QSizeF const &constraint = QSizeF()) const;
+    ND qreal  height() const;
+    ND qreal  width() const;
 
-    void setThumbStyle(ThumbnailStyle _style);
-    void setPadding(int _padding);
-    void setMargins(int _marginX, int _marginY);
-    int  thumbnailSize();
-    void reset();
+    void setThumbnail(QSharedPointer<Thumbnail> newThumbnail);
+    void setThumbStyle(ThumbnailStyle style);
+    void setPadding(int newPadding);
+    void setMargins(int newMarginX, int newMarginY);
     void unsetThumbnail();
+    void reset();
 
   protected:
     void setupTextLayout();
-    void drawThumbnail(QPainter *painter, QPixmap const *pixmap);
-    void drawIcon(QPainter *painter, QPixmap const *pixmap);
-    void drawHighlight(QPainter *painter);
-    void drawHoverBg(QPainter *painter);
-    void drawHoverHighlight(QPainter *painter);
-    void drawLabel(QPainter *painter);
-    void drawDropHover(QPainter *painter);
-    void drawSingleLineText(QPainter *painter, QFont &_fnt, QRect rect, QString text, QColor const &color, bool center = true);
+    void drawThumbnail(QPainter *painter, QPixmap const *pixmap) const;
+    void drawIcon(QPainter *painter, QPixmap const *pixmap) const;
+    void drawHighlight(QPainter *painter) const;
+    void drawHoverBg(QPainter *painter) const;
+    void drawHoverHighlight(QPainter *painter) const;
+    void drawLabel(QPainter *painter) const;
+    void drawDropHover(QPainter *painter) const;
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
-    void paint(QPainter *painter, QStyleOptionGraphicsItem const *item, QWidget *widget) override;
+    void paint(QPainter *painter, QStyleOptionGraphicsItem const *option, QWidget *widget) override;
     void updateGeometry() override;
     void setHovered(bool);
-    bool isHovered();
     void updateBackgroundRect();
     void updateThumbnailDrawPosition();
     void updateBoundingRect();
 
+    ND bool   isHovered() const;
     ND QSizeF sizeHint(Qt::SizeHint which, QSizeF const &constraint = QSizeF()) const override;
 
-    QSharedPointer<Thumbnail> thumbnail;
+    static void drawSingleLineText(QPainter *painter, QFont const &fnt, QRect rect, QString const &text, QColor const &color, bool center = true);
+
+   private:
+    QSharedPointer<Thumbnail> thumbnail = nullptr;
 
     QRectF bgRect;
     QRectF mBoundingRect;
@@ -85,18 +87,18 @@ class ThumbnailWidgetCmp : public QGraphicsWidget
     QRect  drawRectCentered;
     QRect  nameRect;
     QRect  infoRect;
-    int    mThumbnailSize;
-    int    padding;
-    int    marginX;
-    int    marginY;
-    int    labelSpacing;
-    int    textHeight;
-    bool   highlighted;
-    bool   hovered;
-    bool   dropHovered;
+    int    mThumbnailSize = 100;
+    int    padding        = 5;
+    int    marginX        = 2;
+    int    marginY        = 2;
+    int    labelSpacing   = 9;
+    int    textHeight     = 5;
+    bool   highlighted    = false;
+    bool   hovered        = false;
+    bool   dropHovered    = false;
 
-    ThumbnailStyle thumbStyle;
+    ThumbnailStyle thumbStyle = ThumbnailStyle::SIMPLE;
 
   public:
-    bool isLoaded;
+    bool isLoaded = false;
 };

@@ -17,8 +17,7 @@ class IDirectoryView
 
     IDirectoryView() = default;
     virtual ~IDirectoryView() = default;
-
-    DEFAULT_COPY_MOVE_CONSTRUCTORS(IDirectoryView);
+    DEFAULT_COPY_MOVE_ROUTINES(IDirectoryView);
 
     virtual void populate(qsizetype)            = 0;
     virtual void select(SelectionList)          = 0;
