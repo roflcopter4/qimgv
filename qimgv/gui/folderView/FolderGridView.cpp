@@ -4,8 +4,7 @@
 
 FolderGridView::FolderGridView(QWidget *parent)
     : ThumbnailView(Qt::Vertical, parent),
-      holderWidget(new QGraphicsWidget()),
-      shiftedCol(-1)
+      holderWidget(new QGraphicsWidget())
 {
     offscreenPreloadArea = 2300;
 
@@ -22,8 +21,6 @@ FolderGridView::FolderGridView(QWidget *parent)
     setupLayout();
     connect(this, &ThumbnailView::itemActivated, this, &FolderGridView::onitemSelected);
 }
-
-FolderGridView::~FolderGridView() = default;
 
 void FolderGridView::dropEvent(QDropEvent *event)
 {

@@ -19,20 +19,24 @@ class RenameOverlay : public OverlayWidget
   public:
     explicit RenameOverlay(FloatingWidgetContainer *parent);
     ~RenameOverlay() override;
+    DELETE_COPY_MOVE_ROUTINES(RenameOverlay);
+
+  protected:
+    void keyPressEvent(QKeyEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void recalculateGeometry() override;
+
+  private:
+    void selectName();
+
+  Q_SIGNALS:
+    void renameRequested(QString name);
 
   public Q_SLOTS:
     void setName(QString const &name);
     void setBackdropEnabled(bool mode);
     void show();
     void hide();
-
-  Q_SIGNALS:
-    void renameRequested(QString name);
-
-  protected:
-    void keyPressEvent(QKeyEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void recalculateGeometry() override;
 
   private Q_SLOTS:
     void rename();
@@ -43,6 +47,4 @@ class RenameOverlay : public OverlayWidget
     QString            origName;
     QList<QString>     keyFilter;
     bool               backdrop = false;
-
-    void selectName();
 };

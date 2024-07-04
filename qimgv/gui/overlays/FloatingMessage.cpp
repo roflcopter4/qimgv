@@ -4,8 +4,8 @@
 FloatingMessage::FloatingMessage(FloatingWidgetContainer *parent)
     : OverlayWidget(parent),
       ui(new Ui::FloatingMessage),
-      preferredPosition(FloatingWidgetPosition::BOTTOM),
-      hideDelay(700)
+      hideDelay(700),
+      preferredPosition(FloatingWidget::Position::Bottom)
 {
     ui->setupUi(this);
 
@@ -14,7 +14,7 @@ FloatingMessage::FloatingMessage(FloatingWidgetContainer *parent)
 
     setFadeEnabled(true);
     setFadeDuration(300);
-    setIcon(FloatingMessageIcon::NONE);
+    setIcon(FloatingMessage::Icon::None);
 
     setAccessibleName(u"FloatingMessage"_s);
     connect(&visibilityTimer, &QTimer::timeout, this, &FloatingMessage::hideAnimated);
@@ -37,25 +37,25 @@ void FloatingMessage::readSettings()
 #if 0
     // don't interfere with the main panel
     if (settings->panelEnabled() && settings->panelPosition() == PanelHPosition::PANEL_BOTTOM)
-        preferredPosition = FloatingWidgetPosition::TOP;
+        preferredPosition = FloatingWidget::Position::Top;
     else
-        preferredPosition = FloatingWidgetPosition::BOTTOM;
+        preferredPosition = FloatingWidget::Position::Bottom;
 #endif
 }
 
-void FloatingMessage::showMessage(QString const &text, FloatingWidgetPosition Position, FloatingMessageIcon icon, int duration)
+void FloatingMessage::showMessage(QString const &text, FloatingWidget::Position Position, FloatingMessage::Icon icon, int duration)
 {
     setPosition(Position);
     doShowMessage(text, icon, duration);
 }
 
-void FloatingMessage::showMessage(QString const &text, FloatingMessageIcon icon, int duration)
+void FloatingMessage::showMessage(QString const &text, FloatingMessage::Icon icon, int duration)
 {
     setPosition(preferredPosition);
     doShowMessage(text, icon, duration);
 }
 
-void FloatingMessage::doShowMessage(QString const &text, FloatingMessageIcon icon, int duration)
+void FloatingMessage::doShowMessage(QString const &text, FloatingMessage::Icon icon, int duration)
 {
     hideDelay = duration;
     setIcon(icon);
@@ -71,28 +71,28 @@ void FloatingMessage::setText(QString const &text)
     update();
 }
 
-void FloatingMessage::setIcon(FloatingMessageIcon icon)
+void FloatingMessage::setIcon(FloatingMessage::Icon icon)
 {
     switch (icon) {
-    case FloatingMessageIcon::NONE:
-    case FloatingMessageIcon::WARNING:
-    case FloatingMessageIcon::ERROR:
+    case FloatingMessage::Icon::None:
+    case FloatingMessage::Icon::Warning:
+    case FloatingMessage::Icon::Error:
         // ui->iconLabel->setIconPath(u":/res/icons/common/notifications/error16.png"_s);
         ui->iconLabel->hide();
         break;
-    case FloatingMessageIcon::DIRECTORY:
+    case FloatingMessage::Icon::Directory:
         ui->iconLabel->show();
         ui->iconLabel->setIconPath(u":/res/icons/common/buttons/panel/folder16.png"_s);
         break;
-    case FloatingMessageIcon::LEFT_EDGE:
+    case FloatingMessage::Icon::LeftEdge:
         ui->iconLabel->show();
         ui->iconLabel->setIconPath(u":/res/icons/common/notifications/dir_start20.png"_s);
         break;
-    case FloatingMessageIcon::RIGHT_EDGE:
+    case FloatingMessage::Icon::RightEdge:
         ui->iconLabel->show();
         ui->iconLabel->setIconPath(u":/res/icons/common/notifications/dir_end20.png"_s);
         break;
-    case FloatingMessageIcon::SUCCESS:
+    case FloatingMessage::Icon::Success:
         ui->iconLabel->show();
         ui->iconLabel->setIconPath(u":/res/icons/common/notifications/success16.png"_s);
         break;

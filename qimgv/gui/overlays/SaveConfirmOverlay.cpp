@@ -25,9 +25,9 @@ void SaveConfirmOverlay::readSettings()
 {
     // don't interfere with the main panel
     if (settings->panelEnabled() && settings->panelPosition() == PanelPosition::BOTTOM)
-        setPosition(FloatingWidgetPosition::TOPRIGHT);
+        setPosition(FloatingWidget::Position::TopRight);
     else
-        setPosition(FloatingWidgetPosition::BOTTOMRIGHT);
+        setPosition(FloatingWidget::Position::BottomRight);
     update();
 }
 

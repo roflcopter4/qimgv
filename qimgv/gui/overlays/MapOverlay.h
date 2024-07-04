@@ -22,24 +22,25 @@ class MapOverlay : public QWidget
 
     explicit MapOverlay(QWidget *parent = nullptr);
     ~MapOverlay() override;
-
-    void   resize(int size);
-    ND int size() const;
+    DELETE_COPY_MOVE_ROUTINES(MapOverlay);
 
     void animateVisible(bool visible);
     void enableVisibility(bool);
 
-    void     setOpacity(qreal opacity);
+       void resize(int size);
+    ND int  size() const;
+
+       void  setOpacity(qreal opacity);
     ND qreal opacity() const;
 
-    void    setLocation(Location l);
+       void setLocation(Location l);
     ND auto location() const -> Location;
 
-    void   setMargin(int margin);
-    ND int margin() const;
+       void setMargin(int margin);
+    ND int  margin() const;
 
-    void   setY(int y);
-    ND int y() const;
+       void setY(int y);
+    ND int  y() const;
 
     /**
      * @brief Updating navigation map
@@ -52,14 +53,9 @@ class MapOverlay : public QWidget
      */
     void updatePosition();
 
-    /**
-     * Unit test functions
-     */
+    /* Unit test functions */
     ND QSizeF inner() const;
     ND QSizeF outer() const;
-
-  signals:
-    void positionChanged(float x, float y);
 
   protected:
     void enterEvent(QEnterEvent *event) override;
@@ -69,6 +65,9 @@ class MapOverlay : public QWidget
     void mouseReleaseEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
+
+  Q_SIGNALS:
+    void positionChanged(float x, float y);
 
   private:
     class MapOverlayPrivate;

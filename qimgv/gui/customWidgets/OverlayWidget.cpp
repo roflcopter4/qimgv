@@ -50,7 +50,7 @@ int OverlayWidget::verticalMargin() const
     return mVerticalMargin;
 }
 
-void OverlayWidget::setPosition(FloatingWidgetPosition pos)
+void OverlayWidget::setPosition(FloatingWidget::Position pos)
 {
     position = pos;
     recalculateGeometry();
@@ -95,39 +95,39 @@ void OverlayWidget::recalculateGeometry()
     QPoint pos(0, 0);
 
     switch (position) {
-    case FloatingWidgetPosition::LEFT:
+    case FloatingWidget::Position::Left:
         pos.setX(mHorizontalMargin);
         pos.setY((containerSize().height() - newRect.height()) / 2);
         break;
-    case FloatingWidgetPosition::RIGHT:
+    case FloatingWidget::Position::Right:
         pos.setX(containerSize().width() - newRect.width() - mHorizontalMargin);
         pos.setY((containerSize().height() - newRect.height()) / 2);
         break;
-    case FloatingWidgetPosition::BOTTOM:
+    case FloatingWidget::Position::Bottom:
         pos.setX((containerSize().width() - newRect.width()) / 2);
         pos.setY(containerSize().height() - newRect.height() - mVerticalMargin);
         break;
-    case FloatingWidgetPosition::TOP:
+    case FloatingWidget::Position::Top:
         pos.setX((containerSize().width() - newRect.width()) / 2);
         pos.setY(mVerticalMargin);
         break;
-    case FloatingWidgetPosition::TOPLEFT:
+    case FloatingWidget::Position::TopLeft:
         pos.setX(mHorizontalMargin);
         pos.setY(mVerticalMargin);
         break;
-    case FloatingWidgetPosition::TOPRIGHT:
+    case FloatingWidget::Position::TopRight:
         pos.setX(containerSize().width() - newRect.width() - mHorizontalMargin);
         pos.setY(mVerticalMargin);
         break;
-    case FloatingWidgetPosition::BOTTOMLEFT:
+    case FloatingWidget::Position::BottomLeft:
         pos.setX(mHorizontalMargin);
         pos.setY(containerSize().height() - newRect.height() - mVerticalMargin);
         break;
-    case FloatingWidgetPosition::BOTTOMRIGHT:
+    case FloatingWidget::Position::BottomRight:
         pos.setX(containerSize().width() - newRect.width() - mHorizontalMargin);
         pos.setY(containerSize().height() - newRect.height() - mVerticalMargin);
         break;
-    case FloatingWidgetPosition::CENTER:
+    case FloatingWidget::Position::Center:
         pos.setX((containerSize().width() - newRect.width()) / 2);
         pos.setY((containerSize().height() - newRect.height()) / 2);
         break;

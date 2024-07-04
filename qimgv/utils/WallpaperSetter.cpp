@@ -10,7 +10,7 @@ void WallpaperSetter::setWallpaper(QString const &path)
         const_cast<LPVOID>(static_cast<LPCVOID>(path.utf16())),
         SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE);
     qDebug() << u"Wallpaper changed:" << (ok ? u"true" : u"false");
-#elif defined __linux__
+#elif defined Q_OS_LINUX
     QString command;
     command =
         u"qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \'var allDesktops = desktops(); print "

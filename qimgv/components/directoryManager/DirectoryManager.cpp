@@ -145,6 +145,15 @@ bool DirectoryManager::setDirectory(QString const &dirPath)
         qDebug() << u"[DirectoryManager] Error - cannot read directory.";
         return false;
     }
+    if (path.isSymbolicLink()) {
+        auto targetPath = QFileInfo(path.symLinkTarget());
+        if (!targetPath.exists()) {
+            qDebug() << u"[DirectoryManager] Error - path" << dirPath << u"is a dangling symbolic link. Target path"
+                     << targetPath.filePath() << "does not exist.";
+            return false;
+        }
+    }
+
     mListSource    = FileListSource::DIRECTORY;
     mDirectoryPath = dirPath;
 

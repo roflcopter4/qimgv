@@ -7,7 +7,7 @@ ChangelogWindow::ChangelogWindow(FloatingWidgetContainer *parent)
 {
     ui->setupUi(this);
     hide();
-    setPosition(FloatingWidgetPosition::CENTER);
+    setPosition(FloatingWidget::Position::Center);
     connect(ui->closeButton, &QPushButton::pressed, this, &ChangelogWindow::hide);
     connect(ui->shutUpButton, &QPushButton::pressed, this, &ChangelogWindow::hideAndShutUp);
 

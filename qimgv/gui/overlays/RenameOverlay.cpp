@@ -12,7 +12,7 @@ RenameOverlay::RenameOverlay(FloatingWidgetContainer *parent)
     ui->okButton->setHighlighted(true);
     ui->closeButton->setIconPath(u":res/icons/common/overlay/close-dim16.png"_s);
     ui->headerIcon->setIconPath(u":res/icons/common/overlay/edit16.png"_s);
-    setPosition(FloatingWidgetPosition::CENTER);
+    setPosition(FloatingWidget::Position::Center);
     setAcceptKeyboardFocus(true);
 
     keyFilter.append(actionManager->shortcutsForAction(u"exit"_s));

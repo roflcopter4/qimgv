@@ -14,6 +14,7 @@ class FullscreenInfoOverlayProxy
   public:
     explicit FullscreenInfoOverlayProxy(FloatingWidgetContainer *parent = nullptr);
     ~FullscreenInfoOverlayProxy();
+    DELETE_COPY_MOVE_ROUTINES(FullscreenInfoOverlayProxy);
 
     void init();
     void show();

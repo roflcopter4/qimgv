@@ -13,7 +13,7 @@ ZoomIndicatorOverlay::ZoomIndicatorOverlay(FloatingWidgetContainer *parent)
     label.setAlignment(Qt::AlignCenter);
 
     setLayout(layout);
-    setPosition(FloatingWidgetPosition::BOTTOMLEFT);
+    setPosition(FloatingWidget::Position::BottomLeft);
     setHorizontalMargin(0);
     setVerticalMargin(16);
 

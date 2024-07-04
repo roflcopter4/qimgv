@@ -105,9 +105,9 @@ void CopyOverlay::readSettings()
 {
     // don't interfere with the main panel
     if (settings->panelEnabled() && settings->panelPosition() == PanelPosition::BOTTOM)
-        setPosition(FloatingWidgetPosition::TOPLEFT);
+        setPosition(FloatingWidget::Position::TopLeft);
     else
-        setPosition(FloatingWidgetPosition::BOTTOMLEFT);
+        setPosition(FloatingWidget::Position::BottomLeft);
     update();
 }
 

@@ -21,7 +21,7 @@ MW::MW(QWidget *parent)
     setWindowTitle(QCoreApplication::applicationName() + u' ' + QCoreApplication::applicationVersion());
     setMouseTracking(true);
     setAcceptDrops(true);
-    setAccessibleName(u"mainwindow"_s);
+    setAccessibleName(u"MainWindow"_s);
 
     windowGeometryChangeTimer->setSingleShot(true);
     windowGeometryChangeTimer->setInterval(30);
@@ -40,8 +40,8 @@ MW::MW(QWidget *parent)
 MW::~MW()
 {
     delete infoBarFullscreen; infoBarFullscreen = nullptr;
-    delete imageInfoOverlay; imageInfoOverlay = nullptr;
-    delete floatingMessage; floatingMessage = nullptr;
+    delete imageInfoOverlay;  imageInfoOverlay = nullptr;
+    delete floatingMessage;   floatingMessage = nullptr;
 }
 
 /*                                                             |--[ImageViewer]
@@ -960,57 +960,57 @@ ThumbnailStripProxy *MW::getThumbnailPanel() const
 // todo: this is crap
 void MW::showMessageDirectory(QString const &dirName)
 {
-    floatingMessage->showMessage(dirName, FloatingMessageIcon::DIRECTORY, 1700);
+    floatingMessage->showMessage(dirName, FloatingMessage::Icon::Directory, 1700);
 }
 
 void MW::showMessageDirectoryEnd()
 {
-    floatingMessage->showMessage(QString(), FloatingWidgetPosition::RIGHT, FloatingMessageIcon::RIGHT_EDGE, 400);
+    floatingMessage->showMessage(u""_s, FloatingWidget::Position::Right, FloatingMessage::Icon::RightEdge, 400);
 }
 
 void MW::showMessageDirectoryStart()
 {
-    floatingMessage->showMessage(QString(), FloatingWidgetPosition::LEFT, FloatingMessageIcon::LEFT_EDGE, 400);
+    floatingMessage->showMessage(u""_s, FloatingWidget::Position::Left, FloatingMessage::Icon::LeftEdge, 400);
 }
 
 void MW::showMessageFitWindow()
 {
-    floatingMessage->showMessage(tr("Fit Window"), FloatingMessageIcon::NONE, 350);
+    floatingMessage->showMessage(tr("Fit Window"), FloatingMessage::Icon::None, 350);
 }
 
 void MW::showMessageFitWidth()
 {
-    floatingMessage->showMessage(tr("Fit Width"), FloatingMessageIcon::NONE, 350);
+    floatingMessage->showMessage(tr("Fit Width"), FloatingMessage::Icon::None, 350);
 }
 
 void MW::showMessageFitOriginal()
 {
-    floatingMessage->showMessage(tr("Fit 1:1"), FloatingMessageIcon::NONE, 350);
+    floatingMessage->showMessage(tr("Fit 1:1"), FloatingMessage::Icon::None, 350);
 }
 
 void MW::showMessage(QString const &text)
 {
-    floatingMessage->showMessage(text, FloatingMessageIcon::NONE, 1500);
+    floatingMessage->showMessage(text, FloatingMessage::Icon::None, 1500);
 }
 
 void MW::showMessage(QString const &text, int duration)
 {
-    floatingMessage->showMessage(text, FloatingMessageIcon::NONE, duration);
+    floatingMessage->showMessage(text, FloatingMessage::Icon::None, duration);
 }
 
 void MW::showMessageSuccess(QString const &text)
 {
-    floatingMessage->showMessage(text, FloatingMessageIcon::SUCCESS, 1500);
+    floatingMessage->showMessage(text, FloatingMessage::Icon::Success, 1500);
 }
 
 void MW::showWarning(QString const &text)
 {
-    floatingMessage->showMessage(text, FloatingMessageIcon::WARNING, 1500);
+    floatingMessage->showMessage(text, FloatingMessage::Icon::Warning, 1500);
 }
 
 void MW::showError(QString const &text)
 {
-    floatingMessage->showMessage(text, FloatingMessageIcon::ERROR, 2800);
+    floatingMessage->showMessage(text, FloatingMessage::Icon::Error, 2800);
 }
 
 bool MW::showConfirmation(QString const &title, QString const &msg, QMessageBox::StandardButton defaultButton)

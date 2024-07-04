@@ -26,7 +26,7 @@ class SSideBar : public QWidget
     void selectEntryAt(QPoint pos);
 
   Q_SIGNALS:
-    void entrySelected(qsizetype);
+    void entrySelected(int);
 
   protected:
     void mousePressEvent(QMouseEvent *event) override;

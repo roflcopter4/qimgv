@@ -15,8 +15,6 @@ ImageInfoOverlayProxy::~ImageInfoOverlayProxy()
     = default;
 #endif
 
-
-
 void ImageInfoOverlayProxy::show()
 {
     init();

@@ -121,7 +121,6 @@ class Settings final : public QObject
     ND auto thumbnailCacheDir() const -> QString;
     ND auto videoFormats() const -> QMultiMap<QByteArray, QByteArray> const &;
     ND bool unlockMinZoom() const;
-    ND static auto defaultZoomLevels() -> QString;
 
     ND bool printLandscape() const;
        void setPrintLandscape(bool mode);
@@ -281,6 +280,8 @@ class Settings final : public QObject
        void setTrackpadDetection(bool mode);
     ND bool useSystemColorScheme() const;
        void setUseSystemColorScheme(bool mode);
+
+    ND static QString defaultZoomLevels();
 
   private:
     explicit Settings(QObject *parent = nullptr);

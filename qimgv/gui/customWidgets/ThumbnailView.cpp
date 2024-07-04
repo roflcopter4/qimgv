@@ -4,7 +4,7 @@ ThumbnailView::ThumbnailView(Qt::Orientation orientation, QWidget *parent)
     : QGraphicsView(parent),
       scene(new QGraphicsScene(this))
 {
-    setAccessibleName(u"thumbnailView"_s);
+    setAccessibleName(u"ThumbnailView"_s);
     setMouseTracking(true);
     setAcceptDrops(false);
     setScene(scene);
@@ -406,11 +406,9 @@ void ThumbnailView::loadVisibleThumbnails()
             offRectFront = QRectF(visRect.left(), visRect.bottom(), visRect.width(), offscreenPreloadArea);
         }
 
-        QList<QGraphicsItem *> visibleItems;
-        if (lastScrollDirection == ScrollDirection::FORWARDS)
-            visibleItems = scene->items(visRect, Qt::IntersectsItemBoundingRect, Qt::AscendingOrder);
-        else
-            visibleItems = scene->items(visRect, Qt::IntersectsItemBoundingRect, Qt::DescendingOrder);
+        QList<QGraphicsItem *> visibleItems =
+            scene->items(visRect, Qt::IntersectsItemBoundingRect,
+                         lastScrollDirection == ScrollDirection::FORWARDS ? Qt::AscendingOrder : Qt::DescendingOrder);
         visibleItems.append(scene->items(offRectBack, Qt::IntersectsItemBoundingRect, Qt::DescendingOrder));
         visibleItems.append(scene->items(offRectFront, Qt::IntersectsItemBoundingRect, Qt::AscendingOrder));
 
@@ -427,10 +425,8 @@ void ThumbnailView::loadVisibleThumbnails()
 
         // load
         if (loadList.count())
-            emit thumbnailsRequested(loadList,
-                                     static_cast<int>(qApp->devicePixelRatio() * mThumbnailSize),
-                                     mCropThumbnails,
-                                     false);
+            emit thumbnailsRequested(loadList, static_cast<int>(qApp->devicePixelRatio() * mThumbnailSize),
+                                     mCropThumbnails, false);
         // unload offscreen
         if (settings->unloadThumbs()) {
             for (auto *th : thumbnails)

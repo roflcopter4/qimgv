@@ -6,7 +6,7 @@ FullscreenInfoOverlay::FullscreenInfoOverlay(FloatingWidgetContainer *parent)
       ui(new Ui::FullscreenInfoOverlay)
 {
     ui->setupUi(this);
-    setPosition(FloatingWidgetPosition::TOPLEFT);
+    setPosition(FloatingWidget::Position::TopLeft);
     setHorizontalMargin(0);
     setVerticalMargin(0);
     ui->nameLabel->setText(u"No file opened"_s);

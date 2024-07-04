@@ -36,6 +36,8 @@ class DirectoryManager final : public QObject
 
   public:
     explicit DirectoryManager(QObject *parent = nullptr);
+    ~DirectoryManager() override = default;
+    DELETE_COPY_MOVE_ROUTINES(DirectoryManager);
 
     // ignored if the same dir is already opened
     bool setDirectory(QString const &);
@@ -105,12 +107,6 @@ class DirectoryManager final : public QObject
     void addEntriesFromDirectory(std::vector<FSEntry> &entryVec, QString const &directoryPath);
     void addEntriesFromDirectoryRecursive(std::vector<FSEntry> &entryVec, QString const &directoryPath) const;
 
-  private Q_SLOTS:
-    void onFileAddedExternal(QString const &fileName);
-    void onFileRemovedExternal(QString const &fileName);
-    void onFileModifiedExternal(QString const &fileName);
-    void onFileRenamedExternal(QString const &oldFileName, QString const &newFileName);
-
   Q_SIGNALS:
     void loaded(QString const &path);
     void sortingChanged();
@@ -121,6 +117,12 @@ class DirectoryManager final : public QObject
     void dirRemoved(QString dirPath, qsizetype);
     void dirAdded(QString dirPath);
     void dirRenamed(QString fromPath, qsizetype indexFrom, QString toPath, qsizetype indexTo);
+
+  private Q_SLOTS:
+    void onFileAddedExternal(QString const &fileName);
+    void onFileRemovedExternal(QString const &fileName);
+    void onFileModifiedExternal(QString const &fileName);
+    void onFileRenamedExternal(QString const &oldFileName, QString const &newFileName);
 
   private:
     DirectoryWatcher    *watcher;

@@ -32,7 +32,7 @@ void SSideBar::selectEntry(qsizetype idx)
         for (auto entry : entries)
             entry->setHighlighted(false);
         entries[idx]->setHighlighted(true);
-        emit entrySelected(idx);
+        emit entrySelected(static_cast<int>(idx));
     }
 }
 

@@ -23,15 +23,21 @@ class FloatingWidget : public QWidget
     ~FloatingWidget() override = default;
     DELETE_COPY_MOVE_ROUTINES(FloatingWidget);
 
+    enum class Position : uint8_t {
+        Left,
+        Right,
+        Bottom,
+        Top,
+        TopLeft,
+        TopRight,
+        BottomLeft,
+        BottomRight,
+        Center,
+    };
+
     ND QSize containerSize() const;
     ND bool  acceptKeyboardFocus() const;
     void     setAcceptKeyboardFocus(bool mode);
-
-  public Q_SLOTS:
-    void hide();
-
-  private Q_SLOTS:
-    void onContainerResized(QSize size);
 
   protected:
     // called whenever container rectangle changes
@@ -44,9 +50,15 @@ class FloatingWidget : public QWidget
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
 
+  public Q_SLOTS:
+    void hide();
+
+  private Q_SLOTS:
+    void onContainerResized(QSize size);
+
   private:
     // size of whatever widget we are overlayed on
     QSize   container;
+    quint32 destructorCount      = 0;
     bool    mAcceptKeyboardFocus = false;
-    quint16 destructorCount      = 0;
 };

@@ -5,19 +5,17 @@ FloatingMessageProxy::FloatingMessageProxy(FloatingWidgetContainer *parent)
       overlay(nullptr)
 {}
 
-FloatingMessageProxy::~FloatingMessageProxy() = default;
-
-void FloatingMessageProxy::showMessage(QString const &text, FloatingMessageIcon icon, int duration)
+void FloatingMessageProxy::showMessage(QString const &text, FloatingMessage::Icon icon, int duration)
 {
     init();
     overlay->showMessage(text, icon, duration);
 }
 
 void FloatingMessageProxy::showMessage(
-      QString const         &text,
-      FloatingWidgetPosition position,
-      FloatingMessageIcon    icon,
-      int                    duration)
+      QString const           &text,
+      FloatingWidget::Position position,
+      FloatingMessage::Icon    icon,
+      int                      duration)
 {
     init();
     overlay->showMessage(text, position, icon, duration);

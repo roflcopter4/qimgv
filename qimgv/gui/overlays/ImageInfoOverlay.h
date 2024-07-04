@@ -15,6 +15,8 @@ class ImageInfoOverlay : public OverlayWidget
   public:
     explicit ImageInfoOverlay(FloatingWidgetContainer *parent = nullptr);
     ~ImageInfoOverlay() override;
+    DELETE_COPY_MOVE_ROUTINES(ImageInfoOverlay);
+
     void setExifInfo(QMap<QString, QString> const &);
 
   public Q_SLOTS:

@@ -10,6 +10,7 @@ class ImageAnimated : public Image
     explicit ImageAnimated(QString const &path);
     explicit ImageAnimated(std::unique_ptr<DocumentInfo> info);
     ~ImageAnimated() override = default;
+    DELETE_COPY_MOVE_ROUTINES(ImageAnimated);
 
     ND auto getMovie() -> QSharedPointer<QMovie>;
     ND auto getPixmap() -> std::unique_ptr<QPixmap> override;
@@ -19,12 +20,12 @@ class ImageAnimated : public Image
     ND QSize size() const override;
     ND int frameCount() const;
 
+  Q_SIGNALS:
+    void frameChanged(QPixmap *);
+
   public Q_SLOTS:
     bool save() override;
     bool save(QString destPath) override;
-
-  Q_SIGNALS:
-    void frameChanged(QPixmap *);
 
   private:
     void load() override;

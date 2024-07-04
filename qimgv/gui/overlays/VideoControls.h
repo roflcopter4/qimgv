@@ -20,6 +20,7 @@ class VideoControls : public OverlayWidget
   public:
     explicit VideoControls(FloatingWidgetContainer *parent = nullptr);
     ~VideoControls() override;
+    DELETE_COPY_MOVE_ROUTINES(VideoControls);
 
   Q_SIGNALS:
     void seek(int64_t pos);

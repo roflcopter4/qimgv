@@ -14,6 +14,7 @@ class FullscreenInfoOverlay : public OverlayWidget
   public:
     explicit FullscreenInfoOverlay(FloatingWidgetContainer *parent);
     ~FullscreenInfoOverlay() override;
+    DELETE_COPY_MOVE_ROUTINES(FullscreenInfoOverlay);
 
     void setInfo(QString const &pos, QString const &fileName, QString const &info);
 

@@ -32,8 +32,8 @@ void CmdOptionsRunner::generateThumbs(QString const &dirPath, int size)
     }
 
     auto list = dm->fileList();
-    QString out = u"Directory: " + dirPath + "\n"
-                  u"File count: " + QString::number(list.size()) + "\n"
+    QString out = u"Directory: " + dirPath + u"\n"
+                  u"File count: " + QString::number(list.size()) + u"\n"
                   u"Size limit:" + QString::number(size) + u'x' + QString::number(size) + u"px\n"
                   u"Generating thumbnails...\n";
     std::cout << out.toStdString();

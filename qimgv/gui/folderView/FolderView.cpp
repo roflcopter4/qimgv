@@ -200,13 +200,13 @@ void FolderView::onViewModeSelected(FolderViewMode mode)
 
 void FolderView::onThumbnailSizeChanged(int newSize) const
 {
-    ui->zoomSlider->setValue(newSize / ui->thumbnailGrid->ZOOM_STEP);
+    ui->zoomSlider->setValue(newSize / FolderGridView::ZOOM_STEP);
     settings->setFolderViewIconSize(newSize);
 }
 
 void FolderView::onZoomSliderValueChanged(int value) const
 {
-    ui->thumbnailGrid->setThumbnailSize(value * ui->thumbnailGrid->ZOOM_STEP);
+    ui->thumbnailGrid->setThumbnailSize(value * FolderGridView::ZOOM_STEP);
 }
 
 // changed by user via combobox

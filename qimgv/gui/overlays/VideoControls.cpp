@@ -32,9 +32,9 @@ VideoControls::VideoControls(FloatingWidgetContainer *parent)
 void VideoControls::readSettings()
 {
     if (settings->panelEnabled() && settings->panelPosition() == PanelPosition::BOTTOM)
-        setPosition(FloatingWidgetPosition::TOP);
+        setPosition(FloatingWidget::Position::Top);
     else
-        setPosition(FloatingWidgetPosition::BOTTOM);
+        setPosition(FloatingWidget::Position::Bottom);
 }
 
 VideoControls::~VideoControls()

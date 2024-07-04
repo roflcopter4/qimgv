@@ -16,7 +16,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     ui->qtIconLabel->setPixmap(QIcon(u":/res/icons/common/logo/3rdparty/qt22.png"_s).pixmap(22, 16));
 
     connect(ui->themeSelectorComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &SettingsDialog::onThemeSelectorComboBoxIndexChanged);
-    connect(ui->useSystemColorsCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onSystemColorsCheckBoxToggled);
+    connect(ui->useSystemColorsCheckBox, &QCheckBox::toggled,      this, &SettingsDialog::onSystemColorsCheckBoxToggled);
     connect(ui->modifySystemSchemeLabel, &ClickableLabel::clicked, this, &SettingsDialog::onModifySystemSchemeLabelClicked);
 
     ui->colorSelectorAccent->setDescription(tr("Accent color"));
@@ -34,20 +34,17 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 #ifndef USE_KDE_BLUR
     ui->blurBackgroundCheckBox->setEnabled(false);
 #endif
-
 #ifdef USE_MPV
     // ui->novideoInfoLabel->setHidden(true);
 #else
     ui->videoPlaybackGroup->setEnabled(false);
     // ui->novideoInfoLabel->setHidden(false);
 #endif
-
 #ifdef USE_OPENCV
     ui->scalingQualityComboBox->addItem(u"Bilinear+sharpen (OpenCV)"_s);
     ui->scalingQualityComboBox->addItem(u"Bicubic (OpenCV)"_s);
     ui->scalingQualityComboBox->addItem(u"Bicubic+sharpen (OpenCV)"_s);
 #endif
-
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     ui->memoryLimitSpinBox->setEnabled(false);
     ui->memoryLimitLabel->setEnabled(false);
@@ -117,16 +114,7 @@ void SettingsDialog::adjustSizeToContents()
     ui->scrollAreaWidgetContents_3->layout()->activate();
     ui->scrollArea_3->setMinimumWidth(ui->scrollAreaWidgetContents_3->minimumSizeHint().width());
     // container
-    // ui->stackedWidget->layout()->activate();
     setMinimumWidth(sizeHint().width() + 22);
-
-    // qDebug() << "window:" << sizeHint() << minimumSizeHint() << size();
-    // qDebug() << "stackedwidget:" << ui->stackedWidget->sizeHint() << ui->stackedWidget->minimumSizeHint() <<
-    // ui->stackedWidget->size(); qDebug() << "scrollarea:" << ui->scrollArea->sizeHint() << ui->scrollArea->minimumSizeHint() <<
-    // ui->scrollArea->size(); qDebug() << "scrollareawidget:" << ui->scrollAreaWidgetContents->sizeHint() <<
-    // ui->scrollAreaWidgetContents->minimumSizeHint() << ui->scrollAreaWidgetContents->size(); qDebug() << "grid" <<
-    // ui->gridLayout_15->sizeHint(); qDebug() << "wtf" << ui->startInFolderViewCheckBox->sizeHint() <<
-    // ui->startInFolderViewCheckBox->minimumSizeHint();
 }
 
 void SettingsDialog::resetToDesktopTheme()
@@ -174,25 +162,30 @@ void SettingsDialog::readSettings()
         ui->zoomIndicatorAuto->setChecked(true);
     else
         ui->zoomIndicatorOff->setChecked(true);
+
     ui->showInfoBarFullscreen->setChecked(settings->infoBarFullscreen());
     ui->showInfoBarWindowed->setChecked(settings->infoBarWindowed());
     ui->showExtendedInfoTitle->setChecked(settings->windowTitleExtendedInfo());
     ui->cursorAutohideCheckBox->setChecked(settings->cursorAutohide());
     ui->keepFitModeCheckBox->setChecked(settings->keepFitMode());
+
     if (settings->focusPointIn1to1Mode() == ImageFocusPoint::TOP)
         ui->focus1to1Top->setChecked(true);
     else if (settings->focusPointIn1to1Mode() == ImageFocusPoint::CENTER)
         ui->focus1to1Center->setChecked(true);
     else
         ui->focus1to1Cursor->setChecked(true);
+
     ui->slideshowIntervalSpinBox->setValue(settings->slideshowInterval());
     ui->imageScrollingComboBox->setCurrentIndex(static_cast<int>(settings->imageScrolling()));
     ui->saveOverlayCheckBox->setChecked(settings->showSaveOverlay());
     ui->unloadThumbsCheckBox->setChecked(settings->unloadThumbs());
+
     if (settings->thumbPanelStyle() == ThumbPanelStyle::SIMPLE)
         ui->thumbStyleSimple->setChecked(true);
     else
         ui->thumbStyleExtended->setChecked(true);
+
     ui->animatedJxlCheckBox->setChecked(settings->jxlAnimation());
     ui->autoResizeWindowCheckBox->setChecked(settings->autoResizeWindow());
     ui->panelCenterSelectionCheckBox->setChecked(settings->panelCenterSelection());
@@ -213,7 +206,7 @@ void SettingsDialog::readSettings()
 
     ui->mpvLineEdit->setText(settings->mpvBinary());
 
-    ui->zoomStepSlider->setValue(static_cast<int>(settings->zoomStep() * 100.f));
+    ui->zoomStepSlider->setValue(static_cast<int>(settings->zoomStep() * 100.0));
     onZoomStepSliderChanged(ui->zoomStepSlider->value());
 
     ui->autoResizeLimitSlider->setValue(static_cast<int>(settings->autoResizeLimit() / 5.0));
@@ -273,6 +266,7 @@ void SettingsDialog::saveSettings()
 
     settings->setLoopSlideshow(ui->loopSlideshowCheckBox->isChecked());
     settings->setFullscreenMode(ui->fullscreenCheckBox->isChecked());
+
     if (ui->fitModeWindow->isChecked())
         settings->setImageFitMode(ImageFitMode::WINDOW);
     else if (ui->fitModeWidth->isChecked())
@@ -281,7 +275,6 @@ void SettingsDialog::saveSettings()
         settings->setImageFitMode(ImageFitMode::ORIGINAL);
 
     settings->setLanguage(langs.key(ui->langComboBox->currentText()));
-
     settings->setVideoPlayback(ui->videoPlaybackCheckBox->isChecked());
     settings->setPlayVideoSounds(ui->playSoundsCheckBox->isChecked());
     settings->setPanelEnabled(ui->enablePanelCheckBox->isChecked());
@@ -294,7 +287,6 @@ void SettingsDialog::saveSettings()
     settings->setSmoothUpscaling(ui->smoothUpscalingCheckBox->isChecked());
     settings->setExpandImage(ui->expandImageCheckBox->isChecked());
     settings->setSmoothAnimatedImages(ui->smoothAnimatedImagesCheckBox->isChecked());
-
     settings->setBackgroundOpacity(ui->bgOpacitySlider->value() / 100.0);
     settings->setBlurBackground(ui->blurBackgroundCheckBox->isChecked());
     settings->setSortingMode(static_cast<SortingMode>(ui->sortingComboBox->currentIndex()));

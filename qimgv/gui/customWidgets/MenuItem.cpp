@@ -17,7 +17,7 @@ MenuItem::MenuItem(QWidget *parent)
 
     mIconWidget->setMinimumSize(26, 26); // 5px padding from stylesheet
     mIconWidget->installEventFilter(this);
-    mIconWidget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    mIconWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
     mIconWidget->setAccessibleName(u"MenuItemIcon"_s);
 
     mTextLabel.setAccessibleName(u"MenuItemText"_s);

@@ -10,18 +10,6 @@
 #include <QPropertyAnimation>
 #include <QDebug>
 
-enum class FloatingWidgetPosition : uint8_t {
-    LEFT,
-    RIGHT,
-    BOTTOM,
-    TOP,
-    TOPLEFT,
-    TOPRIGHT,
-    BOTTOMLEFT,
-    BOTTOMRIGHT,
-    CENTER,
-};
-
 class OverlayWidget : public FloatingWidget
 {
     Q_OBJECT
@@ -34,7 +22,7 @@ class OverlayWidget : public FloatingWidget
 
     void setHorizontalMargin(int);
     void setVerticalMargin(int);
-    void setPosition(FloatingWidgetPosition pos);
+    void setPosition(FloatingWidget::Position pos);
     void setFadeDuration(int duration);
     void setFadeEnabled(bool mode);
 
@@ -61,5 +49,5 @@ class OverlayWidget : public FloatingWidget
     int  mVerticalMargin   = 35;
     bool fadeEnabled       = false;
 
-    FloatingWidgetPosition position = FloatingWidgetPosition::BOTTOM;
+    FloatingWidget::Position position = FloatingWidget::Position::Bottom;
 };
