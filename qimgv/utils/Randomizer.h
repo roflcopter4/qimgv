@@ -14,18 +14,17 @@ class Randomizer
     Randomizer();
     explicit Randomizer(qsizetype count);
 
-    void     setCount(qsizetype count);
+    void setCount(qsizetype count);
+    void setCurrent(qsizetype current);
+    void shuffle();
+    void print() const;
     uint32_t next();
     uint32_t prev();
 
-    void shuffle();
-    void print() const;
-    void setCurrent(qsizetype current);
-
   private:
-    qsizetype currentIndex;
+    qsizetype currentIndex = 0;
     std::vector<uint32_t> vec;
 
-    void    fill();
-    ND auto indexOf(qsizetype item) const -> qsizetype;
+    void fill();
+    ND qsizetype indexOf(qsizetype item) const;
 };

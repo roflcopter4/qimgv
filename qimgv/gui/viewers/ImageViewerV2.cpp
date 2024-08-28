@@ -109,7 +109,7 @@ void ImageViewerV2::onFullscreenModeChanged(bool mode)
     mIsFullscreen = mode;
     if (mode) {
         bgColor = settings->colorScheme().background_fullscreen;
-        bgColor.setAlphaF(1.0);
+        bgColor.setAlphaF(1.0f);
     } else {
         bgColor = settings->colorScheme().background;
         bgColor.setAlphaF(static_cast<float>(settings->backgroundOpacity()));
@@ -770,7 +770,7 @@ void ImageViewerV2::fitWindow()
         // - unless when called from eventloop
         if (scrollBarWorkaround) {
             scrollBarWorkaround = false;
-            QTimer::singleShot(0, this, SLOT(centerOnPixmap()));
+            QTimer::singleShot(0, this, &ImageViewerV2::centerOnPixmap);
         } else {
             centerOnPixmap();
         }

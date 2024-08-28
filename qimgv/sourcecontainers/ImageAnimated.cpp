@@ -27,7 +27,7 @@ void ImageAnimated::loadMovie()
 {
     movie = QSharedPointer<QMovie>(new QMovie());
     movie->setFileName(mPath);
-    movie->setFormat(mDocInfo->format().toStdString().c_str());
+    movie->setFormat(mDocInfo->format());
     movie->jumpToFrame(0);
     mSize       = movie->frameRect().size();
     mFrameCount = movie->frameCount();

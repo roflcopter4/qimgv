@@ -19,7 +19,7 @@ SSideBar::SSideBar(QWidget *parent)
 
 void SSideBar::addEntry(QString const &icon, QString const &name)
 {
-    auto entry = new SSideBarItem(icon, name);
+    auto *entry = new SSideBarItem(icon, name);
     layout->insertWidget(static_cast<int>(entries.count()), entry);
     entries.append(entry);
     if (entries.count() == 1)
@@ -29,7 +29,7 @@ void SSideBar::addEntry(QString const &icon, QString const &name)
 void SSideBar::selectEntry(qsizetype idx)
 {
     if (idx >= 0 && idx < entries.count()) {
-        for (auto entry : entries)
+        for (SSideBarItem *entry : entries)
             entry->setHighlighted(false);
         entries[idx]->setHighlighted(true);
         emit entrySelected(static_cast<int>(idx));

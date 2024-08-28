@@ -40,8 +40,8 @@ MW::MW(QWidget *parent)
 MW::~MW()
 {
     delete infoBarFullscreen; infoBarFullscreen = nullptr;
-    delete imageInfoOverlay;  imageInfoOverlay = nullptr;
-    delete floatingMessage;   floatingMessage = nullptr;
+    delete imageInfoOverlay;  imageInfoOverlay  = nullptr;
+    delete floatingMessage;   floatingMessage   = nullptr;
 }
 
 /*                                                             |--[ImageViewer]

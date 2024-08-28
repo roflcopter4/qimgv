@@ -14,15 +14,15 @@ class PathSelectorMenuItem : public MenuItem
     ND QString directory() const;
     ND QString path() const;
 
-  public Q_SLOTS:
-    void setDirectory(QString const &path);
-    void onClicked();
-
   protected:
     void onPress() override;
 
   Q_SIGNALS:
     void directorySelected(QString);
+
+  public Q_SLOTS:
+    void setDirectory(QString const &path);
+    void onClicked();
 
   private:
     QString mDirectory;

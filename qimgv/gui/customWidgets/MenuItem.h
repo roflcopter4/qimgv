@@ -18,14 +18,22 @@ class MenuItem : public QWidget
     explicit MenuItem(QWidget *parent = nullptr);
     ~MenuItem() override;
 
-    void    setText(QString const &text);
-    QString text() const;
-    void    setShortcutText(QString const &text);
-    QString shortcut() const;
-    void    setIconPath(QString const &path);
-    void    setPassthroughClicks(bool mode);
+    void setText(QString const &text);
+    void setShortcutText(QString const &text);
+    void setIconPath(QString const &path);
+    void setPassthroughClicks(bool mode);
+
+    ND QString text() const;
+    ND QString shortcut() const;
 
   protected:
+    void paintEvent(QPaintEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
+    virtual void onClick();
+    virtual void onPress();
+
     IconButton  *mIconWidget;
     QSpacerItem *spacer;
     QHBoxLayout *mLayout;
@@ -33,11 +41,4 @@ class MenuItem : public QWidget
     QLabel mTextLabel;
     QLabel mShortcutLabel;
     bool   passthroughClicks = true;
-
-    void paintEvent(QPaintEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-
-    virtual void onClick();
-    virtual void onPress();
 };

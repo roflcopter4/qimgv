@@ -46,46 +46,38 @@ FolderView::FolderView(QWidget *parent)
 
     ui->optionsPopupButton->setCheckable(true);
     ui->optionsPopupButton->setIconPath(u":res/icons/common/buttons/panel/folderview20.png"_s);
-
     ui->sortingComboBox->setIconPath(u":res/icons/common/other/sorting-mode16.png"_s);
-
     ui->newBookmarkButton->setIconPath(u":res/icons/common/buttons/panel-small/add-new12.png"_s);
     ui->homeButton->setIconPath(u":res/icons/common/buttons/panel-small/home12.png"_s);
     ui->rootButton->setIconPath(u":res/icons/common/buttons/panel-small/root12.png"_s);
-
-    static constexpr int minimum = FolderGridView::THUMBNAIL_SIZE_MIN / FolderGridView::ZOOM_STEP;
-    static constexpr int maximum = FolderGridView::THUMBNAIL_SIZE_MAX / FolderGridView::ZOOM_STEP;
-
-    ui->zoomSlider->setMinimum(minimum);
-    ui->zoomSlider->setMaximum(maximum);
+    ui->zoomSlider->setMinimum(FolderGridView::THUMBNAIL_SIZE_MIN / FolderGridView::ZOOM_STEP);
+    ui->zoomSlider->setMaximum(FolderGridView::THUMBNAIL_SIZE_MAX / FolderGridView::ZOOM_STEP);
     ui->zoomSlider->setSingleStep(1);
     ui->zoomSlider->setPageStep(1);
-
     ui->splitter->setStretchFactor(1, 50);
 
-    connect(ui->thumbnailGrid, &FolderGridView::thumbnailsRequested, this, &FolderView::thumbnailsRequested);
+    connect(ui->thumbnailGrid, &FolderGridView::thumbnailsRequested,  this, &FolderView::thumbnailsRequested);
     connect(ui->thumbnailGrid, &FolderGridView::thumbnailSizeChanged, this, &FolderView::onThumbnailSizeChanged);
-    connect(ui->thumbnailGrid, &FolderGridView::itemActivated, this, &FolderView::itemActivated);
-    connect(ui->thumbnailGrid, &FolderGridView::draggedOut, this, &FolderView::draggedOut);
-    connect(ui->thumbnailGrid, &FolderGridView::draggedOver, this, &FolderView::draggedOver);
-    connect(ui->thumbnailGrid, &FolderGridView::droppedInto, this, &FolderView::droppedInto);
+    connect(ui->thumbnailGrid, &FolderGridView::itemActivated,        this, &FolderView::itemActivated);
+    connect(ui->thumbnailGrid, &FolderGridView::draggedOut,           this, &FolderView::draggedOut);
+    connect(ui->thumbnailGrid, &FolderGridView::draggedOver,          this, &FolderView::draggedOver);
+    connect(ui->thumbnailGrid, &FolderGridView::droppedInto,          this, &FolderView::droppedInto);
 
     connect(ui->bookmarksWidget, &BookmarksWidget::bookmarkClicked, this, &FolderView::onBookmarkClicked);
-
     connect(ui->newBookmarkButton, &IconButton::clicked, this, &FolderView::newBookmark);
-    connect(ui->homeButton, &IconButton::clicked, this, &FolderView::onHomeBtn);
-    connect(ui->rootButton, &IconButton::clicked, this, &FolderView::onRootBtn);
+    connect(ui->homeButton,        &IconButton::clicked, this, &FolderView::onHomeBtn);
+    connect(ui->rootButton,        &IconButton::clicked, this, &FolderView::onRootBtn);
 
-    connect(ui->zoomSlider, &QSlider::valueChanged, this, &FolderView::onZoomSliderValueChanged);
-    connect(ui->sortingComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &FolderView::onSortingSelected);
+    connect(ui->zoomSlider,              &QSlider::valueChanged, this, &FolderView::onZoomSliderValueChanged);
     connect(ui->togglePlacesPanelButton, &ActionButton::toggled, this, &FolderView::onPlacesPanelButtonChecked);
+    connect(ui->sortingComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &FolderView::onSortingSelected);
 
-    connect(ui->optionsPopupButton, &IconButton::toggled, this, &FolderView::onOptionsPopupButtonToggled);
-    connect(optionsPopup, &FVOptionsPopup::dismissed, this, &FolderView::onOptionsPopupDismissed);
-    connect(optionsPopup, &FVOptionsPopup::viewModeSelected, this, &FolderView::onViewModeSelected);
+    connect(ui->optionsPopupButton, &IconButton::toggled,              this, &FolderView::onOptionsPopupButtonToggled);
+    connect(optionsPopup,           &FVOptionsPopup::dismissed,        this, &FolderView::onOptionsPopupDismissed);
+    connect(optionsPopup,           &FVOptionsPopup::viewModeSelected, this, &FolderView::onViewModeSelected);
 
-    connect(ui->dirTreeView, &TreeViewCustom::droppedIn, this, &FolderView::onDroppedInByIndex);
-    connect(ui->dirTreeView, &TreeViewCustom::tabbedOut, this, &FolderView::onTreeViewTabOut);
+    connect(ui->dirTreeView,     &TreeViewCustom::droppedIn,  this, &FolderView::onDroppedInByIndex);
+    connect(ui->dirTreeView,     &TreeViewCustom::tabbedOut,  this, &FolderView::onTreeViewTabOut);
     connect(ui->bookmarksWidget, &BookmarksWidget::droppedIn, this, &FolderView::moveUrlsRequested); // ask what to do via popup? copy or move
 
     ui->sortingComboBox->setItemDelegate(new QStyledItemDelegate(ui->sortingComboBox));
@@ -173,8 +165,7 @@ void FolderView::onDroppedInByIndex(QList<QString> const &paths, QModelIndex con
 void FolderView::onOptionsPopupButtonToggled(bool mode) const
 {
     if (mode) {
-        // Fixes popup being shown again right after dismissing it
-        // by clicking on this toggle button.
+        // Fixes popup being shown again right after dismissing it by clicking on this toggle button.
         // This issue is only present on windows (different Qt::Popup behavior)
         if (popupTimerClutch.elapsed() < 10) {
             ui->optionsPopupButton->setChecked(false);

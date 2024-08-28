@@ -108,7 +108,7 @@ class ThumbnailView : public QGraphicsView, public IDirectoryView
     void scrollToItem(qsizetype index);
     void scrollPrecise(int delta);
     void scrollByItem(int delta);
-    void scrollSmooth(int delta);
+    void scrollSmooth(int angleDelta);
     void scrollSmooth(int angleDelta, qreal multiplier, qreal acceleration);
     void scrollSmooth(int angleDelta, qreal multiplier, qreal acceleration, bool additive);
     void unloadAllThumbnails();

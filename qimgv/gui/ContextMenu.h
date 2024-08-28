@@ -21,14 +21,14 @@ class ContextMenu : public QWidget
 
     void setImageEntriesEnabled(bool mode);
 
-  public slots:
+  Q_SIGNALS:
+    void showScriptSettings();
+
+  public Q_SLOTS:
     void showAt(QPoint pos);
     void setGeometry(QRect geom);
     void show();
     void hide();
-
-  Q_SIGNALS:
-    void showScriptSettings();
 
   private Q_SLOTS:
     void switchToMainPage();

@@ -2,5 +2,4 @@
 
 SidePanelWidget::SidePanelWidget(QWidget *parent)
     : QWidget(parent)
-{
-}
+{}

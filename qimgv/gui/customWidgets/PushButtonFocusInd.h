@@ -11,18 +11,19 @@ class PushButtonFocusInd : public QPushButton
     Q_OBJECT
 
   public:
-    PushButtonFocusInd(QWidget *parent = nullptr);
+    explicit PushButtonFocusInd(QWidget *parent = nullptr);
+
     void setHighlighted(bool);
     bool isHighlighted() const;
 
-  signals:
+  Q_SIGNALS:
     void rightPressed();
     void rightClicked();
 
   protected:
-    bool mIsHighlighted;
-
     void mousePressEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
+
+    bool mIsHighlighted;
 };

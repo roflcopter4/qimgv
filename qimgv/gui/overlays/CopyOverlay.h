@@ -24,7 +24,7 @@ class CopyOverlay : public OverlayWidget
     Q_OBJECT
 
   public:
-    CopyOverlay(FloatingWidgetContainer *parent);
+    explicit CopyOverlay(FloatingWidgetContainer *parent);
     ~CopyOverlay() override;
 
     void saveSettings();
@@ -32,13 +32,13 @@ class CopyOverlay : public OverlayWidget
 
     ND CopyOverlayMode operationMode() const;
 
-  public Q_SLOTS:
-    void show();
-    void hide();
-
   Q_SIGNALS:
     void copyRequested(QString);
     void moveRequested(QString);
+
+  public Q_SLOTS:
+    void show();
+    void hide();
 
   private Q_SLOTS:
     void requestFileOperation(QString const &path);

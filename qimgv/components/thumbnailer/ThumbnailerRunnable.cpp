@@ -154,7 +154,7 @@ ThumbnailerRunnable::createThumbnail(QString const &path, char const *format, in
     }
 
     // Force reader to close the file so it can be deleted later.
-    reader->setFileName({});
+    reader->setFileName(u""_s);
     return std::make_pair(result, originalSize);
 }
 
@@ -166,18 +166,19 @@ ThumbnailerRunnable::createVideoThumbnail(QString const &path, int size, bool cr
     QString   tmpFilePathEsc = tmpFilePath;
     tmpFilePathEsc.replace(u'%', u"%%"_s);
 
-    QStringList argv;
-    QProcess    process;
+    QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
-    argv << u"--start=30%"_s
-         << u"--frames=1"_s
-         << u"--aid=no"_s
-         << u"--sid=no"_s
-         << u"--no-config"_s
-         << u"--load-scripts=no"_s
-         << u"--no-terminal"_s
-         << u"--o=" + tmpFilePathEsc
-         << path;
+    QStringList argv = {
+        u"--start=30%"_s,
+        u"--frames=1"_s,
+        u"--aid=no"_s,
+        u"--sid=no"_s,
+        u"--no-config"_s,
+        u"--load-scripts=no"_s,
+        u"--no-terminal"_s,
+        u"--o=" + tmpFilePathEsc,
+        path
+    };
     process.start(settings->mpvBinary(), argv);
     process.waitForFinished(8000);
     process.close();
@@ -198,7 +199,7 @@ ThumbnailerRunnable::createVideoThumbnail(QString const &path, int size, bool cr
     auto  result       = new QImage(reader.read());
 
     // Force reader to close the file so it can be deleted later.
-    reader.setFileName(QString());
+    reader.setFileName(u""_s);
 
     // remove temporary file
     QFile tmpFile(tmpFilePath);

@@ -6,7 +6,6 @@ Randomizer::Randomizer()
 }
 
 Randomizer::Randomizer(qsizetype count)
-    : currentIndex(0)
 {
     setCount(count);
 }
@@ -19,8 +18,8 @@ void Randomizer::setCount(qsizetype count)
 
 void Randomizer::shuffle()
 {
-    static std::random_device dev;
-    static std::mt19937       rng(dev());
+    static auto dev = std::random_device();
+    static auto rng = std::mt19937(dev());
 
     std::ranges::shuffle(vec, rng);
 }

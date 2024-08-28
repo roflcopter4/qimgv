@@ -66,9 +66,9 @@ int main(int argc, char *argv[])
 # endif
 
 # ifdef USE_VLD
-    VLDGlobalEnable();
-    VLDSetReportOptions(0, nullptr);
-    VLDSetOptions(VLD_OPT_AGGREGATE_DUPLICATES | VLD_OPT_SAFE_STACK_WALK, 256, 128);
+    ::VLDGlobalEnable();
+    ::VLDSetReportOptions(0, nullptr);
+    ::VLDSetOptions(VLD_OPT_AGGREGATE_DUPLICATES | VLD_OPT_SAFE_STACK_WALK, 256, 128);
 # endif
 
     // If this is set by other app, platform plugins may fail to load.
@@ -144,11 +144,11 @@ int main(int argc, char *argv[])
     actionManager = ActionManager::getInstance();
     shrRes        = SharedResources::getInstance();
 
-    atexit(saveSettings);
+    ::atexit(saveSettings);
 
     // Parse args ------------------------------------------------------------------
     QString appDescription = qApp->applicationName() + u" - Fast and configurable image viewer.\n"
-                             u"Version: " + qApp->applicationVersion() + "\n"
+                             u"Version: " + qApp->applicationVersion() + u"\n"
                              u"License: GNU GPLv3";
 
     auto *parser = new QCommandLineParser;
@@ -212,9 +212,9 @@ int main(int argc, char *argv[])
     util::DeleteAndAssignNull(app);
 
 #ifdef USE_VLD
-    VLDSetReportOptions(VLD_OPT_UNICODE_REPORT | VLD_OPT_REPORT_TO_FILE,
-                        (LR"(F:\Ass\GIT\qimgv\MSVC_2\#LOGS\vld_report_)" + std::to_wstring(time(nullptr)) + L".log").c_str());
-    wprintf(L"Leaks: %u\n", VLDGetLeaksCount());
+    ::VLDSetReportOptions(VLD_OPT_UNICODE_REPORT | VLD_OPT_REPORT_TO_FILE,
+                          (LR"(F:\Ass\GIT\qimgv\MSVC_2\#LOGS\vld_report_)" + std::to_wstring(::_time64(nullptr)) + L".log").c_str());
+    ::fwprintf(stderr, L"Leaks: %u\n", ::VLDGetLeaksCount());
 # ifdef _DEBUG
     util::WaitForAnyKey();
 # endif

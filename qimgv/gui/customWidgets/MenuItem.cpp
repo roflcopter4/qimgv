@@ -74,12 +74,10 @@ void MenuItem::paintEvent(QPaintEvent *event)
 }
 
 void MenuItem::onPress()
-{
-}
+{}
 
 void MenuItem::onClick()
-{
-}
+{}
 
 void MenuItem::mousePressEvent(QMouseEvent *event)
 {

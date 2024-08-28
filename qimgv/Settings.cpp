@@ -359,7 +359,7 @@ QList<QByteArray> Settings::supportedFormats() const
     formats << "jfif"_ba;
     if (videoPlayback())
         formats << mVideoFormatsMap.values();
-    formats.removeAll("pdf");
+    formats.removeAll("pdf"_ba);
     return formats;
 }
 

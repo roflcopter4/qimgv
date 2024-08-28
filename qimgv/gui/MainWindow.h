@@ -259,6 +259,7 @@ class MW final : public FloatingWidgetContainer
     FloatingMessageProxy       *floatingMessage   = nullptr;
 
     CurrentInfo info{};
+
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     QDesktopWidget desktopWidget;
 #endif

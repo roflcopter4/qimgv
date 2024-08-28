@@ -4,7 +4,6 @@ ThumbnailView::ThumbnailView(Qt::Orientation orientation, QWidget *parent)
     : QGraphicsView(parent),
       scene(new QGraphicsScene(this))
 {
-    setAccessibleName(u"ThumbnailView"_s);
     setMouseTracking(true);
     setAcceptDrops(false);
     setScene(scene);
@@ -92,7 +91,7 @@ void ThumbnailView::createScrollTimeLine()
     //qApp->processEvents();
 
     connect(scrollTimeLine, &QTimeLine::frameChanged, this, &ThumbnailView::onScrollTimeLineFrameChanged);
-    connect(scrollTimeLine, &QTimeLine::finished, this, &ThumbnailView::onScrollTimeLineFinished);
+    connect(scrollTimeLine, &QTimeLine::finished,     this, &ThumbnailView::onScrollTimeLineFinished);
 }
 
 void ThumbnailView::onScrollTimeLineFrameChanged(int value)
@@ -329,7 +328,7 @@ void ThumbnailView::insertItem(qsizetype index)
 void ThumbnailView::removeItem(qsizetype index)
 {
     if (checkRange(index)) {
-        auto newSelection = mSelection;
+        SelectionList newSelection = mSelection;
         clearSelection();
         removeItemFromLayout(index);
         delete thumbnails.takeAt(index);
@@ -357,8 +356,7 @@ void ThumbnailView::reloadItem(qsizetype index)
         thumb->unsetThumbnail();
     emit thumbnailsRequested(SelectionList() << index,
                              static_cast<int>(qApp->devicePixelRatio() * mThumbnailSize),
-                             mCropThumbnails,
-                             true);
+                             mCropThumbnails, true);
 }
 
 void ThumbnailView::setDragHover(qsizetype)
@@ -508,8 +506,8 @@ void ThumbnailView::fitSceneToContents()
 void ThumbnailView::wheelEvent(QWheelEvent *event)
 {
     event->accept();
-    auto pixelDelta = event->pixelDelta().y();
-    auto angleDelta = event->angleDelta().ry();
+    int  pixelDelta = event->pixelDelta().y();
+    int  angleDelta = event->angleDelta().y();
     bool isWheel    = angleDelta && !(angleDelta % 120) && lastTouchpadScroll.elapsed() > 100;
 
     if (isWheel) {
@@ -591,15 +589,17 @@ void ThumbnailView::scrollToItem(qsizetype index)
 
     if (!visible) {
         qreal delta;
-        if (mOrientation == Qt::Vertical)
+        if (mOrientation == Qt::Vertical) {
             if (itemRect.top() >= sceneRect.top()) // UP
                 delta = sceneRect.bottom() - itemRect.bottom();
             else // DOWN
                 delta = sceneRect.top() - itemRect.top();
-        else if (itemRect.left() >= sceneRect.left()) // LEFT
+        } else if (itemRect.left() >= sceneRect.left()) { // LEFT
             delta = sceneRect.right() - itemRect.right();
-        else // RIGHT
+        } else { // RIGHT
             delta = sceneRect.left() - itemRect.left();
+        }
+
         if (settings->enableSmoothScroll())
             scrollSmooth(static_cast<int>(delta));
         else
@@ -607,13 +607,13 @@ void ThumbnailView::scrollToItem(qsizetype index)
     }
 }
 
-void ThumbnailView::scrollSmooth(int delta, qreal multiplier, qreal acceleration, bool additive)
+void ThumbnailView::scrollSmooth(int angleDelta, qreal multiplier, qreal acceleration, bool additive)
 {
-    lastScrollDirection = delta < 0 ? ScrollDirection::FORWARDS : ScrollDirection::BACKWARDS;
+    lastScrollDirection = angleDelta < 0 ? ScrollDirection::FORWARDS : ScrollDirection::BACKWARDS;
     viewportCenter      = mapToScene(viewport()->rect().center());
 
     // ignore if we reached boundaries
-    if ((delta > 0 && atSceneStart()) || (delta < 0 && atSceneEnd()))
+    if ((angleDelta > 0 && atSceneStart()) || (angleDelta < 0 && atSceneEnd()))
         return;
 
     int center = static_cast<int>(
@@ -622,7 +622,7 @@ void ThumbnailView::scrollSmooth(int delta, qreal multiplier, qreal acceleration
 
     int  oldEndFrame = scrollTimeLine->endFrame();
     auto state       = scrollTimeLine->state();
-    int  newEndFrame = center - static_cast<int>(delta * multiplier);
+    int  newEndFrame = center - static_cast<int>(angleDelta * multiplier);
     bool redirect    = (newEndFrame < center && center < oldEndFrame) ||
                        (newEndFrame > center && center > oldEndFrame);
     bool accelerate  = false;
@@ -636,7 +636,7 @@ void ThumbnailView::scrollSmooth(int delta, qreal multiplier, qreal acceleration
         if (oldEndFrame == center)
             createScrollTimeLine();
         if (!redirect && additive)
-            newEndFrame = oldEndFrame - static_cast<int>(delta * multiplier * acceleration);
+            newEndFrame = oldEndFrame - static_cast<int>(angleDelta * multiplier * acceleration);
 
         // Force load thumbs in between scroll animations.
         blockThumbnailLoading = false;
@@ -650,9 +650,9 @@ void ThumbnailView::scrollSmooth(int delta, qreal multiplier, qreal acceleration
     scrollTimeLine->start();
 }
 
-void ThumbnailView::scrollSmooth(int delta, qreal multiplier, qreal acceleration)
+void ThumbnailView::scrollSmooth(int angleDelta, qreal multiplier, qreal acceleration)
 {
-    scrollSmooth(delta, multiplier, acceleration, false);
+    scrollSmooth(angleDelta, multiplier, acceleration, false);
 }
 
 void ThumbnailView::scrollSmooth(int angleDelta)
@@ -712,8 +712,7 @@ void ThumbnailView::mouseReleaseEvent(QMouseEvent *event)
 {
     QGraphicsView::mouseReleaseEvent(event);
     if (mouseReleaseSelect && QLineF(dragStartPos, event->pos()).length() < 40) {
-        auto *item = dynamic_cast<ThumbnailWidget *>(itemAt(event->pos()));
-        if (item) {
+        if (auto *item = dynamic_cast<ThumbnailWidget *>(itemAt(event->pos()))) {
             qsizetype index = thumbnails.indexOf(item);
             select(index);
         }

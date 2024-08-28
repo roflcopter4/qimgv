@@ -18,7 +18,6 @@ DirectoryManager::DirectoryManager(QObject *parent)
 {
     regex.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
     collator.setNumericMode(true);
-
     readSettings();
     setSortingMode(settings->sortingMode());
     connect(settings, &Settings::settingsChanged, this, &DirectoryManager::readSettings);

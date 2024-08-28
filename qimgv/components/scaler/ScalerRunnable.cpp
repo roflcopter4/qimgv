@@ -3,8 +3,7 @@
 
 ScalerRunnable::ScalerRunnable(QObject *parent)
     : QObject(parent)
-{
-}
+{}
 
 void ScalerRunnable::setRequest(ScalerRequest const &r)
 {

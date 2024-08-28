@@ -17,7 +17,6 @@ Core::Core(QObject *parent)
       thumbPanelPresenter(new DirectoryPresenter(this)),
       folderViewPresenter(new DirectoryPresenter(this)),
       translator(new QTranslator(this)),
-      mDrag(new QDrag(this)),
       folderEndAction(settings->folderEndAction()),
       loopSlideshow(settings->loopSlideshow()),
       slideshow(false),
@@ -351,7 +350,7 @@ void Core::rotateRight()
     rotateByDegrees(90);
 }
 
-void Core::close() const
+void Core::close()
 {
     mw->close();
 }
@@ -596,24 +595,104 @@ void Core::openFromClipboard()
     }
 }
 
-#ifdef Q_OS_WINDOWS
-# define IsAligned(n) (static_cast<size_t>((reinterpret_cast<uintptr_t>(n) & 1) == 0))
+//-----------------------------------------------------------------------------------
 
-static QString evilWindowsMimeDataHack(QMimeData const *mimeData)
+#ifdef Q_OS_WINDOWS
+# define GetPIDLFolder(pida)  (reinterpret_cast<LPCITEMIDLIST>((reinterpret_cast<BYTE const *>(pida)) + (pida)->aoffset[0]))
+# define GetPIDLItem(pida, i) (reinterpret_cast<LPCITEMIDLIST>((reinterpret_cast<BYTE const *>(pida)) + (pida)->aoffset[(i) + 1]))
+
+static void dumpComError(char16_t const *message, HRESULT res)
+{
+    qDebug() << u"COM error in" << message << u':' << QString::number(static_cast<ULONG>(res), 16) << u':'
+             << QString::fromStdString(std::error_code(res, std::system_category()).message());
+}
+
+ND static QString getFilePathFromIdList(QMimeData const *mimeData)
+{
+    QByteArray  shIdList = mimeData->data(uR"(application/x-qt-windows-mime;value="Shell IDList Array")"_s);
+    CIDA const *idList   = reinterpret_cast<CIDA const *>(shIdList.data());
+
+    LPWSTR  str = nullptr;
+    HRESULT res = ::SHGetNameFromIDList(GetPIDLFolder(idList), SIGDN_DESKTOPABSOLUTEPARSING, &str);
+    if (FAILED(res)) {
+        dumpComError(u"SHGetNameFromIDList", res);
+        return {};
+    }
+    QString path = QString::fromWCharArray(str);
+    ::CoTaskMemFree(str);
+
+    str = nullptr;
+    res = ::SHGetNameFromIDList(GetPIDLItem(idList, 0), SIGDN_PARENTRELATIVE, &str);
+    if (FAILED(res)) {
+        dumpComError(u"SHGetNameFromIDList", res);
+        return {};
+    }
+    path.append(u'\\');
+    path.append(reinterpret_cast<QChar *>(str), static_cast<qsizetype>(wcslen(str)));
+    ::CoTaskMemFree(str);
+
+    return path;
+}
+
+ND static QString getFilePathFromIdList2(QMimeData const *mimeData)
+{
+    QByteArray  shIdList = mimeData->data(uR"(application/x-qt-windows-mime;value="Shell IDList Array")"_s);
+    auto const *idList   = reinterpret_cast<CIDA const *>(shIdList.data());
+    IShellItem *item     = nullptr;
+    LPWSTR      str      = nullptr;
+
+    HRESULT res = ::SHCreateItemFromIDList(GetPIDLFolder(idList), IID_PPV_ARGS(&item));
+    if (FAILED(res)) {
+        dumpComError(u"SHCreateItemFromIDList", res);
+        return {};
+    }
+    res = item->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &str);
+    if (FAILED(res)) {
+        dumpComError(u"IShellItem::GetDisplayName", res);
+        item->Release();
+        return {};
+    }
+    QString path = QString::fromWCharArray(str);
+    ::CoTaskMemFree(str);
+    item->Release();
+
+    res = ::SHCreateItemFromIDList(GetPIDLItem(idList, 0), IID_PPV_ARGS(&item));
+    if (FAILED(res)) {
+        dumpComError(u"SHCreateItemFromIDList", res);
+        return {};
+    }
+    res = item->GetDisplayName(SIGDN_PARENTRELATIVE, &str);
+    if (FAILED(res)) {
+        dumpComError(u"IShellItem::GetDisplayName", res);
+        item->Release();
+        return {};
+    }
+    path.append(u'\\');
+    path.append(str);
+    ::CoTaskMemFree(str);
+    item->Release();
+
+    return path;
+}
+
+# define IsEvenAlignment(n) ((reinterpret_cast<UINT_PTR>(n) & 1) == 0)
+
+ND static QString evilWindowsMimeDataHack(QMimeData const *mimeData)
 {
     QByteArray shIdList = mimeData->data(uR"(application/x-qt-windows-mime;value="Shell IDList Array")"_s);
     if (shIdList.size() < 8LL + 35LL + 2LL)
         return {};
 
-    char const *data = shIdList.constData();
-    char const *end  = data + shIdList.size();
-    char const *last = data + *reinterpret_cast<uint32_t const *>(data + 8);
+    char16_t buffer[512];
+    LPCSTR   data = shIdList.constData();
+    LPCSTR   end  = data + shIdList.size();
+    LPCSTR   last = data + *reinterpret_cast<UINT32 const *>(data + 8);
     data += 35;
 
     // The drive letter is an ASCII string only. Technically a drive letter can be more
     // than one letter, so we treat it as a string. We use strnlen out of paranoia. It is
     // non-standard but definitely exists on Windows.
-    QString str = uR"(\\?\)" + QString::fromLatin1(data, qsizetype(strnlen(data, end - data)));
+    QString str = uR"(\\?\)" + QLatin1StringView(data, static_cast<qsizetype>(strnlen(data, end - data)));
 
     // We blindly add path separators later so ensure there isn't one.
     if (str.endsWith(u'\\'))
@@ -623,23 +702,33 @@ static QString evilWindowsMimeDataHack(QMimeData const *mimeData)
         return {};
     // Skip 28 bytes of unknown data. The data always appears to be aligned to an odd
     // offset. If we're at an even offset, skip 29 instead.
-    data += 28 + IsAligned(data);
+    data += 28 + IsEvenAlignment(data);
 
     while (data + 2 < end) {
-        // ASCII short name (null-terminated)
+        // ASCII short name (null-terminated). We just skip and ignore.
         data += strnlen(data, end - data) + 1;
         // Skip 46 bytes of unknown data, or 47 if we're aligned.
-        data += 46 + IsAligned(data);
+        data += 46 + IsEvenAlignment(data);
         if (data >= end)
             break;
 
         // UTF-16 path segment (null-terminated). Qt won't accept an unaligned string,
         // so we must copy it to a buffer first. wcsnlen for paranoia as before.
-        size_t len = wcsnlen(reinterpret_cast<wchar_t const *>(data), end - data);
-        auto   tmp = std::make_unique<QChar[]>(len + 1);
-        memcpy(tmp.get(), data, (len + 1) * sizeof(wchar_t));
+        SIZE_T    len = wcsnlen(reinterpret_cast<wchar_t const *>(data), end - data);
+        char16_t *tmp;
+        bool      delTmp;
+        if (len < std::size(buffer)) {
+            tmp    = buffer;
+            delTmp = false;
+        } else {
+            tmp    = new char16_t[len + 1];
+            delTmp = true;
+        }
+        memcpy(tmp, data, (len + 1) * sizeof(wchar_t));
         str.append(u'\\');
-        str.append(tmp.get(), qsizetype(len));
+        str.append(reinterpret_cast<QChar *>(tmp), static_cast<qsizetype>(len));
+        if (delTmp)
+            delete[] tmp;
 
         // Skip UTF-16 data and null terminator
         data += (len + 1) * sizeof(wchar_t);
@@ -651,8 +740,12 @@ static QString evilWindowsMimeDataHack(QMimeData const *mimeData)
     return str;
 }
 
-# undef IsAligned
+# undef GetPIDLFolder
+# undef GetPIDLItem
+# undef IsEvenAlignment
 #endif
+
+//-----------------------------------------------------------------------------------
 
 void Core::onDropIn(QMimeData const *mimeData, QObject const *source)
 {
@@ -665,7 +758,7 @@ void Core::onDropIn(QMimeData const *mimeData, QObject const *source)
         if (urlList.isEmpty()) {
             static constexpr char16_t commonWarning[] = u"hasUrls() indicated that file urls should exist, but urls() returned an empty list.";
 #ifdef Q_OS_WINDOWS
-            QString path = evilWindowsMimeDataHack(mimeData);
+            QString path = getFilePathFromIdList(mimeData);
             if (path.isEmpty()) {
                 qWarning() << commonWarning << u"The backup hack failed to return any path. Ignoring event.";
             } else {
@@ -704,14 +797,17 @@ void Core::onDraggedOut(QList<QString> const &paths)
     } else { // multi-selection, or single directory. drag urls
         mimeData = new QMimeData();
         QList<QUrl> urlList;
-        for (auto const &path : paths)
-            urlList << QUrl::fromLocalFile(path);
+        for (auto const &path : paths) {
+            QUrl tmp = QUrl::fromLocalFile(path);
+            urlList.append(tmp);
+        }
         mimeData->setUrls(urlList);
     }
+    auto *drag = new QDrag(this);
     // auto thumb = Thumbnailer::getThumbnail(paths.last(), 100);
-    mDrag->setMimeData(mimeData);
+    drag->setMimeData(mimeData);
     // mDrag->setPixmap(*thumb->pixmap().get());
-    mDrag->exec(Qt::CopyAction | Qt::MoveAction | Qt::LinkAction, Qt::CopyAction);
+    drag->exec(Qt::CopyAction | Qt::MoveAction | Qt::LinkAction, Qt::CopyAction);
 }
 
 QMimeData *Core::getMimeDataForImage(QSharedPointer<Image> const &img, MimeDataTarget target)
@@ -1351,12 +1447,11 @@ void Core::print()
     p.exec();
 }
 
-void Core::scalingRequest(QSize size, ScalingFilter filter) const
+void Core::scalingRequest(QSize size, ScalingFilter filter)
 {
     // filter out an unnecessary scale request at statup
     if (mw->isVisible() && state.hasActiveImage) {
-        QSharedPointer<Image> forScale = model->getImage(state.currentFilePath);
-        if (forScale)
+        if (QSharedPointer<Image> forScale = model->getImage(state.currentFilePath))
             model->scaler()->requestScaled(ScalerRequest(forScale, size, state.currentFilePath, filter));
     }
 }
@@ -1534,8 +1629,7 @@ void Core::prevDirectory()
 
 void Core::nextImage()
 {
-    if (mw->currentViewMode() == ViewMode::FOLDERVIEW ||
-        (model->isEmpty() && folderEndAction != FolderEndAction::GOTO_ADJACENT))
+    if (mw->currentViewMode() == ViewMode::FOLDERVIEW || (model->isEmpty() && folderEndAction != FolderEndAction::GOTO_ADJACENT))
         return;
     stopSlideshow();
     if (shuffle) {
@@ -1560,8 +1654,7 @@ void Core::nextImage()
 
 void Core::prevImage()
 {
-    if (mw->currentViewMode() == ViewMode::FOLDERVIEW ||
-        (model->isEmpty() && folderEndAction != FolderEndAction::GOTO_ADJACENT))
+    if (mw->currentViewMode() == ViewMode::FOLDERVIEW || (model->isEmpty() && folderEndAction != FolderEndAction::GOTO_ADJACENT))
         return;
     stopSlideshow();
     if (shuffle) {
@@ -1639,7 +1732,7 @@ void Core::jumpToLast()
     mw->showMessageDirectoryEnd();
 }
 
-void Core::onLoadFailed(QString const &path) const
+void Core::onLoadFailed(QString const &path)
 {
     mw->showMessage(tr("Load failed: ") + path);
     if (path == state.currentFilePath)

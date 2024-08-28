@@ -17,8 +17,8 @@
 
 namespace ImageLib {
 
- QImage *rotatedRaw(QImage const *src, int grad);
- QImage *rotated(QSharedPointer<QImage const> const &src, int grad);
+ QImage *rotatedRaw(QImage const *src, qreal grad);
+ QImage *rotated(QSharedPointer<QImage const> const &src, qreal grad);
 
  QImage *croppedRaw(QImage const *src, QRect newRect);
  QImage *cropped(QSharedPointer<QImage const> const &src, QRect newRect);

@@ -93,11 +93,11 @@ class Core final : public QObject
     void onModelItemReady(QSharedPointer<Image> const &, QString const &);
     void onModelItemUpdated(QString const &filePath);
     void onModelSortingChanged(SortingMode mode);
-    void onLoadFailed(QString const &path) const;
+    void onLoadFailed(QString const &path);
     void rotateLeft();
     void rotateRight();
-    void close() const;
-    void scalingRequest(QSize, ScalingFilter) const;
+    void close();
+    void scalingRequest(QSize, ScalingFilter);
     void onScalingFinished(QPixmap *scaled, ScalerRequest const &req);
     void copyCurrentFile(QString const &destDirectory);
     void moveCurrentFile(QString const &destDirectory);
@@ -169,7 +169,6 @@ class Core final : public QObject
     DirectoryPresenter *folderViewPresenter;
 
     QTranslator  *translator;
-    QDrag        *mDrag;
     Randomizer    randomizer;
     QTimer        slideshowTimer;
     QElapsedTimer t;

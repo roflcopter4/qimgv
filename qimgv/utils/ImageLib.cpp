@@ -11,18 +11,18 @@ void recolor(QPixmap &pixmap, QColor const &color)
     p.drawRect(pixmap.rect());
 }
 
-QImage *rotatedRaw(QImage const *src, int grad)
+QImage *rotatedRaw(QImage const *src, qreal grad)
 {
+    auto *img = new QImage();
     if (!src)
-        return new QImage();
-    auto      *img = new QImage();
+        return img;
     QTransform transform;
     transform.rotate(grad);
     *img = src->transformed(transform, Qt::SmoothTransformation);
     return img;
 }
 
-QImage *rotated(QSharedPointer<QImage const> const &src, int grad)
+QImage *rotated(QSharedPointer<QImage const> const &src, qreal grad)
 {
     return rotatedRaw(src.get(), grad);
 }
@@ -70,32 +70,32 @@ std::unique_ptr<QImage const>
 exifRotated(std::unique_ptr<QImage const> src, int orientation)
 {
     switch (orientation) {
-    case 1: {
+    case 1:
         src.reset(flippedHRaw(src.get()));
-    } break;
-    case 2: {
+        break;
+    case 2:
         src.reset(flippedVRaw(src.get()));
-    } break;
-    case 3: {
+        break;
+    case 3:
         src.reset(flippedHRaw(src.get()));
         src.reset(flippedVRaw(src.get()));
-    } break;
-    case 4: {
-        src.reset(rotatedRaw(src.get(), 90));
-    } break;
-    case 5: {
+        break;
+    case 4:
+        src.reset(rotatedRaw(src.get(), 90.0));
+        break;
+    case 5:
         src.reset(flippedHRaw(src.get()));
-        src.reset(rotatedRaw(src.get(), 90));
-    } break;
-    case 6: {
+        src.reset(rotatedRaw(src.get(), 90.0));
+        break;
+    case 6:
         src.reset(flippedVRaw(src.get()));
-        src.reset(rotatedRaw(src.get(), 90));
-    } break;
-    case 7: {
-        src.reset(rotatedRaw(src.get(), -90));
-    } break;
-    default: {
-    } break;
+        src.reset(rotatedRaw(src.get(), 90.0));
+        break;
+    case 7:
+        src.reset(rotatedRaw(src.get(), -90.0));
+        break;
+    default:
+        break;
     }
     return src;
 }
@@ -104,42 +104,43 @@ std::unique_ptr<QImage>
 exifRotated(std::unique_ptr<QImage> src, int orientation)
 {
     switch (orientation) {
-    case 1: {
+    case 1:
         src.reset(flippedHRaw(src.get()));
-    } break;
-    case 2: {
+        break;
+    case 2:
         src.reset(flippedVRaw(src.get()));
-    } break;
-    case 3: {
+        break;
+    case 3:
         src.reset(flippedHRaw(src.get()));
         src.reset(flippedVRaw(src.get()));
-    } break;
-    case 4: {
-        src.reset(rotatedRaw(src.get(), 90));
-    } break;
-    case 5: {
+        break;
+    case 4:
+        src.reset(rotatedRaw(src.get(), 90.0));
+        break;
+    case 5:
         src.reset(flippedHRaw(src.get()));
-        src.reset(rotatedRaw(src.get(), 90));
-    } break;
-    case 6: {
+        src.reset(rotatedRaw(src.get(), 90.0));
+        break;
+    case 6:
         src.reset(flippedVRaw(src.get()));
-        src.reset(rotatedRaw(src.get(), 90));
-    } break;
-    case 7: {
-        src.reset(rotatedRaw(src.get(), -90));
-    } break;
-    default: {
-    } break;
+        src.reset(rotatedRaw(src.get(), 90.0));
+        break;
+    case 7:
+        src.reset(rotatedRaw(src.get(), -90.0));
+        break;
+    default:
+        break;
     }
     return src;
 }
 
 #if 0
-QImage *cropped(QRect newRect, QRect targetRes, bool upscaled) {
+QImage *cropped(QRect newRect, QRect targetRes, bool upscaled)
+{
     QImage *cropped = new QImage(targetRes.size(), image->format());
-    if(upscaled) {
+    if (upscaled) {
         QImage temp = image->copy(newRect);
-        *cropped = temp.scaled(targetRes.size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+        *cropped    = temp.scaled(targetRes.size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
         QRect target(QPoint(0, 0), targetRes.size());
         target.moveCenter(cropped->rect().center());
         *cropped = cropped->copy(target);
@@ -205,8 +206,9 @@ scaled_CV(QSharedPointer<QImage const> const &source,
         return dest;
 
     QtOcv::MatColorOrder order;
-    cv::Mat  srcMat     = QtOcv::image2Mat_shared(*source, &order);
-    cv::Size destSizeCv = cv::Size(destSize.width(), destSize.height());
+
+    cv::Mat srcMat     = QtOcv::image2Mat_shared(*source, &order);
+    auto    destSizeCv = cv::Size(destSize.width(), destSize.height());
 
     if (destSize == source->size()) {
         // TODO: should this return a copy?
@@ -218,8 +220,8 @@ scaled_CV(QSharedPointer<QImage const> const &source,
         *dest = QtOcv::mat2Image(dstMat, order, source->format());
     }
     else { // downscale
-        float scale = static_cast<float>(destSize.width()) / static_cast<float>(source->width());
-        if (scale < 0.5f && filter != cv::INTER_NEAREST) {
+        auto scale = static_cast<qreal>(destSize.width()) / static_cast<qreal>(source->width());
+        if (scale < 0.5 && filter != cv::INTER_NEAREST) {
             if (filter == cv::INTER_CUBIC)
                 sharpen = 1;
             filter = cv::INTER_AREA;

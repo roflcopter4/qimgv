@@ -37,15 +37,13 @@ void ScriptManager::runScript(QString const &scriptName, QSharedPointer<Image> c
         if (script.blocking) {
             exec.start(program, arguments);
             if (!exec.waitForStarted())
-                qDebug() << u"Unable not run application/script \"" << program << u"\". Make sure it is an executable.";
+                qDebug() << u"Unable not run application/script" << program << u". Make sure it is an executable.";
             exec.waitForFinished(10000);
         } else if (!QProcess::startDetached(program, arguments)) {
             QFileInfo fi(program);
-            QString   errorString;
-            if (fi.isFile() && !fi.isExecutable())
-                errorString = u"Error:  " + program + u"  is not an executable.";
-            else
-                errorString = u"Error: unable run application/script. See README for working examples."_s;
+            QString   errorString = fi.isFile() && !fi.isExecutable()
+                                        ? u"Error:" + program + u"is not an executable."
+                                        : u"Error: unable run application/script. See README for working examples."_s;
             emit error(errorString);
             qWarning() << errorString;
         }

@@ -15,6 +15,10 @@ class BookmarksWidget : public QWidget
     explicit BookmarksWidget(QWidget *parent = nullptr);
     ~BookmarksWidget() override;
 
+  Q_SIGNALS:
+    void bookmarkClicked(QString dirPath);
+    void droppedIn(QList<QString> paths, QString dirPath);
+
   public Q_SLOTS:
     void addBookmark(QString const &directoryPath);
     void removeBookmark(QString const &dirPath);
@@ -23,10 +27,6 @@ class BookmarksWidget : public QWidget
   private Q_SLOTS:
     void readSettings();
     void saveBookmarks();
-
-  Q_SIGNALS:
-    void bookmarkClicked(QString dirPath);
-    void droppedIn(QList<QString> paths, QString dirPath);
 
   protected:
     void dropEvent(QDropEvent *event) override;

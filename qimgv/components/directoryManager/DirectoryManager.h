@@ -32,8 +32,6 @@ class DirectoryManager final : public QObject
 {
     Q_OBJECT
 
-    using CompareFunction = bool (DirectoryManager::*)(FSEntry const &e1, FSEntry const &e2) const;
-
   public:
     explicit DirectoryManager(QObject *parent = nullptr);
     ~DirectoryManager() override = default;
@@ -88,6 +86,8 @@ class DirectoryManager final : public QObject
     ND static bool isFile(QString const &filePath);
 
   private:
+    using CompareFunction = bool (DirectoryManager::*)(FSEntry const &e1, FSEntry const &e2) const;
+
     ND bool path_entry_compare        (FSEntry const &e1, FSEntry const &e2) const;
     ND bool path_entry_compare_reverse(FSEntry const &e1, FSEntry const &e2) const;
     ND bool name_entry_compare        (FSEntry const &e1, FSEntry const &e2) const;

@@ -3,8 +3,7 @@
 PushButtonFocusInd::PushButtonFocusInd(QWidget *parent)
     : QPushButton(parent),
       mIsHighlighted(false)
-{
-}
+{}
 
 void PushButtonFocusInd::setHighlighted(bool mode)
 {

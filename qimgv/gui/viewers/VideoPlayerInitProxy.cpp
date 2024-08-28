@@ -33,10 +33,6 @@ VideoPlayerInitProxy::VideoPlayerInitProxy(QWidget *parent)
 
 VideoPlayerInitProxy::~VideoPlayerInitProxy()
 {
-#ifdef Q_OS_WINDOWS
-    if (hPlayerModule)
-        ::FreeLibrary(hPlayerModule);
-#endif
     if (playerLib.isLoaded())
         playerLib.unload();
 }
@@ -78,25 +74,24 @@ inline bool VideoPlayerInitProxy::initPlayer()
         return false;
     }
 
-#if defined Q_OS_WINDOWS
+# ifdef Q_OS_WINDOWS
     QString mpvDll  = QDir::toNativeSeparators(pluginFile.absolutePath()) + u'\\' + u"libmpv-2.dll";
-    HMODULE hLibMpv = ::LoadLibraryExW(reinterpret_cast<wchar_t *>(mpvDll.data()), nullptr, 0);
+    HMODULE hLibMpv = ::LoadLibraryW(reinterpret_cast<LPCWSTR>(mpvDll.data()));
     if (!hLibMpv) {
         qWarning() << u"Error loading library libmpv";
         return false;
     }
-#endif
+# endif
     if (!playerLib.load()) {
         qWarning() << u"Error loading library:" << playerLib.errorString();
         return false;
     }
-#ifdef Q_OS_WINDOWS
+# ifdef Q_OS_WINDOWS
     ::FreeLibrary(hLibMpv);
-#endif
+# endif
 
-    using CreatePlayerWidget_t = VideoPlayer *(*)(QWidget *);
     //NOLINTNEXTLINE(clang-diagnostic-cast-function-type-strict)
-    auto CreatePlayerWidget = reinterpret_cast<CreatePlayerWidget_t>(playerLib.resolve("CreatePlayerWidget"));
+    auto *CreatePlayerWidget = reinterpret_cast<VideoPlayer *(*)(QWidget *)>(playerLib.resolve("CreatePlayerWidget"));
 
     if (!CreatePlayerWidget) {
         qWarning() << u"Error resolving function:" << playerLib.errorString();

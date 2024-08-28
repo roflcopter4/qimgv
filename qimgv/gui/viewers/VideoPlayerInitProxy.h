@@ -11,9 +11,6 @@
 #include <QPainter>
 #include <QVBoxLayout>
 #include <memory>
-#ifdef Q_OS_WINDOWS
-# include "Platform.h"
-#endif
 
 class VideoPlayerInitProxy : public VideoPlayer
 {
@@ -65,8 +62,4 @@ class VideoPlayerInitProxy : public VideoPlayer
     QString      libFile;
     QStringList  libDirs;
     QLibrary     playerLib;
-
-#ifdef Q_OS_WINDOWS
-    HMODULE hPlayerModule = nullptr;
-#endif
 };
