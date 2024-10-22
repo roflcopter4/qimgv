@@ -31,7 +31,7 @@
 #  include <vld.h>
 # endif
 #endif
-#define tr(...) QCoreApplication::translate(__VA_ARGS__)
+#define tr(...) QApplication::translate(__VA_ARGS__)
 
 //------------------------------------------------------------------------------
 
@@ -200,16 +200,9 @@ int main(int argc, char *argv[])
 
     // Run the show.
     core->showGui();
-    int ret = QGuiApplication::exec();
+    int ret = QApplication::exec();
 
-    util::DeleteAndAssignNull(parser);
-    util::DeleteAndAssignNull(core);
-    util::DeleteAndAssignNull(appActions);
-    util::DeleteAndAssignNull(scriptManager);
-    util::DeleteAndAssignNull(actionManager);
-    util::DeleteAndAssignNull(shrRes);
-    util::DeleteAndAssignNull(settings);
-    util::DeleteAndAssignNull(app);
+    util::DeleteAndAssignNull(parser, core, appActions, scriptManager, actionManager, shrRes, settings, app);
 
 #ifdef USE_VLD
     ::VLDSetReportOptions(VLD_OPT_UNICODE_REPORT | VLD_OPT_REPORT_TO_FILE,

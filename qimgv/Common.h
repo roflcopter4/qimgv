@@ -4,27 +4,12 @@
 /***************************************************************************************/
 
 
-#define ND     [[nodiscard]]
-#define QS(s)  QStringLiteral(s)
-//#define QSV(s) QStringView(u"" s)
-#define QSV(s) util::makeQStringView(u"" s)
+#define ND [[nodiscard]]
 
 #if defined __has_include && __has_include(<QString>) && __has_include(<QStringView>)
 # include <QString>
 # include <QStringView>
 namespace util {
-
-template <size_t N>
-# if defined _MSC_VER
-__forceinline
-# elif defined __GNUC__
-__attribute__((__always_inline__))
-# endif
-consteval QStringView makeQStringView(char16_t const (&literal)[N])
-{
-    return QStringView{literal, static_cast<qsizetype>(N - 1)};
-}
-
 namespace Literals {
 inline namespace StringLiterals {
 consteval QStringView operator""_sv(char16_t const *str, size_t size) noexcept
@@ -33,7 +18,6 @@ consteval QStringView operator""_sv(char16_t const *str, size_t size) noexcept
 }
 } // namespace string_literals
 } // namespace literals
-
 } // namespace util
 
 using namespace Qt::Literals::StringLiterals;

@@ -1,12 +1,14 @@
 #include "Stuff.h"
+
+#include <QApplication>
 #include <QDebug>
+#include <QDir>
 #include <QFileInfo>
 #include <QString>
+
 #include <atomic>
 #include <iostream>
 #include <mutex>
-#include <qcoreapplication.h>
-#include <QDir>
 
 #ifdef Q_OS_WIN32
 # ifndef WIN32_LEAN_AND_MEAN
@@ -24,25 +26,6 @@
 using namespace std::literals;
 
 /****************************************************************************************/
-
-int clamp(int x, int lower, int upper)
-{
-    return qMin(upper, qMax(x, lower));
-}
-
-// 0 - mac, 1 - linux, 2 - windows, 3 - other
-int probeOS()
-{
-#ifdef TARGET_OS_MAC
-    return 0;
-#elif defined Q_OS_LINUX
-    return 1;
-#elif defined Q_OS_WINDOWS
-    return 2;
-#else
-    return 3;
-#endif
-}
 
 namespace util {
 
@@ -294,7 +277,7 @@ static void do_OpenConsoleWindow()
                      reinterpret_cast<wchar_t const *>(GetErrorMessage(err).data()));
         ::MessageBoxW(nullptr, buf, L"Fatal Error", MB_OK | MB_ICONERROR);
 #ifdef QT_VERSION
-        ::QCoreApplication::exit(1);
+        ::QApplication::exit(1);
 #else
         ::exit(1);
 #endif

@@ -136,9 +136,9 @@ QString ShortcutBuilder::fromEventText(QKeyEvent *event)
         sequence.remove(0, 4);
         // rename some keys to match the ones from inputmap
         // just a bandaid
-        if (sequence == QSV("Return"))
+        if (sequence == u"Return"_sv)
             sequence = u"Enter"_s;
-        else if (sequence == QSV("Escape"))
+        else if (sequence == u"Escape"_sv)
             sequence = u"Esc"_s;
     } else {
         // got an unknown key (usually something from non-eng layout)

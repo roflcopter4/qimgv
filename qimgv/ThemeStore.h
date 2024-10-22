@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QDebug>
 #include <QColor>
+#include <QDebug>
 #include <QPalette>
 
 enum class ColorSchemes {
@@ -29,11 +29,13 @@ struct BaseColorScheme {
     QColor overlay;
 };
 
-class ColorScheme {
-public:
+class ColorScheme
+{
+  public:
     ColorScheme();
-    ColorScheme(BaseColorScheme const &base);
+    explicit ColorScheme(BaseColorScheme const &base);
     void setBaseColors(BaseColorScheme const &base);
+
     // index of theme name
     int tid;
     // base
@@ -67,12 +69,12 @@ public:
     QColor folderview_button_pressed;
     QColor input_field_focus;
 
-
-private:
+  private:
     void createColorVariants();
 };
 
-class ThemeStore {
-public:
+class ThemeStore
+{
+  public:
     static ColorScheme colorScheme(ColorSchemes name);
 };

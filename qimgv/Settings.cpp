@@ -142,7 +142,7 @@ void Settings::loadStylesheet()
     // Ensure at least 4px so it's not too thin.
     unsigned top_panel_text_padding = std::max(text_padding, 4U);
     // Scale with font, 38px base size.
-    unsigned top_panel_height = std::max((text_height + top_panel_text_padding * 2 + top_panel_v_margin * 2), 38U);
+    unsigned top_panel_height = std::max(text_height + top_panel_text_padding * 2 + top_panel_v_margin * 2, 38U);
     // Overlay headers.
     unsigned overlay_header_margin = 2;
     // 32px base size.
@@ -152,10 +152,10 @@ void Settings::loadStylesheet()
     // Pseudo-dpi to scale some widget widths.
     unsigned text_height_base = 22;
 
-    qreal pDpr = std::max((static_cast<qreal>(text_height) / text_height_base), 1.0);
+    qreal pDpr = std::max(static_cast<qreal>(text_height) / text_height_base, 1.0);
 
     unsigned context_menu_width         = static_cast<unsigned>(212.0 * pDpr);
-    unsigned context_menu_button_height = static_cast<unsigned>(32.0 * pDpr);
+    unsigned context_menu_button_height = static_cast<unsigned>( 32.0 * pDpr);
     unsigned rename_overlay_width       = static_cast<unsigned>(380.0 * pDpr);
 
     qDebug() << u"dpr=" << qApp->devicePixelRatio() << u"pDpr=" << pDpr;
@@ -235,7 +235,8 @@ void Settings::loadStylesheet()
 
     // do not show separator line if topbar color matches folderview
     styleSheet.replace(u"%topbar_border_rgba%"_s,
-                       colors.folderview == colors.folderview_topbar ? colors.folderview.name()
+                       colors.folderview == colors.folderview_topbar 
+                           ? colors.folderview.name()
                            : u"rgba(0,0,0,14%)"_s);
 
     // --- apply -------------------------------------------------

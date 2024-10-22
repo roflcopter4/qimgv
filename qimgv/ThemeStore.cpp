@@ -82,7 +82,7 @@ ColorScheme ThemeStore::colorScheme(ColorSchemes name)
         break;
     }
 
-    return {base};
+    return ColorScheme{base};
 }
 
 //---------------------------------------------------------------------

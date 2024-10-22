@@ -87,7 +87,7 @@ void FileOperations::copyFileTo(QString const &srcFilePath, QString const &destD
         result = FileOpResult::DESTINATION_NOT_WRITABLE;
         return;
     }
-    QFileInfo destFile(destDirPath + util::pathsep + srcFile.fileName());
+    QFileInfo destFile(destDirPath + u'/' + srcFile.fileName());
     if (destFile.exists()) {
 #ifdef Q_OS_WIN32
         if (!destFile.isWritable()) {
@@ -163,7 +163,7 @@ void FileOperations::moveFileTo(QString const &srcFilePath, QString const &destD
         result = FileOpResult::DESTINATION_NOT_WRITABLE;
         return;
     }
-    QFileInfo destFile(destDirPath + util::pathsep + srcFile.fileName());
+    QFileInfo destFile(destDirPath + u'/' + srcFile.fileName());
     if (destFile.exists()) {
 #ifdef Q_OS_WIN32
         if (!destFile.isWritable()) {
@@ -240,7 +240,7 @@ void FileOperations::rename(QString const &srcFilePath, QString const &newName, 
         result = FileOpResult::NOTHING_TO_DO;
         return;
     }
-    QString   newFilePath = srcFile.absolutePath() + util::pathsep + newName;
+    QString   newFilePath = srcFile.absolutePath() + u'/' + newName;
     QFileInfo destFile(newFilePath);
     if (destFile.exists()) {
 #ifdef Q_OS_WIN32

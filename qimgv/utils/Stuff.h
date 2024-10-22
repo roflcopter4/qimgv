@@ -5,24 +5,7 @@
 #include <filesystem>
 #include <cstddef>
 
-#ifdef _WIN32
-# include <basetsd.h>
-using StdString = std::wstring;
-using ssize_t = SSIZE_T;
-#else
-using StdString = std::string;
-#endif
-
-int clamp(int x, int lower, int upper);
-int probeOS();
-
 namespace util {
-
-#if defined Q_OS_WIN32 && false
-inline constexpr QChar pathsep = u'\\';
-#else
-inline constexpr QChar pathsep = u'/';
-#endif
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -39,6 +22,13 @@ void DeleteAndAssignNull(Ty *&var)
 {
     delete var;
     var = nullptr;
+}
+
+template <typename First, typename ...Rest>
+void DeleteAndAssignNull(First *&first, Rest *&...rest)
+{
+    DeleteAndAssignNull(first);
+    DeleteAndAssignNull(rest...);
 }
 
 QString GetBacktrace();

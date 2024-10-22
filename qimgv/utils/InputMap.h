@@ -12,7 +12,6 @@ class InputMap
     static QString keyNameAlt();
     static QString keyNameShift();
 
-    //ND auto keys() const -> QMap<quint32, QString> const &;
     ND static auto modifiers() -> std::map<QString, Qt::KeyboardModifier> const &;
     ND static bool keyMapContains(uint32_t nativeScanCode);
     ND static auto keyName(uint32_t nativeScanCode) -> QString;
@@ -21,7 +20,7 @@ class InputMap
     enum class KeyCode;
     struct NativeInputKeyInfo {
         uint32_t nativeCode;
-        KeyCode key;
+        KeyCode  key;
         QString  repr;
     };
 
