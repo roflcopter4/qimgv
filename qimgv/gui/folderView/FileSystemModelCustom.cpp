@@ -4,7 +4,7 @@
 
 class FileSystemModelCustom::FileIconProvider final : public QAbstractFileIconProvider
 {
-#define appTr QGuiApplication::translate
+#define appTr QApplication::translate
 
     // This is copied from the Qt source.
     static QString getFileType(QFileInfo const &info)

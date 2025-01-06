@@ -4,7 +4,7 @@ Settings *settings = nullptr;
 
 Settings::Settings(QObject *parent)
     : QObject(parent),
-#ifdef Q_OS_LINUX
+#if defined Q_OS_LINUX || defined Q_OS_FREEBSD
       stateConf(QCoreApplication::organizationName(), u"savedState"_s),
       themeConf(QCoreApplication::organizationName(), u"theme"_s)
 #else
@@ -15,7 +15,7 @@ Settings::Settings(QObject *parent)
 #endif
 {
     // config files
-#ifdef Q_OS_LINUX
+#if defined Q_OS_LINUX || defined Q_OS_FREEBSD
       qDebug() << stateConf.fileName();
       qDebug() << themeConf.fileName();
 #else
@@ -47,7 +47,7 @@ Settings *Settings::getInstance()
 
 void Settings::setupCache()
 {
-#ifdef Q_OS_LINUX
+#if defined Q_OS_LINUX || defined Q_OS_FREEBSD
     QString genericCacheLocation = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation);
     if (genericCacheLocation.isEmpty())
         genericCacheLocation = QDir::homePath() + u"/.cache"_s;
@@ -335,10 +335,12 @@ QString Settings::mpvBinary() const
 {
     QString mpvPath = settingsConf.value(u"mpvBinary"_sv, u""_s).toString();
     if (!QFile::exists(mpvPath)) {
-#ifdef Q_OS_WIN32
+#if defined Q_OS_WIN32
         mpvPath = QCoreApplication::applicationDirPath() + u"/plugins/mpv.exe";
-#elif defined __linux__
+#elif defined Q_OS_LINUX
         mpvPath = u"/usr/bin/mpv"_s;
+#elif defined Q_OS_FREEBSD
+        mpvPath = u"/usr/local/bin/mpv"_s;
 #endif
         if (!QFile::exists(mpvPath))
             mpvPath = u""_s;
@@ -433,10 +435,9 @@ void Settings::setUseSystemColorScheme(bool mode)
 
 QVersionNumber Settings::lastVersion() const
 {
-    int vmajor = settingsConf.value(u"lastVerMajor"_sv, 0).toInt();
-    int vminor = settingsConf.value(u"lastVerMinor"_sv, 0).toInt();
-    int vmicro = settingsConf.value(u"lastVerMicro"_sv, 0).toInt();
-    return QVersionNumber(vmajor, vminor, vmicro);
+    return QVersionNumber(settingsConf.value(u"lastVerMajor"_sv, 0).toInt(),
+                          settingsConf.value(u"lastVerMinor"_sv, 0).toInt(),
+                          settingsConf.value(u"lastVerMicro"_sv, 0).toInt());
 }
 
 void Settings::setLastVersion(QVersionNumber const &ver)
@@ -744,8 +745,8 @@ void Settings::readShortcuts(QMap<QString, QString> &shortcuts)
     for (auto &item : in) {
         QStringList pair = item.split(u'=');
         if (!pair[0].isEmpty() && !pair[1].isEmpty()) {
-            if (pair[1] == u"eq"_sv)
-                pair[1] = u'=';
+            if (pair[1].endsWith(u"eq"_sv))
+                pair[1] = pair[1].chopped(2) + u"=";
             shortcuts.insert(pair[1], pair[0]);
         }
     }
@@ -760,8 +761,8 @@ void Settings::saveShortcuts(QMap<QString, QString> const &shortcuts)
     QStringList  out;
     while (i.hasNext()) {
         i.next();
-        if (i.key() == u"="_sv)
-            out << i.value() + u'=' + u"eq";
+        if (i.key().endsWith(u"="_sv))
+            out << i.value() + u"=" + i.key().chopped(1) + u"eq";
         else
             out << i.value() + u'=' + i.key();
     }
@@ -1366,4 +1367,24 @@ bool Settings::trackpadDetection() const
 void Settings::setTrackpadDetection(bool mode)
 {
     settingsConf.setValue(u"trackpadDetection"_sv, mode);
+}
+//------------------------------------------------------------------------------
+bool Settings::clickableEdges()
+{
+    return settingsConf.value("clickableEdges", false).toBool();
+}
+
+void Settings::setClickableEdges(bool mode)
+{
+    settingsConf.setValue("clickableEdges", mode);
+}
+//------------------------------------------------------------------------------
+bool Settings::clickableEdgesVisible()
+{
+    return settingsConf.value("clickableEdgesVisible", true).toBool();
+}
+
+void Settings::setClickableEdgesVisible(bool mode)
+{
+    settingsConf.setValue("clickableEdgesVisible", mode);
 }

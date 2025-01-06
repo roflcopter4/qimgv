@@ -10,7 +10,7 @@
 
 class IconWidget : public QWidget
 {
-    enum class IconColorMode {
+    enum class IconColorMode : uint8_t {
         CUSTOM,
         THEME,
         SOURCE,
@@ -19,6 +19,7 @@ class IconWidget : public QWidget
   public:
     explicit IconWidget(QWidget *parent = nullptr);
     ~IconWidget() override;
+    DELETE_COPY_MOVE_ROUTINES(IconWidget);
 
     void  setIconPath(QString const &path);
     void  setIconOffset(int x, int y);
@@ -41,7 +42,7 @@ class IconWidget : public QWidget
     QString       iconPath;
     QPoint        iconOffset;
     QColor        color;
-    qreal         dpr;
+    qreal         dpr             = devicePixelRatioF();
     qreal         pixmapDrawScale = 0.0;
     IconColorMode colorMode       = IconColorMode::THEME;
     bool          hiResPixmap     = false;

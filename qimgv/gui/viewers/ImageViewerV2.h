@@ -55,6 +55,8 @@ class ImageViewerV2 final : public QGraphicsView
     void showAnimation(QSharedPointer<QMovie> const &movie_);
     void setScaledPixmap(std::unique_ptr<QPixmap> newFrame);
     void pauseResume();
+    void enableDrags();
+    void disableDrags();
 
   protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -201,6 +203,7 @@ class ImageViewerV2 final : public QGraphicsView
     bool scrollBarWorkaround  : 1 = true;
     bool useFixedZoomLevels   : 1 = false;
     bool trackpadDetection    : 1 = true;
+    bool dragsEnabled         : 1 = true;
 
     MouseInteractionState mouseInteraction    = MouseInteractionState::NONE;
     ImageFitMode          imageFitMode        = ImageFitMode::WINDOW;

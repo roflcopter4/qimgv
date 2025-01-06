@@ -450,7 +450,7 @@ void ViewerWidget::hideCursor()
             setCursor(QCursor(Qt::BlankCursor));
             videoControls->hide();
         } else {
-            // only hide when we are under viewer or player widget
+            // Only hide when we are under viewer or player widget
             QWidget *w = qApp->widgetAt(QCursor::pos());
             if (w && (w == imageViewer->viewport() || w == videoPlayer->getPlayer().get())) {
                 if (!videoControls->isVisible() || !videoControlsArea().contains(mapFromGlobal(QCursor::pos()))) {

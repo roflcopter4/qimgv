@@ -848,7 +848,7 @@ void Core::showInDirectory()
         QDesktopServices::openUrl(QUrl::fromLocalFile(model->directoryPath()));
         return;
     }
-#if defined Q_OS_LINUX
+#if defined Q_OS_LINUX || defined Q_OS_FREEBSD
     QString fm = ScriptManager::runCommand(u"xdg-mime query default inode/directory"_s);
     if (fm.contains(u"dolphin"_sv))
         ScriptManager::runCommandDetached(u"dolphin --select " + selectedPath());

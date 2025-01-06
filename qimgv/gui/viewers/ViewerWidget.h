@@ -49,10 +49,10 @@ class ViewerWidget final : public FloatingWidgetContainer
     bool focusNextPrevChild(bool mode) override;
 
   private:
-    void  enableImageViewer();
-    void  enableVideoPlayer();
-    void  disableImageViewer();
-    void  disableVideoPlayer();
+    void enableImageViewer();
+    void enableVideoPlayer();
+    void disableImageViewer();
+    void disableVideoPlayer();
 
     ND QRect videoControlsArea() const;
 

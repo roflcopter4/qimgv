@@ -1,7 +1,7 @@
 #include "../DirectoryManager.h"
 #include "DirectoryWatcher_p.h"
 
-#if defined Q_OS_LINUX
+#if defined Q_OS_LINUX || defined Q_OS_FREEBSD
 # include "linux/LinuxDirectoryWatcher.h"
 #elif defined Q_OS_WINDOWS
 # include "windows/WindowsDirectoryWatcher.h"
@@ -56,20 +56,7 @@ DirectoryWatcher::~DirectoryWatcher()
 // Move this function to some creational class
 DirectoryWatcher *DirectoryWatcher::newInstance(DirectoryManager *parent)
 {
-    DirectoryWatcher *watcher;
-
-#if defined Q_OS_LINUX
-    watcher = new LinuxDirectoryWatcher(parent);
-#elif defined Q_OS_WIN32
-    watcher = new WindowsDirectoryWatcher(parent);
-#elif defined Q_OS_APPLE
-      watcher = new DummyDirectoryWatcher(parent);
-#elif defined Q_OS_UNIX
-      watcher = new DummyDirectoryWatcher(parent);
-#else
-      watcher = new DummyDirectoryWatcher(parent);
-#endif
-
+    DirectoryWatcher *watcher = new DirectoryWatcherImplementation(parent);
     return watcher;
 }
 

@@ -5,7 +5,7 @@
 class DirectoryManager;
 class LinuxDirectoryWatcherPrivate;
 
-class LinuxDirectoryWatcher : public DirectoryWatcher
+class LinuxDirectoryWatcher final : public DirectoryWatcher
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(LinuxDirectoryWatcher)
@@ -13,4 +13,7 @@ class LinuxDirectoryWatcher : public DirectoryWatcher
   public:
     explicit LinuxDirectoryWatcher(DirectoryManager *parent);
     ~LinuxDirectoryWatcher() override;
+    DELETE_COPY_MOVE_ROUTINES(LinuxDirectoryWatcher);
 };
+
+using DirectoryWatcherImplementation = LinuxDirectoryWatcher;

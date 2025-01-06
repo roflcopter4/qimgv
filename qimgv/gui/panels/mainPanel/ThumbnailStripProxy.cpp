@@ -11,12 +11,13 @@ ThumbnailStripProxy::~ThumbnailStripProxy() = default;
 
 void ThumbnailStripProxy::init()
 {
-    qApp->processEvents(); // chew through events in case we have something that alters stateBuf in queue
-    QMutexLocker ml(&mtx);
     if (thumbnailStrip)
         return;
+    qApp->processEvents(); // chew through events in case we have something that alters stateBuf in queue
+    QMutexLocker ml(&mtx);
     thumbnailStrip = new ThumbnailStrip(this);
     ml.unlock();
+
     layout->addWidget(thumbnailStrip);
     setFocusProxy(thumbnailStrip);
     setLayout(layout);
@@ -29,6 +30,7 @@ void ThumbnailStripProxy::init()
     // apply buffer
     thumbnailStrip->populate(stateBuf.itemCount);
     thumbnailStrip->select(stateBuf.selection);
+
     // wait till layout stuff happens
     // before calling focusOn()
     qApp->processEvents();

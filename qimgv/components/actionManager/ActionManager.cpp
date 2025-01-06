@@ -49,6 +49,12 @@ void ActionManager::initDefaults()
     defaults.insert(InputMap::keyNameCtrl() + u"+WheelDown", u"zoomOutCursor"_s);
     defaults.insert(u"+"_s, u"zoomIn"_s);
     defaults.insert(u"-"_s, u"zoomOut"_s);
+    defaults.insert(u"="_s, u"zoomIn"_s); // [=+] key on the number row
+    defaults.insert(InputMap::keyNameCtrl() + u"+=", u"zoomIn"_s);
+    defaults.insert(u"+"_s, u"zoomIn"_s);
+    defaults.insert(InputMap::keyNameCtrl() + u"++", u"zoomIn"_s);
+    defaults.insert(u"-"_s, u"zoomOut"_s);
+    defaults.insert(InputMap::keyNameCtrl() + u"+-", u"zoomOut"_s);
     defaults.insert(InputMap::keyNameCtrl() + u"+Down", u"zoomOut"_s);
     defaults.insert(InputMap::keyNameCtrl() + u"+Up", u"zoomIn"_s);
     defaults.insert(u"Up"_s, u"scrollUp"_s);

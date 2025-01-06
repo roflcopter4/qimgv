@@ -41,6 +41,9 @@ class VideoPlayerInitProxy : public VideoPlayer
     ND bool isInitialized() const;
     ND auto getPlayer() -> QSharedPointer<VideoPlayer>;
 
+    void installEventFilter(QObject *filterObj);
+    void removeEventFilter(QObject *filterObj);
+
   private:
     bool initPlayer();
 
@@ -58,7 +61,8 @@ class VideoPlayerInitProxy : public VideoPlayer
     QSharedPointer<VideoPlayer> player;
 
     QVBoxLayout *layout;
-    QLabel      *errorLabel;
+    QLabel      *errorLabel     = nullptr;
+    QObject     *eventFilterObj = nullptr;
     QString      libFile;
     QStringList  libDirs;
     QLibrary     playerLib;

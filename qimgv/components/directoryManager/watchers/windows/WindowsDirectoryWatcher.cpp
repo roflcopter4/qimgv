@@ -12,8 +12,8 @@ WindowsDirectoryWatcherPrivate::WindowsDirectoryWatcherPrivate(DirectoryWatcher 
     auto *threadPtr = workerThread.get();
 
     connect(threadPtr, &QThread::started,                    workerPtr, &DirectoryWatcherWorker::run);
-    connect(workerPtr, &WindowsDirectoryWorker::notifyEvent, this,      &WindowsDirectoryWatcherPrivate::dispatchNotify);
     connect(workerPtr, &DirectoryWatcherWorker::finished,    threadPtr, &QThread::quit);
+    connect(workerPtr, &WindowsDirectoryWorker::notifyEvent, this,      &WindowsDirectoryWatcherPrivate::dispatchNotify);
 
     workerPtr->moveToThread(threadPtr);
 }
@@ -60,7 +60,7 @@ HANDLE WindowsDirectoryWatcherPrivate::requestDirectoryHandle(QString const &pat
                 qDebug() << u"ERROR_SHARING_VIOLATION waiting for 1 sec";
                 QThread::sleep(1);
             } else {
-                qDebug() << u"Error in requestDirectoryHandle:" <<  util::GetErrorMessage(err);
+                qDebug() << u"Error in requestDirectoryHandle:" << util::GetErrorMessage(err);
                 return INVALID_HANDLE_VALUE;
             }
         }

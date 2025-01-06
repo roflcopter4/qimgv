@@ -230,7 +230,7 @@ std::map<uint32_t, InputMap::NativeInputKeyInfo> const InputMap::keyMap = {
     {57427, {57437, KeyCode::Key_Del,      u"Del"_s}},
     {57437, {57427, KeyCode::Key_Menu,     u"Menu"_s}},
 
-#elif defined Q_OS_LINUX
+#elif defined Q_OS_LINUX || defined Q_OS_FREEBSD
    // Row 1
    {9,   {9,   KeyCode::Key_Esc,        u"Esc"_s}},
    {67,  {67,  KeyCode::Key_F1,         u"F1"_s}},

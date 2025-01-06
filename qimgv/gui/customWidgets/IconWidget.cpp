@@ -3,8 +3,7 @@
 IconWidget::IconWidget(QWidget *parent)
     : QWidget(parent),
       pixmap(nullptr),
-      color(settings->colorScheme().icons),
-      dpr(devicePixelRatioF())
+      color(settings->colorScheme().icons)
 {
     connect(settings, &Settings::settingsChanged, this, &IconWidget::onSettingsChanged);
 }

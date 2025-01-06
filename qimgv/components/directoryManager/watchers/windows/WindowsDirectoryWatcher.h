@@ -12,3 +12,5 @@ class WindowsDirectoryWatcher final : public DirectoryWatcher
   public:
     explicit WindowsDirectoryWatcher(DirectoryManager *parent);
 };
+
+using DirectoryWatcherImplementation = WindowsDirectoryWatcher;

@@ -1,5 +1,7 @@
 #include "ImageViewerV2.h"
 
+#include <algorithm>
+
 ImageViewerV2::ImageViewerV2(QWidget *parent)
     : QGraphicsView(parent),
       movie(nullptr),
@@ -144,6 +146,16 @@ void ImageViewerV2::pauseResume()
         else
             startAnimation();
     }
+}
+
+void ImageViewerV2::enableDrags()
+{
+    dragsEnabled = true;
+}
+
+void ImageViewerV2::disableDrags()
+{
+    dragsEnabled = false;
 }
 
 void ImageViewerV2::onAnimationTimer()
@@ -295,7 +307,7 @@ void ImageViewerV2::reset()
     pixmap.reset();
     stopAnimation();
     movie = nullptr;
-    centerOn(sceneRect().center());
+    centerOn(10000, 10000);
     // when this view is not in focus this it won't update the background
     // so we force it here
     viewport()->update();
@@ -501,7 +513,8 @@ void ImageViewerV2::mouseMoveEvent(QMouseEvent *event)
         // select which action to start
         if (mouseInteraction == MouseInteractionState::NONE) {
             if (scaledImageFits()) {
-                mouseInteraction = MouseInteractionState::DRAG_BEGIN;
+                if (dragsEnabled)
+                    mouseInteraction = MouseInteractionState::DRAG_BEGIN;
             } else {
                 mouseInteraction = MouseInteractionState::PAN;
                 if (cursor().shape() != Qt::ClosedHandCursor)
@@ -558,11 +571,7 @@ void ImageViewerV2::mouseReleaseEvent(QMouseEvent *event)
 // For some reason in qgraphicsview wheelEvent is followed by moveEvent (wtf?)
 void ImageViewerV2::wheelEvent(QWheelEvent *event)
 {
-    qDebug() << event->modifiers()
-             << event->pixelDelta()
-             << event->angleDelta()
-             << lastTouchpadScroll.elapsed()
-             << trackpadDetection;
+    //qDebug() << event->modifiers() << event->pixelDelta() << event->angleDelta() << lastTouchpadScroll.elapsed() << trackpadDetection;
 
 #ifdef Q_OS_APPLE
     // this event goes off during force touch with Qt::ScrollPhase being set to begin/end
@@ -584,15 +593,19 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event)
     } else if (event->modifiers() == Qt::NoModifier) {
         QPoint pixelDelta = event->pixelDelta();
         QPoint angleDelta = event->angleDelta();
+
         /* for reference
          * linux
-         *   trackpad:
+         *   trackpad/xorg:
          *     pixelDelta = (x,y) OR (0,0)
          *     angleDelta = (x*scale,y*scale) OR (x,y)
+         *   trackpad/wayland:
+         *     pixelDelta = (x,y)
+         *     angleDelta = (x*scale,y*scale)
          *   wheel:
          *     pixelDelta = (0,0)     - libinput <= 1.18
-         *     pixelDelta = (0,120*mtx) - libinput 1.19
-         *     angleDelta = (0,120*mtx)
+         *     pixelDelta = (0,120*m) - libinput 1.19
+         *     angleDelta = (0,120*m)
          * -----------------------------------------
          * macOS
          *   trackpad:
@@ -600,15 +613,17 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event)
          *     angleDelta = (x*scale,y*scale)
          *   wheel:
          *     pixelDelta = (0,y*scrollAccel)
-         *     angleDelta = (0,120*mtx)
+         *     angleDelta = (0,120*m)
          * -----------------------------------------
          * windows
          *   trackpad:
-         *     ?? (dont have the hardware with precision drivers)
+         *     pixelDelta = (0,0)
+         *     angleDelta = (x,y)
          *   wheel:
          *     pixelDelta = (0,0)
-         *     AngleDelta = (0,120*mtx)
+         *     AngleDelta = (0,120*m)
          */
+
         bool isWheel = true;
         if (trackpadDetection)
             isWheel = angleDelta.y() && !(angleDelta.y() % 120) && lastTouchpadScroll.elapsed() > 250;
@@ -616,12 +631,14 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event)
             lastTouchpadScroll.restart();
             event->accept();
             if (settings->imageScrolling() != ImageScrolling::NONE) {
-                // scroll (high precision)
+                // Scroll (high precision)
                 stopPosAnimation();
-                int dx = pixelDelta.x() ? pixelDelta.x() : angleDelta.x();
-                int dy = pixelDelta.y() ? pixelDelta.y() : angleDelta.y();
-                hs->setValue(hs->value() - dx * TRACKPAD_SCROLL_MULTIPLIER);
-                vs->setValue(vs->value() - dy * TRACKPAD_SCROLL_MULTIPLIER);
+                // One of these (pixel/angleDelta) may be multiplied by some scale value.
+                // We'll use whichever is larger.
+                int dx = abs(angleDelta.x()) > abs(pixelDelta.x()) ? angleDelta.x() : pixelDelta.x();
+                int dy = abs(angleDelta.y()) > abs(pixelDelta.y()) ? angleDelta.y() : pixelDelta.y();
+                hs->setValue(int(qreal(hs->value() - dx) * TRACKPAD_SCROLL_MULTIPLIER));
+                vs->setValue(int(qreal(vs->value() - dy) * TRACKPAD_SCROLL_MULTIPLIER));
                 centerIfNecessary();
                 snapToEdges();
             }
@@ -632,7 +649,8 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event)
             // shift by 2px in case of img edge misalignment
             // todo: maybe even increase it to skip small distance scrolls?
             if ((event->angleDelta().y() < 0 && imgRect.bottom() > height() + 2) ||
-                (event->angleDelta().y() > 0 && imgRect.top() < -2)) {
+                (event->angleDelta().y() > 0 && imgRect.top() < -2))
+            {
                 event->accept();
                 scroll(0, -angleDelta.y(), true);
             } else {
@@ -738,8 +756,7 @@ void ImageViewerV2::fitWidth()
 
     if (!expandImage && scaleX > 1.0)
         scaleX = 1.0;
-    if (scaleX > expandLimit)
-        scaleX = expandLimit;
+    scaleX = std::min(scaleX, expandLimit);
     if (currentScale() != scaleX) {
         swapToOriginalPixmap();
         doZoom(scaleX);
@@ -790,7 +807,7 @@ void ImageViewerV2::fitFree(qreal scale)
         doZoom(scale);
         centerIfNecessary();
         if (scaledSizeR().height() > viewport()->height()) {
-            QPointF centerTarget = sceneRect().center();
+            QPointF centerTarget = pixmapItem.sceneBoundingRect().center();
             centerTarget.setY(0);
             centerOn(centerTarget);
         }

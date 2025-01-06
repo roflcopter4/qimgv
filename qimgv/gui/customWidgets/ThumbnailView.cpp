@@ -524,10 +524,12 @@ void ThumbnailView::wheelEvent(QWheelEvent *event)
         }
     } else {
         lastTouchpadScroll.restart();
-        if (pixelDelta)
-            scrollPrecise(pixelDelta);
-        else if (angleDelta)
+        // One of these (pixel/angleDelta) may be multiplied by some scale value.
+        // We'll use whichever is larger.
+        if (abs(angleDelta) > abs(pixelDelta))
             scrollPrecise(angleDelta);
+        else
+            scrollPrecise(pixelDelta);
     }
 }
 

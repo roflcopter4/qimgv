@@ -64,7 +64,7 @@ QString ShortcutBuilder::processKeyEvent(QKeyEvent *event)
 {
     if (event->type() != QEvent::KeyPress || isModifier(Qt::Key(event->key())))
         return u""_s;
-#if defined Q_OS_LINUX || defined Q_OS_WIN32
+#if defined Q_OS_LINUX || defined Q_OS_FREEBSD || defined Q_OS_WIN32
     return fromEventNativeScanCode(event);
 #else
     return fromEventText(event);

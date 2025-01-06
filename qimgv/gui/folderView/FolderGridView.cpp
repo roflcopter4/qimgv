@@ -231,7 +231,7 @@ void FolderGridView::pageDown()
 {
     if (!thumbnails.count() || lastSelected() == -1 || flowLayout->sameRow(lastSelected(), thumbnails.count() - 1))
         return;
-    shiftedCol   = -1;
+    shiftedCol = -1;
     qsizetype newIndex = lastSelected();
     // 4 rows down
     for (int i = 0; i < 4; i++) {

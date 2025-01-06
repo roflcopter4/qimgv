@@ -14,7 +14,6 @@ VideoPlayerInitProxy::VideoPlayerInitProxy(QWidget *parent)
     : VideoPlayer(parent),
       player(nullptr),
       layout(new QVBoxLayout(this)),
-      errorLabel(nullptr),
       libFile(QStringLiteral(QIMGV_PLAYER_PLUGIN))
 {
     setAccessibleName(u"VideoPlayerInitProxy"_s);
@@ -115,6 +114,9 @@ inline bool VideoPlayerInitProxy::initPlayer()
     connect(player.get(), &VideoPlayer::positionChanged,  this, &VideoPlayerInitProxy::positionChanged);
     connect(player.get(), &VideoPlayer::videoPaused,      this, &VideoPlayerInitProxy::videoPaused);
     connect(player.get(), &VideoPlayer::playbackFinished, this, &VideoPlayerInitProxy::playbackFinished);
+
+    if (eventFilterObj)
+        player.get()->installEventFilter(eventFilterObj);
 
     return true;
 #else
@@ -262,4 +264,17 @@ void VideoPlayerInitProxy::hide()
         player->hide();
     VideoPlayer::hide();
     player.reset();
+}
+
+void VideoPlayerInitProxy::installEventFilter(QObject *filterObj)
+{
+    eventFilterObj = filterObj;
+    if (player)
+        player->installEventFilter(eventFilterObj);
+}
+
+void VideoPlayerInitProxy::removeEventFilter(QObject *filterObj)
+{
+    if (player)
+        player->removeEventFilter(filterObj);
 }

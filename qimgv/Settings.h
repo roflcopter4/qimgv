@@ -280,6 +280,10 @@ class Settings final : public QObject
        void setTrackpadDetection(bool mode);
     ND bool useSystemColorScheme() const;
        void setUseSystemColorScheme(bool mode);
+    ND bool clickableEdges();
+       void setClickableEdges(bool mode);
+    ND bool clickableEdgesVisible();
+       void setClickableEdgesVisible(bool mode);
 
     ND static QString defaultZoomLevels();
 
