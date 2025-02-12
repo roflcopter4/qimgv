@@ -15,5 +15,3 @@ class LinuxDirectoryWatcher final : public DirectoryWatcher
     ~LinuxDirectoryWatcher() override;
     DELETE_COPY_MOVE_ROUTINES(LinuxDirectoryWatcher);
 };
-
-using DirectoryWatcherImplementation = LinuxDirectoryWatcher;

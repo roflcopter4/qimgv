@@ -11,5 +11,3 @@ class DummyDirectoryWatcher : public DirectoryWatcher
   public:
     explicit DummyDirectoryWatcher(DirectoryManager *parent);
 };
-
-using DirectoryWatcherImplementation = DummyDirectoryWatcher;

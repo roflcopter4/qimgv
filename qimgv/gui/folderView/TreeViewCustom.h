@@ -25,6 +25,9 @@ class TreeViewCustom : public QTreeView
     void showEvent(QShowEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
 
+  private:
+    void reallyExpandRecursively(QModelIndex const &index);
+
   Q_SIGNALS:
     void droppedIn(QList<QString>, QModelIndex);
     void tabbedOut();
@@ -32,9 +35,11 @@ class TreeViewCustom : public QTreeView
   private Q_SLOTS:
     void updateScrollbarStyle();
     void onValueChanged();
+    //void continueExpansion(QModelIndex const &index);
 
-  private:
+private:
     QScrollBar overlayScrollbar;
+    std::atomic_flag isExpanding;
 
     static constexpr int SCROLLBAR_WIDTH = 12;
 };

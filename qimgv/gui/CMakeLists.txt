@@ -93,6 +93,7 @@ target_sources(qimgv PRIVATE
     dialogs/PrintDialog.ui
 
     overlays/ChangeLogWindow.ui
+    overlays/ClickZoneOverlay.cpp
     overlays/CopyOverlay.ui
     overlays/FloatingMessage.ui
     overlays/FullscreenInfoOverlay.ui

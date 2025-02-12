@@ -2,6 +2,7 @@
 
 #include "gui/ContextMenu.h"
 #include "gui/customWidgets/FloatingWidgetContainer.h"
+#include "gui/overlays/ClickZoneOverlay.h"
 #include "gui/overlays/VideoControlsProxy.h"
 #include "gui/overlays/ZoomIndicatorOverlayProxy.h"
 #include "gui/viewers/ImageViewerV2.h"
@@ -38,6 +39,8 @@ class ViewerWidget final : public FloatingWidgetContainer
     ND bool  lockZoomEnabled() const;
     ND bool  lockViewEnabled() const;
     ND auto  scalingFilter() const -> ScalingFilter;
+
+    bool eventFilter(QObject *object, QEvent *event) override;
 
   protected:
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -122,6 +125,7 @@ class ViewerWidget final : public FloatingWidgetContainer
     VideoPlayerInitProxy      *videoPlayer;
     VideoControlsProxyWrapper *videoControls;
     ZoomIndicatorOverlayProxy *zoomIndicator;
+    ClickZoneOverlay          *clickZoneOverlay;
     ContextMenu               *contextMenu;
     QTimer                     cursorTimer;
 

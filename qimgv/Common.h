@@ -9,16 +9,14 @@
 #if defined __has_include && __has_include(<QString>) && __has_include(<QStringView>)
 # include <QString>
 # include <QStringView>
-namespace util {
-namespace Literals {
+namespace util::Literals {
 inline namespace StringLiterals {
 consteval QStringView operator""_sv(char16_t const *str, size_t size) noexcept
 {
     return QStringView{str, static_cast<qsizetype>(size)};
 }
-} // namespace string_literals
-} // namespace literals
-} // namespace util
+} // namespace StringLiterals
+} // namespace util::Literals
 
 using namespace Qt::Literals::StringLiterals;
 using util::Literals::StringLiterals::operator""_sv;

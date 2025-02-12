@@ -3,17 +3,22 @@
 
 #if defined Q_OS_LINUX || defined Q_OS_FREEBSD
 # include "linux/LinuxDirectoryWatcher.h"
+using DirectoryWatcherImplementation = LinuxDirectoryWatcher;
 #elif defined Q_OS_WINDOWS
 # include "windows/WindowsDirectoryWatcher.h"
+using DirectoryWatcherImplementation = WindowsDirectoryWatcher;
 #elif defined Q_OS_APPLE
   // TODO: implement this
 # include "DummyDirectoryWatcher.h"
+using DirectoryWatcherImplementation = DummyDirectoryWatcher;
 #elif defined Q_OS_UNIX
   // TODO: implement this
 # include "DummyDirectoryWatcher.h"
+using DirectoryWatcherImplementation = DummyDirectoryWatcher;
 #else
   // TODO: implement this
 # include "DummyDirectoryWatcher.h"
+using DirectoryWatcherImplementation = DummyDirectoryWatcher;
 #endif
 
 /****************************************************************************************/

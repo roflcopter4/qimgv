@@ -158,7 +158,7 @@ void Settings::loadStylesheet()
     unsigned context_menu_button_height = static_cast<unsigned>( 32.0 * pDpr);
     unsigned rename_overlay_width       = static_cast<unsigned>(380.0 * pDpr);
 
-    qDebug() << u"dpr=" << qApp->devicePixelRatio() << u"pDpr=" << pDpr;
+    //qDebug() << u"dpr=" << qApp->devicePixelRatio() << u"pDpr=" << pDpr;
 
     // --- write variables into stylesheet --------------------------
     styleSheet.replace(u"%font_small%"_s,                 QString::number(font_small) + u"pt");

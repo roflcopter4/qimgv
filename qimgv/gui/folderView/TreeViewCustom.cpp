@@ -1,4 +1,6 @@
 #include "TreeViewCustom.h"
+#include <QFileSystemModel>
+#include <QTimer>
 
 TreeViewCustom::TreeViewCustom(QWidget *parent)
     : QTreeView(parent)
@@ -82,14 +84,107 @@ void TreeViewCustom::onValueChanged()
     verticalScrollBar()->setValue(overlayScrollbar.value());
 }
 
+#if 0
+void TreeViewCustom::continueExpansion(QModelIndex const &index)
+{
+    expand(index);
+    auto *fileSystemModel = reinterpret_cast<QFileSystemModel const *>(index.model());
+    //if (!fileSystemModel)
+    //    return; // Handle the case where the model isn't a QFileSystemModel
+
+    // Iterate over the children and call expandRecursively for each directory
+    for (int i = 0; i < fileSystemModel->rowCount(index); ++i) {
+        QModelIndex childIndex = fileSystemModel->index(i, index.column(), index);
+        if (fileSystemModel->isDir(childIndex))
+            reallyExpandRecursively(childIndex);
+    }
+}
+
+void TreeViewCustom::reallyExpandRecursively(QModelIndex const &index)
+{
+    // Use qobject_cast for safety
+    auto *fileSystemModel = qobject_cast<QFileSystemModel const *>(index.model());
+    if (!fileSystemModel)
+        return; // Handle the case where the model isn't a QFileSystemModel
+
+    if (!index.isValid() || !fileSystemModel->isDir(index))
+        return;
+
+    // Expand the current index.
+    expand(index);
+
+    // Use a single-shot timer to avoid busy waiting and potential stack overflow.
+    QTimer::singleShot(
+        0, this, 
+        [this, index, fileSystemModel]
+    {
+            // Check if there are any directories which are not loaded yet.
+            bool hasChildren = fileSystemModel->hasChildren(index);
+            bool canFetchMore = fileSystemModel->canFetchMore(index);
+
+            // Connect to directoryLoaded to be notified when the directory has been fully loaded
+            //auto *fileSystemModel = reinterpret_cast<QFileSystemModel const *>(index.model());
+            if (hasChildren) {
+                connect(
+                    fileSystemModel, &QFileSystemModel::directoryLoaded, this,
+                    [this, index, fileSystemModel](QString const &path) {
+                        qDebug() << path;
+                        auto newPath = fileSystemModel->filePath(index);
+                        continueExpansion(index);
+                        if (newPath == path) {
+                            disconnect(fileSystemModel, &QFileSystemModel::directoryLoaded, this, nullptr);
+                        }
+                    }
+                );
+            }
+            // If the directory is already loaded then continue expansion.
+            else {
+                continueExpansion(index);
+                disconnect(fileSystemModel, &QFileSystemModel::directoryLoaded, this, nullptr);
+            }
+        }
+    );
+}
+#endif
+
+void TreeViewCustom::reallyExpandRecursively(QModelIndex const &index)
+{
+    if (!index.isValid())
+        return;
+    auto *model = reinterpret_cast<QFileSystemModel const *>(index.model());
+    auto  dir   = QDir(model->filePath(index));
+    auto  list  = dir.entryList(QDir::Filter::AllDirs | QDir::Filter::NoDotAndDotDot);
+
+    expand(index);
+    int iterations = 0;
+    int cnt;
+    do {
+        QCoreApplication::processEvents();
+        QThread::sleep(5ms);
+        cnt = model->rowCount(index);
+    } while (cnt < list.size() && ++iterations < 1024);
+
+    for (int i = 0; i < cnt; ++i)
+        reallyExpandRecursively(model->index(i, index.column(), index));
+}
+
 void TreeViewCustom::keyPressEvent(QKeyEvent *event)
 {
     QModelIndex index = currentIndex();
+
     if (index.isValid()) {
         switch (event->key()) {
-        case Qt::Key_Space:
-            expandRecursively(index);
+        case Qt::Key_Space: {
+            if (!isExpanding.test_and_set()) {
+                QTimer::singleShot(0, this, [this, index] {
+                    reallyExpandRecursively(index);
+                    expandRecursively(index);
+                    qDebug() << u"Finished, at last!";
+                    isExpanding.clear();
+                });
+            }
             break;
+        }
         case Qt::Key_Return:
         case Qt::Key_Enter:
             emit clicked(index);
@@ -102,3 +197,4 @@ void TreeViewCustom::keyPressEvent(QKeyEvent *event)
         QTreeView::keyPressEvent(event);
     }
 }
+
